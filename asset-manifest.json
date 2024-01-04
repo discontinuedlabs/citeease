@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/citeease/static/css/main.bcd343fc.css",
+    "main.js": "/citeease/static/js/main.667c9e43.js",
+    "index.html": "/citeease/index.html",
+    "main.bcd343fc.css.map": "/citeease/static/css/main.bcd343fc.css.map",
+    "main.667c9e43.js.map": "/citeease/static/js/main.667c9e43.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.bcd343fc.css",
+    "static/js/main.667c9e43.js"
+  ]
+}
