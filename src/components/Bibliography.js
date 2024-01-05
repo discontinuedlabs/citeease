@@ -12,7 +12,7 @@ export default function Bibliography(props) {
     const [citations, setCitations] = useState(content.citations || []);
     const [sourceOptionsHidden, setSourceOptionsHidden] = useState(true);
 
-    const sources = ["Journal", "Book", "Website"];
+    const sources = ["Webpage", "Journal", "Book"];
 
     function handleTitleChange(event) {
         const newTitle = event.target.value;
@@ -26,11 +26,11 @@ export default function Bibliography(props) {
     }
 
     function handleAddCitation(event) {
-        const source = event.target.textContent;
+        const sourceType = event.target.textContent;
         const newCitation = {
-            source: source,
+            sourceType: sourceType,
             id: uuid4(),
-            content: {},
+            style: style,
         };
         setCitations((prevCitations) => [...prevCitations, newCitation]);
         setBibliographies((prevBibliographies) => {
@@ -60,7 +60,7 @@ export default function Bibliography(props) {
 
             <div className="citations-container">
                 {citations.map((citation) => (
-                    <Citation key={citation.id} />
+                    <Citation key={citation.id} {...citation} />
                 ))}
             </div>
 
