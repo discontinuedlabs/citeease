@@ -1,18 +1,23 @@
 import Journal from "./sourceTypes/Journal";
 import Webpage from "./sourceTypes/Webpage";
 import Book from "./sourceTypes/Book";
-
-function withProps(WrappedComponent, props) {
-    return (additionalProps) => <WrappedComponent {...props} {...additionalProps} />;
-}
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 export default function Citation(props) {
-    const { sourceType, style } = props;
-    const args = { getCitation };
-    const sources = {
-        Journal: withProps(Journal, args),
-        Book: withProps(Book, args),
-        Webpage: withProps(Webpage, args),
+    const { id: bibliographyId } = useParams();
+    const { id, bibliographies, setBibliographies } = props;
+    const bibliography = bibliographies.find((b) => b.id === bibliographyId);
+
+    const [citation, setCitation] = useState(bibliography.citations.find((c) => c.id === id));
+    const [reference, setReference] = useState(citation.reference);
+    const [content, setContent] = useState(citation.content);
+
+    const args = { content, setContent };
+    const sourceTypes = {
+        Journal: Journal(args),
+        Book: Book(args),
+        Webpage: Webpage(args),
     };
     const monthNames = [
         "January",
@@ -29,10 +34,40 @@ export default function Citation(props) {
         "December",
     ];
 
+    useEffect(() => {
+        setBibliographies((prevBibliographies) => {
+            return prevBibliographies.map((b) =>
+                b.id === bibliographyId
+                    ? {
+                          ...b,
+                          citations: b.citations.map((c) => (c.id === citation.id ? citation : c)),
+                      }
+                    : b
+            );
+        });
+    }, [citation]);
+
+    useEffect(() => {
+        setCitation((prevCitation) => ({
+            ...prevCitation,
+            reference: reference,
+        }));
+    }, [reference]);
+
+    useEffect(() => {
+        const newReference = getReference(content);
+        setCitation((prevCitation) => ({
+            ...prevCitation,
+            reference: newReference,
+            content: content,
+        }));
+    }, [content]);
+
     function formatAuthors(arr) {
         if (!arr || arr.length === 0) return "";
 
         const formattedAuthors = arr.map((author, index) => {
+            if (/\s/g.test(author)) return; // TODO: this whole function should adapt to different number of names in one author
             const names = author.split(" ");
             const lastName = names.pop();
             const initials = names.map((name) => name[0]).join(". ");
@@ -46,7 +81,7 @@ export default function Citation(props) {
         return formattedAuthors.join(", ");
     }
 
-    function getCitation(content) {
+    function getReference(content) {
         let {
             authors,
             publishDate,
@@ -66,7 +101,7 @@ export default function Citation(props) {
         } = content;
 
         const todaysDate = new Date();
-        publishDate = new Date(publishDate);
+        publishDate = publishDate ? new Date(publishDate) : "";
         publishDate = publishDate
             ? `${publishDate.getFullYear()}, ${
                   monthNames[publishDate.getMonth()]
@@ -80,28 +115,28 @@ export default function Citation(props) {
             } ${todaysDate.getDate()}, ${todaysDate.getFullYear()}`;
 
         function APA() {
-            let citation;
+            let newReference;
 
-            if (sourceType === "Webpage") {
+            if (citation.sourceType === "Webpage") {
                 if (authors && authors.length > 0) {
-                    citation = `${formatAuthors(authors)} (${publishDate}). ${title}. ${
-                        website || ""
-                    }. ${publisher ? `Publisher: ${publisher}.` : ""} Retrieved from ${url} on ${
-                        retrievalDate || "n.d."
-                    }`;
+                    newReference = `${formatAuthors(authors)} (${publishDate}). ${
+                        title ? `${title}.` : ""
+                    } ${website ? `${website}.` : ""} ${
+                        publisher ? `Publisher: ${publisher}.` : ""
+                    } Retrieved from ${url} on ${retrievalDate || "n.d."}`;
                 } else {
-                    citation = `${title} (${publishDate}). ${website || ""}. ${
+                    newReference = `${title} (${publishDate}). ${website ? `${website}.` : ""} ${
                         publisher ? `Publisher: ${publisher}.` : ""
                     } Retrieved from ${url} on ${retrievalDate || "n.d."}`;
                 }
-            } else if (sourceType === "Journal") {
-                citation = `${formatAuthors(
+            } else if (citation.sourceType === "Journal") {
+                newReference = `${formatAuthors(
                     authors
                 )}. (${publishDate}). ${title}. *${source}*, ${volume}(${issue}), ${pages}. DOI: ${
                     doi || ""
                 }`;
-            } else if (sourceType === "Book") {
-                citation = `${formatAuthors(authors)}. (${publishDate}). ${title}. ${source}. ${
+            } else if (citation.sourceType === "Book") {
+                newReference = `${formatAuthors(authors)}. (${publishDate}). ${title}. ${source}. ${
                     place || ""
                 }: ${publisher || ""}${editor ? ", Edited by " + editor : ""}${
                     edition ? ", " + edition + " ed." : ""
@@ -109,20 +144,20 @@ export default function Citation(props) {
                     retrievalDate || "n.d."
                 }`;
             }
-            return citation;
+            return newReference;
         }
 
         function MLA() {
-            let citation;
-            return citation;
+            let newReference;
+            return newReference;
         }
 
         function Chicago() {
-            let citation;
-            return citation;
+            let newReference;
+            return newReference;
         }
 
-        switch (style) {
+        switch (bibliography.style) {
             case "APA":
                 return APA(content);
             case "MLA":
@@ -130,10 +165,14 @@ export default function Citation(props) {
             case "Chicago":
                 return Chicago(content);
             default:
-                throw new Error(`Unknown citation style: ${style}`);
+                throw new Error(`Unknown citation style: ${bibliography.style}`);
         }
     }
 
-    const Component = sources[sourceType];
-    return <div className="citation">{Component && <Component />}</div>;
+    return (
+        <div className="citation-box">
+            <p>{citation.reference}</p>
+            {sourceTypes[citation.sourceType]}
+        </div>
+    );
 }

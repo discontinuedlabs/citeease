@@ -6,40 +6,31 @@ import { useParams } from "react-router-dom";
 export default function Bibliography(props) {
     const { id } = useParams();
     const { bibliographies, setBibliographies } = props;
-    const content = bibliographies.find((b) => b.id === id);
-    const [style, setStyle] = useState(content.style || "");
-    const [title, setTitle] = useState(content.title || "");
-    const [citations, setCitations] = useState(content.citations || []);
-    const [sourceOptionsHidden, setSourceOptionsHidden] = useState(true);
+    const bibliography = bibliographies.find((b) => b.id === id);
 
+    const [sourceOptionsHidden, setSourceOptionsHidden] = useState(true);
     const sources = ["Webpage", "Journal", "Book"];
 
     function handleTitleChange(event) {
         const newTitle = event.target.value;
-        setTitle(newTitle);
         setBibliographies((prevBibliographies) => {
-            const updatedBibliographies = prevBibliographies.map((bibliography) =>
-                bibliography.id === id ? { ...bibliography, title: newTitle } : bibliography
-            );
-            return updatedBibliographies;
+            return prevBibliographies.map((b) => (b.id === id ? { ...b, title: newTitle } : b));
         });
     }
 
     function handleAddCitation(event) {
+        toggleSourceOptions();
         const sourceType = event.target.textContent;
         const newCitation = {
             sourceType: sourceType,
             id: uuid4(),
-            style: style,
+            reference: "",
+            content: {},
         };
-        setCitations((prevCitations) => [...prevCitations, newCitation]);
         setBibliographies((prevBibliographies) => {
-            const updatedBibliographies = prevBibliographies.map((bibliography) =>
-                bibliography.id === id
-                    ? { ...bibliography, citations: [...citations, newCitation] }
-                    : bibliography
+            return prevBibliographies.map((b) =>
+                b.id === id ? { ...b, citations: [...bibliography.citations, newCitation] } : b
             );
-            return updatedBibliographies;
         });
     }
 
@@ -51,25 +42,31 @@ export default function Bibliography(props) {
         <div className="bibliography">
             <input
                 type="text"
-                value={title}
+                value={bibliography.title}
                 className="bibliography-title"
                 onChange={handleTitleChange}
+                maxLength={10}
             />
-            <p>{style || ""}</p>
+            <p>{bibliography.style || ""}</p>
             <p>{id}</p>
 
             <div className="citations-container">
-                {citations.map((citation) => (
-                    <Citation key={citation.id} {...citation} />
+                {bibliography.citations.map((c) => (
+                    <Citation
+                        key={c.id}
+                        id={c.id}
+                        bibliographies={bibliographies}
+                        setBibliographies={setBibliographies}
+                    />
                 ))}
             </div>
 
             <button onClick={toggleSourceOptions}>Add Citation</button>
 
             <div className={`source-options ${sourceOptionsHidden && "hidden"}`}>
-                {sources.map((source) => (
-                    <button onClick={handleAddCitation} key={source}>
-                        {source}
+                {sources.map((s) => (
+                    <button onClick={handleAddCitation} key={s}>
+                        {s}
                     </button>
                 ))}
             </div>

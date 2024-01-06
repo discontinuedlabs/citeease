@@ -1,5 +1,3 @@
-import { v4 as uuid4 } from "uuid";
-import { useState } from "react";
 import "./css/style.css";
 import Bibliography from "./components/Bibliography";
 import { Route, Routes } from "react-router-dom";
@@ -7,7 +5,7 @@ import Home from "./components/Home";
 import { useLocalStorage } from "./utils";
 
 export default function App() {
-    const [bibliographies, setBibliographies] = useState([]);
+    const [bibliographies, setBibliographies] = useLocalStorage("bibliographies", []);
 
     return (
         <div className="app">
