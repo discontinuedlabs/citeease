@@ -12,12 +12,13 @@ export default function Citation(props) {
     const [citation, setCitation] = useState(bibliography.citations.find((c) => c.id === id));
     const [reference, setReference] = useState(citation.reference);
     const [content, setContent] = useState(citation.content);
+    const [isEditModeVisible, setIsEditModeVisible] = useState(false);
 
-    const args = { content, setContent };
-    const sourceTypes = {
-        Journal: Journal(args),
-        Book: Book(args),
-        Webpage: Webpage(args),
+    const citationControlProps = { content, setContent, toggleEditMode };
+    const citationComponents = {
+        Journal: Journal(citationControlProps),
+        Book: Book(citationControlProps),
+        Webpage: Webpage(citationControlProps),
     };
     const monthNames = [
         "January",
@@ -36,13 +37,15 @@ export default function Citation(props) {
 
     useEffect(() => {
         setBibliographies((prevBibliographies) => {
-            return prevBibliographies.map((b) =>
-                b.id === bibliographyId
+            return prevBibliographies.map((biblio) =>
+                biblio.id === bibliographyId
                     ? {
-                          ...b,
-                          citations: b.citations.map((c) => (c.id === citation.id ? citation : c)),
+                          ...biblio,
+                          citations: biblio.citations.map((c) =>
+                              c.id === citation.id ? citation : c
+                          ),
                       }
-                    : b
+                    : biblio
             );
         });
     }, [citation]);
@@ -55,7 +58,7 @@ export default function Citation(props) {
     }, [reference]);
 
     useEffect(() => {
-        const newReference = getReference(content);
+        const newReference = generateCitationReference(content);
         setCitation((prevCitation) => ({
             ...prevCitation,
             reference: newReference,
@@ -63,16 +66,21 @@ export default function Citation(props) {
         }));
     }, [content]);
 
-    function formatAuthors(arr) {
-        if (!arr || arr.length === 0) return "";
+    function toggleEditMode() {
+        setIsEditModeVisible((prevEditMode) => !prevEditMode);
+    }
 
-        const formattedAuthors = arr.map((author, index) => {
-            if (/\s/g.test(author)) return; // TODO: this whole function should adapt to different number of names in one author
-            const names = author.split(" ");
-            const lastName = names.pop();
-            const initials = names.map((name) => name[0]).join(". ");
+    function formatAuthors(authors) {
+        if (!authors || authors.length === 0) return "";
 
-            if (arr.length > 1 && index === arr.length - 1) {
+        const validAuthors = authors.filter((author) => author.firstName && author.lastName);
+        const formattedAuthors = validAuthors.map((author, index) => {
+            let lastNames = author.lastName.split(/\s+/g);
+            const lastName = lastNames.pop();
+            lastNames.unshift(author.firstName);
+            const initials = lastNames.map((name) => name[0].toUpperCase()).join(". ");
+
+            if (validAuthors.length > 1 && index === validAuthors.length - 1) {
                 return `& ${lastName}, ${initials}.`;
             }
             return `${lastName}, ${initials}.`;
@@ -81,7 +89,8 @@ export default function Citation(props) {
         return formattedAuthors.join(", ");
     }
 
-    function getReference(content) {
+    // TODO: Add error handling for unexpected behaviors, and add more comments
+    function generateCitationReference(content) {
         let {
             authors,
             publishDate,
@@ -171,8 +180,20 @@ export default function Citation(props) {
 
     return (
         <div className="citation-box">
-            <p>{citation.reference}</p>
-            {sourceTypes[citation.sourceType]}
+            {!isEditModeVisible && (
+                <>
+                    <p>{citation.reference}</p>
+                    <button onClick={toggleEditMode}>Edit</button>
+                </>
+            )}
+
+            {/* We are invoking the Component as a function instead of treating it as a React component.
+            This is a common practice when you need to compute the component's output without rendering it.
+            However, keep in mind that this approach disconnects the component from the React lifecycle,
+            meaning it won't have access to lifecycle methods or state management features. So avoid using
+            useState inside of them. For more details, refer to this article:
+            https://dev.to/igor_bykov/react-calling-functional-components-as-functions-1d3l */}
+            {isEditModeVisible && citationComponents[citation.sourceType]}
         </div>
     );
 }

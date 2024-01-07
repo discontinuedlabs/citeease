@@ -1,19 +1,18 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { v4 as uuid4 } from "uuid";
 
 export default function Webpage(props) {
-    const { content, setContent } = props;
-    const [inputContent, setInputContent] = useState(content);
+    const { content, setContent, toggleEditMode } = props;
 
     useEffect(() => {
-        if (!inputContent.authors)
-            setInputContent((prevContent) => ({
+        if (!content.authors)
+            setContent((prevContent) => ({
                 ...prevContent,
                 authors: [{ firstName: "", lastName: "", id: uuid4() }],
             }));
-    }, []);
+    }, [content]);
 
     function parseHtml(url) {
         if (url)
@@ -33,7 +32,9 @@ export default function Webpage(props) {
                         return author.trim() !== "" && self.indexOf(author) === index;
                     });
 
-                    setInputContent({
+                    authors = makeAuthorsArray(authors);
+
+                    setContent({
                         title:
                             $("title").text() ||
                             $("meta[property='og:title']").attr("content") ||
@@ -61,29 +62,31 @@ export default function Webpage(props) {
                 .catch((error) => console.error(error));
     }
 
-    function updateAuthors(id, key, value) {
-        setInputContent((prevContent) => {
-            let newArray;
-            const index = prevContent.authors.findIndex((a) => a.id === id);
+    function makeAuthorsArray(authors) {
+        const result = authors.map((author) => {
+            const names = author.split(/\s+/);
+            const firstName = names.shift() || "";
+            const lastName = names.join(" ");
+            return { firstName, lastName, id: uuid4() };
+        });
 
-            if (index !== -1) {
-                const newAuthor = {
-                    ...prevContent.authors[index],
-                    [key]: value,
-                };
-                newArray = [
-                    ...prevContent.authors.slice(0, index),
-                    newAuthor,
-                    ...prevContent.authors.slice(index + 1),
-                ];
-            } else newArray = prevContent.authors;
+        return result;
+    }
+
+    function updateAuthors(id, key, value) {
+        setContent((prevContent) => {
+            const newArray = prevContent.authors.map((author) => {
+                if (author.id === id) {
+                    return {
+                        ...author,
+                        [key]: value,
+                    };
+                }
+                return author;
+            });
 
             return { ...prevContent, authors: newArray };
         });
-    }
-
-    function handleAddReference() {
-        setContent({ ...inputContent });
     }
 
     function handleFillIn(event) {
@@ -105,8 +108,8 @@ export default function Webpage(props) {
                     If the author is an organization, keep the last name empty, and type the full
                     organization's name in the author's first name field.
                 </p>
-                {inputContent.authors &&
-                    inputContent.authors.map((author) => (
+                {content.authors &&
+                    content.authors.map((author) => (
                         <div key={author.id}>
                             <label htmlFor="first-name last-name">Author</label>
                             <input
@@ -131,7 +134,7 @@ export default function Webpage(props) {
                     ))}
                 <button
                     onClick={() =>
-                        setInputContent((prevContent) => ({
+                        setContent((prevContent) => ({
                             ...prevContent,
                             authors: [
                                 ...prevContent?.authors,
@@ -147,10 +150,10 @@ export default function Webpage(props) {
                 <input
                     type="text"
                     name="title"
-                    value={inputContent.title}
+                    value={content.title}
                     placeholder="Page title"
                     onChange={(event) =>
-                        setInputContent((prevContent) => ({
+                        setContent((prevContent) => ({
                             ...prevContent,
                             title: event.target.value,
                         }))
@@ -160,10 +163,10 @@ export default function Webpage(props) {
                 <input
                     type="text"
                     name="website"
-                    value={inputContent.website}
+                    value={content.website}
                     placeholder="Website title"
                     onChange={(event) =>
-                        setInputContent((prevContent) => ({
+                        setContent((prevContent) => ({
                             ...prevContent,
                             website: event.target.value,
                         }))
@@ -173,10 +176,10 @@ export default function Webpage(props) {
                 <input
                     type="text"
                     name="publish-date"
-                    value={inputContent.publishDate}
+                    value={content.publishDate}
                     placeholder="Date published"
                     onChange={(event) =>
-                        setInputContent((prevContent) => ({
+                        setContent((prevContent) => ({
                             ...prevContent,
                             publishDate: event.target.value,
                         }))
@@ -186,10 +189,10 @@ export default function Webpage(props) {
                 <input
                     type="text"
                     name="title"
-                    value={inputContent.url}
+                    value={content.url}
                     placeholder="Page title"
                     onChange={(event) =>
-                        setInputContent((prevContent) => ({
+                        setContent((prevContent) => ({
                             ...prevContent,
                             title: event.target.value,
                         }))
@@ -199,16 +202,16 @@ export default function Webpage(props) {
                 <input
                     type="text"
                     name="access-date"
-                    value={inputContent.publishDate}
+                    value={content.publishDate}
                     placeholder="Date accessed"
                     onChange={(event) =>
-                        setInputContent((prevContent) => ({
+                        setContent((prevContent) => ({
                             ...prevContent,
                             retrievalDate: event.target.value,
                         }))
                     }
                 />
-                <button onClick={handleAddReference}>Add reference</button>
+                <button onClick={toggleEditMode}>Add reference</button>
             </form>
         </>
     );
