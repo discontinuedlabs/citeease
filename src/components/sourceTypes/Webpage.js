@@ -1,20 +1,15 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { v4 as uuid4 } from "uuid";
 
 export default function Webpage(props) {
     const { content, setContent } = props;
-
-    function handleCitationFormSubmit(event) {
-        event.preventDefault();
-        const url = event.target[0].value;
-        parseHtml(url);
-    }
+    const [inputContent, setInputContent] = useState(content);
 
     useEffect(() => {
-        if (!content.authors)
-            setContent((prevContent) => ({
+        if (!inputContent.authors)
+            setInputContent((prevContent) => ({
                 ...prevContent,
                 authors: [{ firstName: "", lastName: "", id: uuid4() }],
             }));
@@ -38,7 +33,7 @@ export default function Webpage(props) {
                         return author.trim() !== "" && self.indexOf(author) === index;
                     });
 
-                    setContent({
+                    setInputContent({
                         title:
                             $("title").text() ||
                             $("meta[property='og:title']").attr("content") ||
@@ -67,7 +62,7 @@ export default function Webpage(props) {
     }
 
     function updateAuthors(id, key, value) {
-        setContent((prevContent) => {
+        setInputContent((prevContent) => {
             let newArray;
             const index = prevContent.authors.findIndex((a) => a.id === id);
 
@@ -87,23 +82,37 @@ export default function Webpage(props) {
         });
     }
 
+    function handleAddReference() {
+        setContent({ ...inputContent });
+    }
+
+    function handleFillIn(event) {
+        event.preventDefault();
+        const url = event.target[0]?.value;
+        parseHtml(url);
+    }
+
     return (
         <>
-            <form className="citation-form" onSubmit={handleCitationFormSubmit}>
+            <form className="citation-form" onSubmit={handleFillIn}>
                 <p>Insert the URL (link) here to fill the fields automatically:</p>
                 <label htmlFor="url">URL</label>
                 <input type="text" name="url" placeholder="Insert a URL" />
-                <button>Fill in</button>
+                <button type="submit">Fill in</button>
 
                 <p>Or enter webpage details manually:</p>
-                {content.authors &&
-                    content.authors.map((author) => (
+                <p>
+                    If the author is an organization, keep the last name empty, and type the full
+                    organization's name in the author's first name field.
+                </p>
+                {inputContent.authors &&
+                    inputContent.authors.map((author) => (
                         <div key={author.id}>
                             <label htmlFor="first-name last-name">Author</label>
                             <input
                                 type="text"
                                 name="first-name"
-                                placeholder="Page title"
+                                placeholder="Author's first name"
                                 value={author.firstName}
                                 onChange={(event) => {
                                     updateAuthors(author.id, "firstName", event.target.value);
@@ -112,7 +121,7 @@ export default function Webpage(props) {
                             <input
                                 type="text"
                                 name="last-name"
-                                placeholder="Page title"
+                                placeholder="Author's first name"
                                 value={author.lastName}
                                 onChange={(event) => {
                                     updateAuthors(author.id, "lastName", event.target.value);
@@ -122,7 +131,7 @@ export default function Webpage(props) {
                     ))}
                 <button
                     onClick={() =>
-                        setContent((prevContent) => ({
+                        setInputContent((prevContent) => ({
                             ...prevContent,
                             authors: [
                                 ...prevContent?.authors,
@@ -135,13 +144,71 @@ export default function Webpage(props) {
                 </button>
 
                 <label htmlFor="title">Title</label>
-                <input type="text" name="title" placeholder="Page title" />
+                <input
+                    type="text"
+                    name="title"
+                    value={inputContent.title}
+                    placeholder="Page title"
+                    onChange={(event) =>
+                        setInputContent((prevContent) => ({
+                            ...prevContent,
+                            title: event.target.value,
+                        }))
+                    }
+                />
                 <label htmlFor="website">Website</label>
-                <input type="text" name="website" placeholder="Website title" />
-
+                <input
+                    type="text"
+                    name="website"
+                    value={inputContent.website}
+                    placeholder="Website title"
+                    onChange={(event) =>
+                        setInputContent((prevContent) => ({
+                            ...prevContent,
+                            website: event.target.value,
+                        }))
+                    }
+                />
+                <label htmlFor="publish-date">Publication date</label>
+                <input
+                    type="text"
+                    name="publish-date"
+                    value={inputContent.publishDate}
+                    placeholder="Date published"
+                    onChange={(event) =>
+                        setInputContent((prevContent) => ({
+                            ...prevContent,
+                            publishDate: event.target.value,
+                        }))
+                    }
+                />
                 <label htmlFor="title">URL (link)</label>
-                <input type="text" name="title" placeholder="Page title" />
-                <button type="submit">Add reference</button>
+                <input
+                    type="text"
+                    name="title"
+                    value={inputContent.url}
+                    placeholder="Page title"
+                    onChange={(event) =>
+                        setInputContent((prevContent) => ({
+                            ...prevContent,
+                            title: event.target.value,
+                        }))
+                    }
+                />
+                <label htmlFor="access-date">Access date</label>
+                <input
+                    type="text"
+                    name="access-date"
+                    value={inputContent.publishDate}
+                    placeholder="Date accessed"
+                    onChange={(event) =>
+                        setInputContent((prevContent) => ({
+                            ...prevContent,
+                            retrievalDate: event.target.value,
+                        }))
+                    }
+                />
+                <button onClick={handleAddReference}>Add reference</button>
             </form>
         </>
     );
