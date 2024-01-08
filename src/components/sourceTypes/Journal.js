@@ -1,4 +1,8 @@
 export default function Journal() {
+    // fetch(`https://api.crossref.org/works/${doi}`)
+    //         .then((response) => response.json())
+    //         .then((data) => console.log(data));
+
     return (
         <>
             <label htmlFor="url">URL</label>

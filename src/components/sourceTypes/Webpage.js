@@ -28,6 +28,10 @@ export default function Webpage(props) {
                         authors.push($(element).attr("content"));
                     });
 
+                    $('span.css-1baulvz.last-byline[itemprop="name"]').each((index, element) => {
+                        authors.push($(element).text().trim());
+                    });
+
                     authors = authors.filter((author, index, self) => {
                         return author.trim() !== "" && self.indexOf(author) === index;
                     });
@@ -53,13 +57,17 @@ export default function Webpage(props) {
                             $("meta[property='og:updated_time']").attr("content") ||
                             $(".publish-date").text(),
                         url: (
-                            $("link[rel='canonical']").attr("href") ||
                             $("meta[property='og:url']").attr("content") ||
+                            $("meta[name='url']").attr("content") ||
+                            $("link[rel='canonical']").attr("href") ||
                             url
                         ).replace(/\/$/, ""), // Remove trailing slash
                     });
                 })
-                .catch((error) => console.error(error));
+                .catch((error) => {
+                    // TODO: Add an error or toast message
+                    console.error(error);
+                });
     }
 
     function makeAuthorsArray(authors) {
@@ -212,6 +220,7 @@ export default function Webpage(props) {
                     }
                 />
                 <button onClick={toggleEditMode}>Add reference</button>
+                <button onClick={toggleEditMode}>Cancel</button>
             </form>
         </>
     );
