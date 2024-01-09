@@ -2,9 +2,11 @@ import axios from "axios";
 import * as cheerio from "cheerio";
 import { useEffect } from "react";
 import { v4 as uuid4 } from "uuid";
+import DateInput from "../DateInput";
+import AuthorsInput from "../AuthorsInput";
 
 export default function Webpage(props) {
-    const { content, setContent, toggleEditMode } = props;
+    const { content, setContent, toggleEditMode, showToast } = props;
 
     useEffect(() => {
         if (!content.authors)
@@ -17,7 +19,7 @@ export default function Webpage(props) {
     function parseHtml(url) {
         if (url)
             axios
-                .get(`https://corsproxy.io/?${url}`)
+                .get(`https://corsproxy.io/?${url}`, { mode: "no-cors" })
                 .then((response) => {
                     const $ = cheerio.load(response.data);
 
@@ -47,15 +49,17 @@ export default function Webpage(props) {
                         authors: authors,
                         website: $("meta[property='og:site_name']").attr("content"),
                         publisher: $("meta[property='article:publisher']").attr("content"),
-                        publishDate:
+                        accessDate: new Date(),
+                        publishDate: new Date(
                             $("meta[name='date']").attr("content") ||
-                            $("meta[name='article:published_time']").attr("content") ||
-                            $("meta[property='article:published_time']").attr("content") ||
-                            $("meta[name='article:modified_time']").attr("content") ||
-                            $("meta[property='article:modified_time']").attr("content") ||
-                            $("meta[name='og:updated_time']").attr("content") ||
-                            $("meta[property='og:updated_time']").attr("content") ||
-                            $(".publish-date").text(),
+                                $("meta[name='article:published_time']").attr("content") ||
+                                $("meta[property='article:published_time']").attr("content") ||
+                                $("meta[name='article:modified_time']").attr("content") ||
+                                $("meta[property='article:modified_time']").attr("content") ||
+                                $("meta[name='og:updated_time']").attr("content") ||
+                                $("meta[property='og:updated_time']").attr("content") ||
+                                $(".publish-date").text()
+                        ),
                         url: (
                             $("meta[property='og:url']").attr("content") ||
                             $("meta[name='url']").attr("content") ||
@@ -65,7 +69,10 @@ export default function Webpage(props) {
                     });
                 })
                 .catch((error) => {
-                    // TODO: Add an error or toast message
+                    showToast(
+                        "Webpage Access Error",
+                        "We couldn't retrieve the information from the webpage you're attempting to cite. This may be due to the webpage being protected by a login or paywall."
+                    );
                     console.error(error);
                 });
     }
@@ -79,22 +86,6 @@ export default function Webpage(props) {
         });
 
         return result;
-    }
-
-    function updateAuthors(id, key, value) {
-        setContent((prevContent) => {
-            const newArray = prevContent.authors.map((author) => {
-                if (author.id === id) {
-                    return {
-                        ...author,
-                        [key]: value,
-                    };
-                }
-                return author;
-            });
-
-            return { ...prevContent, authors: newArray };
-        });
     }
 
     function handleFillIn(event) {
@@ -112,47 +103,7 @@ export default function Webpage(props) {
                 <button type="submit">Fill in</button>
 
                 <p>Or enter webpage details manually:</p>
-                <p>
-                    If the author is an organization, keep the last name empty, and type the full
-                    organization's name in the author's first name field.
-                </p>
-                {content.authors &&
-                    content.authors.map((author) => (
-                        <div key={author.id}>
-                            <label htmlFor="first-name last-name">Author</label>
-                            <input
-                                type="text"
-                                name="first-name"
-                                placeholder="Author's first name"
-                                value={author.firstName}
-                                onChange={(event) => {
-                                    updateAuthors(author.id, "firstName", event.target.value);
-                                }}
-                            />
-                            <input
-                                type="text"
-                                name="last-name"
-                                placeholder="Author's first name"
-                                value={author.lastName}
-                                onChange={(event) => {
-                                    updateAuthors(author.id, "lastName", event.target.value);
-                                }}
-                            />
-                        </div>
-                    ))}
-                <button
-                    onClick={() =>
-                        setContent((prevContent) => ({
-                            ...prevContent,
-                            authors: [
-                                ...prevContent?.authors,
-                                { firstName: "", lastName: "", id: uuid4() },
-                            ],
-                        }))
-                    }
-                >
-                    Add author
-                </button>
+                <AuthorsInput content={content} setContent={setContent} />
 
                 <label htmlFor="title">Title</label>
                 <input
@@ -167,6 +118,7 @@ export default function Webpage(props) {
                         }))
                     }
                 />
+
                 <label htmlFor="website">Website</label>
                 <input
                     type="text"
@@ -180,47 +132,43 @@ export default function Webpage(props) {
                         }))
                     }
                 />
+
                 <label htmlFor="publish-date">Publication date</label>
-                <input
-                    type="text"
+                <DateInput
                     name="publish-date"
-                    value={content.publishDate}
-                    placeholder="Date published"
-                    onChange={(event) =>
-                        setContent((prevContent) => ({
-                            ...prevContent,
-                            publishDate: event.target.value,
-                        }))
-                    }
+                    content={content}
+                    setContent={setContent}
+                    dateKey="publishDate"
                 />
+
                 <label htmlFor="title">URL (link)</label>
                 <input
                     type="text"
                     name="title"
                     value={content.url}
-                    placeholder="Page title"
+                    placeholder="URL (link)"
                     onChange={(event) =>
                         setContent((prevContent) => ({
                             ...prevContent,
-                            title: event.target.value,
+                            url: event.target.value,
                         }))
                     }
                 />
+
                 <label htmlFor="access-date">Access date</label>
-                <input
-                    type="text"
+                <DateInput
                     name="access-date"
-                    value={content.publishDate}
-                    placeholder="Date accessed"
-                    onChange={(event) =>
-                        setContent((prevContent) => ({
-                            ...prevContent,
-                            retrievalDate: event.target.value,
-                        }))
-                    }
+                    content={content}
+                    setContent={setContent}
+                    dateKey="accessDate"
                 />
-                <button onClick={toggleEditMode}>Add reference</button>
-                <button onClick={toggleEditMode}>Cancel</button>
+
+                <button type="button" onClick={toggleEditMode}>
+                    Add reference
+                </button>
+                <button type="button" onClick={toggleEditMode}>
+                    Cancel
+                </button>
             </form>
         </>
     );

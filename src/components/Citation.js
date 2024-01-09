@@ -7,7 +7,7 @@ import { v4 as uuid4 } from "uuid";
 
 export default function Citation(props) {
     const { id: bibliographyId } = useParams();
-    const { id, bibliographies, setBibliographies } = props;
+    const { id, bibliographies, setBibliographies, showToast } = props;
     const bibliography = bibliographies.find((b) => b.id === bibliographyId);
 
     const [citation, setCitation] = useState(bibliography.citations.find((c) => c.id === id));
@@ -15,7 +15,7 @@ export default function Citation(props) {
     const [content, setContent] = useState(citation.content);
     const [isEditModeVisible, setIsEditModeVisible] = useState(false);
 
-    const citationControlProps = { content, setContent, toggleEditMode };
+    const citationControlProps = { content, setContent, toggleEditMode, showToast };
     const citationComponents = {
         Journal: Journal(citationControlProps),
         Book: Book(citationControlProps),
@@ -132,7 +132,7 @@ export default function Citation(props) {
             return "";
         }
         const formattedAuthors = authors.map((author) => {
-            const fullName = `${author.firstName} ${author.lastName}`;
+            const fullName = `${author.firstName || ""} ${author.lastName || ""}`;
             return fullName.trim();
         });
         return formattedAuthors.join(" and ");
@@ -203,7 +203,7 @@ export default function Citation(props) {
         let {
             authors,
             publishDate,
-            retrievalDate,
+            accessDate,
             title,
             url,
             volume,
@@ -218,49 +218,67 @@ export default function Citation(props) {
             source,
         } = content;
 
-        const todaysDate = new Date();
-        publishDate = publishDate ? new Date(publishDate) : "";
-        publishDate = publishDate
-            ? `${publishDate.getFullYear()}, ${
-                  monthNames[publishDate.getMonth()]
-              } ${publishDate.getDate()}`
-            : todaysDate.getFullYear();
+        publishDate = new Date(publishDate);
+        accessDate = new Date(accessDate);
 
-        retrievalDate =
-            retrievalDate ??
-            `${
-                monthNames[todaysDate.getMonth()]
-            } ${todaysDate.getDate()}, ${todaysDate.getFullYear()}`;
+        let formattedPublishDate;
+        if (
+            publishDate &&
+            publishDate.getFullYear() &&
+            publishDate.getMonth() >= 0 && // checking this state like this "publishDate.getMonth()" instead will return 0 if the month is January, which is falsy value
+            publishDate.getDate()
+        ) {
+            formattedPublishDate = `${publishDate.getFullYear()}, ${
+                monthNames[publishDate.getMonth()]
+            } ${publishDate.getDate()}`;
+        } else if (publishDate && publishDate.getFullYear()) {
+            formattedPublishDate = publishDate.getFullYear();
+        }
+
+        let formattedAccessDate;
+        if (accessDate && accessDate.getFullYear()) {
+            formattedAccessDate = `${
+                monthNames[accessDate.getMonth()]
+            } ${accessDate.getDate()}, ${accessDate.getFullYear()}`;
+        }
 
         function APA() {
             let newReference;
 
             if (citation.sourceType === "Webpage") {
                 if (authors && authors.length > 0 && authors[0].firstName) {
-                    newReference = `${formatAuthorsForReference(authors)} (${publishDate}). ${
-                        title ? `${title}.` : ""
-                    } ${website ? `${website}.` : ""} ${
+                    newReference = `${formatAuthorsForReference(authors)} (${
+                        formattedPublishDate || "n.d"
+                    }). ${title ? `${title}.` : ""} ${website ? `${website}.` : ""} ${
                         publisher ? `Publisher: ${publisher}.` : ""
-                    } Retrieved from ${url} on ${retrievalDate || "n.d."}`;
+                    } ${
+                        formattedAccessDate
+                            ? `Retrieved ${formattedAccessDate}${url ? `, from ${url}` : ""}`
+                            : ""
+                    }`;
                 } else {
-                    newReference = `${title} (${publishDate}). ${website ? `${website}.` : ""} ${
-                        publisher ? `Publisher: ${publisher}.` : ""
-                    } Retrieved from ${url} on ${retrievalDate || "n.d."}`;
+                    newReference = `${title} (${formattedPublishDate || "n.d"}). ${
+                        website ? `${website}.` : ""
+                    } ${publisher ? `Publisher: ${publisher}.` : ""} ${
+                        formattedAccessDate ? `Retrieved ${formattedAccessDate}, from ${url}` : url
+                    }`;
                 }
             } else if (citation.sourceType === "Journal") {
                 newReference = `${formatAuthorsForReference(
                     authors
-                )}. (${publishDate}). ${title}. *${source}*, ${volume}(${issue}), ${pages}. DOI: ${
+                )}. (${formattedPublishDate}). ${title}. *${source}*, ${volume}(${issue}), ${pages}. DOI: ${
                     doi || ""
                 }`;
             } else if (citation.sourceType === "Book") {
                 newReference = `${formatAuthorsForReference(
                     authors
-                )}. (${publishDate}). ${title}. ${source}. ${place || ""}: ${publisher || ""}${
-                    editor ? ", Edited by " + editor : ""
-                }${edition ? ", " + edition + " ed." : ""}. ${
-                    url || doi ? `Retrieved from ${url || doi}` : ""
-                } on ${retrievalDate || "n.d."}`;
+                )}. (${formattedPublishDate}). ${title}. ${source}. ${place || ""}: ${
+                    publisher || ""
+                }${editor ? ", Edited by " + editor : ""}${
+                    edition ? ", " + edition + " ed." : ""
+                }. ${url || doi ? `Retrieved from ${url || doi}` : ""} on ${
+                    formattedAccessDate || "n.d."
+                }`;
             }
             return newReference;
         }

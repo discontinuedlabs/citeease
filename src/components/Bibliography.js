@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 
 export default function Bibliography(props) {
     const { id } = useParams();
-    const { bibliographies, setBibliographies } = props;
+    const { bibliographies, setBibliographies, showToast } = props;
     const bibliography = bibliographies.find((biblio) => biblio.id === id);
 
     const [isSourceOptionsHidden, setIsSourceOptionsHidden] = useState(true);
@@ -61,6 +61,7 @@ export default function Bibliography(props) {
                         id={citation.id}
                         bibliographies={bibliographies}
                         setBibliographies={setBibliographies}
+                        showToast={showToast}
                     />
                 ))}
             </div>
