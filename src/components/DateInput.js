@@ -1,67 +1,49 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function DateInput(props) {
     const { content, setContent, dateKey } = props;
+    const [year, setYear] = useState(new Date(content[dateKey]).getFullYear());
+    const [month, setMonth] = useState(new Date(content[dateKey]).getMonth());
+    const [day, setDay] = useState(new Date(content[dateKey]).getDate());
 
-    const handleYearChange = (event) => {
-        const month = new Date(content[dateKey]).getMonth();
-        const day = new Date(content[dateKey]).getDate();
+    useEffect(() => {
         setContent((prevContent) => ({
             ...prevContent,
-            [dateKey]: new Date(event.target.value, month, day),
+            [dateKey]: new Date(year, month, day),
         }));
-    };
-
-    const handleMonthChange = (event) => {
-        const year = new Date(content[dateKey]).getFullYear();
-        const day = new Date(content[dateKey]).getDate();
-        setContent((prevContent) => ({
-            ...prevContent,
-            [dateKey]: new Date(year, event.target.value - 1, day),
-        }));
-    };
-
-    const handleDayChange = (event) => {
-        const year = new Date(content[dateKey]).getFullYear();
-        const month = new Date(content[dateKey]).getMonth();
-        setContent((prevContent) => ({
-            ...prevContent,
-            [dateKey]: new Date(year, month, event.target.value),
-        }));
-    };
+    }, [year, month, day]);
 
     function setToToday() {
         const today = new Date();
-        setContent((prevContent) => ({
-            ...prevContent,
-            [dateKey]: new Date(today),
-        }));
+        setYear(today.getFullYear());
+        setMonth(today.getMonth());
+        setDay(today.getDate());
     }
 
     return (
         <div className="date-inputs-container">
             <input
                 type="number"
-                value={new Date(content[dateKey]).getFullYear()}
+                value={year}
                 max={new Date().getFullYear()}
                 placeholder="YYYY"
-                onChange={handleYearChange}
+                onChange={(event) => setYear(event.target.value)}
             />
             <input
                 type="number"
-                value={new Date(content[dateKey]).getMonth() + 1}
+                value={month + 1}
                 min="1"
                 max="12"
                 placeholder="MM"
-                onChange={handleMonthChange}
+                onChange={(event) => setMonth(event.target.value - 1)}
             />
             <input
                 type="number"
-                value={new Date(content[dateKey]).getDate()}
+                value={day}
                 min="1"
                 max="31"
                 placeholder="DD"
-                onChange={handleDayChange}
+                onChange={(event) => setDay(event.target.value)}
             />
             <button type="button" onClick={setToToday}>
                 Today

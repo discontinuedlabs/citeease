@@ -8,10 +8,10 @@ import Toast from "./components/Toast";
 
 export default function App() {
     const [bibliographies, setBibliographies] = useLocalStorage("bibliographies", []);
-    const [toastMessage, setToastMessage] = useState("");
+    const [toastMessage, setToastMessage] = useState({});
 
     function showToast(title, body = "") {
-        setToastMessage(title, body);
+        setToastMessage({ title, body });
         setTimeout(() => setToastMessage(""), 3000);
     }
 

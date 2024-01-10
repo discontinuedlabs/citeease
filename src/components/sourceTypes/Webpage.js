@@ -22,33 +22,13 @@ export default function Webpage(props) {
                 .get(`https://corsproxy.io/?${url}`, { mode: "no-cors" })
                 .then((response) => {
                     const $ = cheerio.load(response.data);
-
-                    let authors = [];
-
-                    authors.push($(".author[rel='author']").text());
-                    $('meta[name="author"], meta[name="article:author"]').each((index, element) => {
-                        authors.push($(element).attr("content"));
-                    });
-
-                    $('span.css-1baulvz.last-byline[itemprop="name"]').each((index, element) => {
-                        authors.push($(element).text().trim());
-                    });
-
-                    authors = authors.filter((author, index, self) => {
-                        return author.trim() !== "" && self.indexOf(author) === index;
-                    });
-
-                    authors = makeAuthorsArray(authors);
-
-                    console.log($("title").text());
-
                     setContent({
                         title:
                             $("title").text() ||
                             $("meta[property='og:title']").attr("content") ||
                             $("h1").text() ||
                             "",
-                        authors: authors,
+                        authors: extractAuthors($),
                         website: $("meta[property='og:site_name']").attr("content") || "",
                         publisher: $("meta[property='article:publisher']").attr("content"),
                         accessDate: new Date(),
@@ -78,6 +58,25 @@ export default function Webpage(props) {
                     );
                     console.error(error);
                 });
+    }
+
+    function extractAuthors($) {
+        let authors = [];
+
+        authors.push($(".author[rel='author']").text());
+        $('meta[name="author"], meta[name="article:author"]').each((index, element) => {
+            authors.push($(element).attr("content"));
+        });
+
+        $('span.css-1baulvz.last-byline[itemprop="name"]').each((index, element) => {
+            authors.push($(element).text().trim());
+        });
+
+        authors = authors.filter((author, index, self) => {
+            return author.trim() !== "" && self.indexOf(author) === index;
+        });
+
+        return makeAuthorsArray(authors);
     }
 
     function makeAuthorsArray(authors) {
