@@ -2,18 +2,10 @@ import { useState, useEffect } from "react";
 
 export default function DateInput(props) {
     const { content, setContent, dateKey } = props;
-    const [year, setYear] = useState(new Date(content[dateKey]).getFullYear());
-    const [month, setMonth] = useState(new Date(content[dateKey]).getMonth());
-    const [day, setDay] = useState(new Date(content[dateKey]).getDate());
-
-    useEffect(() => {
-        setYear(new Date(content[dateKey]).getFullYear());
-        setMonth(new Date(content[dateKey]).getMonth());
-        setDay(new Date(content[dateKey]).getDate());
-    }, [content]);
 
     const handleYearChange = (event) => {
-        setYear(event.target.value);
+        const month = new Date(content[dateKey]).getMonth();
+        const day = new Date(content[dateKey]).getDate();
         setContent((prevContent) => ({
             ...prevContent,
             [dateKey]: new Date(event.target.value, month, day),
@@ -21,7 +13,8 @@ export default function DateInput(props) {
     };
 
     const handleMonthChange = (event) => {
-        setMonth(event.target.value - 1);
+        const year = new Date(content[dateKey]).getFullYear();
+        const day = new Date(content[dateKey]).getDate();
         setContent((prevContent) => ({
             ...prevContent,
             [dateKey]: new Date(year, event.target.value - 1, day),
@@ -29,7 +22,8 @@ export default function DateInput(props) {
     };
 
     const handleDayChange = (event) => {
-        setDay(event.target.value);
+        const year = new Date(content[dateKey]).getFullYear();
+        const month = new Date(content[dateKey]).getMonth();
         setContent((prevContent) => ({
             ...prevContent,
             [dateKey]: new Date(year, month, event.target.value),
@@ -42,23 +36,20 @@ export default function DateInput(props) {
             ...prevContent,
             [dateKey]: new Date(today),
         }));
-        setYear(today.getFullYear());
-        setMonth(today.getMonth());
-        setDay(today.getDate());
     }
 
     return (
         <div className="date-inputs-container">
             <input
                 type="number"
-                value={year}
+                value={new Date(content[dateKey]).getFullYear()}
                 max={new Date().getFullYear()}
                 placeholder="YYYY"
                 onChange={handleYearChange}
             />
             <input
                 type="number"
-                value={month + 1}
+                value={new Date(content[dateKey]).getMonth() + 1}
                 min="1"
                 max="12"
                 placeholder="MM"
@@ -66,7 +57,7 @@ export default function DateInput(props) {
             />
             <input
                 type="number"
-                value={day}
+                value={new Date(content[dateKey]).getDate()}
                 min="1"
                 max="31"
                 placeholder="DD"

@@ -40,14 +40,16 @@ export default function Webpage(props) {
 
                     authors = makeAuthorsArray(authors);
 
+                    console.log($("title").text());
+
                     setContent({
                         title:
                             $("title").text() ||
                             $("meta[property='og:title']").attr("content") ||
-                            $("meta[name='twitter:title']").attr("content") ||
-                            $("h1").text(),
+                            $("h1").text() ||
+                            "",
                         authors: authors,
-                        website: $("meta[property='og:site_name']").attr("content"),
+                        website: $("meta[property='og:site_name']").attr("content") || "",
                         publisher: $("meta[property='article:publisher']").attr("content"),
                         accessDate: new Date(),
                         publishDate: new Date(
@@ -58,7 +60,8 @@ export default function Webpage(props) {
                                 $("meta[property='article:modified_time']").attr("content") ||
                                 $("meta[name='og:updated_time']").attr("content") ||
                                 $("meta[property='og:updated_time']").attr("content") ||
-                                $(".publish-date").text()
+                                $(".publish-date").text() ||
+                                ""
                         ),
                         url: (
                             $("meta[property='og:url']").attr("content") ||
