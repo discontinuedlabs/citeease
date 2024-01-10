@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 
 export default function DateInput(props) {
     const { content, setContent, dateKey } = props;
-    const [year, setYear] = useState(new Date(content[dateKey]).getFullYear());
-    const [month, setMonth] = useState(new Date(content[dateKey]).getMonth());
-    const [day, setDay] = useState(new Date(content[dateKey]).getDate());
+    const date = content && dateKey in content ? new Date(content[dateKey]) : null;
+    const [year, setYear] = useState(() => (date ? date.getFullYear() : new Date().getFullYear()));
+    const [month, setMonth] = useState(() => (date ? date.getMonth() : 0));
+    const [day, setDay] = useState(() => (date ? date.getDate() : 1));
 
     useEffect(() => {
         setContent((prevContent) => ({

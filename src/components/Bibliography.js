@@ -49,7 +49,7 @@ export default function Bibliography(props) {
                 value={bibliography.title}
                 className="bibliography-title"
                 onChange={updateBibliographyTitle}
-                maxLength={10}
+                maxLength={100}
             />
             <p>{bibliography.style || ""}</p>
             <p>{id}</p>

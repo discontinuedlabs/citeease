@@ -38,7 +38,7 @@ export default function App() {
                     }
                 />
             </Routes>
-            {toastMessage && (
+            {toastMessage.title && (
                 <Toast message={toastMessage} closeToast={() => setToastMessage("")} />
             )}
         </div>

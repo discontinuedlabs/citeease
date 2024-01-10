@@ -9,11 +9,12 @@ export default function Webpage(props) {
     const { content, setContent, toggleEditMode, showToast } = props;
 
     useEffect(() => {
-        if (!content.authors)
+        if (!content.authors) {
             setContent((prevContent) => ({
                 ...prevContent,
                 authors: [{ firstName: "", lastName: "", id: uuid4() }],
             }));
+        }
     }, [content]);
 
     function parseHtml(url) {
@@ -40,8 +41,7 @@ export default function Webpage(props) {
                                 $("meta[property='article:modified_time']").attr("content") ||
                                 $("meta[name='og:updated_time']").attr("content") ||
                                 $("meta[property='og:updated_time']").attr("content") ||
-                                $(".publish-date").text() ||
-                                ""
+                                $(".publish-date").text()
                         ),
                         url: (
                             $("meta[property='og:url']").attr("content") ||
