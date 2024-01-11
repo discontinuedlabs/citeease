@@ -27,7 +27,7 @@ export default function Bibliography(props) {
             sourceType: sourceType,
             id: uuid4(),
             reference: "",
-            content: {},
+            content: { authors: [{ firstName: "", lastName: "", id: uuid4() }] },
         };
         setBibliographies((prevBibliographies) => {
             return prevBibliographies.map((biblio) =>

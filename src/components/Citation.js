@@ -149,7 +149,8 @@ export default function Citation(props) {
                 content.authors[0].firstName &&
                 `\tauthor={${formatAuthorsForLaTeX(content.authors)}},\n`;
             latexCitation +=
-                content.publishDate && `\tyear={${new Date(content.publishDate).getFullYear()}},\n`;
+                content.publicationDate &&
+                `\tyear={${new Date(content.publicationDate).getFullYear()}},\n`;
             latexCitation += content.url && `\thowpublished={${content.url}}\n`;
             latexCitation += `}\n\n`;
         }
@@ -162,7 +163,8 @@ export default function Citation(props) {
                 content.authors[0].firstName &&
                 `\tauthor={${formatAuthorsForLaTeX(content.authors)}},\n`;
             latexCitation +=
-                content.publishDate && `\tyear={${new Date(content.publishDate).getFullYear()}},\n`;
+                content.publicationDate &&
+                `\tyear={${new Date(content.publicationDate).getFullYear()}},\n`;
             latexCitation += content.journal && `\tjournal={${content.journal}},\n`;
             latexCitation += content.volume && `\tvolume={${content.volume}},\n`;
             latexCitation += content.number && `\tnumber={${content.number}},\n`;
@@ -178,7 +180,8 @@ export default function Citation(props) {
                 content.authors[0].firstName &&
                 `\tauthor={${formatAuthorsForLaTeX(content.authors)}},\n`;
             latexCitation +=
-                content.publishDate && `\tyear={${new Date(content.publishDate).getFullYear()}},\n`;
+                content.publicationDate &&
+                `\tyear={${new Date(content.publicationDate).getFullYear()}},\n`;
             latexCitation += content.publisher && `\tpublisher={${content.publisher}}\n`;
             latexCitation += `}\n\n`;
         }
@@ -202,7 +205,7 @@ export default function Citation(props) {
     function generateCitationReference(content) {
         let {
             authors,
-            publishDate,
+            publicationDate,
             accessDate,
             title,
             url,
@@ -218,21 +221,21 @@ export default function Citation(props) {
             source,
         } = content;
 
-        publishDate = new Date(publishDate);
+        publicationDate = new Date(publicationDate);
         accessDate = new Date(accessDate);
 
-        let formattedPublishDate;
+        let formattedpublicationDate;
         if (
-            publishDate &&
-            publishDate.getFullYear() &&
-            publishDate.getMonth() >= 0 && // checking this state like this "publishDate.getMonth()" instead will return 0 if the month is January, which is falsy value
-            publishDate.getDate()
+            publicationDate &&
+            publicationDate.getFullYear() &&
+            publicationDate.getMonth() >= 0 && // checking this state like this "publicationDate.getMonth()" instead will return 0 if the month is January, which is falsy value
+            publicationDate.getDate()
         ) {
-            formattedPublishDate = `${publishDate.getFullYear()}, ${
-                monthNames[publishDate.getMonth()]
-            } ${publishDate.getDate()}`;
-        } else if (publishDate && publishDate.getFullYear()) {
-            formattedPublishDate = publishDate.getFullYear();
+            formattedpublicationDate = `${publicationDate.getFullYear()}, ${
+                monthNames[publicationDate.getMonth()]
+            } ${publicationDate.getDate()}`;
+        } else if (publicationDate && publicationDate.getFullYear()) {
+            formattedpublicationDate = publicationDate.getFullYear();
         }
 
         let formattedAccessDate;
@@ -248,7 +251,7 @@ export default function Citation(props) {
             if (citation.sourceType === "Webpage") {
                 if (authors && authors.length > 0 && authors[0].firstName) {
                     newReference = `${formatAuthorsForReference(authors)} (${
-                        formattedPublishDate || "n.d"
+                        formattedpublicationDate || "n.d"
                     }). ${title ? `${title}.` : ""} ${website ? `${website}.` : ""} ${
                         publisher ? `Publisher: ${publisher}.` : ""
                     } ${
@@ -257,7 +260,7 @@ export default function Citation(props) {
                             : ""
                     }`;
                 } else {
-                    newReference = `${title} (${formattedPublishDate || "n.d"}). ${
+                    newReference = `${title} (${formattedpublicationDate || "n.d"}). ${
                         website ? `${website}.` : ""
                     } ${publisher ? `Publisher: ${publisher}.` : ""} ${
                         formattedAccessDate ? `Retrieved ${formattedAccessDate}, from ${url}` : url
@@ -266,13 +269,13 @@ export default function Citation(props) {
             } else if (citation.sourceType === "Journal") {
                 newReference = `${formatAuthorsForReference(
                     authors
-                )}. (${formattedPublishDate}). ${title}. *${source}*, ${volume}(${issue}), ${pages}. DOI: ${
+                )}. (${formattedpublicationDate}). ${title}. *${source}*, ${volume}(${issue}), ${pages}. DOI: ${
                     doi || ""
                 }`;
             } else if (citation.sourceType === "Book") {
                 newReference = `${formatAuthorsForReference(
                     authors
-                )}. (${formattedPublishDate}). ${title}. ${source}. ${place || ""}: ${
+                )}. (${formattedpublicationDate}). ${title}. ${source}. ${place || ""}: ${
                     publisher || ""
                 }${editor ? ", Edited by " + editor : ""}${
                     edition ? ", " + edition + " ed." : ""

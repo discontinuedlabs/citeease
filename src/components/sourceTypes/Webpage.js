@@ -8,19 +8,19 @@ import AuthorsInput from "../AuthorsInput";
 export default function Webpage(props) {
     const { content, setContent, toggleEditMode, showToast } = props;
 
-    useEffect(() => {
-        if (!content.authors) {
-            setContent((prevContent) => ({
-                ...prevContent,
-                authors: [{ firstName: "", lastName: "", id: uuid4() }],
-            }));
-        }
-    }, [content]);
+    // useEffect(() => {
+    //     if (!content.authors) {
+    //         setContent((prevContent) => ({
+    //             ...prevContent,
+    //             authors: [{ firstName: "", lastName: "", id: uuid4() }],
+    //         }));
+    //     }
+    // }, [content]);
 
-    function parseHtml(url) {
-        if (url)
+    function retrieveContent(source) {
+        if (source)
             axios
-                .get(`https://corsproxy.io/?${url}`, { mode: "no-cors" })
+                .get(`https://corsproxy.io/?${source}`, { mode: "no-cors" })
                 .then((response) => {
                     const $ = cheerio.load(response.data);
                     setContent({
@@ -33,7 +33,7 @@ export default function Webpage(props) {
                         website: $("meta[property='og:site_name']").attr("content") || "",
                         publisher: $("meta[property='article:publisher']").attr("content"),
                         accessDate: new Date(),
-                        publishDate: new Date(
+                        publicationDate: new Date(
                             $("meta[name='date']").attr("content") ||
                                 $("meta[name='article:published_time']").attr("content") ||
                                 $("meta[property='article:published_time']").attr("content") ||
@@ -41,21 +41,28 @@ export default function Webpage(props) {
                                 $("meta[property='article:modified_time']").attr("content") ||
                                 $("meta[name='og:updated_time']").attr("content") ||
                                 $("meta[property='og:updated_time']").attr("content") ||
-                                $(".publish-date").text()
+                                $(".publication-date").text()
                         ),
                         url: (
                             $("meta[property='og:url']").attr("content") ||
                             $("meta[name='url']").attr("content") ||
                             $("link[rel='canonical']").attr("href") ||
-                            url
+                            source
                         ).replace(/\/$/, ""), // Remove trailing slash
                     });
                 })
                 .catch((error) => {
-                    showToast(
-                        "Webpage Access Error",
-                        "We couldn't retrieve the information from the webpage you're attempting to cite. This may be due to the webpage being protected by a login or paywall."
-                    );
+                    if (!error.response && error.message === "Network Error") {
+                        showToast(
+                            "Network Error",
+                            "Unable to retrieve the webpage due to network issues. Please check your internet connection and try again."
+                        );
+                    } else {
+                        showToast(
+                            "Webpage Access Error",
+                            "We couldn't retrieve the information from the webpage you're attempting to cite. This may be due to the webpage being protected by a login or paywall."
+                        );
+                    }
                     console.error(error);
                 });
     }
@@ -76,10 +83,11 @@ export default function Webpage(props) {
             return author.trim() !== "" && self.indexOf(author) === index;
         });
 
-        return makeAuthorsArray(authors);
+        return createAuthorsArray(authors);
     }
 
-    function makeAuthorsArray(authors) {
+    // This must recieve authors as an array with the full names ["Michael Connelly", ...]
+    function createAuthorsArray(authors) {
         const result = authors.map((author) => {
             const names = author.split(/\s+/);
             const firstName = names.shift() || "";
@@ -93,7 +101,7 @@ export default function Webpage(props) {
     function handleFillIn(event) {
         event.preventDefault();
         const url = event.target[0]?.value;
-        parseHtml(url);
+        retrieveContent(url);
     }
 
     return (
@@ -135,18 +143,18 @@ export default function Webpage(props) {
                     }
                 />
 
-                <label htmlFor="publish-date">Publication date</label>
+                <label htmlFor="publication-date">Publication date</label>
                 <DateInput
-                    name="publish-date"
+                    name="publication-date"
                     content={content}
                     setContent={setContent}
-                    dateKey="publishDate"
+                    dateKey="publicationDate"
                 />
 
-                <label htmlFor="title">URL (link)</label>
+                <label htmlFor="url">URL (link)</label>
                 <input
                     type="text"
-                    name="title"
+                    name="url"
                     value={content.url}
                     placeholder="URL (link)"
                     onChange={(event) =>
