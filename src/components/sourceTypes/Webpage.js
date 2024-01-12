@@ -1,21 +1,13 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
-import { useEffect } from "react";
+import { useRef } from "react";
 import { v4 as uuid4 } from "uuid";
 import DateInput from "../DateInput";
 import AuthorsInput from "../AuthorsInput";
 
 export default function Webpage(props) {
-    const { content, setContent, toggleEditMode, showToast } = props;
-
-    // useEffect(() => {
-    //     if (!content.authors) {
-    //         setContent((prevContent) => ({
-    //             ...prevContent,
-    //             authors: [{ firstName: "", lastName: "", id: uuid4() }],
-    //         }));
-    //     }
-    // }, [content]);
+    const { content, setContent, setCitation, toggleEditMode, showToast } = props;
+    const autoFillUrlRef = useRef(null);
 
     function retrieveContent(source) {
         if (source)
@@ -25,10 +17,7 @@ export default function Webpage(props) {
                     const $ = cheerio.load(response.data);
                     setContent({
                         title:
-                            $("title").text() ||
-                            $("meta[property='og:title']").attr("content") ||
-                            $("h1").text() ||
-                            "",
+                            $("title").text() || $("meta[property='og:title']").attr("content") || $("h1").text() || "",
                         authors: extractAuthors($),
                         website: $("meta[property='og:site_name']").attr("content") || "",
                         publisher: $("meta[property='article:publisher']").attr("content"),
@@ -98,88 +87,87 @@ export default function Webpage(props) {
         return result;
     }
 
-    function handleFillIn(event) {
+    function handleFillIn() {
+        const autoFillUrl = autoFillUrlRef.current.value;
+        retrieveContent(autoFillUrl);
+    }
+
+    function handleAddReference(event) {
         event.preventDefault();
-        const url = event.target[0]?.value;
-        retrieveContent(url);
+        setCitation((prevCitation) => ({ ...prevCitation, referenceCompleted: true }));
+        toggleEditMode();
+    }
+
+    function handleCancel() {
+        toggleEditMode(true);
     }
 
     return (
-        <>
-            <form className="citation-form" onSubmit={handleFillIn}>
-                <p>Insert the URL (link) here to fill the fields automatically:</p>
-                <label htmlFor="url">URL</label>
-                <input type="text" name="url" placeholder="Insert a URL" />
-                <button type="submit">Fill in</button>
+        <form className="citation-form" onSubmit={handleAddReference}>
+            <p>Insert the URL (link) here to fill the fields automatically:</p>
+            <label htmlFor="auto-filler-url">URL</label>
+            <input type="text" name="auto-filler-url" placeholder="Insert a URL" ref={autoFillUrlRef} />
+            <button type="button" onClick={handleFillIn}>
+                Fill in
+            </button>
 
-                <p>Or enter webpage details manually:</p>
-                <AuthorsInput content={content} setContent={setContent} />
+            <p>Or enter webpage details manually:</p>
+            <AuthorsInput content={content} setContent={setContent} />
 
-                <label htmlFor="title">Title</label>
-                <input
-                    type="text"
-                    name="title"
-                    value={content.title}
-                    placeholder="Page title"
-                    onChange={(event) =>
-                        setContent((prevContent) => ({
-                            ...prevContent,
-                            title: event.target.value,
-                        }))
-                    }
-                />
+            <label htmlFor="title">Title</label>
+            <input
+                type="text"
+                name="title"
+                value={content.title}
+                placeholder="Page title"
+                onChange={(event) =>
+                    setContent((prevContent) => ({
+                        ...prevContent,
+                        title: event.target.value,
+                    }))
+                }
+                required
+            />
 
-                <label htmlFor="website">Website</label>
-                <input
-                    type="text"
-                    name="website"
-                    value={content.website}
-                    placeholder="Website title"
-                    onChange={(event) =>
-                        setContent((prevContent) => ({
-                            ...prevContent,
-                            website: event.target.value,
-                        }))
-                    }
-                />
+            <label htmlFor="website">Website</label>
+            <input
+                type="text"
+                name="website"
+                value={content.website}
+                placeholder="Website title"
+                onChange={(event) =>
+                    setContent((prevContent) => ({
+                        ...prevContent,
+                        website: event.target.value,
+                    }))
+                }
+            />
 
-                <label htmlFor="publication-date">Publication date</label>
-                <DateInput
-                    name="publication-date"
-                    content={content}
-                    setContent={setContent}
-                    dateKey="publicationDate"
-                />
+            <label htmlFor="publication-date">Publication date</label>
+            <DateInput name="publication-date" content={content} setContent={setContent} dateKey="publicationDate" />
 
-                <label htmlFor="url">URL (link)</label>
-                <input
-                    type="text"
-                    name="url"
-                    value={content.url}
-                    placeholder="URL (link)"
-                    onChange={(event) =>
-                        setContent((prevContent) => ({
-                            ...prevContent,
-                            url: event.target.value,
-                        }))
-                    }
-                />
+            <label htmlFor="url">URL (link)</label>
+            <input
+                type="text"
+                name="url"
+                value={content.url}
+                placeholder="URL (link)"
+                onChange={(event) =>
+                    setContent((prevContent) => ({
+                        ...prevContent,
+                        url: event.target.value,
+                    }))
+                }
+                required
+            />
 
-                <label htmlFor="access-date">Access date</label>
-                <DateInput
-                    name="access-date"
-                    content={content}
-                    setContent={setContent}
-                    dateKey="accessDate"
-                />
+            <label htmlFor="access-date">Access date</label>
+            <DateInput name="access-date" content={content} setContent={setContent} dateKey="accessDate" />
 
-                <button type="button" onClick={toggleEditMode}>
-                    Add reference
-                </button>
-                <button type="button" onClick={toggleEditMode}>
-                    Cancel
-                </button>
-            </form>
-        </>
+            <button type="submit">Add reference</button>
+            <button type="button" onClick={handleCancel}>
+                Cancel
+            </button>
+        </form>
     );
 }

@@ -1,14 +1,11 @@
 import { v4 as uuid4 } from "uuid";
 import DateInput from "../DateInput";
 import AuthorsInput from "../AuthorsInput";
-import { useEffect } from "react";
+import { useRef } from "react";
 
 export default function Journal(props) {
-    const { content, setContent, toggleEditMode, showToast } = props;
-
-    useEffect(() => {
-        console.log(content);
-    }, [content]);
+    const { content, setContent, setCitation, toggleEditMode, showToast } = props;
+    const autoFillDoiRef = useRef(null);
 
     function retrieveContent(source) {
         if (source)
@@ -16,7 +13,6 @@ export default function Journal(props) {
                 .then((response) => response.json())
                 .then((data) => {
                     data = data.message;
-                    console.log(data);
 
                     let authors = [];
                     for (let author of data.author) {
@@ -55,16 +51,9 @@ export default function Journal(props) {
                         issue: data.issue || data["journal-issue"].issue,
                         pages: data.page,
                         doi: data.DOI || data.URL,
-                        url:
-                            data.resource.primary.URL ||
-                            data.link[0].URL ||
-                            data.resource.primary.URL,
+                        url: data.resource.primary.URL || data.link[0].URL || data.resource.primary.URL,
                         online:
-                            data.resource.primary.URL ||
-                            data.link[0].URL ||
-                            data.resource.primary.URL
-                                ? true
-                                : false,
+                            data.resource.primary.URL || data.link[0].URL || data.resource.primary.URL ? true : false,
                         issn: data.ISSN[0] || data["issn-type"][0].value,
                         accessDate: new Date(),
                     });
@@ -97,128 +86,135 @@ export default function Journal(props) {
         return result;
     }
 
-    function handleFillIn(event) {
+    function handleFillIn() {
+        const autoFillDoi = autoFillDoiRef.current.value;
+        retrieveContent(autoFillDoi);
+    }
+
+    function handleAddReference(event) {
         event.preventDefault();
-        const doi = event.target[0]?.value;
-        retrieveContent(doi);
+        setCitation((prevCitation) => ({ ...prevCitation, referenceCompleted: true }));
+        toggleEditMode();
+    }
+
+    function handleCancel() {
+        toggleEditMode(true);
     }
 
     return (
-        <>
-            <form className="citation-form" onSubmit={handleFillIn}>
-                <p>Insert the DOI here to fill the fields automatically:</p>
-                <label htmlFor="doi">DOI</label>
-                <input type="text" name="doi" placeholder="Insert a DOI" />
-                <button type="submit">Fill in</button>
+        <form className="citation-form" onSubmit={handleAddReference}>
+            <p>Insert the DOI here to fill the fields automatically:</p>
+            <label htmlFor="auto-filler-doi">DOI</label>
+            <input type="text" name="auto-filler-doi" placeholder="Insert a DOI" ref={autoFillDoiRef} />
+            <button type="button" onClick={handleFillIn}>
+                Fill in
+            </button>
 
-                <p>Or enter the article details manually:</p>
-                <AuthorsInput content={content} setContent={setContent} />
+            <p>Or enter the article details manually:</p>
+            <AuthorsInput content={content} setContent={setContent} />
 
-                <label htmlFor="title">Articel title</label>
-                <input
-                    type="text"
-                    name="title"
-                    value={content.title}
-                    placeholder="Article title"
-                    onChange={(event) =>
-                        setContent((prevContent) => ({
-                            ...prevContent,
-                            title: event.target.value,
-                        }))
-                    }
-                />
+            <label htmlFor="title">Article title</label>
+            <input
+                type="text"
+                name="title"
+                value={content.title}
+                placeholder="Article title"
+                onChange={(event) =>
+                    setContent((prevContent) => ({
+                        ...prevContent,
+                        title: event.target.value,
+                    }))
+                }
+            />
 
-                <label htmlFor="journal">Journal title</label>
-                <input
-                    type="text"
-                    name="journal"
-                    value={content.journal}
-                    placeholder="Journal title"
-                    onChange={(event) =>
-                        setContent((prevContent) => ({
-                            ...prevContent,
-                            journal: event.target.value,
-                        }))
-                    }
-                />
+            <label htmlFor="journal">Journal title</label>
+            <input
+                type="text"
+                name="journal"
+                value={content.journal}
+                placeholder="Journal title"
+                onChange={(event) =>
+                    setContent((prevContent) => ({
+                        ...prevContent,
+                        journal: event.target.value,
+                    }))
+                }
+            />
 
-                <label htmlFor="volume">Volume</label>
-                <input
-                    type="number"
-                    name="volume"
-                    value={content.volume}
-                    placeholder="Enter a number"
-                    onChange={(event) =>
-                        setContent((prevContent) => ({
-                            ...prevContent,
-                            volume: event.target.value,
-                        }))
-                    }
-                />
+            <label htmlFor="volume">Volume</label>
+            <input
+                type="number"
+                name="volume"
+                value={content.volume}
+                placeholder="Enter a number"
+                onChange={(event) =>
+                    setContent((prevContent) => ({
+                        ...prevContent,
+                        volume: event.target.value,
+                    }))
+                }
+            />
 
-                <label htmlFor="issue">Issue</label>
-                <input
-                    type="number"
-                    name="issue"
-                    value={content.issue}
-                    placeholder="Enter a number"
-                    onChange={(event) =>
-                        setContent((prevContent) => ({
-                            ...prevContent,
-                            issue: event.target.value,
-                        }))
-                    }
-                />
+            <label htmlFor="issue">Issue</label>
+            <input
+                type="number"
+                name="issue"
+                value={content.issue}
+                placeholder="Enter a number"
+                onChange={(event) =>
+                    setContent((prevContent) => ({
+                        ...prevContent,
+                        issue: event.target.value,
+                    }))
+                }
+            />
 
-                <label htmlFor="publication-date">Publication date</label>
-                <DateInput
-                    name="publication-date"
-                    content={content}
-                    setContent={setContent}
-                    dateKey="publicationDate"
-                />
+            <label htmlFor="publication-date">Publication date</label>
+            <DateInput name="publication-date" content={content} setContent={setContent} dateKey="publicationDate" />
 
-                <label htmlFor="pages">Pages</label>
-                <input
-                    type="text"
-                    name="pages"
-                    value={content.pages}
-                    placeholder="Page range"
-                    onChange={(event) =>
-                        setContent((prevContent) => ({
-                            ...prevContent,
-                            pages: event.target.value,
-                        }))
-                    }
-                />
+            <label htmlFor="pages">Pages</label>
+            <input
+                type="text"
+                name="pages"
+                value={content.pages}
+                placeholder="Page range"
+                onChange={(event) =>
+                    setContent((prevContent) => ({
+                        ...prevContent,
+                        pages: event.target.value,
+                    }))
+                }
+            />
 
-                <label htmlFor="issn">ISSN</label>
-                <input
-                    type="text"
-                    name="issn"
-                    value={content.issn}
-                    placeholder="ISSN number"
-                    onChange={(event) =>
-                        setContent((prevContent) => ({
-                            ...prevContent,
-                            issn: event.target.value,
-                        }))
-                    }
-                />
+            <label htmlFor="issn">ISSN</label>
+            <input
+                type="text"
+                name="issn"
+                value={content.issn}
+                placeholder="ISSN number"
+                onChange={(event) =>
+                    setContent((prevContent) => ({
+                        ...prevContent,
+                        issn: event.target.value,
+                    }))
+                }
+            />
 
-                <label htmlFor="online">Accessed online?</label>
-                <input
-                    type="checkbox"
-                    checked={content.online}
-                    onChange={(event) =>
-                        setContent((prevContent) => ({
-                            ...prevContent,
-                            online: !prevContent.online,
-                        }))
-                    }
-                />
+            <label htmlFor="online">Accessed online?</label>
+            <input
+                type="checkbox"
+                name="online"
+                checked={content.online}
+                onChange={() =>
+                    setContent((prevContent) => ({
+                        ...prevContent,
+                        online: !prevContent.online,
+                    }))
+                }
+            />
 
-                <div className={!content.online && `hidden`}>
+            {content.online && (
+                <>
                     <label htmlFor="doi">DOI</label>
                     <input
                         type="text"
@@ -234,21 +230,14 @@ export default function Journal(props) {
                     />
 
                     <label htmlFor="access-date">Access date</label>
-                    <DateInput
-                        name="access-date"
-                        content={content}
-                        setContent={setContent}
-                        dateKey="accessDate"
-                    />
-                </div>
+                    <DateInput name="access-date" content={content} setContent={setContent} dateKey="accessDate" />
+                </>
+            )}
 
-                <button type="button" onClick={toggleEditMode}>
-                    Add reference
-                </button>
-                <button type="button" onClick={toggleEditMode}>
-                    Cancel
-                </button>
-            </form>
-        </>
+            <button type="sumbit">Add reference</button>
+            <button type="button" onClick={handleCancel}>
+                Cancel
+            </button>
+        </form>
     );
 }

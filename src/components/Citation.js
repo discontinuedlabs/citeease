@@ -4,18 +4,25 @@ import Book from "./sourceTypes/Book";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { v4 as uuid4 } from "uuid";
+import * as LaTeX from "./LaTeX";
 
 export default function Citation(props) {
     const { id: bibliographyId } = useParams();
-    const { id, bibliographies, setBibliographies, showToast } = props;
+    const { id, bibliographies, setBibliographies, font, showToast } = props;
     const bibliography = bibliographies.find((b) => b.id === bibliographyId);
 
     const [citation, setCitation] = useState(bibliography.citations.find((c) => c.id === id));
-    const [reference, setReference] = useState(citation.reference);
     const [content, setContent] = useState(citation.content);
     const [isEditModeVisible, setIsEditModeVisible] = useState(false);
+    const [optionsVisible, setOptionsVisible] = useState(false);
 
-    const citationControlProps = { content, setContent, toggleEditMode, showToast };
+    const citationControlProps = {
+        content,
+        setContent,
+        toggleEditMode,
+        showToast,
+        setCitation,
+    };
     const citationComponents = {
         Journal: Journal(citationControlProps),
         Book: Book(citationControlProps),
@@ -42,9 +49,7 @@ export default function Citation(props) {
                 biblio.id === bibliographyId
                     ? {
                           ...biblio,
-                          citations: biblio.citations.map((c) =>
-                              c.id === citation.id ? citation : c
-                          ),
+                          citations: biblio.citations.map((c) => (c.id === citation.id ? citation : c)),
                       }
                     : biblio
             );
@@ -54,9 +59,13 @@ export default function Citation(props) {
     useEffect(() => {
         setCitation((prevCitation) => ({
             ...prevCitation,
-            reference: reference,
+            reference: citation.reference,
         }));
-    }, [reference]);
+    }, [citation.reference]);
+
+    useEffect(() => {
+        toggleEditMode();
+    }, [citation.referenceCompleted]);
 
     useEffect(() => {
         const newReference = generateCitationReference(content);
@@ -67,8 +76,13 @@ export default function Citation(props) {
         }));
     }, [content]);
 
-    function toggleEditMode() {
-        setIsEditModeVisible((prevEditMode) => !prevEditMode);
+    function toggleEditMode(deleteIfNotComplete = false) {
+        if (deleteIfNotComplete && !citation.referenceCompleted) deleteCitation();
+        else setIsEditModeVisible((prevEditMode) => !prevEditMode);
+    }
+
+    function handleToggleOptions() {
+        setOptionsVisible((prevOptionsVisible) => !prevOptionsVisible);
     }
 
     function handleCopy() {
@@ -127,78 +141,13 @@ export default function Citation(props) {
         return formattedAuthors.join(", ");
     }
 
-    function formatAuthorsForLaTeX(authors) {
-        if (!Array.isArray(authors)) {
-            return "";
-        }
-        const formattedAuthors = authors.map((author) => {
-            const fullName = `${author.firstName || ""} ${author.lastName || ""}`;
-            return fullName.trim();
-        });
-        return formattedAuthors.join(" and ");
-    }
-
-    function generateLaTeXCitation(content) {
-        let latexCitation = "";
-
-        if (citation.sourceType === "Webpage") {
-            latexCitation += `@online{${content.id},\n`;
-            latexCitation += content.title && `\ttitle={${content.title}},\n`;
-            latexCitation +=
-                content.authors &&
-                content.authors[0].firstName &&
-                `\tauthor={${formatAuthorsForLaTeX(content.authors)}},\n`;
-            latexCitation +=
-                content.publicationDate &&
-                `\tyear={${new Date(content.publicationDate).getFullYear()}},\n`;
-            latexCitation += content.url && `\thowpublished={${content.url}}\n`;
-            latexCitation += `}\n\n`;
+    function formattedDoi(doi) {
+        doi = doi.replace(/^https?:\/\//i, "");
+        if (!doi.startsWith("doi.org/")) {
+            return `https://doi.org/${doi}`;
         }
 
-        if (citation.sourceType === "Journal") {
-            latexCitation += `@article{${content.id},\n`;
-            latexCitation += content.title && `\ttitle={${content.title}},\n`;
-            latexCitation +=
-                content.authors &&
-                content.authors[0].firstName &&
-                `\tauthor={${formatAuthorsForLaTeX(content.authors)}},\n`;
-            latexCitation +=
-                content.publicationDate &&
-                `\tyear={${new Date(content.publicationDate).getFullYear()}},\n`;
-            latexCitation += content.journal && `\tjournal={${content.journal}},\n`;
-            latexCitation += content.volume && `\tvolume={${content.volume}},\n`;
-            latexCitation += content.number && `\tnumber={${content.number}},\n`;
-            latexCitation += content.pages && `\tpages={${content.pages}}\n`;
-            latexCitation += `}\n\n`;
-        }
-
-        if (citation.sourceType === "Book") {
-            latexCitation += `@book{${content.id},\n`;
-            latexCitation += content.title && `\ttitle={${content.title}},\n`;
-            latexCitation +=
-                content.authors &&
-                content.authors[0].firstName &&
-                `\tauthor={${formatAuthorsForLaTeX(content.authors)}},\n`;
-            latexCitation +=
-                content.publicationDate &&
-                `\tyear={${new Date(content.publicationDate).getFullYear()}},\n`;
-            latexCitation += content.publisher && `\tpublisher={${content.publisher}}\n`;
-            latexCitation += `}\n\n`;
-        }
-
-        return latexCitation;
-    }
-
-    function exportToLaTeX() {
-        const latexCitation = generateLaTeXCitation(content);
-        const blob = new Blob([latexCitation], { type: "text/plain" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `${bibliography.title}.tex`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        return `https://${doi}`;
     }
 
     // TODO: Add error handling for unexpected behaviors, and add more comments
@@ -216,9 +165,11 @@ export default function Citation(props) {
             editor,
             edition,
             website,
+            journal,
             doi,
             place,
             source,
+            article,
         } = content;
 
         publicationDate = new Date(publicationDate);
@@ -250,36 +201,40 @@ export default function Citation(props) {
 
             if (citation.sourceType === "Webpage") {
                 if (authors && authors.length > 0 && authors[0].firstName) {
-                    newReference = `${formatAuthorsForReference(authors)} (${
-                        formattedpublicationDate || "n.d"
-                    }). ${title ? `${title}.` : ""} ${website ? `${website}.` : ""} ${
-                        publisher ? `Publisher: ${publisher}.` : ""
-                    } ${
+                    newReference = `${formatAuthorsForReference(authors)} (${formattedpublicationDate || "n.d."}). ${
+                        title ? `<i>${title}</i>.` : ""
+                    } ${website ? `${website}.` : ""} ${publisher ? `Publisher: ${publisher}.` : ""} ${
                         formattedAccessDate
-                            ? `Retrieved ${formattedAccessDate}${url ? `, from ${url}` : ""}`
+                            ? `Retrieved ${formattedAccessDate}${
+                                  url ? `, from <a href="${url}" target="_blank">${url}</a>` : ""
+                              }`
                             : ""
                     }`;
                 } else {
-                    newReference = `${title} (${formattedpublicationDate || "n.d"}). ${
+                    newReference = `<i>${title}</i> (${formattedpublicationDate || "n.d."}). ${
                         website ? `${website}.` : ""
                     } ${publisher ? `Publisher: ${publisher}.` : ""} ${
-                        formattedAccessDate ? `Retrieved ${formattedAccessDate}, from ${url}` : url
+                        formattedAccessDate
+                            ? `Retrieved ${formattedAccessDate}, from <a href="${url}" target="_blank">${url}</a>`
+                            : url
                     }`;
                 }
             } else if (citation.sourceType === "Journal") {
-                newReference = `${formatAuthorsForReference(
-                    authors
-                )}. (${formattedpublicationDate}). ${title}. *${source}*, ${volume}(${issue}), ${pages}. DOI: ${
-                    doi || ""
-                }`;
+                newReference = `${formatAuthorsForReference(authors)} (${publicationDate.getFullYear() || "n.d."}). ${
+                    title ? `${title}. ` : ""
+                }${
+                    journal
+                        ? `<i>${journal}</i>, ${volume ? `<i>${volume}</i>` : ""}${issue ? `(${issue})` : ""}${
+                              pages ? `, ${pages}` : article ? `, Article ${article}` : ""
+                          }. `
+                        : ""
+                }<a href="${url}" target="_blank">${doi ? `${formattedDoi(doi)}` : url ? `${url}` : ""}</a>`;
             } else if (citation.sourceType === "Book") {
                 newReference = `${formatAuthorsForReference(
                     authors
-                )}. (${formattedpublicationDate}). ${title}. ${source}. ${place || ""}: ${
-                    publisher || ""
-                }${editor ? ", Edited by " + editor : ""}${
-                    edition ? ", " + edition + " ed." : ""
-                }. ${url || doi ? `Retrieved from ${url || doi}` : ""} on ${
+                )}. (${formattedpublicationDate}). ${title}. ${source}. ${place || ""}: ${publisher || ""}${
+                    editor ? ", Edited by " + editor : ""
+                }${edition ? ", " + edition + " ed." : ""}. ${url || doi ? `Retrieved from ${url || doi}` : ""} on ${
                     formattedAccessDate || "n.d."
                 }`;
             }
@@ -310,37 +265,48 @@ export default function Citation(props) {
 
     return (
         <div className="citation-box">
-            {!isEditModeVisible && (
+            {citation.referenceCompleted && !isEditModeVisible && (
                 <>
-                    <p>{citation.reference}</p>
+                    <div
+                        style={{
+                            fontFamily:
+                                font === "System UI"
+                                    ? "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, sans-serif"
+                                    : font,
+                        }}
+                        dangerouslySetInnerHTML={{ __html: citation.reference }}
+                    />
+
+                    <button onClick={handleToggleOptions}>Options</button>
+                    {optionsVisible && (
+                        <div className="context-menu">
+                            <button className="option-button" onClick={handleCopy}>
+                                Copy to clipboard
+                            </button>
+                            <button
+                                className="option-button"
+                                onClick={() => LaTeX.generateAndExport(bibliography.title, citation)}
+                            >
+                                Export to LaTeX
+                            </button>
+                            <button className="option-button" onClick={toggleEditMode}>
+                                Edit
+                            </button>
+                            <button className="option-button" onClick={handleDuplicate}>
+                                Duplicate
+                            </button>
+                            {content.url && (
+                                <button className="option-button" onClick={() => window.open(content.url, "_blank")}>
+                                    Visit website
+                                </button>
+                            )}
+                            <button className="option-button" onClick={deleteCitation}>
+                                Delete
+                            </button>
+                        </div>
+                    )}
                 </>
             )}
-
-            <div className="context-menu">
-                <button className="option-button" onClick={handleCopy}>
-                    Copy to clipboard
-                </button>
-                <button className="option-button" onClick={exportToLaTeX}>
-                    Export to LaTeX
-                </button>
-                <button className="option-button" onClick={toggleEditMode}>
-                    Edit
-                </button>
-                <button className="option-button" onClick={handleDuplicate}>
-                    Duplicate
-                </button>
-                {content.url && (
-                    <button
-                        className="option-button"
-                        onClick={() => window.open(content.url, "_blank")}
-                    >
-                        Visit website
-                    </button>
-                )}
-                <button className="option-button" onClick={deleteCitation}>
-                    Delete
-                </button>
-            </div>
 
             {/* We are invoking the Component as a function instead of treating it as a React component.
             This is a common practice when you need to compute the component's output without rendering it.
@@ -348,7 +314,7 @@ export default function Citation(props) {
             meaning it won't have access to lifecycle methods or state management features. So avoid using
             useState inside of them. For more details, refer to this article:
             https://dev.to/igor_bykov/react-calling-functional-components-as-functions-1d3l */}
-            {isEditModeVisible && citationComponents[citation.sourceType]}
+            {(!citation.referenceCompleted || isEditModeVisible) && citationComponents[citation.sourceType]}
         </div>
     );
 }

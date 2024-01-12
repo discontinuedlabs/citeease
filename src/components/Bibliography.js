@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 
 export default function Bibliography(props) {
     const { id } = useParams();
-    const { bibliographies, setBibliographies, showToast } = props;
+    const { bibliographies, setBibliographies, font, showToast } = props;
     const bibliography = bibliographies.find((biblio) => biblio.id === id);
 
     const [isSourceOptionsHidden, setIsSourceOptionsHidden] = useState(true);
@@ -14,9 +14,7 @@ export default function Bibliography(props) {
     function updateBibliographyTitle(event) {
         const newTitle = event.target.value;
         setBibliographies((prevBibliographies) => {
-            return prevBibliographies.map((biblio) =>
-                biblio.id === id ? { ...biblio, title: newTitle } : biblio
-            );
+            return prevBibliographies.map((biblio) => (biblio.id === id ? { ...biblio, title: newTitle } : biblio));
         });
     }
 
@@ -27,13 +25,12 @@ export default function Bibliography(props) {
             sourceType: sourceType,
             id: uuid4(),
             reference: "",
+            referenceCompleted: false,
             content: { authors: [{ firstName: "", lastName: "", id: uuid4() }] },
         };
         setBibliographies((prevBibliographies) => {
             return prevBibliographies.map((biblio) =>
-                biblio.id === id
-                    ? { ...biblio, citations: [...bibliography.citations, newCitation] }
-                    : biblio
+                biblio.id === id ? { ...biblio, citations: [...bibliography.citations, newCitation] } : biblio
             );
         });
     }
@@ -56,13 +53,7 @@ export default function Bibliography(props) {
 
             <div className="citations-container">
                 {bibliography.citations.map((citation) => (
-                    <Citation
-                        key={citation.id}
-                        id={citation.id}
-                        bibliographies={bibliographies}
-                        setBibliographies={setBibliographies}
-                        showToast={showToast}
-                    />
+                    <Citation key={citation.id} id={citation.id} {...props} />
                 ))}
             </div>
 
