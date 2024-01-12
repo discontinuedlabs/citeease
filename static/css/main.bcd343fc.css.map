@@ -1,1 +1,1 @@
-{"version":3,"file":"static/css/main.bcd343fc.css","mappings":"AAAA,QACI,YACJ","sources":["css/style.css"],"sourcesContent":[".hidden {\r\n    display: none;\r\n}\r\n"],"names":[],"sourceRoot":""}
+{"version":3,"file":"static/css/main.bcd343fc.css","mappings":"AAAA,QACI,YACJ","sources":["css/App.css"],"sourcesContent":[".hidden {\r\n    display: none;\r\n}\r\n"],"names":[],"sourceRoot":""}
