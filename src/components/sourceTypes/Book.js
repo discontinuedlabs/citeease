@@ -33,12 +33,12 @@ export default function Book(props) {
                         originalPublished: data.first_publish_year || Math.min(...data.publish_year),
                         isbn: selectBestIsbn(data.isbn),
                         // multiVolume: data,
-                        // volume: data,
-                        // volumeTitle: data,
+                        // volume: data.volume,
+                        // volumeTitle: data.volumeTitle,
                         // online: data,
-                        // doi: data,
-                        // url: data,
-                        // accessDate: data,
+                        // doi: data.doi,
+                        // url: data.url,
+                        accessDate: new Date(),
                     });
                 })
                 .catch((error) => {
@@ -113,6 +113,7 @@ export default function Book(props) {
                         title: event.target.value,
                     }))
                 }
+                required
             />
 
             <label htmlFor="city">City</label>

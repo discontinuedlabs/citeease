@@ -141,13 +141,29 @@ export default function Citation(props) {
         return formattedAuthors.join(", ");
     }
 
-    function formattedDoi(doi) {
+    function formatDoi(doi) {
         doi = doi.replace(/^https?:\/\//i, "");
         if (!doi.startsWith("doi.org/")) {
             return `https://doi.org/${doi}`;
         }
 
         return `https://${doi}`;
+    }
+
+    function formatEdition(edition) {
+        const lastDigit = edition % 10;
+        const suffix =
+            edition % 100 === 11 || edition % 100 === 12 || edition % 100 === 13
+                ? "th"
+                : lastDigit === 1
+                ? "st"
+                : lastDigit === 2
+                ? "nd"
+                : lastDigit === 3
+                ? "rd"
+                : "th";
+
+        return edition + suffix;
     }
 
     // TODO: Add error handling for unexpected behaviors, and add more comments
@@ -159,6 +175,7 @@ export default function Citation(props) {
             title,
             url,
             volume,
+            volumeTitle,
             issue,
             pages,
             publisher,
@@ -167,9 +184,10 @@ export default function Citation(props) {
             website,
             journal,
             doi,
-            place,
-            source,
+            city,
             article,
+            year,
+            originalPublished,
         } = content;
 
         publicationDate = new Date(publicationDate);
@@ -228,15 +246,51 @@ export default function Citation(props) {
                               pages ? `, ${pages}` : article ? `, Article ${article}` : ""
                           }. `
                         : ""
-                }<a href="${url}" target="_blank">${doi ? `${formattedDoi(doi)}` : url ? `${url}` : ""}</a>`;
+                }<a href="${url}" target="_blank">${doi ? `${formatDoi(doi)}` : url ? `${url}` : ""}</a>`;
             } else if (citation.sourceType === "Book") {
-                newReference = `${formatAuthorsForReference(
-                    authors
-                )}. (${formattedpublicationDate}). ${title}. ${source}. ${place || ""}: ${publisher || ""}${
-                    editor ? ", Edited by " + editor : ""
-                }${edition ? ", " + edition + " ed." : ""}. ${url || doi ? `Retrieved from ${url || doi}` : ""} on ${
-                    formattedAccessDate || "n.d."
-                }`;
+                if (authors && authors.length > 0 && authors[0].firstName) {
+                    newReference = `${formatAuthorsForReference(authors)} (${
+                        year || "n.d."
+                    }). <i>${getProperTitle()}</i>. ${edition ? `(${formatEdition(edition)} ed.).` : ""} ${
+                        city + ":" || ""
+                    } ${publisher || ""}${editor ? ", Edited by " + editor : ""}. ${
+                        url || doi
+                            ? ` Retrieved from <a href="${url || doi}" target="_blank">${
+                                  url || doi
+                              }</a> on ${formattedAccessDate}`
+                            : ""
+                    } ${
+                        originalPublished && originalPublished !== year
+                            ? `(Original work published ${originalPublished})`
+                            : ""
+                    }`;
+                } else {
+                    newReference = `<i>${title}</i> (${year || "n.d."}). ${
+                        edition ? `(${formatEdition(edition)} ed.).` : ""
+                    } ${city + ":" || ""} ${publisher || ""}${editor ? ", Edited by " + editor : ""}. ${
+                        url || doi
+                            ? ` Retrieved from <a href="${url || doi}" target="_blank">${
+                                  url || doi
+                              }</a> on ${formattedAccessDate}`
+                            : ""
+                    } ${
+                        originalPublished && originalPublished !== year
+                            ? `(Original work published ${originalPublished})`
+                            : ""
+                    }`;
+                }
+
+                function getProperTitle() {
+                    let newTitle;
+                    if (volumeTitle && !volume) {
+                        newTitle = volumeTitle;
+                    } else {
+                        newTitle = `${title}${
+                            volume ? `: Vol. ${volume}.${volumeTitle ? ` ${volumeTitle}.` : ""}` : ""
+                        }`;
+                    }
+                    return newTitle;
+                }
             }
             return newReference;
         }
@@ -285,7 +339,7 @@ export default function Citation(props) {
                             </button>
                             <button
                                 className="option-button"
-                                onClick={() => LaTeX.generateAndExport(bibliography.title, citation)}
+                                onClick={() => LaTeX.exportToLaTeX(bibliography.title, citation)}
                             >
                                 Export to LaTeX
                             </button>

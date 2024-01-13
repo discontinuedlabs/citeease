@@ -1,4 +1,4 @@
-export function formatAuthors(authors) {
+export function formatAuthorsforLaTeX(authors) {
     if (!Array.isArray(authors)) {
         return "";
     }
@@ -9,54 +9,54 @@ export function formatAuthors(authors) {
     return formattedAuthors.join(" and ");
 }
 
-export function generateCitation(citation) {
+export function generateLaTeXCitation(citation) {
     const { id, content, sourceType } = citation;
-    let newCitation = "";
+    let LaTeXCitation = "";
 
     if (sourceType === "Webpage") {
-        newCitation += `@online{${id},\n`;
-        newCitation += content.title && `\ttitle={${content.title}},\n`;
-        newCitation +=
+        LaTeXCitation += `@online{${id},\n`;
+        LaTeXCitation += content.title && `\ttitle={${content.title}},\n`;
+        LaTeXCitation +=
             content.authors && content.authors[0] && content.authors[0].firstName
-                ? `\tauthor={${formatAuthors(content.authors)}},\n`
+                ? `\tauthor={${formatAuthorsforLaTeX(content.authors)}},\n`
                 : "";
-        newCitation += content.publicationDate && `\tyear={${new Date(content.publicationDate).getFullYear()}},\n`;
-        newCitation += content.url && `\thowpublished={${content.url}}\n`;
-        newCitation += `}\n\n`;
+        LaTeXCitation += content.publicationDate && `\tyear={${new Date(content.publicationDate).getFullYear()}},\n`;
+        LaTeXCitation += content.url && `\thowpublished={${content.url}}\n`;
+        LaTeXCitation += `}\n\n`;
     }
 
     if (sourceType === "Journal") {
-        newCitation += `@article{${id},\n`;
-        newCitation += content.title && `\ttitle={${content.title}},\n`;
-        newCitation +=
+        LaTeXCitation += `@article{${id},\n`;
+        LaTeXCitation += content.title && `\ttitle={${content.title}},\n`;
+        LaTeXCitation +=
             content.authors && content.authors[0] && content.authors[0].firstName
-                ? `\tauthor={${formatAuthors(content.authors)}},\n`
+                ? `\tauthor={${formatAuthorsforLaTeX(content.authors)}},\n`
                 : "";
-        newCitation += content.publicationDate && `\tyear={${new Date(content.publicationDate).getFullYear()}},\n`;
-        newCitation += content.journal && `\tjournal={${content.journal}},\n`;
-        newCitation += content.volume && `\tvolume={${content.volume}},\n`;
-        newCitation += content.issue && `\tnumber={${content.issue}},\n`;
-        newCitation += content.pages && `\tpages={${content.pages}}\n`;
-        newCitation += `}\n\n`;
+        LaTeXCitation += content.publicationDate && `\tyear={${new Date(content.publicationDate).getFullYear()}},\n`;
+        LaTeXCitation += content.journal && `\tjournal={${content.journal}},\n`;
+        LaTeXCitation += content.volume && `\tvolume={${content.volume}},\n`;
+        LaTeXCitation += content.issue && `\tnumber={${content.issue}},\n`;
+        LaTeXCitation += content.pages && `\tpages={${content.pages}}\n`;
+        LaTeXCitation += `}\n\n`;
     }
 
     if (sourceType === "Book") {
-        newCitation += `@book{${id},\n`;
-        newCitation += content.title && `\ttitle={${content.title}},\n`;
-        newCitation +=
+        LaTeXCitation += `@book{${id},\n`;
+        LaTeXCitation += content.title && `\ttitle={${content.title}},\n`;
+        LaTeXCitation +=
             content.authors && content.authors[0] && content.authors[0].firstName
-                ? `\tauthor={${formatAuthors(content.authors)}},\n`
+                ? `\tauthor={${formatAuthorsforLaTeX(content.authors)}},\n`
                 : "";
-        newCitation += content.publicationDate && `\tyear={${new Date(content.publicationDate).getFullYear()}},\n`;
-        newCitation += content.publisher && `\tpublisher={${content.publisher}}\n`;
-        newCitation += `}\n\n`;
+        LaTeXCitation += content.publicationDate && `\tyear={${new Date(content.publicationDate).getFullYear()}},\n`;
+        LaTeXCitation += content.publisher && `\tpublisher={${content.publisher}}\n`;
+        LaTeXCitation += `}\n\n`;
     }
 
-    return newCitation;
+    return LaTeXCitation;
 }
 
-export function generateAndExport(title, citation) {
-    const newCitation = generateCitation(citation);
+export function exportToLaTeX(title, citation) {
+    const newCitation = generateLaTeXCitation(citation);
     const blob = new Blob([newCitation], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");

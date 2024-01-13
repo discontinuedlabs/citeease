@@ -125,6 +125,7 @@ export default function Journal(props) {
                         title: event.target.value,
                     }))
                 }
+                required
             />
 
             <label htmlFor="journal">Journal title</label>
