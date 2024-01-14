@@ -1,13 +1,17 @@
-import Journal from "./sourceTypes/Journal";
-import Webpage from "./sourceTypes/Webpage";
-import Book from "./sourceTypes/Book";
-import APA from "./citationStyles/APA";
-import MLA from "./citationStyles/MLA";
-import Chicago from "./citationStyles/Chicago";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { v4 as uuid4 } from "uuid";
 import * as LaTeX from "./LaTeX";
+
+// Source Types
+import Journal from "./sourceTypes/Journal";
+import Webpage from "./sourceTypes/Webpage";
+import Book from "./sourceTypes/Book";
+
+// Citations Styles
+import APA from "./citationStyles/APA";
+import MLA from "./citationStyles/MLA";
+import Chicago from "./citationStyles/Chicago";
 
 export default function Citation(props) {
     const { id: bibliographyId } = useParams();
@@ -53,6 +57,7 @@ export default function Citation(props) {
     }, [citation.reference]);
 
     useEffect(() => {
+        console.log(citation.referenceCompleted);
         toggleEditMode();
     }, [citation.referenceCompleted]);
 

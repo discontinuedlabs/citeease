@@ -1,4 +1,3 @@
-import { v4 as uuid4 } from "uuid";
 import DateInput from "../DateInput";
 import AuthorsInput from "../AuthorsInput";
 import { useRef } from "react";
@@ -23,7 +22,7 @@ export default function Journal(props) {
 
                     setContent({
                         title: data.title[0],
-                        authors: createAuthorsArray(authors),
+                        authors: sourceTypeUtils.createAuthorsArray(authors),
                         journal: data["container-title"][0] || data["short-container-title"][0],
                         publisher: data.publisher,
                         publicationDate: sourceTypeUtils.createDateObject(
@@ -72,17 +71,6 @@ export default function Journal(props) {
                     }
                     console.error(error);
                 });
-    }
-
-    function createAuthorsArray(authors) {
-        const result = authors.map((author) => {
-            const names = author.split(/\s+/);
-            const firstName = names.shift() || "";
-            const lastName = names.join(" ");
-            return { firstName, lastName, id: uuid4() };
-        });
-
-        return result;
     }
 
     function handleFillIn() {

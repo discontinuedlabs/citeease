@@ -1,4 +1,3 @@
-import { v4 as uuid4 } from "uuid";
 import DateInput from "../DateInput";
 import AuthorsInput from "../AuthorsInput";
 import { useEffect, useRef } from "react";
@@ -24,7 +23,7 @@ export default function Book(props) {
                         title: data.title,
                         city: data.publish_place[0],
                         allCities: data.publish_place,
-                        authors: createAuthorsArray(data.author_name),
+                        authors: sourceTypeUtils.createAuthorsArray(data.author_name),
                         publisher: data.publisher[0],
                         allPublishers: data.publisher,
                         year: data.publish_year[0],
@@ -56,17 +55,6 @@ export default function Book(props) {
                     }
                     console.error(error);
                 });
-    }
-
-    function createAuthorsArray(authors) {
-        const result = authors.map((author) => {
-            const names = author.split(/[\s.]+/);
-            const firstName = names.shift() || "";
-            const lastName = names.join(" ");
-            return { firstName, lastName, id: uuid4() };
-        });
-
-        return result;
     }
 
     function selectBestIsbn(isbnArray) {

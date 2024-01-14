@@ -7,7 +7,6 @@ export default function DateInput(props) {
     const [day, setDay] = useState(content[dateKey]?.day);
 
     useEffect(() => {
-        console.log(year, month, day);
         setContent((prevContent) => ({
             ...prevContent,
             [dateKey]: { year: year, month: month, day: day },
