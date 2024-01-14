@@ -2,6 +2,7 @@ import { v4 as uuid4 } from "uuid";
 import DateInput from "../DateInput";
 import AuthorsInput from "../AuthorsInput";
 import { useRef } from "react";
+import * as sourceTypeUtils from "../sourceTypeUtils";
 
 export default function Journal(props) {
     const { content, setContent, setCitation, toggleEditMode, showToast } = props;
@@ -25,7 +26,7 @@ export default function Journal(props) {
                         authors: createAuthorsArray(authors),
                         journal: data["container-title"][0] || data["short-container-title"][0],
                         publisher: data.publisher,
-                        publicationDate: new Date(
+                        publicationDate: sourceTypeUtils.createDateObject(
                             data.created["date-time"] ||
                                 (data.created["date-parts"][0][0],
                                 data.created["date-parts"][0][1],
@@ -44,8 +45,7 @@ export default function Journal(props) {
                                 (data.deposited["date-parts"][0][0],
                                 data.deposited["date-parts"][0][1],
                                 data.deposited["date-parts"][0][2]) ||
-                                data.deposited.timestamp ||
-                                new Date()
+                                data.deposited.timestamp
                         ),
                         volume: data.volume,
                         issue: data.issue || data["journal-issue"].issue,
@@ -55,7 +55,7 @@ export default function Journal(props) {
                         online:
                             data.resource.primary.URL || data.link[0].URL || data.resource.primary.URL ? true : false,
                         issn: data.ISSN[0] || data["issn-type"][0].value,
-                        accessDate: new Date(),
+                        accessDate: sourceTypeUtils.createDateObject(new Date()),
                     });
                 })
                 .catch((error) => {
@@ -74,7 +74,6 @@ export default function Journal(props) {
                 });
     }
 
-    // This must recieve authors as an array with the full names ["Michael Connelly", ...]
     function createAuthorsArray(authors) {
         const result = authors.map((author) => {
             const names = author.split(/\s+/);

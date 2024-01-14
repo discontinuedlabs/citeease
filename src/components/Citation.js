@@ -1,6 +1,9 @@
 import Journal from "./sourceTypes/Journal";
 import Webpage from "./sourceTypes/Webpage";
 import Book from "./sourceTypes/Book";
+import APA from "./citationStyles/APA";
+import MLA from "./citationStyles/MLA";
+import Chicago from "./citationStyles/Chicago";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { v4 as uuid4 } from "uuid";
@@ -28,20 +31,6 @@ export default function Citation(props) {
         Book: Book(citationControlProps),
         Webpage: Webpage(citationControlProps),
     };
-    const monthNames = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-    ];
 
     useEffect(() => {
         setBibliographies((prevBibliographies) => {
@@ -68,7 +57,7 @@ export default function Citation(props) {
     }, [citation.referenceCompleted]);
 
     useEffect(() => {
-        const newReference = generateCitationReference(content);
+        const newReference = generateCitationReference();
         setCitation((prevCitation) => ({
             ...prevCitation,
             reference: newReference,
@@ -77,7 +66,7 @@ export default function Citation(props) {
     }, [content]);
 
     function toggleEditMode(deleteIfNotComplete = false) {
-        if (deleteIfNotComplete && !citation.referenceCompleted) deleteCitation();
+        if (deleteIfNotComplete && !citation.referenceCompleted) handleDelete();
         else setIsEditModeVisible((prevEditMode) => !prevEditMode);
     }
 
@@ -108,7 +97,7 @@ export default function Citation(props) {
         });
     }
 
-    function deleteCitation() {
+    function handleDelete() {
         setBibliographies((prevBibliographies) => {
             return prevBibliographies.map((biblio) =>
                 biblio.id === bibliographyId
@@ -121,197 +110,14 @@ export default function Citation(props) {
         });
     }
 
-    // TODO: Needs the rule of more than 20 authors
-    function formatAuthorsForReference(authors) {
-        const formattedAuthors = authors.map((author, index) => {
-            if (author.firstName && author.lastName) {
-                let lastNames = author.lastName.split(/\s+/g);
-                const lastName = lastNames.pop();
-                lastNames.unshift(author.firstName);
-                const initials = lastNames.map((name) => name[0].toUpperCase()).join(". ");
-
-                if (authors.length > 1 && index === authors.length - 1) {
-                    return `& ${lastName}, ${initials}.`;
-                }
-                return `${lastName}, ${initials}.`;
-            } else if (author.firstName) return `${author.firstName}`;
-            else return "";
-        });
-
-        return formattedAuthors.join(", ");
-    }
-
-    function formatDoi(doi) {
-        doi = doi.replace(/^https?:\/\//i, "");
-        if (!doi.startsWith("doi.org/")) {
-            return `https://doi.org/${doi}`;
-        }
-
-        return `https://${doi}`;
-    }
-
-    function formatEdition(edition) {
-        const lastDigit = edition % 10;
-        const suffix =
-            edition % 100 === 11 || edition % 100 === 12 || edition % 100 === 13
-                ? "th"
-                : lastDigit === 1
-                ? "st"
-                : lastDigit === 2
-                ? "nd"
-                : lastDigit === 3
-                ? "rd"
-                : "th";
-
-        return edition + suffix;
-    }
-
-    // TODO: Add error handling for unexpected behaviors, and add more comments
-    function generateCitationReference(content) {
-        let {
-            authors,
-            publicationDate,
-            accessDate,
-            title,
-            url,
-            volume,
-            volumeTitle,
-            issue,
-            pages,
-            publisher,
-            editor,
-            edition,
-            website,
-            journal,
-            doi,
-            city,
-            article,
-            year,
-            originalPublished,
-        } = content;
-
-        publicationDate = new Date(publicationDate);
-        accessDate = new Date(accessDate);
-
-        let formattedpublicationDate;
-        if (
-            publicationDate &&
-            publicationDate.getFullYear() &&
-            publicationDate.getMonth() >= 0 && // checking this state like this "publicationDate.getMonth()" instead will return 0 if the month is January, which is falsy value
-            publicationDate.getDate()
-        ) {
-            formattedpublicationDate = `${publicationDate.getFullYear()}, ${
-                monthNames[publicationDate.getMonth()]
-            } ${publicationDate.getDate()}`;
-        } else if (publicationDate && publicationDate.getFullYear()) {
-            formattedpublicationDate = publicationDate.getFullYear();
-        }
-
-        let formattedAccessDate;
-        if (accessDate && accessDate.getFullYear()) {
-            formattedAccessDate = `${
-                monthNames[accessDate.getMonth()]
-            } ${accessDate.getDate()}, ${accessDate.getFullYear()}`;
-        }
-
-        function APA() {
-            let newReference;
-
-            if (citation.sourceType === "Webpage") {
-                if (authors && authors.length > 0 && authors[0].firstName) {
-                    newReference = `${formatAuthorsForReference(authors)} (${formattedpublicationDate || "n.d."}). ${
-                        title ? `<i>${title}</i>.` : ""
-                    } ${website ? `${website}.` : ""} ${publisher ? `Publisher: ${publisher}.` : ""} ${
-                        formattedAccessDate
-                            ? `Retrieved ${formattedAccessDate}${
-                                  url ? `, from <a href="${url}" target="_blank">${url}</a>` : ""
-                              }`
-                            : ""
-                    }`;
-                } else {
-                    newReference = `<i>${title}</i> (${formattedpublicationDate || "n.d."}). ${
-                        website ? `${website}.` : ""
-                    } ${publisher ? `Publisher: ${publisher}.` : ""} ${
-                        formattedAccessDate
-                            ? `Retrieved ${formattedAccessDate}, from <a href="${url}" target="_blank">${url}</a>`
-                            : url
-                    }`;
-                }
-            } else if (citation.sourceType === "Journal") {
-                newReference = `${formatAuthorsForReference(authors)} (${publicationDate.getFullYear() || "n.d."}). ${
-                    title ? `${title}. ` : ""
-                }${
-                    journal
-                        ? `<i>${journal}</i>, ${volume ? `<i>${volume}</i>` : ""}${issue ? `(${issue})` : ""}${
-                              pages ? `, ${pages}` : article ? `, Article ${article}` : ""
-                          }. `
-                        : ""
-                }<a href="${url}" target="_blank">${doi ? `${formatDoi(doi)}` : url ? `${url}` : ""}</a>`;
-            } else if (citation.sourceType === "Book") {
-                if (authors && authors.length > 0 && authors[0].firstName) {
-                    newReference = `${formatAuthorsForReference(authors)} (${
-                        year || "n.d."
-                    }). <i>${getProperTitle()}</i>. ${edition ? `(${formatEdition(edition)} ed.).` : ""} ${
-                        city + ":" || ""
-                    } ${publisher || ""}${editor ? ", Edited by " + editor : ""}. ${
-                        url || doi
-                            ? ` Retrieved from <a href="${url || doi}" target="_blank">${
-                                  url || doi
-                              }</a> on ${formattedAccessDate}`
-                            : ""
-                    } ${
-                        originalPublished && originalPublished !== year
-                            ? `(Original work published ${originalPublished})`
-                            : ""
-                    }`;
-                } else {
-                    newReference = `<i>${title}</i> (${year || "n.d."}). ${
-                        edition ? `(${formatEdition(edition)} ed.).` : ""
-                    } ${city + ":" || ""} ${publisher || ""}${editor ? ", Edited by " + editor : ""}. ${
-                        url || doi
-                            ? ` Retrieved from <a href="${url || doi}" target="_blank">${
-                                  url || doi
-                              }</a> on ${formattedAccessDate}`
-                            : ""
-                    } ${
-                        originalPublished && originalPublished !== year
-                            ? `(Original work published ${originalPublished})`
-                            : ""
-                    }`;
-                }
-
-                function getProperTitle() {
-                    let newTitle;
-                    if (volumeTitle && !volume) {
-                        newTitle = volumeTitle;
-                    } else {
-                        newTitle = `${title}${
-                            volume ? `: Vol. ${volume}.${volumeTitle ? ` ${volumeTitle}.` : ""}` : ""
-                        }`;
-                    }
-                    return newTitle;
-                }
-            }
-            return newReference;
-        }
-
-        function MLA() {
-            let newReference;
-            return newReference;
-        }
-
-        function Chicago() {
-            let newReference;
-            return newReference;
-        }
-
+    function generateCitationReference() {
         switch (bibliography.style) {
             case "APA":
-                return APA(content);
+                return APA(content, citation.sourceType);
             case "MLA":
-                return MLA(content);
+                return MLA(content, citation.sourceType);
             case "Chicago":
-                return Chicago(content);
+                return Chicago(content, citation.sourceType);
             default:
                 throw new Error(`Unknown citation style: ${bibliography.style}`);
         }
@@ -354,7 +160,7 @@ export default function Citation(props) {
                                     Visit website
                                 </button>
                             )}
-                            <button className="option-button" onClick={deleteCitation}>
+                            <button className="option-button" onClick={handleDelete}>
                                 Delete
                             </button>
                         </div>

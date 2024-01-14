@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { v4 as uuid4 } from "uuid";
 import DateInput from "../DateInput";
 import AuthorsInput from "../AuthorsInput";
+import * as sourceTypeUtils from "../sourceTypeUtils";
 
 export default function Webpage(props) {
     const { content, setContent, setCitation, toggleEditMode, showToast } = props;
@@ -21,8 +22,8 @@ export default function Webpage(props) {
                         authors: extractAuthors($),
                         website: $("meta[property='og:site_name']").attr("content") || "",
                         publisher: $("meta[property='article:publisher']").attr("content"),
-                        accessDate: new Date(),
-                        publicationDate: new Date(
+                        accessDate: sourceTypeUtils.createDateObject(new Date()),
+                        publicationDate: sourceTypeUtils.createDateObject(
                             $("meta[name='date']").attr("content") ||
                                 $("meta[name='article:published_time']").attr("content") ||
                                 $("meta[property='article:published_time']").attr("content") ||
@@ -75,7 +76,6 @@ export default function Webpage(props) {
         return createAuthorsArray(authors);
     }
 
-    // This must recieve authors as an array with the full names ["Michael Connelly", ...]
     function createAuthorsArray(authors) {
         const result = authors.map((author) => {
             const names = author.split(/\s+/);

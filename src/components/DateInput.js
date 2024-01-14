@@ -2,17 +2,29 @@ import { useEffect, useState } from "react";
 
 export default function DateInput(props) {
     const { content, setContent, dateKey } = props;
-    const date = content && dateKey in content ? new Date(content[dateKey]) : null;
-    const [year, setYear] = useState(() => (date ? date.getFullYear() : new Date().getFullYear()));
-    const [month, setMonth] = useState(() => (date ? date.getMonth() : 0));
-    const [day, setDay] = useState(() => (date ? date.getDate() : 1));
+    const [year, setYear] = useState(content[dateKey]?.year);
+    const [month, setMonth] = useState(content[dateKey]?.month);
+    const [day, setDay] = useState(content[dateKey]?.day);
 
     useEffect(() => {
+        console.log(year, month, day);
         setContent((prevContent) => ({
             ...prevContent,
-            [dateKey]: new Date(year, month, day),
+            [dateKey]: { year: year, month: month, day: day },
         }));
     }, [year, month, day]);
+
+    useEffect(() => {
+        const newYear = content[dateKey]?.year;
+        const newMonth = content[dateKey]?.month;
+        const newDay = content[dateKey]?.day;
+
+        if (year !== newYear || month !== newMonth || day !== newDay) {
+            setYear(newYear);
+            setMonth(newMonth);
+            setDay(newDay);
+        }
+    }, [content, dateKey]);
 
     function setToToday() {
         const today = new Date();

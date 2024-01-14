@@ -2,14 +2,15 @@ import { v4 as uuid4 } from "uuid";
 import DateInput from "../DateInput";
 import AuthorsInput from "../AuthorsInput";
 import { useEffect, useRef } from "react";
+import * as sourceTypeUtils from "../sourceTypeUtils";
 
 export default function Book(props) {
     const { content, setContent, setCitation, toggleEditMode, showToast } = props;
     const autoFillIsbnRef = useRef(null);
 
-    useEffect(() => {
-        console.log(content);
-    }, [content]);
+    // useEffect(() => {
+    //     console.log(content);
+    // }, [content]);
 
     function retrieveContent(source) {
         if (source)
@@ -38,7 +39,7 @@ export default function Book(props) {
                         // online: data,
                         // doi: data.doi,
                         // url: data.url,
-                        accessDate: new Date(),
+                        accessDate: sourceTypeUtils.createDateObject(new Date()),
                     });
                 })
                 .catch((error) => {
@@ -57,7 +58,6 @@ export default function Book(props) {
                 });
     }
 
-    // This must recieve authors as an array with the full names ["Michael Connelly", ...]
     function createAuthorsArray(authors) {
         const result = authors.map((author) => {
             const names = author.split(/[\s.]+/);
