@@ -1,15 +1,12 @@
-import { useState } from "react";
 import Citation from "./Citation";
 import { v4 as uuid4 } from "uuid";
 import { useParams } from "react-router-dom";
+import ContextMenu from "./ContextMenu";
 
 export default function Bibliography(props) {
     const { id } = useParams();
     const { bibliographies, setBibliographies } = props;
     const bibliography = bibliographies.find((biblio) => biblio.id === id);
-
-    const [isSourceOptionsHidden, setIsSourceOptionsHidden] = useState(true);
-    const sources = ["Webpage", "Journal", "Book"];
 
     function updateBibliographyTitle(event) {
         const newTitle = event.target.value;
@@ -19,7 +16,6 @@ export default function Bibliography(props) {
     }
 
     function addCitationWithSourceType(event) {
-        toggleSourceOptions();
         const sourceType = event.target.textContent;
         const newCitation = {
             sourceType: sourceType,
@@ -33,10 +29,6 @@ export default function Bibliography(props) {
                 biblio.id === id ? { ...biblio, citations: [...bibliography.citations, newCitation] } : biblio
             );
         });
-    }
-
-    function toggleSourceOptions() {
-        setIsSourceOptionsHidden((prevSourceOptionsHidden) => !prevSourceOptionsHidden);
     }
 
     return (
@@ -57,15 +49,14 @@ export default function Bibliography(props) {
                 ))}
             </div>
 
-            <button onClick={toggleSourceOptions}>Add Citation</button>
-
-            <div className={`source-options ${isSourceOptionsHidden && "hidden"}`}>
-                {sources.map((source) => (
-                    <button onClick={addCitationWithSourceType} key={source}>
-                        {source}
-                    </button>
-                ))}
-            </div>
+            <ContextMenu
+                label="Add Citation"
+                options={[
+                    { label: "Webpage", method: addCitationWithSourceType },
+                    { label: "Journal", method: addCitationWithSourceType },
+                    { label: "Book", method: addCitationWithSourceType },
+                ]}
+            />
         </div>
     );
 }

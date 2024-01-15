@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { v4 as uuid4 } from "uuid";
 import * as LaTeX from "./LaTeX";
+import "../css/Citation.css";
 
 // Source Types
 import Journal from "./sourceTypes/Journal";
@@ -12,6 +13,7 @@ import Book from "./sourceTypes/Book";
 import APA from "./citationStyles/APA";
 import MLA from "./citationStyles/MLA";
 import Chicago from "./citationStyles/Chicago";
+import ContextMenu from "./ContextMenu";
 
 export default function Citation(props) {
     const { id: bibliographyId } = useParams();
@@ -21,7 +23,6 @@ export default function Citation(props) {
     const [citation, setCitation] = useState(bibliography.citations.find((c) => c.id === id));
     const [content, setContent] = useState(citation.content);
     const [isEditModeVisible, setIsEditModeVisible] = useState(false);
-    const [optionsVisible, setOptionsVisible] = useState(false);
 
     const citationControlProps = {
         content,
@@ -75,10 +76,6 @@ export default function Citation(props) {
         else setIsEditModeVisible((prevEditMode) => !prevEditMode);
     }
 
-    function handleToggleOptions() {
-        setOptionsVisible((prevOptionsVisible) => !prevOptionsVisible);
-    }
-
     function handleCopy() {
         try {
             navigator.clipboard.writeText(citation.reference);
@@ -129,47 +126,25 @@ export default function Citation(props) {
     }
 
     return (
-        <div className="citation-box">
+        <div className="citation">
             {citation.referenceCompleted && !isEditModeVisible && (
                 <>
-                    <div
-                        style={{
-                            fontFamily:
-                                font === "System UI"
-                                    ? "system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, sans-serif"
-                                    : font,
-                        }}
-                        dangerouslySetInnerHTML={{ __html: citation.reference }}
-                    />
+                    <div style={{ fontFamily: font.family }} dangerouslySetInnerHTML={{ __html: citation.reference }} />
 
-                    <button onClick={handleToggleOptions}>Options</button>
-                    {optionsVisible && (
-                        <div className="context-menu">
-                            <button className="option-button" onClick={handleCopy}>
-                                Copy to clipboard
-                            </button>
-                            <button
-                                className="option-button"
-                                onClick={() => LaTeX.exportToLaTeX(bibliography.title, citation)}
-                            >
-                                Export to LaTeX
-                            </button>
-                            <button className="option-button" onClick={toggleEditMode}>
-                                Edit
-                            </button>
-                            <button className="option-button" onClick={handleDuplicate}>
-                                Duplicate
-                            </button>
-                            {content.url && (
-                                <button className="option-button" onClick={() => window.open(content.url, "_blank")}>
-                                    Visit website
-                                </button>
-                            )}
-                            <button className="option-button" onClick={handleDelete}>
-                                Delete
-                            </button>
-                        </div>
-                    )}
+                    <ContextMenu
+                        label="Options"
+                        options={[
+                            { label: "Copy to clipboard", method: handleCopy },
+                            {
+                                label: "Export to LaTeX",
+                                method: () => LaTeX.exportToLaTeX(bibliography.title, citation),
+                            },
+                            { label: "Edit", method: toggleEditMode },
+                            { label: "Duplicate", method: handleDuplicate },
+                            content.url && { label: "Visit website", method: () => window.open(content.url, "_blank") },
+                            { label: "Delete", method: handleDelete },
+                        ]}
+                    />
                 </>
             )}
 

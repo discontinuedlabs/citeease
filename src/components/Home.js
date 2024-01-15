@@ -1,15 +1,12 @@
 import { v4 as uuid4 } from "uuid";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import ContextMenu from "./ContextMenu";
 
 export default function Home(props) {
     const { bibliographies, setBibliographies } = props;
-    const [styleOptionsHidden, setStyleOptionsHidden] = useState(true);
-
     const styles = ["APA", "MLA", "Chicago"];
 
     function handleAddBibliography(style) {
-        toggleStyleOptions();
         const newBibliography = {
             title: "Bibliography",
             style: style,
@@ -17,10 +14,6 @@ export default function Home(props) {
             citations: [],
         };
         setBibliographies((prevBibliographies) => [...prevBibliographies, newBibliography]);
-    }
-
-    function toggleStyleOptions() {
-        setStyleOptionsHidden((prevStyleOptionsHidden) => !prevStyleOptionsHidden);
     }
 
     return (
@@ -35,18 +28,14 @@ export default function Home(props) {
                     ))}
             </div>
 
-            <button onClick={toggleStyleOptions}>Add bibliography</button>
-
-            <div className={`style-options ${styleOptionsHidden && "hidden"}`}>
-                {styles.map((s) => (
-                    <button
-                        onClick={(event) => handleAddBibliography(event.target.textContent)}
-                        key={s}
-                    >
-                        {s}
-                    </button>
-                ))}
-            </div>
+            <ContextMenu
+                label="Add bibliography"
+                options={styles.map((s) => ({
+                    label: s,
+                    method: (event) => handleAddBibliography(event.target.textContent),
+                }))}
+                style={{ position: "absolute", bottom: "100%" }}
+            />
         </div>
     );
 }
