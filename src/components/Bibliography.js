@@ -1,7 +1,7 @@
 import Citation from "./Citation";
 import { v4 as uuid4 } from "uuid";
 import { useParams } from "react-router-dom";
-import ContextMenu from "./ContextMenu";
+import ContextMenu from "./ui/ContextMenu";
 
 export default function Bibliography(props) {
     const { id } = useParams();
@@ -38,10 +38,9 @@ export default function Bibliography(props) {
                 value={bibliography.title}
                 className="bibliography-title"
                 onChange={updateBibliographyTitle}
-                maxLength={100}
+                maxLength={200}
             />
             <p>{bibliography.style || ""}</p>
-            <p>{id}</p>
 
             <div className="citations-container">
                 {bibliography.citations.map((citation) => (

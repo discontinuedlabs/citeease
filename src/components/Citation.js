@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { v4 as uuid4 } from "uuid";
 import * as LaTeX from "./LaTeX";
 import "../css/Citation.css";
+import ContextMenu from "./ui/ContextMenu";
 
 // Source Types
 import Journal from "./sourceTypes/Journal";
@@ -13,7 +14,6 @@ import Book from "./sourceTypes/Book";
 import APA from "./citationStyles/APA";
 import MLA from "./citationStyles/MLA";
 import Chicago from "./citationStyles/Chicago";
-import ContextMenu from "./ContextMenu";
 
 export default function Citation(props) {
     const { id: bibliographyId } = useParams();

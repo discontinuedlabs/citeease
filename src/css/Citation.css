@@ -1,7 +1,7 @@
 .citation {
     background-color: white;
     border: solid 0.1rem black;
-    border-radius: 0.5rem;
+    border-radius: var(--border-radius-regular);
     padding: 1rem;
     max-width: 50rem;
     margin: auto;
