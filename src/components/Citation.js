@@ -31,7 +31,7 @@ export default function Citation(props) {
         showToast,
         setCitation,
     };
-    const citationComponents = {
+    const CITATION_COMPONENTS = {
         Journal: Journal(citationControlProps),
         Book: Book(citationControlProps),
         Webpage: Webpage(citationControlProps),
@@ -78,7 +78,9 @@ export default function Citation(props) {
 
     function handleCopy() {
         try {
-            navigator.clipboard.writeText(citation.reference);
+            const regex = /(<([^>]+)>)/gi;
+            const cleanedReference = citation.reference.replace(regex, "");
+            navigator.clipboard.writeText(cleanedReference);
         } catch (err) {
             console.error("Failed to copy text: ", err);
         }
@@ -129,21 +131,37 @@ export default function Citation(props) {
         <div className="citation">
             {citation.referenceCompleted && !isEditModeVisible && (
                 <>
-                    <div style={{ fontFamily: font.family }} dangerouslySetInnerHTML={{ __html: citation.reference }} />
-
-                    <ContextMenu
-                        label="Options"
-                        options={[
-                            { label: "Copy to clipboard", method: handleCopy },
-                            {
-                                label: "Export to LaTeX",
-                                method: () => LaTeX.exportToLaTeX(bibliography.title, citation),
-                            },
-                            { label: "Edit", method: toggleEditMode },
-                            { label: "Duplicate", method: handleDuplicate },
-                            content.url && { label: "Visit website", method: () => window.open(content.url, "_blank") },
-                            { label: "Delete", method: handleDelete },
-                        ]}
+                    <div className="citation-header">
+                        <h3>In-text citation</h3>
+                        <ContextMenu
+                            icon="more_vert"
+                            options={[
+                                { label: "Copy to clipboard", method: handleCopy },
+                                {
+                                    label: "Export to LaTeX",
+                                    method: () => LaTeX.exportToLaTeX(bibliography.title, citation),
+                                },
+                                { label: "Edit", method: toggleEditMode },
+                                { label: "Duplicate", method: handleDuplicate },
+                                content.url && {
+                                    label: "Visit website",
+                                    method: () => window.open(content.url, "_blank"),
+                                },
+                                { label: "Delete", method: handleDelete },
+                            ]}
+                            menuStyle={{
+                                position: "absolute",
+                                left: "0",
+                            }}
+                            buttonStyle={{
+                                all: "unset",
+                            }}
+                        />
+                    </div>
+                    <div
+                        className="reference"
+                        style={{ fontFamily: font.family }}
+                        dangerouslySetInnerHTML={{ __html: citation.reference }}
                     />
                 </>
             )}
@@ -154,7 +172,7 @@ export default function Citation(props) {
             meaning it won't have access to lifecycle methods or state management features. So avoid using
             useState inside of them. For more details, refer to this article:
             https://dev.to/igor_bykov/react-calling-functional-components-as-functions-1d3l */}
-            {(!citation.referenceCompleted || isEditModeVisible) && citationComponents[citation.sourceType]}
+            {(!citation.referenceCompleted || isEditModeVisible) && CITATION_COMPONENTS[citation.sourceType]}
         </div>
     );
 }

@@ -34,14 +34,14 @@ export default function App() {
 
     return (
         <div className="app">
-            <ContextMenu
+            {/* <ContextMenu
                 label={font.name}
                 options={fonts.map((f) => ({
                     label: f.name,
                     method: () => setFont(f),
                     style: { fontFamily: f.family },
                 }))}
-            />
+            /> */}
 
             <Routes>
                 <Route

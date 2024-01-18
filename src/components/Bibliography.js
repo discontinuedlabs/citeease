@@ -2,6 +2,7 @@ import Citation from "./Citation";
 import { v4 as uuid4 } from "uuid";
 import { useParams } from "react-router-dom";
 import ContextMenu from "./ui/ContextMenu";
+import AutoResizingTextarea from "./formElements/AutoResizingTextarea";
 
 export default function Bibliography(props) {
     const { id } = useParams();
@@ -33,14 +34,19 @@ export default function Bibliography(props) {
 
     return (
         <div className="bibliography">
-            <input
-                type="text"
+            <div className="bibliography-header">
+                <h3>{bibliography.style}</h3>
+                <ContextMenu icon="more_vert" />
+            </div>
+
+            <AutoResizingTextarea
                 value={bibliography.title}
                 className="bibliography-title"
                 onChange={updateBibliographyTitle}
                 maxLength={200}
+                rows={1}
+                spellcheck="false"
             />
-            <p>{bibliography.style || ""}</p>
 
             <div className="citations-container">
                 {bibliography.citations.map((citation) => (

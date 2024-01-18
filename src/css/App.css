@@ -10,10 +10,20 @@
     --border-regular: 0.1rem solid;
 }
 
-body {
-    margin: 0;
+* {
     font-family: "Josefin Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
         Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+::selection {
+    color: var(--main-black);
+    background-color: var(--accent-yellow);
+}
+
+body {
     color: var(--main-black);
 }
 
@@ -48,12 +58,46 @@ body {
     border: var(--border-regular) var(--main-blue);
     text-decoration: none;
     color: var(--main-black);
-    padding-inline: 1rem;
+    padding: 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 0.6rem;
     box-shadow: 0 0.2rem 0 var(--main-blue);
+}
+
+.bibliography-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bibliography-title {
+    all: unset;
+    font-weight: bold;
+    font-size: 2rem;
+    width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.citation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.citation-header h3 {
+    margin: 0;
+    padding: 0;
+}
+
+.reference {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .styled-button {
@@ -63,8 +107,6 @@ body {
     border-radius: var(--border-radius-regular);
     border: var(--border-regular) var(--dark-blue);
     padding: 0.7rem;
-    font-family: "Josefin Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
-        Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }
 
 .context-menu-container {
@@ -72,6 +114,7 @@ body {
 }
 
 .context-menu {
+    --context-menu-padding: 0.2rem;
     background-color: white;
     position: fixed;
     display: grid;
@@ -79,20 +122,21 @@ body {
     width: fit-content;
     border: var(--border-regular) var(--main-blue);
     border-radius: var(--border-radius-regular);
-    padding: 0.2rem;
+    padding: var(--context-menu-padding);
     z-index: 50;
+    box-shadow: 0 0.5rem 1rem 0.1rem hsla(215, 100%, 4%, 0.2);
 }
 
-.option-button {
+.context-menu-option {
     background-color: white;
     border: none;
     box-shadow: none;
     color: var(--dark-blue);
-    border-radius: var(--border-radius-regular);
+    border-radius: calc(var(--border-radius-regular) - var(--context-menu-padding));
     padding: 0.7rem;
 }
 
-.option-button:hover {
+.context-menu-option:hover {
     background-color: var(--light-blue);
 }
 
@@ -123,4 +167,9 @@ body {
     z-index: 2;
     max-width: 50rem;
     margin: 1rem;
+}
+
+.auto-resizing-textarea {
+    overflow: hidden;
+    resize: none;
 }
