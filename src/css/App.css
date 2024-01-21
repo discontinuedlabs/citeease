@@ -27,6 +27,10 @@ body {
     color: var(--main-black);
 }
 
+a {
+    color: var(--main-blue);
+}
+
 .app {
     padding: 1rem;
     background-color: white;
@@ -64,112 +68,4 @@ body {
     align-items: center;
     gap: 0.6rem;
     box-shadow: 0 0.2rem 0 var(--main-blue);
-}
-
-.bibliography-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.bibliography-title {
-    all: unset;
-    font-weight: bold;
-    font-size: 2rem;
-    width: 100%;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    word-break: break-word;
-}
-
-.citation-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-}
-
-.citation-header h3 {
-    margin: 0;
-    padding: 0;
-}
-
-.reference {
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    word-break: break-word;
-}
-
-.styled-button {
-    color: var(--dark-blue);
-    background-color: var(--accent-yellow);
-    box-shadow: 0 0.4rem 0 var(--dark-blue);
-    border-radius: var(--border-radius-regular);
-    border: var(--border-regular) var(--dark-blue);
-    padding: 0.7rem;
-}
-
-.context-menu-container {
-    position: relative;
-}
-
-.context-menu {
-    --context-menu-padding: 0.2rem;
-    background-color: white;
-    position: fixed;
-    display: grid;
-    grid-row: 1;
-    width: fit-content;
-    border: var(--border-regular) var(--main-blue);
-    border-radius: var(--border-radius-regular);
-    padding: var(--context-menu-padding);
-    z-index: 50;
-    box-shadow: 0 0.5rem 1rem 0.1rem hsla(215, 100%, 4%, 0.2);
-}
-
-.context-menu-option {
-    background-color: white;
-    border: none;
-    box-shadow: none;
-    color: var(--dark-blue);
-    border-radius: calc(var(--border-radius-regular) - var(--context-menu-padding));
-    padding: 0.7rem;
-}
-
-.context-menu-option:hover {
-    background-color: var(--light-blue);
-}
-
-.accept-dialog {
-    width: 100vw;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.accept-dialog-background {
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.21);
-    position: fixed;
-    z-index: 1;
-}
-
-.accept-dialog-box {
-    border-radius: var(--border-radius-regular);
-    background-color: red;
-    padding: 1rem;
-    color: white;
-    z-index: 2;
-    max-width: 50rem;
-    margin: 1rem;
-}
-
-.auto-resizing-textarea {
-    overflow: hidden;
-    resize: none;
 }

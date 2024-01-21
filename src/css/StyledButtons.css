@@ -1,0 +1,8 @@
+.mechanic-button {
+    color: var(--dark-blue);
+    background-color: var(--accent-yellow);
+    box-shadow: 0 0.4rem 0 var(--dark-blue);
+    border-radius: var(--border-radius-regular);
+    border: var(--border-regular) var(--dark-blue);
+    padding: 0.7rem;
+}

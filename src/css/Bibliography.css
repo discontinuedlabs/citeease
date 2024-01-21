@@ -1,0 +1,38 @@
+.bibliography-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bibliography-title {
+    all: unset;
+    font-weight: bold;
+    font-size: 2rem;
+    width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.citation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.citation-header h3 {
+    margin: 0;
+    padding: 0;
+}
+
+.reference {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.auto-resizing-textarea {
+    overflow: hidden;
+    resize: none;
+}

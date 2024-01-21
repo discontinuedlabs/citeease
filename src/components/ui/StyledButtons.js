@@ -1,23 +1,14 @@
 import { useRef } from "react";
+import "../../css/StyledButtons.css";
 
-export function MechanicButton(props) {
-    const { label, onClick, icon, buttonStyle } = props;
+export function Button(props) {
+    const { label, onClick, icon, buttonStyle, className, styles } = props;
     const buttonRef = useRef(null);
-    const styles = {
-        down: {
-            transform: "translateY(0.4rem)",
-            boxShadow: "0 0 0 transparent",
-        },
-        up: {
-            transform: "",
-            boxShadow: "0 0.4rem 0 var(--dark-blue)",
-        },
-    };
 
     return (
         <button
             ref={buttonRef}
-            className="styled-button"
+            className={className}
             style={{ ...buttonStyle }}
             onClick={onClick}
             onTouchStart={() => Object.assign(buttonRef.current.style, styles.down)}
@@ -32,9 +23,7 @@ export function MechanicButton(props) {
     );
 }
 
-export function SmallButton(props) {
-    const { label, onClick, icon, buttonStyle } = props;
-    const buttonRef = useRef(null);
+export function MechanicButton(props) {
     const styles = {
         down: {
             transform: "translateY(0.4rem)",
@@ -45,21 +34,19 @@ export function SmallButton(props) {
             boxShadow: "0 0.4rem 0 var(--dark-blue)",
         },
     };
+    return <Button {...props} className="mechanic-button" styles={styles} />;
+}
 
-    return (
-        <button
-            ref={buttonRef}
-            className="small-button"
-            style={{ ...buttonStyle }}
-            onClick={onClick}
-            onTouchStart={() => Object.assign(buttonRef.current.style, styles.down)}
-            onTouchEnd={() => Object.assign(buttonRef.current.style, styles.up)}
-            onMouseDown={() => Object.assign(buttonRef.current.style, styles.down)}
-            onMouseUp={() => Object.assign(buttonRef.current.style, styles.up)}
-            onMouseLeave={() => Object.assign(buttonRef.current.style, styles.up)}
-        >
-            <i className="material-icons-round">{icon}</i>
-            {label}
-        </button>
-    );
+export function SmallButton(props) {
+    const styles = {
+        down: {
+            transform: "translateY(0.4rem)",
+            boxShadow: "0 0 0 transparent",
+        },
+        up: {
+            transform: "",
+            boxShadow: "0 0.4rem 0 var(--dark-blue)",
+        },
+    };
+    return <Button {...props} className="small-button" styles={styles} />;
 }

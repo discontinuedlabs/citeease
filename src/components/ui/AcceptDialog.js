@@ -1,4 +1,5 @@
 import React from "react";
+import "../../css/AcceptDialog.css";
 
 export default function Toast(props) {
     const { message, closeToast } = props;

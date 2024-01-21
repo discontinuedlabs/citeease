@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { MechanicButton, SmallButton } from "./StyledButtons";
+import "../../css/ContextMenu.css";
 
 export default function ContextMenu(props) {
     const { label, icon, options, buttonType, menuStyle, buttonStyle } = props;
@@ -8,12 +9,12 @@ export default function ContextMenu(props) {
     const buttonProps = {
         label,
         icon,
-        toggleVisibility,
         buttonStyle,
+        onClick: toggleVisibility,
     };
-    const BUTTON_TYPES = {
-        mechanicButton: MechanicButton(buttonProps),
-        smallButton: SmallButton(buttonProps),
+    const buttonTypes = {
+        mechanicButton: <MechanicButton {...buttonProps} />,
+        smallButton: <SmallButton {...buttonProps} />,
     };
 
     function toggleVisibility() {
@@ -22,7 +23,7 @@ export default function ContextMenu(props) {
 
     return (
         <div className="context-menu-container">
-            {BUTTON_TYPES[buttonType] || BUTTON_TYPES.mechanicButton}
+            {buttonTypes[buttonType] || buttonTypes.mechanicButton}
 
             {!hidden && (
                 <div className="context-menu" style={{ ...menuStyle }}>

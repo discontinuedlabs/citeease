@@ -35,7 +35,8 @@ export default function Home(props) {
                     label: s,
                     method: (event) => handleAddBibliography(event.target.textContent),
                 }))}
-                menuStyle={{ position: "absolute", bottom: "100%" }}
+                menuStyle={{ position: "fixed", bottom: "1rem", left: "50%", transform: "translateX(-50%)" }}
+                buttonStyle={{ position: "fixed", bottom: "1rem", left: "50%", transform: "translateX(-50%)" }}
             />
         </div>
     );

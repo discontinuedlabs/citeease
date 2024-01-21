@@ -4,8 +4,7 @@ import Bibliography from "./components/Bibliography";
 import { Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
 import { useLocalStorage } from "./utils";
-import Toast from "./components/ui/Toast";
-import ContextMenu from "./components/ui/ContextMenu";
+import AcceptDialog from "./components/ui/AcceptDialog";
 
 export default function App() {
     const [bibliographies, setBibliographies] = useLocalStorage("bibliographies", []);
@@ -60,7 +59,7 @@ export default function App() {
                     }
                 />
             </Routes>
-            {toastMessage.title && <Toast message={toastMessage} closeToast={() => setToastMessage("")} />}
+            {toastMessage.title && <AcceptDialog message={toastMessage} closeToast={() => setToastMessage("")} />}
         </div>
     );
 }

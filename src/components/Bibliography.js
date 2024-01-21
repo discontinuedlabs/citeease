@@ -1,4 +1,5 @@
 import Citation from "./Citation";
+import "../css/Bibliography.css";
 import { v4 as uuid4 } from "uuid";
 import { useParams } from "react-router-dom";
 import ContextMenu from "./ui/ContextMenu";
@@ -61,6 +62,8 @@ export default function Bibliography(props) {
                     { label: "Journal", method: addCitationWithSourceType },
                     { label: "Book", method: addCitationWithSourceType },
                 ]}
+                menuStyle={{ position: "fixed", bottom: "1rem", left: "50%", transform: "translateX(-50%)" }}
+                buttonStyle={{ position: "fixed", bottom: "1rem", left: "50%", transform: "translateX(-50%)" }}
             />
         </div>
     );

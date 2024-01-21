@@ -1,0 +1,32 @@
+.context-menu-container {
+    position: relative;
+    width: fit-content;
+    height: fit-content;
+}
+
+.context-menu {
+    --context-menu-padding: 0.2rem;
+    background-color: white;
+    position: fixed;
+    display: grid;
+    grid-row: 1;
+    width: fit-content;
+    border: var(--border-regular) var(--main-blue);
+    border-radius: var(--border-radius-regular);
+    padding: var(--context-menu-padding);
+    z-index: 50;
+    box-shadow: 0 0.5rem 1rem 0.1rem hsla(215, 100%, 4%, 0.2);
+}
+
+.context-menu-option {
+    background-color: white;
+    border: none;
+    box-shadow: none;
+    color: var(--dark-blue);
+    border-radius: calc(var(--border-radius-regular) - var(--context-menu-padding));
+    padding: 0.7rem;
+}
+
+.context-menu-option:hover {
+    background-color: var(--light-blue);
+}

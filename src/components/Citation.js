@@ -151,7 +151,7 @@ export default function Citation(props) {
                             ]}
                             menuStyle={{
                                 position: "absolute",
-                                left: "0",
+                                right: "0",
                             }}
                             buttonStyle={{
                                 all: "unset",
