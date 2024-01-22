@@ -17,7 +17,7 @@ import Chicago from "./citationStyles/Chicago";
 
 export default function Citation(props) {
     const { id: bibliographyId } = useParams();
-    const { id, bibliographies, setBibliographies, font, showToast } = props;
+    const { id, bibliographies, setBibliographies, font, showAcceptDialog } = props;
     const bibliography = bibliographies.find((b) => b.id === bibliographyId);
 
     const [citation, setCitation] = useState(bibliography.citations.find((c) => c.id === id));
@@ -28,7 +28,7 @@ export default function Citation(props) {
         content,
         setContent,
         toggleEditMode,
-        showToast,
+        showAcceptDialog,
         setCitation,
     };
     const CITATION_COMPONENTS = {
@@ -86,6 +86,8 @@ export default function Citation(props) {
         }
     }
 
+    function handleMove() {}
+
     function handleDuplicate() {
         const newCitation = { ...citation, id: uuid4() };
 
@@ -141,21 +143,29 @@ export default function Citation(props) {
                                     label: "Export to LaTeX",
                                     method: () => LaTeX.exportToLaTeX(bibliography.title, citation),
                                 },
-                                { label: "Edit", method: toggleEditMode },
+
+                                "DEVIDER",
+
+                                { label: "Move", method: handleMove },
                                 { label: "Duplicate", method: handleDuplicate },
+
+                                "DEVIDER",
+
                                 content.url && {
                                     label: "Visit website",
                                     method: () => window.open(content.url, "_blank"),
                                 },
-                                { label: "Delete", method: handleDelete },
+                                { label: "Edit", method: toggleEditMode },
+
+                                "DEVIDER",
+
+                                { label: "Delete", method: handleDelete, icon: "delete", style: { color: "crimson" } },
                             ]}
                             menuStyle={{
                                 position: "absolute",
                                 right: "0",
                             }}
-                            buttonStyle={{
-                                all: "unset",
-                            }}
+                            buttonType={"smallButton"}
                         />
                     </div>
                     <div

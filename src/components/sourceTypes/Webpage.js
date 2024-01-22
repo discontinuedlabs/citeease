@@ -1,12 +1,12 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
 import { useRef } from "react";
-import DateInput from "../DateInput";
-import AuthorsInput from "../AuthorsInput";
+import DateInput from "../formElements/DateInput";
+import AuthorsInput from "../formElements/AuthorsInput";
 import * as sourceTypeUtils from "../sourceTypeUtils";
 
 export default function Webpage(props) {
-    const { content, setContent, setCitation, toggleEditMode, showToast } = props;
+    const { content, setContent, setCitation, toggleEditMode, showAcceptDialog } = props;
     const autoFillUrlRef = useRef(null);
 
     function retrieveContent(source) {
@@ -42,12 +42,12 @@ export default function Webpage(props) {
                 })
                 .catch((error) => {
                     if (!error.response && error.message === "Network Error") {
-                        showToast(
+                        showAcceptDialog(
                             "Network Error",
                             "Unable to retrieve the webpage due to network issues. Please check your internet connection and try again."
                         );
                     } else {
-                        showToast(
+                        showAcceptDialog(
                             "Webpage Access Error",
                             "We couldn't retrieve the information from the webpage you're attempting to cite. This may be due to the webpage being protected by a login or paywall."
                         );

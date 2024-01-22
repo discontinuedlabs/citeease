@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MechanicButton, SmallButton } from "./StyledButtons";
+import { MechanicButton, SmallButton, ContextMenuOption } from "./StyledButtons";
 import "../../css/ContextMenu.css";
 
 export default function ContextMenu(props) {
@@ -28,19 +28,23 @@ export default function ContextMenu(props) {
             {!hidden && (
                 <div className="context-menu" style={{ ...menuStyle }}>
                     {options &&
-                        options.map((option) => (
-                            <button
-                                className="context-menu-option"
-                                onClick={(event) => {
-                                    option.method(event);
-                                    setHidden(true);
-                                }}
-                                key={option.label}
-                                style={{ ...option.style }}
-                            >
-                                {option.label}
-                            </button>
-                        ))}
+                        options.map((option) => {
+                            if (/devider/i.test(option)) {
+                                return <hr className="solid" />;
+                            }
+                            return (
+                                <ContextMenuOption
+                                    onClick={(event) => {
+                                        option.method(event);
+                                        setHidden(true);
+                                    }}
+                                    key={option.label}
+                                    buttonStyle={{ ...option.style }}
+                                    icon={option.icon}
+                                    label={option.label}
+                                ></ContextMenuOption>
+                            );
+                        })}
                 </div>
             )}
         </div>

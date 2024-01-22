@@ -1,21 +1,20 @@
-import { useRef } from "react";
+import { useState } from "react";
 import "../../css/StyledButtons.css";
 
 export function Button(props) {
     const { label, onClick, icon, buttonStyle, className, styles } = props;
-    const buttonRef = useRef(null);
+    const [originalStyle, setOriginalStyle] = useState({});
 
     return (
         <button
-            ref={buttonRef}
-            className={className}
-            style={{ ...buttonStyle }}
+            className={`${className} styled-button`}
+            style={{ ...originalStyle, ...buttonStyle }}
             onClick={onClick}
-            onTouchStart={() => Object.assign(buttonRef.current.style, styles.down)}
-            onTouchEnd={() => Object.assign(buttonRef.current.style, styles.up)}
-            onMouseDown={() => Object.assign(buttonRef.current.style, styles.down)}
-            onMouseUp={() => Object.assign(buttonRef.current.style, styles.up)}
-            onMouseLeave={() => Object.assign(buttonRef.current.style, styles.up)}
+            onTouchStart={() => setOriginalStyle((prevStyle) => ({ ...prevStyle, ...styles.down }))}
+            onTouchEnd={() => setOriginalStyle((prevStyle) => ({ ...prevStyle, ...styles.up }))}
+            onMouseDown={() => setOriginalStyle((prevStyle) => ({ ...prevStyle, ...styles.down }))}
+            onMouseUp={() => setOriginalStyle((prevStyle) => ({ ...prevStyle, ...styles.up }))}
+            onMouseLeave={() => setOriginalStyle((prevStyle) => ({ ...prevStyle, ...styles.up }))}
         >
             <i className="material-icons-round">{icon}</i>
             {label}
@@ -27,10 +26,10 @@ export function MechanicButton(props) {
     const styles = {
         down: {
             transform: "translateY(0.4rem)",
-            boxShadow: "0 0 0 transparent",
+            boxShadow: "0 0 0 var(--dark-blue)",
         },
         up: {
-            transform: "",
+            transform: "translateY(0rem)",
             boxShadow: "0 0.4rem 0 var(--dark-blue)",
         },
     };
@@ -40,13 +39,40 @@ export function MechanicButton(props) {
 export function SmallButton(props) {
     const styles = {
         down: {
-            transform: "translateY(0.4rem)",
-            boxShadow: "0 0 0 transparent",
+            backgroundColor: "var(--light-blue)",
         },
         up: {
-            transform: "",
-            boxShadow: "0 0.4rem 0 var(--dark-blue)",
+            backgroundColor: "",
         },
     };
     return <Button {...props} className="small-button" styles={styles} />;
+}
+
+export function ContextMenuOption(props) {
+    const { onClick, buttonStyle, icon, label } = props;
+    const [originalStyle, setOriginalStyle] = useState({});
+    const styles = {
+        down: {
+            backgroundColor: "var(--light-blue)",
+        },
+        up: {
+            backgroundColor: "",
+        },
+    };
+
+    return (
+        <button
+            className="styled-button context-menu-option"
+            onClick={onClick}
+            style={{ ...originalStyle, ...buttonStyle }}
+            onTouchStart={() => setOriginalStyle((prevStyle) => ({ ...prevStyle, ...styles.down }))}
+            onTouchEnd={() => setOriginalStyle((prevStyle) => ({ ...prevStyle, ...styles.up }))}
+            onMouseDown={() => setOriginalStyle((prevStyle) => ({ ...prevStyle, ...styles.down }))}
+            onMouseUp={() => setOriginalStyle((prevStyle) => ({ ...prevStyle, ...styles.up }))}
+            onMouseLeave={() => setOriginalStyle((prevStyle) => ({ ...prevStyle, ...styles.up }))}
+        >
+            <i className="material-icons-round">{icon}</i>
+            {label}
+        </button>
+    );
 }

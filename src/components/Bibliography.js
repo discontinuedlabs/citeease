@@ -37,7 +37,7 @@ export default function Bibliography(props) {
         <div className="bibliography">
             <div className="bibliography-header">
                 <h3>{bibliography.style}</h3>
-                <ContextMenu icon="more_vert" />
+                <ContextMenu icon="more_vert" buttonType={"smallButton"} />
             </div>
 
             <AutoResizingTextarea

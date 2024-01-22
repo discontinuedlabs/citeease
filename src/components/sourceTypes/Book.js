@@ -1,10 +1,10 @@
-import DateInput from "../DateInput";
-import AuthorsInput from "../AuthorsInput";
+import DateInput from "../formElements/DateInput";
+import AuthorsInput from "../formElements/AuthorsInput";
 import { useEffect, useRef } from "react";
 import * as sourceTypeUtils from "../sourceTypeUtils";
 
 export default function Book(props) {
-    const { content, setContent, setCitation, toggleEditMode, showToast } = props;
+    const { content, setContent, setCitation, toggleEditMode, showAcceptDialog } = props;
     const autoFillIsbnRef = useRef(null);
 
     // useEffect(() => {
@@ -43,12 +43,12 @@ export default function Book(props) {
                 })
                 .catch((error) => {
                     if (!error.response && error.message === "Network Error") {
-                        showToast(
+                        showAcceptDialog(
                             "Network Error",
                             "Unable to retrieve the webpage due to network issues. Please check your internet connection and try again."
                         );
                     } else {
-                        showToast(
+                        showAcceptDialog(
                             "No results found",
                             "Failed to retrieve information from ISBN. Please check your internet connection and ensure the provided ISBN is correct."
                         );

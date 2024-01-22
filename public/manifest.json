@@ -4,17 +4,17 @@
     "description": "Explore CiteEase, the open-source Progressive Web App (PWA) designed for effortless citation management. Enjoy a completely free and user-friendly experience, packed with a multitude of features to enhance your citation process. Simplify your academic or professional writing with CiteEase.",
     "icons": [
         {
-            "src": "favicon.ico",
+            "src": "/citeease/favicon.ico",
             "sizes": "64x64 32x32 24x24 16x16",
             "type": "image/x-icon"
         },
         {
-            "src": "/images/favicons/android-chrome-192x192.png",
+            "src": "/citeease/images/favicons/android-chrome-192x192.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "/images/favicons/android-chrome-512x512.png",
+            "src": "/citeease/images/favicons/android-chrome-512x512.png",
             "sizes": "512x512",
             "type": "image/png"
         }

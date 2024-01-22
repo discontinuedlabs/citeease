@@ -9,7 +9,7 @@ import AcceptDialog from "./components/ui/AcceptDialog";
 export default function App() {
     const [bibliographies, setBibliographies] = useLocalStorage("bibliographies", []);
     const [font, setFont] = useLocalStorage("font", { name: "Georgia", family: "Georgia" });
-    const [toastMessage, setToastMessage] = useState({});
+    const [acceptDialog, setAcceptDialog] = useState({});
 
     const fonts = [
         { name: "Default", family: "unset" },
@@ -27,8 +27,8 @@ export default function App() {
         { name: "Verdana", family: "Verdana" },
     ];
 
-    function showToast(title, body = "") {
-        setToastMessage({ title, body });
+    function showAcceptDialog(title, body = "") {
+        setAcceptDialog({ title, body });
     }
 
     return (
@@ -54,12 +54,12 @@ export default function App() {
                             bibliographies={bibliographies}
                             setBibliographies={setBibliographies}
                             font={font}
-                            showToast={showToast}
+                            showAcceptDialog={showAcceptDialog}
                         />
                     }
                 />
             </Routes>
-            {toastMessage.title && <AcceptDialog message={toastMessage} closeToast={() => setToastMessage("")} />}
+            {acceptDialog.title && <AcceptDialog message={acceptDialog} closeToast={() => setAcceptDialog("")} />}
         </div>
     );
 }

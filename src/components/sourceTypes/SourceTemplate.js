@@ -3,7 +3,7 @@ import DateInput from "../DateInput";
 import AuthorsInput from "../AuthorsInput";
 
 export default function SourceTemplate(props) {
-    const { content, setContent, toggleEditMode, showToast } = props;
+    const { content, setContent, toggleEditMode, showAcceptDialog } = props;
 
     function retrieveContent(source) {
         if (source)
@@ -15,12 +15,12 @@ export default function SourceTemplate(props) {
                 })
                 .catch((error) => {
                     if (!error.response && error.message === "Network Error") {
-                        showToast(
+                        showAcceptDialog(
                             "Network Error",
                             "Unable to retrieve the webpage due to network issues. Please check your internet connection and try again."
                         );
                     } else {
-                        showToast(
+                        showAcceptDialog(
                             "No results found",
                             "Failed to retrieve information from DOI. Please check your internet connection and ensure the provided DOI is correct."
                         );
@@ -73,12 +73,7 @@ export default function SourceTemplate(props) {
                 />
 
                 <label htmlFor="publication-date">Publication date</label>
-                <DateInput
-                    name="publication-date"
-                    content={content}
-                    setContent={setContent}
-                    dateKey="publication"
-                />
+                <DateInput name="publication-date" content={content} setContent={setContent} dateKey="publication" />
 
                 <label htmlFor="doi">DOI</label>
                 <input
@@ -95,12 +90,7 @@ export default function SourceTemplate(props) {
                 />
 
                 <label htmlFor="access-date">Access date</label>
-                <DateInput
-                    name="access-date"
-                    content={content}
-                    setContent={setContent}
-                    dateKey="accessDate"
-                />
+                <DateInput name="access-date" content={content} setContent={setContent} dateKey="accessDate" />
 
                 <button type="button" onClick={toggleEditMode}>
                     Add reference

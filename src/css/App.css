@@ -6,6 +6,8 @@
     --dark-blue: #001d3d;
     --main-black: #000813;
 
+    --transparent-black: hsla(215, 100%, 4%, 0.1);
+
     --border-radius-regular: 0.5rem;
     --border-regular: 0.1rem solid;
 }
@@ -16,6 +18,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    /* outline: black 1px solid; */
 }
 
 ::selection {

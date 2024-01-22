@@ -1,3 +1,7 @@
+.styled-button {
+    transition: all 0.1s ease-in-out;
+}
+
 .mechanic-button {
     color: var(--dark-blue);
     background-color: var(--accent-yellow);
@@ -5,4 +9,27 @@
     border-radius: var(--border-radius-regular);
     border: var(--border-regular) var(--dark-blue);
     padding: 0.7rem;
+}
+
+.small-button {
+    background-color: transparent;
+    border-radius: 0.5rem;
+    padding: 0.2rem;
+    border: none;
+    box-shadow: 0 0 0 transparent;
+}
+
+.context-menu-option {
+    text-align: left;
+    background-color: white;
+    border: none;
+    box-shadow: none;
+    color: var(--dark-blue);
+    border-radius: calc(var(--border-radius-regular) - var(--context-menu-padding));
+    padding: 0.7rem;
+}
+
+.small-button:hover,
+.context-menu-option:hover {
+    background-color: var(--transparent-black);
 }

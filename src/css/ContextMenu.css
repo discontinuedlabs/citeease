@@ -10,23 +10,21 @@
     position: fixed;
     display: grid;
     grid-row: 1;
-    width: fit-content;
+    width: max-content;
     border: var(--border-regular) var(--main-blue);
     border-radius: var(--border-radius-regular);
     padding: var(--context-menu-padding);
     z-index: 50;
-    box-shadow: 0 0.5rem 1rem 0.1rem hsla(215, 100%, 4%, 0.2);
+    box-shadow: 0 0.5rem 1rem 0.1rem var(--transparent-black);
 }
 
-.context-menu-option {
-    background-color: white;
-    border: none;
-    box-shadow: none;
-    color: var(--dark-blue);
-    border-radius: calc(var(--border-radius-regular) - var(--context-menu-padding));
-    padding: 0.7rem;
+.context-menu hr {
+    border: 0.05rem solid var(--dark-blue);
+    opacity: 0.2;
+    margin: var(--context-menu-padding);
 }
 
-.context-menu-option:hover {
-    background-color: var(--light-blue);
+.context-menu .material-icons-round {
+    font-size: 1em;
+    transform: translateX(-0.2rem);
 }

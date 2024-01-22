@@ -1,10 +1,10 @@
-import DateInput from "../DateInput";
-import AuthorsInput from "../AuthorsInput";
+import DateInput from "../formElements/DateInput";
+import AuthorsInput from "../formElements/AuthorsInput";
 import { useRef } from "react";
 import * as sourceTypeUtils from "../sourceTypeUtils";
 
 export default function Journal(props) {
-    const { content, setContent, setCitation, toggleEditMode, showToast } = props;
+    const { content, setContent, setCitation, toggleEditMode, showAcceptDialog } = props;
     const autoFillDoiRef = useRef(null);
 
     function retrieveContent(source) {
@@ -59,12 +59,12 @@ export default function Journal(props) {
                 })
                 .catch((error) => {
                     if (!error.response && error.message === "Network Error") {
-                        showToast(
+                        showAcceptDialog(
                             "Network Error",
                             "Unable to retrieve the webpage due to network issues. Please check your internet connection and try again."
                         );
                     } else {
-                        showToast(
+                        showAcceptDialog(
                             "No results found",
                             "Failed to retrieve information from DOI. Please check your internet connection and ensure the provided DOI is correct."
                         );
