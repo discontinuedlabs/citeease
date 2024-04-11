@@ -10,6 +10,8 @@
         <meta name="theme-color" content="#ffd60a" />
         <title>CiteEase</title>
 
+        <link rel="canonical" href="https://discontinuedlabs.github.io/citeease/" />
+
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;700&display=swap" rel="stylesheet" />
@@ -27,10 +29,9 @@
         <div id="root"></div>
 
         <script>
-            if ("serviceWorker" in navigator) {
-                navigator.serviceWorker.register("/citeease/service-worker.js");
-            }
+            if (navigator.serviceWorker) {
+               navigator.serviceWorker.register('/citeease/service-worker.js', {scope: '/citeease/'})
+          }
         </script>
-        <script src="service-worker.js"></script>
     </body>
 </html>
