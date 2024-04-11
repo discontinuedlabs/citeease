@@ -30,7 +30,7 @@
 
         <script>
             if ('serviceWorker' in navigator) {
-                   navigator.serviceWorker.register('/citeease/service-worker.js', {scope: '/citeease/'})
+                   navigator.serviceWorker.register('discontinuedlabs.github.io/citeease/service-worker.js')
       .then(function(registration) {
         console.log('Service Worker registered with scope:', registration.scope);
       }).catch(function(error) {
