@@ -29,9 +29,14 @@
         <div id="root"></div>
 
         <script>
-            if (navigator.serviceWorker) {
-               navigator.serviceWorker.register('/citeease/service-worker.js', {scope: '/citeease/'})
-          }
+            if ('serviceWorker' in navigator) {
+                   navigator.serviceWorker.register('/citeease/service-worker.js', {scope: '/citeease/'})
+      .then(function(registration) {
+        console.log('Service Worker registered with scope:', registration.scope);
+      }).catch(function(error) {
+        console.error('Service Worker registration failed:', error);
+      });
+  }
         </script>
     </body>
 </html>
