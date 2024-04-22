@@ -38,7 +38,7 @@ export default function Bibliography(props) {
     function addNewCitationToBibliography(id) {
         const newCitation = {
             id: id,
-            content: {},
+            content: { id: id },
             isChecked: false,
             reference: "",
         };
@@ -145,7 +145,7 @@ export default function Bibliography(props) {
 
             <div className="citations-container">
                 {bibliography.citations.map((citation) => (
-                    <ReferenceEntry citation={citation} font={font} key={uuid4()} />
+                    <ReferenceEntry citation={citation} font={font} key={citation.id} />
                 ))}
             </div>
 

@@ -4,7 +4,7 @@ export default function AuthorsInput(props) {
     const { content, setContent } = props;
 
     function updateAuthors(id, key, value) {
-        const newArray = content.authors.map((author) => {
+        const newArray = content.author.map((author) => {
             if (author.id === id) {
                 return {
                     ...author,
@@ -17,7 +17,7 @@ export default function AuthorsInput(props) {
         setContent((prevContent) => {
             return {
                 ...prevContent,
-                authors: newArray,
+                author: newArray,
             };
         });
     }
@@ -26,7 +26,10 @@ export default function AuthorsInput(props) {
         setContent((prevContent) => {
             return {
                 ...prevContent,
-                authors: [...prevContent.authors, { firstName: "", lastName: "", id: uuid4() }],
+                author: [
+                    ...(Array.isArray(prevContent.author) ? prevContent.author : []),
+                    { given: "", family: "", id: uuid4() },
+                ],
             };
         });
     }
@@ -38,26 +41,26 @@ export default function AuthorsInput(props) {
                 author's first name field.
             </p>
             {content &&
-                content.authors &&
-                content.authors.map((author) => (
+                content.author &&
+                content.author.map((author) => (
                     <div key={author.id}>
-                        <label htmlFor="first-name last-name">Author</label>
+                        <label htmlFor="given-name family-name">Author</label>
                         <input
                             type="text"
-                            name="first-name"
+                            name="given-name"
                             placeholder="Author's first name"
-                            value={author.firstName || ""}
+                            value={author.given || ""}
                             onChange={(event) => {
-                                updateAuthors(author.id, "firstName", event.target.value);
+                                updateAuthors(author.id, "given", event.target.value);
                             }}
                         />
                         <input
                             type="text"
-                            name="last-name"
+                            name="family-name"
                             placeholder="Author's first name"
-                            value={author.lastName || ""}
+                            value={author.family || ""}
                             onChange={(event) => {
-                                updateAuthors(author.id, "lastName", event.target.value);
+                                updateAuthors(author.id, "family", event.target.value);
                             }}
                         />
                     </div>

@@ -1,14 +1,19 @@
 import axios from "axios";
-import { v4 as uuid4 } from "uuid";
 import * as cheerio from "cheerio";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import DateInput from "../formElements/DateInput";
 import AuthorsInput from "../formElements/AuthorsInput";
 import * as sourceTypeUtils from "../sourceTypeUtils";
 
 export default function Webpage(props) {
-    const { content, setContent, setCitation, formatCitation, showAcceptDialog, setCitationWindowVisible } = props;
+    const { content, setContent, showAcceptDialog, setCitationWindowVisible } = props;
     const autoFillUrlRef = useRef(null);
+
+    useEffect(() => {
+        setContent((prevContent) => {
+            return { ...prevContent, type: "website" };
+        });
+    }, []);
 
     function retrieveContent(source) {
         if (source)
@@ -17,8 +22,6 @@ export default function Webpage(props) {
                 .then((response) => {
                     const $ = cheerio.load(response.data);
                     setContent({
-                        id: uuid4(),
-                        type: "webpage",
                         title:
                             $("title").text() || $("meta[property='og:title']").attr("content") || $("h1").text() || "",
                         author: extractAuthors($),
@@ -85,7 +88,6 @@ export default function Webpage(props) {
 
     function handleAddReference(event) {
         event.preventDefault();
-        formatCitation();
         setCitationWindowVisible((prevCitationWindowVisible) => !prevCitationWindowVisible);
     }
 

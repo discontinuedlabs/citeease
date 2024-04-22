@@ -21,7 +21,6 @@ export default function CitationWindow(props) {
         citation,
         content,
         setContent,
-        formatCitation,
         setCitationWindowVisible,
     };
 
@@ -43,35 +42,46 @@ export default function CitationWindow(props) {
     useEffect(() => {
         setBibliographies((prevBibliographies) => {
             return prevBibliographies.map((bib) => {
-                if (bib.id === bibliography.id) {
-                    return { ...bib, citations: [...bib.citations, citation] };
+                if (bib.id === bibliographyId) {
+                    return {
+                        ...bib,
+                        citations: bib.citations.map((cit) => {
+                            if (cit.id === citationId) {
+                                return citation;
+                            }
+                            return cit;
+                        }),
+                    };
                 }
                 return bib;
             });
         });
     }, [citation]);
 
+    useEffect(() => {
+        async function formatCitation() {
+            if (!cslFile) return;
+
+            let config = plugins.config.get("@csl");
+            config.templates.add(bibliography.style.code, cslFile);
+
+            let cite = await Cite.async(content);
+
+            let formattedCitation = cite.format("bibliography", {
+                format: "html",
+                template: bibliography.style.code,
+                lang: "en-US",
+            });
+
+            updateReference(formattedCitation);
+        }
+        formatCitation();
+    }, [content, cslFile, bibliography.style.code]);
+
     function updateReference(newReference) {
         setCitation((prevCitation) => {
             return { ...prevCitation, reference: newReference };
         });
-    }
-
-    async function formatCitation() {
-        if (!cslFile) return;
-
-        let config = plugins.config.get("@csl");
-        config.templates.add(bibliography.style.code, cslFile);
-
-        let cite = await Cite.async(content);
-
-        let formattedCitation = cite.format("bibliography", {
-            format: "html",
-            template: bibliography.style.code,
-            lang: "en-US",
-        });
-
-        updateReference(formattedCitation);
     }
 
     return CITATION_COMPONENTS[sourceType];
