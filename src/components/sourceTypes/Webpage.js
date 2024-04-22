@@ -1,4 +1,5 @@
 import axios from "axios";
+import { v4 as uuid4 } from "uuid";
 import * as cheerio from "cheerio";
 import { useRef } from "react";
 import DateInput from "../formElements/DateInput";
@@ -6,7 +7,7 @@ import AuthorsInput from "../formElements/AuthorsInput";
 import * as sourceTypeUtils from "../sourceTypeUtils";
 
 export default function Webpage(props) {
-    const { content, setContent, setCitation, toggleEditMode, showAcceptDialog } = props;
+    const { content, setContent, setCitation, formatCitation, showAcceptDialog, setCitationWindowVisible } = props;
     const autoFillUrlRef = useRef(null);
 
     function retrieveContent(source) {
@@ -16,13 +17,15 @@ export default function Webpage(props) {
                 .then((response) => {
                     const $ = cheerio.load(response.data);
                     setContent({
+                        id: uuid4(),
+                        type: "webpage",
                         title:
                             $("title").text() || $("meta[property='og:title']").attr("content") || $("h1").text() || "",
-                        authors: extractAuthors($),
+                        author: extractAuthors($),
                         website: $("meta[property='og:site_name']").attr("content") || "",
                         publisher: $("meta[property='article:publisher']").attr("content"),
-                        accessDate: sourceTypeUtils.createDateObject(new Date()),
-                        publicationDate: sourceTypeUtils.createDateObject(
+                        accessed: sourceTypeUtils.createDateObject(new Date()),
+                        published: sourceTypeUtils.createDateObject(
                             $("meta[name='date']").attr("content") ||
                                 $("meta[name='article:published_time']").attr("content") ||
                                 $("meta[property='article:published_time']").attr("content") ||
@@ -32,7 +35,7 @@ export default function Webpage(props) {
                                 $("meta[property='og:updated_time']").attr("content") ||
                                 $(".publication-date").text()
                         ),
-                        url: (
+                        URL: (
                             $("meta[property='og:url']").attr("content") ||
                             $("meta[name='url']").attr("content") ||
                             $("link[rel='canonical']").attr("href") ||
@@ -82,12 +85,12 @@ export default function Webpage(props) {
 
     function handleAddReference(event) {
         event.preventDefault();
-        setCitation((prevCitation) => ({ ...prevCitation, referenceCompleted: true }));
-        toggleEditMode();
+        formatCitation();
+        setCitationWindowVisible((prevCitationWindowVisible) => !prevCitationWindowVisible);
     }
 
     function handleCancel() {
-        toggleEditMode(true);
+        setCitationWindowVisible((prevCitationWindowVisible) => !prevCitationWindowVisible);
     }
 
     return (
@@ -106,7 +109,7 @@ export default function Webpage(props) {
             <input
                 type="text"
                 name="title"
-                value={content.title}
+                value={content ? content.title : ""}
                 placeholder="Page title"
                 onChange={(event) =>
                     setContent((prevContent) => ({
@@ -121,7 +124,7 @@ export default function Webpage(props) {
             <input
                 type="text"
                 name="website"
-                value={content.website}
+                value={content ? content.website : ""}
                 placeholder="Website title"
                 onChange={(event) =>
                     setContent((prevContent) => ({
@@ -132,25 +135,25 @@ export default function Webpage(props) {
             />
 
             <label htmlFor="publication-date">Publication date</label>
-            <DateInput name="publication-date" content={content} setContent={setContent} dateKey="publicationDate" />
+            <DateInput name="publication-date" content={content} setContent={setContent} dateKey="published" />
 
             <label htmlFor="url">URL (link)</label>
             <input
                 type="text"
                 name="url"
-                value={content.url}
+                value={content ? content.URL : ""}
                 placeholder="URL (link)"
                 onChange={(event) =>
                     setContent((prevContent) => ({
                         ...prevContent,
-                        url: event.target.value,
+                        URL: event.target.value,
                     }))
                 }
                 required
             />
 
             <label htmlFor="access-date">Access date</label>
-            <DateInput name="access-date" content={content} setContent={setContent} dateKey="accessDate" />
+            <DateInput name="access-date" content={content} setContent={setContent} dateKey="accessed" />
 
             <button type="submit">Add reference</button>
             <button type="button" onClick={handleCancel}>

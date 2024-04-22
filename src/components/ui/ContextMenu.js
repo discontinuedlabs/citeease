@@ -32,6 +32,15 @@ export default function ContextMenu(props) {
                             if (/devider/i.test(option)) {
                                 return <hr className="solid" />;
                             }
+                            if (option.customElement) {
+                                return (
+                                    <div
+                                        dangerouslySetInnerHTML={{
+                                            __html: option.customElement,
+                                        }}
+                                    ></div>
+                                );
+                            }
                             return (
                                 <ContextMenuOption
                                     onClick={(event) => {

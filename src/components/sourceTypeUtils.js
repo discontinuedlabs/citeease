@@ -12,9 +12,9 @@ export function createDateObject(date) {
 export function createAuthorsArray(authors) {
     const result = authors.map((author) => {
         const names = author.split(/\s+/);
-        const firstName = names.shift() || "";
-        const lastName = names.join(" ");
-        return { firstName, lastName, id: uuid4() };
+        const given = names.shift() || "";
+        const family = names.join(" ");
+        return { given, family, id: uuid4() };
     });
 
     return result;

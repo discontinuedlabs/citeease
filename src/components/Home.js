@@ -4,11 +4,16 @@ import ContextMenu from "./ui/ContextMenu";
 
 export default function Home(props) {
     const { bibliographies, setBibliographies } = props;
-    const styles = ["APA", "MLA", "Chicago"];
+    const styles = [
+        { name: "APA", code: "apa" },
+        { name: "MLA", code: "mla" },
+        { name: "Chicago", code: "chicago" },
+        { name: "Harvard", code: "harvard-cite-them-right" },
+    ];
 
     function handleAddBibliography(style) {
         const newBibliography = {
-            title: "Bibliography",
+            title: "Untitled Bibliography", // Default title
             style: style,
             id: uuid4(),
             citations: [],
@@ -20,24 +25,25 @@ export default function Home(props) {
         <div className="home">
             <div className="bibliography-cards-container">
                 {bibliographies.length > 0 &&
-                    bibliographies.map((b) => (
-                        <Link key={b.id} to={`/bibliography/${b.id}`} className="bibliography-card">
-                            <h3 className="bibliography-card-title">{b.title}</h3>
-                            <p className="bibliography-card-style">{b.style}</p>
+                    bibliographies.map((bib) => (
+                        <Link key={bib.id} to={`/bibliography/${bib.id}`} className="bibliography-card">
+                            <h3 className="bibliography-card-title">{bib.title}</h3>
+                            <p className="bibliography-card-style">{bib.style.name}</p>
                         </Link>
                     ))}
             </div>
 
-            <ContextMenu
-                className="add-bibliography-button"
-                label="Add bibliography"
-                options={styles.map((s) => ({
-                    label: s,
-                    method: (event) => handleAddBibliography(event.target.textContent),
-                }))}
-                menuStyle={{ position: "fixed", bottom: "1rem", left: "50%", transform: "translateX(-50%)" }}
-                buttonStyle={{ position: "fixed", bottom: "1rem", left: "50%", transform: "translateX(-50%)" }}
-            />
+            <div style={{ position: "fixed", bottom: "1rem", left: "50%", transform: "translateX(-50%)" }}>
+                <ContextMenu
+                    className="add-bibliography-button"
+                    label="Add bibliography"
+                    options={styles.map((style) => ({
+                        label: style.name,
+                        method: () => handleAddBibliography(style),
+                    }))}
+                    menuStyle={{ position: "fixed", bottom: "100%", left: "50%", transform: "translateX(-50%)" }}
+                />
+            </div>
         </div>
     );
 }

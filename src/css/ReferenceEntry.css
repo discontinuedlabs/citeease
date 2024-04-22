@@ -1,8 +1,11 @@
-.citation {
+.reference-entry {
     background-color: white;
     border: solid 0.1rem black;
     border-radius: var(--border-radius-regular);
     padding: 1rem;
     max-width: 50rem;
     margin: auto;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }

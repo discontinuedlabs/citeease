@@ -34,10 +34,11 @@ export default function AuthorsInput(props) {
     return (
         <div className="author-inputs-container">
             <p>
-                If the author is an organization, keep the last name empty, and type the full
-                organization's name in the author's first name field.
+                If the author is an organization, keep the last name empty, and type the full organization's name in the
+                author's first name field.
             </p>
-            {content.authors &&
+            {content &&
+                content.authors &&
                 content.authors.map((author) => (
                     <div key={author.id}>
                         <label htmlFor="first-name last-name">Author</label>

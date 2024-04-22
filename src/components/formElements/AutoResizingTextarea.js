@@ -1,7 +1,6 @@
 import React, { useRef, useLayoutEffect } from "react";
 
 export default function AutoResizingTextarea(props) {
-    console.log(props);
     const { value } = props;
     const textareaRef = useRef();
 
