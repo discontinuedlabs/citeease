@@ -2,59 +2,28 @@ import DateInput from "../formElements/DateInput";
 import AuthorsInput from "../formElements/AuthorsInput";
 import { useRef } from "react";
 import * as sourceTypeUtils from "../sourceTypeUtils";
+import { useEffect } from "react";
 
 export default function Journal(props) {
-    const { content, setContent, setCitation, toggleEditMode, showAcceptDialog } = props;
+    const { content, setContent, showAcceptDialog, setCitationWindowVisible } = props;
     const autoFillDoiRef = useRef(null);
+
+    useEffect(() => {
+        setContent((prevContent) => {
+            return { ...prevContent, type: "journal-article" };
+        });
+    }, []);
 
     function retrieveContent(source) {
         if (source)
             fetch(`https://corsproxy.io/?https://api.crossref.org/works/${source}`)
                 .then((response) => response.json())
                 .then((data) => {
-                    data = data.message;
-
-                    let authors = [];
-                    for (let author of data.author) {
-                        const newAuthor = `${author.given} ${author.family}`;
-                        authors.push(newAuthor);
-                    }
-
+                    console.log(data.message);
                     setContent({
-                        title: data.title[0],
-                        authors: sourceTypeUtils.createAuthorsArray(authors),
-                        journal: data["container-title"][0] || data["short-container-title"][0],
-                        publisher: data.publisher,
-                        publicationDate: sourceTypeUtils.createDateObject(
-                            data.created["date-time"] ||
-                                (data.created["date-parts"][0][0],
-                                data.created["date-parts"][0][1],
-                                data.created["date-parts"][0][2]) ||
-                                data.created.timestamp ||
-                                (data.issued["date-parts"][0][0],
-                                data.issued["date-parts"][0][1],
-                                data.issued["date-parts"][0][2]) ||
-                                (data.published["date-parts"][0][0],
-                                data.published["date-parts"][0][1],
-                                data.published["date-parts"][0][2]) ||
-                                (data["published-online"]["date-parts"][0][0],
-                                data["published-online"]["date-parts"][0][1],
-                                data["published-online"]["date-parts"][0][2]) ||
-                                data.deposited["date-time"] ||
-                                (data.deposited["date-parts"][0][0],
-                                data.deposited["date-parts"][0][1],
-                                data.deposited["date-parts"][0][2]) ||
-                                data.deposited.timestamp
-                        ),
-                        volume: data.volume,
-                        issue: data.issue || data["journal-issue"].issue,
-                        pages: data.page,
-                        doi: data.DOI || data.URL,
-                        url: data.resource.primary.URL || data.link[0].URL || data.resource.primary.URL,
-                        online:
-                            data.resource.primary.URL || data.link[0].URL || data.resource.primary.URL ? true : false,
-                        issn: data.ISSN[0] || data["issn-type"][0].value,
-                        accessDate: sourceTypeUtils.createDateObject(new Date()),
+                        ...data.message,
+                        online: true,
+                        accessed: sourceTypeUtils.createDateObject(new Date()),
                     });
                 })
                 .catch((error) => {
@@ -80,12 +49,11 @@ export default function Journal(props) {
 
     function handleAddReference(event) {
         event.preventDefault();
-        setCitation((prevCitation) => ({ ...prevCitation, referenceCompleted: true }));
-        toggleEditMode();
+        setCitationWindowVisible((prevCitationWindowVisible) => !prevCitationWindowVisible);
     }
 
     function handleCancel() {
-        toggleEditMode(true);
+        setCitationWindowVisible((prevCitationWindowVisible) => !prevCitationWindowVisible);
     }
 
     return (
@@ -119,12 +87,12 @@ export default function Journal(props) {
             <input
                 type="text"
                 name="journal"
-                value={content.journal}
+                value={content["container-title"]}
                 placeholder="Journal title"
                 onChange={(event) =>
                     setContent((prevContent) => ({
                         ...prevContent,
-                        journal: event.target.value,
+                        "container-title": event.target.value,
                     }))
                 }
             />
@@ -158,18 +126,18 @@ export default function Journal(props) {
             />
 
             <label htmlFor="publication-date">Publication date</label>
-            <DateInput name="publication-date" content={content} setContent={setContent} dateKey="publicationDate" />
+            <DateInput name="publication-date" content={content} setContent={setContent} dateKey="published" />
 
             <label htmlFor="pages">Pages</label>
             <input
                 type="text"
                 name="pages"
-                value={content.pages}
+                value={content.page}
                 placeholder="Page range"
                 onChange={(event) =>
                     setContent((prevContent) => ({
                         ...prevContent,
-                        pages: event.target.value,
+                        page: event.target.value,
                     }))
                 }
             />
@@ -178,12 +146,12 @@ export default function Journal(props) {
             <input
                 type="text"
                 name="issn"
-                value={content.issn}
+                value={content.ISSN}
                 placeholder="ISSN number"
                 onChange={(event) =>
                     setContent((prevContent) => ({
                         ...prevContent,
-                        issn: event.target.value,
+                        ISSN: event.target.value[0],
                     }))
                 }
             />
@@ -207,18 +175,18 @@ export default function Journal(props) {
                     <input
                         type="text"
                         name="doi"
-                        value={content.doi}
+                        value={content.DOI}
                         placeholder="DOI"
                         onChange={(event) =>
                             setContent((prevContent) => ({
                                 ...prevContent,
-                                doi: event.target.value,
+                                DOI: event.target.value,
                             }))
                         }
                     />
 
                     <label htmlFor="access-date">Access date</label>
-                    <DateInput name="access-date" content={content} setContent={setContent} dateKey="accessDate" />
+                    <DateInput name="access-date" content={content} setContent={setContent} dateKey="accessed" />
                 </>
             )}
 

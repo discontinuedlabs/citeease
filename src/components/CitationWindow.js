@@ -10,9 +10,16 @@ import Book from "./sourceTypes/Book";
 
 export default function CitationWindow(props) {
     const { id: bibliographyId } = useParams();
-    const { id: citationId, bibliographies, setBibliographies, sourceType, setCitationWindowVisible } = props;
+    const {
+        id: citationId,
+        bibliographies,
+        setBibliographies,
+        sourceType,
+        setCitationWindowVisible,
+        showAcceptDialog,
+    } = props;
     const bibliography = bibliographyId ? bibliographies.find((bib) => bib.id === bibliographyId) : undefined;
-    console.log(bibliography);
+
     const [citation, setCitation] = useState(bibliography.citations.find((cit) => cit.id === citationId));
     const [cslFile, setCslFile] = useState();
     const [content, setContent] = useState(citation ? citation.content : {});
@@ -22,6 +29,7 @@ export default function CitationWindow(props) {
         content,
         setContent,
         setCitationWindowVisible,
+        showAcceptDialog,
     };
 
     const CITATION_COMPONENTS = {

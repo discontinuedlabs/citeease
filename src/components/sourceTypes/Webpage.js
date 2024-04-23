@@ -11,7 +11,7 @@ export default function Webpage(props) {
 
     useEffect(() => {
         setContent((prevContent) => {
-            return { ...prevContent, type: "website" };
+            return { ...prevContent, type: "webpage" };
         });
     }, []);
 
@@ -22,13 +22,12 @@ export default function Webpage(props) {
                 .then((response) => {
                     const $ = cheerio.load(response.data);
                     setContent({
-                        title:
-                            $("title").text() || $("meta[property='og:title']").attr("content") || $("h1").text() || "",
+                        title: $("title").text(), // give option to prioritize h1 tag instead of title tag $("h1").text()
                         author: extractAuthors($),
-                        website: $("meta[property='og:site_name']").attr("content") || "",
+                        "container-title": [$("meta[property='og:site_name']").attr("content") || ""],
                         publisher: $("meta[property='article:publisher']").attr("content"),
                         accessed: sourceTypeUtils.createDateObject(new Date()),
-                        published: sourceTypeUtils.createDateObject(
+                        issued: sourceTypeUtils.createDateObject(
                             $("meta[name='date']").attr("content") ||
                                 $("meta[name='article:published_time']").attr("content") ||
                                 $("meta[property='article:published_time']").attr("content") ||
@@ -38,12 +37,11 @@ export default function Webpage(props) {
                                 $("meta[property='og:updated_time']").attr("content") ||
                                 $(".publication-date").text()
                         ),
-                        URL: (
+                        URL:
                             $("meta[property='og:url']").attr("content") ||
                             $("meta[name='url']").attr("content") ||
                             $("link[rel='canonical']").attr("href") ||
-                            source
-                        ).replace(/\/$/, ""), // Remove trailing slash
+                            source,
                     });
                 })
                 .catch((error) => {
@@ -137,7 +135,7 @@ export default function Webpage(props) {
             />
 
             <label htmlFor="publication-date">Publication date</label>
-            <DateInput name="publication-date" content={content} setContent={setContent} dateKey="published" />
+            <DateInput name="publication-date" content={content} setContent={setContent} dateKey="issued" />
 
             <label htmlFor="url">URL (link)</label>
             <input

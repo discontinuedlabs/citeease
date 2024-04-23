@@ -1,4 +1,4 @@
-import { v4 as uuid4 } from "uuid";
+import { nanoid } from "nanoid";
 import { Link } from "react-router-dom";
 import ContextMenu from "./ui/ContextMenu";
 
@@ -15,7 +15,7 @@ export default function Home(props) {
         const newBibliography = {
             title: "Untitled Bibliography", // Default title
             style: style,
-            id: uuid4(),
+            id: "bib=" + nanoid(10), // nanoid offers shorter UUIDs than uuid4. Useful for bibId because they are used in URl params
             citations: [],
         };
         setBibliographies((prevBibliographies) => [...prevBibliographies, newBibliography]);
@@ -26,7 +26,7 @@ export default function Home(props) {
             <div className="bibliography-cards-container">
                 {bibliographies.length > 0 &&
                     bibliographies.map((bib) => (
-                        <Link key={bib.id} to={`/bibliography/${bib.id}`} className="bibliography-card">
+                        <Link key={bib.id} to={`/${bib.id}`} className="bibliography-card">
                             <h3 className="bibliography-card-title">{bib.title}</h3>
                             <p className="bibliography-card-style">{bib.style.name}</p>
                         </Link>

@@ -1,24 +1,25 @@
 import { useEffect, useState } from "react";
+import * as sourceTypeUtils from "../sourceTypeUtils";
 
 export default function DateInput(props) {
     const { content = {}, setContent, dateKey } = props;
-    const [year, setYear] = useState(content[dateKey]?.year || "");
-    const [month, setMonth] = useState(content[dateKey]?.month || "");
-    const [day, setDay] = useState(content[dateKey]?.day || "");
+    const [year, setYear] = useState(content[dateKey]?.[0]?.[0] || "");
+    const [month, setMonth] = useState(content[dateKey]?.[0]?.[1] || "");
+    const [day, setDay] = useState(content[dateKey]?.[0]?.[2] || "");
 
     useEffect(() => {
         if (setContent) {
             setContent((prevContent) => ({
                 ...prevContent,
-                [dateKey]: { year, month, day },
+                [dateKey]: sourceTypeUtils.createDateObject(new Date(year, month, day)),
             }));
         }
     }, [year, month, day, setContent, dateKey]);
 
     useEffect(() => {
-        const newYear = content[dateKey]?.year;
-        const newMonth = content[dateKey]?.month;
-        const newDay = content[dateKey]?.day;
+        const newYear = content[dateKey]?.[0]?.[0];
+        const newMonth = content[dateKey]?.[0]?.[1];
+        const newDay = content[dateKey]?.[0]?.[2];
 
         if (year !== newYear || month !== newMonth || day !== newDay) {
             setYear(newYear || "");

@@ -38,9 +38,10 @@ export default function Bibliography(props) {
     function addNewCitationToBibliography(id) {
         const newCitation = {
             id: id,
-            content: { id: id },
+            content: { id: id, author: [{ given: "", family: "", id: uuid4() }] },
             isChecked: false,
             reference: "",
+            new: true,
         };
         setBibliographies((prevBibliographies) => {
             return prevBibliographies.map((bib) => {

@@ -1,11 +1,32 @@
 import { v4 as uuid4 } from "uuid";
 
-export function createDateObject(date) {
-    const newDate = new Date(date);
+export function createDateObject(yearOrDate, month = undefined, day = undefined) {
+    let year, adjustedMonth, adjustedDay;
+
+    if (yearOrDate instanceof Date) {
+        year = yearOrDate.getFullYear();
+        adjustedMonth = yearOrDate.getMonth();
+        adjustedDay = yearOrDate.getDate();
+    } else {
+        year = yearOrDate;
+        adjustedMonth = month !== undefined ? month : 0;
+        adjustedDay = day !== undefined ? day : 1;
+    }
+
+    const newDate = new Date(year, adjustedMonth, adjustedDay);
+
+    let dateParts = [year];
+    if (adjustedMonth !== undefined) {
+        dateParts.push(adjustedMonth + 1);
+        if (adjustedDay !== undefined) {
+            dateParts.push(adjustedDay);
+        }
+    }
+
     return {
-        year: newDate.getFullYear(),
-        month: newDate.getMonth(),
-        day: newDate.getDate(),
+        "date-parts": [dateParts],
+        "date-time": newDate.toISOString() || undefined,
+        timestamp: newDate.getTime() || undefined,
     };
 }
 

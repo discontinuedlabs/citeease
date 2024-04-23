@@ -48,7 +48,7 @@ export default function App() {
                     element={<Home bibliographies={bibliographies} setBibliographies={setBibliographies} />}
                 />
                 <Route
-                    path="/bibliography/:id"
+                    path="/:id"
                     element={
                         <Bibliography
                             bibliographies={bibliographies}
