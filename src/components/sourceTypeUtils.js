@@ -6,11 +6,11 @@ export function createDateObject(yearOrDate, month = undefined, day = undefined)
 
     if (yearOrDate instanceof Date) {
         year = yearOrDate.getFullYear();
-        adjustedMonth = yearOrDate.getMonth();
+        adjustedMonth = yearOrDate.getMonth() + 1;
         adjustedDay = yearOrDate.getDate();
     } else {
         year = yearOrDate;
-        adjustedMonth = month !== undefined ? month : 0;
+        adjustedMonth = month !== undefined ? month : 1;
         adjustedDay = day !== undefined ? day : 1;
     }
 

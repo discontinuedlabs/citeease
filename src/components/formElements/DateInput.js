@@ -1,52 +1,49 @@
-import { useEffect, useState } from "react";
 import * as sourceTypeUtils from "../sourceTypeUtils";
 
 export default function DateInput(props) {
-    const { content = {}, setContent, dateKey } = props;
-    const [year, setYear] = useState(content[dateKey]?.["date-parts"][0][0]);
-    const [month, setMonth] = useState(content[dateKey]?.["date-parts"][0][1]);
-    const [day, setDay] = useState(content[dateKey]?.["date-parts"][0][2]);
-
-    useEffect(() => {
-        setYear(content[dateKey]?.["date-parts"][0][0]);
-        setMonth(content[dateKey]?.["date-parts"][0][1]);
-        setDay(content[dateKey]?.["date-parts"][0][2]);
-    }, [content]);
+    const { content, setContent, dateKey } = props;
 
     function handleDateChange(key, value) {
-        const newDate = { year: year, month: month, day: day };
+        const newDate = {
+            year: content[dateKey]?.["date-parts"][0][0],
+            month: content[dateKey]?.["date-parts"][0][1],
+            day: content[dateKey]?.["date-parts"][0][2],
+        };
         newDate[key] = value;
         setContent((prevContent) => ({
             ...prevContent,
-            [dateKey]: sourceTypeUtils.createDateObject(new Date(newDate.year, newDate.month, newDate.day)),
+            [dateKey]: sourceTypeUtils.createDateObject(newDate.year, newDate.month, newDate.day),
         }));
     }
 
     function setToToday() {
-        setContent((prevContent) => {
-            return { ...prevContent, [dateKey]: sourceTypeUtils.createDateObject(new Date()) };
-        });
+        setContent((prevContent) => ({
+            ...prevContent,
+            [dateKey]: sourceTypeUtils.createDateObject(new Date()),
+        }));
     }
 
     return (
         <div className="date-inputs-container">
             <input
                 type="number"
-                value={year}
+                value={content[dateKey]?.["date-parts"][0][0]}
+                min="1"
+                max={new Date().getFullYear()}
                 placeholder="YYYY"
                 onChange={(event) => handleDateChange("year", event.target.value)}
             />
             <input
                 type="number"
-                value={month + 1 !== 0 ? month + 1 : ""} // Allow the field for an empty state instead of displaying 0 when no value is received
+                value={content[dateKey]?.["date-parts"][0][1]}
                 min="1"
                 max="12"
                 placeholder="MM"
-                onChange={(event) => handleDateChange("month", event.target.value - 1)}
+                onChange={(event) => handleDateChange("month", event.target.value)}
             />
             <input
                 type="number"
-                value={day}
+                value={content[dateKey]?.["date-parts"][0][2]}
                 min="1"
                 max="31"
                 placeholder="DD"

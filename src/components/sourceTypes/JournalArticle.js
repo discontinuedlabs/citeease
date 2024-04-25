@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { v4 as uuid4 } from "uuid";
 import * as sourceTypeUtils from "../sourceTypeUtils";
-import DateInput from "../formElements/DateInput.test";
+import DateInput from "../formElements/DateInput";
 import AuthorsInput from "../formElements/AuthorsInput";
 
 export default function JournalArticle(props) {
@@ -129,7 +129,7 @@ export default function JournalArticle(props) {
                 name="issn"
                 value={content.ISSN}
                 placeholder="ISSN number"
-                onChange={(event) => updateContentField("ISSN", event.target.value[0])}
+                onChange={(event) => updateContentField("ISSN", event.target.value)}
             />
 
             <label htmlFor="online">Accessed online?</label>

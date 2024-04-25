@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import axios from "axios";
 import * as cheerio from "cheerio";
 import * as sourceTypeUtils from "../sourceTypeUtils";
-import DateInput from "../formElements/DateInput.test";
+import DateInput from "../formElements/DateInput";
 import AuthorsInput from "../formElements/AuthorsInput";
 
 export default function Webpage(props) {
