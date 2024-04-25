@@ -1,9 +1,9 @@
+import { useEffect, useRef } from "react";
 import axios from "axios";
 import * as cheerio from "cheerio";
-import { useEffect, useRef } from "react";
+import * as sourceTypeUtils from "../sourceTypeUtils";
 import DateInput from "../formElements/DateInput";
 import AuthorsInput from "../formElements/AuthorsInput";
-import * as sourceTypeUtils from "../sourceTypeUtils";
 
 export default function Webpage(props) {
     const { content, setContent, showAcceptDialog, setCitationWindowVisible } = props;
@@ -16,33 +16,13 @@ export default function Webpage(props) {
     }, []);
 
     function retrieveContent(source) {
-        if (source)
+        if (source) {
+            const website = encodeURIComponent(source);
             axios
-                .get(`https://corsproxy.io/?${source}`, { mode: "no-cors" })
+                .get(`https://corsproxy.io/?${website}`)
                 .then((response) => {
                     const $ = cheerio.load(response.data);
-                    setContent({
-                        title: $("title").text(), // give option to prioritize h1 tag instead of title tag $("h1").text()
-                        author: extractAuthors($),
-                        "container-title": [$("meta[property='og:site_name']").attr("content") || ""],
-                        publisher: $("meta[property='article:publisher']").attr("content"),
-                        accessed: sourceTypeUtils.createDateObject(new Date()),
-                        issued: sourceTypeUtils.createDateObject(
-                            $("meta[name='date']").attr("content") ||
-                                $("meta[name='article:published_time']").attr("content") ||
-                                $("meta[property='article:published_time']").attr("content") ||
-                                $("meta[name='article:modified_time']").attr("content") ||
-                                $("meta[property='article:modified_time']").attr("content") ||
-                                $("meta[name='og:updated_time']").attr("content") ||
-                                $("meta[property='og:updated_time']").attr("content") ||
-                                $(".publication-date").text()
-                        ),
-                        URL:
-                            $("meta[property='og:url']").attr("content") ||
-                            $("meta[name='url']").attr("content") ||
-                            $("link[rel='canonical']").attr("href") ||
-                            source,
-                    });
+                    updateContentFromFetchedData($, source);
                 })
                 .catch((error) => {
                     if (!error.response && error.message === "Network Error") {
@@ -58,6 +38,34 @@ export default function Webpage(props) {
                     }
                     console.error(error);
                 });
+        }
+    }
+
+    function updateContentFromFetchedData($, sourceURL) {
+        setContent({
+            title: $("title").text(), // TODO: Give option to prioritize h1 tag instead of title tag $("h1").text()
+            author: extractAuthors($),
+            "container-title": [$("meta[property='og:site_name']").attr("content") || ""], // TODO: Should use the website link as a fallback
+            publisher: $("meta[property='article:publisher']").attr("content"),
+            accessed: sourceTypeUtils.createDateObject(new Date()),
+            issued: sourceTypeUtils.createDateObject(
+                new Date(
+                    $("meta[name='date']").attr("content") ||
+                        $("meta[name='article:published_time']").attr("content") ||
+                        $("meta[property='article:published_time']").attr("content") ||
+                        $("meta[name='article:modified_time']").attr("content") ||
+                        $("meta[property='article:modified_time']").attr("content") ||
+                        $("meta[name='og:updated_time']").attr("content") ||
+                        $("meta[property='og:updated_time']").attr("content") ||
+                        $(".publication-date").text()
+                )
+            ),
+            URL:
+                $("meta[property='og:url']").attr("content") ||
+                $("meta[name='url']").attr("content") ||
+                $("link[rel='canonical']").attr("href") ||
+                sourceURL,
+        });
     }
 
     function extractAuthors($) {
@@ -79,6 +87,7 @@ export default function Webpage(props) {
         return sourceTypeUtils.createAuthorsArray(authors);
     }
 
+    // TODO: handleFillIn, handleAddReference, and handleCancel should be moved to CitationWindow
     function handleFillIn() {
         const autoFillUrl = autoFillUrlRef.current.value;
         retrieveContent(autoFillUrl);
@@ -91,6 +100,13 @@ export default function Webpage(props) {
 
     function handleCancel() {
         setCitationWindowVisible((prevCitationWindowVisible) => !prevCitationWindowVisible);
+    }
+
+    function updateContentField(key, value) {
+        setContent((prevContent) => ({
+            ...prevContent,
+            [key]: value,
+        }));
     }
 
     return (
@@ -109,14 +125,9 @@ export default function Webpage(props) {
             <input
                 type="text"
                 name="title"
-                value={content ? content.title : ""}
+                value={content.title}
                 placeholder="Page title"
-                onChange={(event) =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        title: event.target.value,
-                    }))
-                }
+                onChange={(event) => updateContentField("title", event.target.value)}
                 required
             />
 
@@ -124,14 +135,9 @@ export default function Webpage(props) {
             <input
                 type="text"
                 name="website"
-                value={content ? content.website : ""}
+                value={content["container-title"]?.[0] ?? ""} // At the time of writing this, this is the only element that throws error when finding an undefined value. It sometimes changes its mind and doesn't do it.
                 placeholder="Website title"
-                onChange={(event) =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        website: event.target.value,
-                    }))
-                }
+                onChange={(event) => updateContentField("container-title", [event.target.value])}
             />
 
             <label htmlFor="publication-date">Publication date</label>
@@ -141,14 +147,9 @@ export default function Webpage(props) {
             <input
                 type="text"
                 name="url"
-                value={content ? content.URL : ""}
+                value={content.URL}
                 placeholder="URL (link)"
-                onChange={(event) =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        URL: event.target.value,
-                    }))
-                }
+                onChange={(event) => updateContentField("URL", event.target.value)}
                 required
             />
 

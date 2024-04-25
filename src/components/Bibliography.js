@@ -180,7 +180,7 @@ export default function Bibliography(props) {
                         label="Choose source type"
                         options={[
                             { label: "Webpage", method: openCitationMenu },
-                            { label: "Journal", method: openCitationMenu },
+                            { label: "Journal article", method: openCitationMenu },
                             { label: "Book", method: openCitationMenu },
                         ]}
                         menuStyle={{ position: "fixed", bottom: "100%", left: "50%", transform: "translateX(-50%)" }}

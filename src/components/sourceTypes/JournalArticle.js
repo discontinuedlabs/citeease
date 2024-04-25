@@ -1,29 +1,27 @@
 import DateInput from "../formElements/DateInput";
 import AuthorsInput from "../formElements/AuthorsInput";
 import { useRef } from "react";
+import { v4 as uuid4 } from "uuid";
 import * as sourceTypeUtils from "../sourceTypeUtils";
-import { useEffect } from "react";
 
-export default function Journal(props) {
+export default function JournalArticle(props) {
     const { content, setContent, showAcceptDialog, setCitationWindowVisible } = props;
     const autoFillDoiRef = useRef(null);
-
-    useEffect(() => {
-        setContent((prevContent) => {
-            return { ...prevContent, type: "journal-article" };
-        });
-    }, []);
 
     function retrieveContent(source) {
         if (source)
             fetch(`https://corsproxy.io/?https://api.crossref.org/works/${source}`)
                 .then((response) => response.json())
                 .then((data) => {
-                    console.log(data.message);
                     setContent({
                         ...data.message,
+                        // date.message has all the neccessary naming system to work with citeproc, only the below fields are missing for other purposes.
                         online: true,
                         accessed: sourceTypeUtils.createDateObject(new Date()),
+                        author: data.message.author.map((author) => ({
+                            ...author,
+                            id: uuid4(),
+                        })),
                     });
                 })
                 .catch((error) => {
@@ -42,6 +40,7 @@ export default function Journal(props) {
                 });
     }
 
+    // TODO: handleFillIn, handleAddReference, and handleCancel should be moved to CitationWindow
     function handleFillIn() {
         const autoFillDoi = autoFillDoiRef.current.value;
         retrieveContent(autoFillDoi);
@@ -54,6 +53,13 @@ export default function Journal(props) {
 
     function handleCancel() {
         setCitationWindowVisible((prevCitationWindowVisible) => !prevCitationWindowVisible);
+    }
+
+    function updateContentField(key, value) {
+        setContent((prevContent) => ({
+            ...prevContent,
+            [key]: value,
+        }));
     }
 
     return (
@@ -74,12 +80,7 @@ export default function Journal(props) {
                 name="title"
                 value={content.title}
                 placeholder="Article title"
-                onChange={(event) =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        title: event.target.value,
-                    }))
-                }
+                onChange={(event) => updateContentField("title", event.target.value)}
                 required
             />
 
@@ -87,14 +88,9 @@ export default function Journal(props) {
             <input
                 type="text"
                 name="journal"
-                value={content["container-title"]}
+                value={content["container-title"]?.[0] ?? ""} // At the time of writing this, this is the only element that throws error when finding an undefined value. It sometimes changes its mind and doesn't do it.
                 placeholder="Journal title"
-                onChange={(event) =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        "container-title": event.target.value,
-                    }))
-                }
+                onChange={(event) => updateContentField("container-title", [event.target.value])}
             />
 
             <label htmlFor="volume">Volume</label>
@@ -103,12 +99,7 @@ export default function Journal(props) {
                 name="volume"
                 value={content.volume}
                 placeholder="Enter a number"
-                onChange={(event) =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        volume: event.target.value,
-                    }))
-                }
+                onChange={(event) => updateContentField("volume", event.target.value)}
             />
 
             <label htmlFor="issue">Issue</label>
@@ -117,16 +108,11 @@ export default function Journal(props) {
                 name="issue"
                 value={content.issue}
                 placeholder="Enter a number"
-                onChange={(event) =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        issue: event.target.value,
-                    }))
-                }
+                onChange={(event) => updateContentField("issue", event.target.value)}
             />
 
             <label htmlFor="publication-date">Publication date</label>
-            <DateInput name="publication-date" content={content} setContent={setContent} dateKey="published" />
+            <DateInput name="publication-date" content={content} setContent={setContent} dateKey="issued" />
 
             <label htmlFor="pages">Pages</label>
             <input
@@ -134,12 +120,7 @@ export default function Journal(props) {
                 name="pages"
                 value={content.page}
                 placeholder="Page range"
-                onChange={(event) =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        page: event.target.value,
-                    }))
-                }
+                onChange={(event) => updateContentField("page", event.target.value)}
             />
 
             <label htmlFor="issn">ISSN</label>
@@ -148,12 +129,7 @@ export default function Journal(props) {
                 name="issn"
                 value={content.ISSN}
                 placeholder="ISSN number"
-                onChange={(event) =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        ISSN: event.target.value[0],
-                    }))
-                }
+                onChange={(event) => updateContentField("ISSN", event.target.value[0])}
             />
 
             <label htmlFor="online">Accessed online?</label>
@@ -161,12 +137,7 @@ export default function Journal(props) {
                 type="checkbox"
                 name="online"
                 checked={content.online}
-                onChange={() =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        online: !prevContent.online,
-                    }))
-                }
+                onChange={(event) => updateContentField("online", event.target.value)}
             />
 
             {content.online && (
@@ -177,12 +148,7 @@ export default function Journal(props) {
                         name="doi"
                         value={content.DOI}
                         placeholder="DOI"
-                        onChange={(event) =>
-                            setContent((prevContent) => ({
-                                ...prevContent,
-                                DOI: event.target.value,
-                            }))
-                        }
+                        onChange={(event) => updateContentField("DOI", event.target.value)}
                     />
 
                     <label htmlFor="access-date">Access date</label>

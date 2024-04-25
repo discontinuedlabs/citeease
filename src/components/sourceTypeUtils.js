@@ -1,6 +1,7 @@
 import { v4 as uuid4 } from "uuid";
 
 export function createDateObject(yearOrDate, month = undefined, day = undefined) {
+    if (yearOrDate === undefined) return;
     let year, adjustedMonth, adjustedDay;
 
     if (yearOrDate instanceof Date) {
@@ -13,20 +14,20 @@ export function createDateObject(yearOrDate, month = undefined, day = undefined)
         adjustedDay = day !== undefined ? day : 1;
     }
 
-    const newDate = new Date(year, adjustedMonth, adjustedDay);
-
     let dateParts = [year];
     if (adjustedMonth !== undefined) {
-        dateParts.push(adjustedMonth + 1);
+        dateParts.push(adjustedMonth);
         if (adjustedDay !== undefined) {
             dateParts.push(adjustedDay);
         }
     }
 
+    // const newDate = new Date(year, adjustedMonth, adjustedDay);
+
     return {
         "date-parts": [dateParts],
-        "date-time": newDate.toISOString() || undefined,
-        timestamp: newDate.getTime() || undefined,
+        // "date-time": newDate.toISOString() || undefined,
+        // timestamp: newDate.getTime() || undefined,
     };
 }
 

@@ -4,7 +4,7 @@ import { Cite, plugins } from "@citation-js/core";
 import "@citation-js/plugin-csl";
 
 // Source types
-import Journal from "./sourceTypes/Journal";
+import JournalArticle from "./sourceTypes/JournalArticle";
 import Webpage from "./sourceTypes/Webpage";
 import Book from "./sourceTypes/Book";
 
@@ -33,7 +33,7 @@ export default function CitationWindow(props) {
     };
 
     const CITATION_COMPONENTS = {
-        Journal: Journal(citationControlProps),
+        "Journal article": JournalArticle(citationControlProps),
         Book: Book(citationControlProps),
         Webpage: Webpage(citationControlProps),
     };

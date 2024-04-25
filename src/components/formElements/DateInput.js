@@ -3,36 +3,29 @@ import * as sourceTypeUtils from "../sourceTypeUtils";
 
 export default function DateInput(props) {
     const { content = {}, setContent, dateKey } = props;
-    const [year, setYear] = useState(content[dateKey]?.[0]?.[0] || "");
-    const [month, setMonth] = useState(content[dateKey]?.[0]?.[1] || "");
-    const [day, setDay] = useState(content[dateKey]?.[0]?.[2] || "");
+    const [year, setYear] = useState(content[dateKey]?.["date-parts"][0][0]);
+    const [month, setMonth] = useState(content[dateKey]?.["date-parts"][0][1]);
+    const [day, setDay] = useState(content[dateKey]?.["date-parts"][0][2]);
 
     useEffect(() => {
-        if (setContent) {
-            setContent((prevContent) => ({
-                ...prevContent,
-                [dateKey]: sourceTypeUtils.createDateObject(new Date(year, month, day)),
-            }));
-        }
-    }, [year, month, day, setContent, dateKey]);
+        setYear(content[dateKey]?.["date-parts"][0][0]);
+        setMonth(content[dateKey]?.["date-parts"][0][1]);
+        setDay(content[dateKey]?.["date-parts"][0][2]);
+    }, [content]);
 
-    useEffect(() => {
-        const newYear = content[dateKey]?.[0]?.[0];
-        const newMonth = content[dateKey]?.[0]?.[1];
-        const newDay = content[dateKey]?.[0]?.[2];
-
-        if (year !== newYear || month !== newMonth || day !== newDay) {
-            setYear(newYear || "");
-            setMonth(newMonth || "");
-            setDay(newDay || "");
-        }
-    }, [content, dateKey]);
+    function handleDateChange(key, value) {
+        const newDate = { year: year, month: month, day: day };
+        newDate[key] = value;
+        setContent((prevContent) => ({
+            ...prevContent,
+            [dateKey]: sourceTypeUtils.createDateObject(new Date(newDate.year, newDate.month, newDate.day)),
+        }));
+    }
 
     function setToToday() {
-        const today = new Date();
-        setYear(today.getFullYear());
-        setMonth(today.getMonth());
-        setDay(today.getDate());
+        setContent((prevContent) => {
+            return { ...prevContent, [dateKey]: sourceTypeUtils.createDateObject(new Date()) };
+        });
     }
 
     return (
@@ -40,17 +33,16 @@ export default function DateInput(props) {
             <input
                 type="number"
                 value={year}
-                max={new Date().getFullYear()}
                 placeholder="YYYY"
-                onChange={(event) => setYear(event.target.value)}
+                onChange={(event) => handleDateChange("year", event.target.value)}
             />
             <input
                 type="number"
-                value={month + 1}
+                value={month + 1 !== 0 ? month + 1 : ""} // Allow the field for an empty state instead of displaying 0 when no value is received
                 min="1"
                 max="12"
                 placeholder="MM"
-                onChange={(event) => setMonth(event.target.value - 1)}
+                onChange={(event) => handleDateChange("month", event.target.value - 1)}
             />
             <input
                 type="number"
@@ -58,7 +50,7 @@ export default function DateInput(props) {
                 min="1"
                 max="31"
                 placeholder="DD"
-                onChange={(event) => setDay(event.target.value)}
+                onChange={(event) => handleDateChange("day", event.target.value)}
             />
             <button type="button" onClick={setToToday}>
                 Today
