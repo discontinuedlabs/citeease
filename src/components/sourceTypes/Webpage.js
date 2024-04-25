@@ -6,7 +6,7 @@ import DateInput from "../formElements/DateInput";
 import AuthorsInput from "../formElements/AuthorsInput";
 
 export default function Webpage(props) {
-    const { content, setContent, showAcceptDialog, setCitationWindowVisible, handleAddReference } = props;
+    const { content, setContent, showAcceptDialog, handleAddReference, handleCancel } = props;
     const autoFillUrlRef = useRef(null);
 
     useEffect(() => {
@@ -42,29 +42,32 @@ export default function Webpage(props) {
     }
 
     function updateContentFromFetchedData($, sourceURL) {
-        setContent({
-            title: $("title").text(), // TODO: Give option to prioritize h1 tag instead of title tag $("h1").text()
-            author: extractAuthors($),
-            "container-title": [$("meta[property='og:site_name']").attr("content") || ""], // TODO: Should use the website link as a fallback
-            publisher: $("meta[property='article:publisher']").attr("content"),
-            accessed: sourceTypeUtils.createDateObject(new Date()),
-            issued: sourceTypeUtils.createDateObject(
-                new Date(
-                    $("meta[name='date']").attr("content") ||
-                        $("meta[name='article:published_time']").attr("content") ||
-                        $("meta[property='article:published_time']").attr("content") ||
-                        $("meta[name='article:modified_time']").attr("content") ||
-                        $("meta[property='article:modified_time']").attr("content") ||
-                        $("meta[name='og:updated_time']").attr("content") ||
-                        $("meta[property='og:updated_time']").attr("content") ||
-                        $(".publication-date").text()
-                )
-            ),
-            URL:
-                $("meta[property='og:url']").attr("content") ||
-                $("meta[name='url']").attr("content") ||
-                $("link[rel='canonical']").attr("href") ||
-                sourceURL,
+        setContent((prevContent) => {
+            return {
+                ...prevContent,
+                title: $("title").text(), // TODO: Give option to prioritize h1 tag instead of title tag $("h1").text()
+                author: extractAuthors($),
+                "container-title": [$("meta[property='og:site_name']").attr("content") || ""], // TODO: Should use the website link as a fallback
+                publisher: $("meta[property='article:publisher']").attr("content"),
+                accessed: sourceTypeUtils.createDateObject(new Date()),
+                issued: sourceTypeUtils.createDateObject(
+                    new Date(
+                        $("meta[name='date']").attr("content") ||
+                            $("meta[name='article:published_time']").attr("content") ||
+                            $("meta[property='article:published_time']").attr("content") ||
+                            $("meta[name='article:modified_time']").attr("content") ||
+                            $("meta[property='article:modified_time']").attr("content") ||
+                            $("meta[name='og:updated_time']").attr("content") ||
+                            $("meta[property='og:updated_time']").attr("content") ||
+                            $(".publication-date").text()
+                    )
+                ),
+                URL:
+                    $("meta[property='og:url']").attr("content") ||
+                    $("meta[name='url']").attr("content") ||
+                    $("link[rel='canonical']").attr("href") ||
+                    sourceURL,
+            };
         });
     }
 
@@ -87,14 +90,9 @@ export default function Webpage(props) {
         return sourceTypeUtils.createAuthorsArray(authors);
     }
 
-    // TODO: handleFillIn, handleAddReference, and handleCancel should be moved to CitationWindow
     function handleFillIn() {
         const autoFillUrl = autoFillUrlRef.current.value;
         retrieveContent(autoFillUrl);
-    }
-
-    function handleCancel() {
-        setCitationWindowVisible((prevCitationWindowVisible) => !prevCitationWindowVisible);
     }
 
     function updateContentField(key, value) {

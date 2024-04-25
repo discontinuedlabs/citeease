@@ -1,17 +1,98 @@
 import "./css/App.css";
-import { useState } from "react";
+import { useReducer, useState } from "react";
 import Bibliography from "./components/Bibliography";
 import { Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
 import { useLocalStorage } from "./utils";
 import AcceptDialog from "./components/ui/AcceptDialog";
+import { nanoid } from "nanoid";
+import { v4 as uuid4 } from "uuid";
+
+const ACTIONS = {
+    ADD_NEW_BIBLIOGRAPHY: "Add new bibliography",
+    ADD_NEW_CITATION_TO_BIBLIOGRAPHY: "Add new citation to bibliography",
+    UPDATE_CONTENT_IN_EDITED_CITATION: "Update content in edited citation",
+    UPDATE_CITATION_IN_BIBLIOGRAPHY: "Update citation in bibliography",
+};
+
+function reducer(bibliographies, action) {
+    switch (action.type) {
+        case ACTIONS.ADD_NEW_BIBLIOGRAPHY:
+            const newBibliography = {
+                title: "Untitled Bibliography", // Default title
+                style: action.bibStyle,
+                id: "bib=" + nanoid(10), // nanoid offers shorter UUIDs than uuid4. Useful for bibId because they are used in URl params
+                citations: [],
+            };
+            return [...bibliographies, newBibliography];
+
+        case ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY:
+            const citId = uuid4();
+            const newCitation = {
+                id: citId,
+                content: { id: citId, author: [{ given: "", family: "", id: uuid4() }] },
+                isChecked: false,
+            };
+            return bibliographies.map((bib) => {
+                if (bib.id === action.bibliographyId) {
+                    return {
+                        ...bib,
+                        editedCitation: newCitation,
+                    };
+                }
+                return bib;
+            });
+
+        case ACTIONS.UPDATE_CONTENT_IN_EDITED_CITATION:
+            return bibliographies.map((bib) => {
+                if (bib.id === action.bibliographyId) {
+                    return {
+                        ...bib,
+                        editedCitation: { ...bib.editedCitation, content: action.content },
+                    };
+                }
+                return bib;
+            });
+
+        case ACTIONS.UPDATE_CITATION_IN_BIBLIOGRAPHY:
+            return bibliographies.map((bib) => {
+                if (bib.id === action.bibliographyId) {
+                    const citationIndex = bib.citations.findIndex((cit) => cit.id === action.editedCitation.id);
+                    let updatedCitations;
+
+                    if (citationIndex !== -1) {
+                        // If the citation exists, update it
+                        updatedCitations = bib.citations.map((cit, index) => {
+                            if (index === citationIndex) {
+                                return { ...cit, ...action.editedCitation }; // Update the existing citation
+                            }
+                            return cit;
+                        });
+                    } else {
+                        // If the citation doesn't exist, add it
+                        updatedCitations = [...bib.citations, action.editedCitation];
+                    }
+
+                    return {
+                        ...bib,
+                        citations: updatedCitations,
+                    };
+                }
+                return bib;
+            });
+
+        default:
+            return bibliographies;
+    }
+}
 
 export default function App() {
-    const [bibliographies, setBibliographies] = useLocalStorage("bibliographies", []);
+    const [bibliographies, dispatch] = useReducer(reducer, []);
+    console.log(bibliographies);
     const [font, setFont] = useLocalStorage("font", { name: "Georgia", family: "Georgia" });
     const [acceptDialog, setAcceptDialog] = useState({});
 
-    const fonts = [
+    const FONTS = [
         { name: "Default", family: "unset" },
         { name: "Arial", family: "Arial" },
         { name: "Calibri", family: "Calibri" },
@@ -45,14 +126,15 @@ export default function App() {
             <Routes>
                 <Route
                     path="/"
-                    element={<Home bibliographies={bibliographies} setBibliographies={setBibliographies} />}
+                    element={<Home bibliographies={bibliographies} dispatch={dispatch} ACTIONS={ACTIONS} />}
                 />
                 <Route
                     path="/:id"
                     element={
                         <Bibliography
                             bibliographies={bibliographies}
-                            setBibliographies={setBibliographies}
+                            dispatch={dispatch}
+                            ACTIONS={ACTIONS}
                             font={font}
                             showAcceptDialog={showAcceptDialog}
                         />

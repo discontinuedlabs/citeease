@@ -1,5 +1,4 @@
 import "../css/Bibliography.css";
-import { v4 as uuid4 } from "uuid";
 import { useParams } from "react-router-dom";
 import ContextMenu from "./ui/ContextMenu";
 import CitationWindow from "./CitationWindow";
@@ -10,7 +9,7 @@ import { plugins as cslPlugins } from "@citation-js/core";
 
 export default function Bibliography(props) {
     const { id: bibliographyId } = useParams();
-    const { bibliographies, setBibliographies, font } = props;
+    const { bibliographies, dispatch, ACTIONS, font } = props;
     const bibliography = bibliographies.find((bib) => bib.id === bibliographyId);
 
     const [sourceType, setSourceType] = useState("Webpage"); // Can be changed to any other source type as default
@@ -19,52 +18,45 @@ export default function Bibliography(props) {
     const [cslFile, setCslFile] = useState();
 
     useEffect(() => {
-        fetch(`${process.env.PUBLIC_URL}/cslFiles/${bibliography.style.code}.csl`)
-            .then((response) => response.text())
-            .then((data) => {
-                setCslFile(data);
-            })
-            .catch((error) => console.error("Error fetching CSL file:", error));
+        function getCslFile() {
+            fetch(`${process.env.PUBLIC_URL}/cslFiles/${bibliography.style.code}.csl`)
+                .then((response) => response.text())
+                .then((data) => {
+                    setCslFile(data);
+                })
+                .catch((error) => console.error("Error fetching CSL file:", error));
+        }
+        getCslFile();
     }, [bibliography.style]);
 
     useEffect(() => {
-        if (!cslFile) return;
-        let config = cslPlugins.config.get("@csl");
-        config.templates.add(bibliography.style.code, cslFile);
+        function registerNewCsl() {
+            if (!cslFile) return;
+            let config = cslPlugins.config.get("@csl");
+            config.templates.add(bibliography.style.code, cslFile);
+        }
+        registerNewCsl();
     }, [cslFile, bibliography.style.code]);
 
     // TODO: Change this to an option in the setting that also have an accept button to prevent changing the title by accident
     function updateBibliographyTitle(event) {
-        const newTitle = event.target.value;
-        setBibliographies((prevBibliographies) => {
-            return prevBibliographies.map((bib) => (bib.id === bibliographyId ? { ...bib, title: newTitle } : bib));
-        });
+        // const newTitle = event.target.value;
+        // setBibliographies((prevBibliographies) => {
+        //     return prevBibliographies.map((bib) => (bib.id === bibliographyId ? { ...bib, title: newTitle } : bib));
+        // });
     }
 
     function openCitationMenu(event) {
         // TODO: First check if there are checked reference entries, if no one is checked, it sets the chosenCitation as a newCitation
-        const newCitationId = uuid4();
-        addNewCitationToBibliography(newCitationId);
+        // const newCitationId = uuid4();
+        addNewCitationToBibliography();
         setSourceType(event.target.textContent);
         setCitationWindowVisible(true);
         setAddCitationMenuVisible(false);
     }
 
-    function addNewCitationToBibliography(id) {
-        const newCitation = {
-            id: id,
-            content: { id: id, author: [{ given: "", family: "", id: uuid4() }] },
-            isChecked: false,
-        };
-        setBibliographies((prevBibliographies) => {
-            return prevBibliographies.map((bib) => {
-                if (bib.id === bibliographyId) {
-                    // return { ...bib, citations: [...bib.citations, newCitation] };
-                    return { ...bib, editedCitation: newCitation };
-                }
-                return bib;
-            });
-        });
+    function addNewCitationToBibliography() {
+        dispatch({ type: ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY, bibliographyId: bibliographyId });
     }
 
     // function handleCopy() {
@@ -112,22 +104,22 @@ export default function Bibliography(props) {
     function handleImportCitation() {}
 
     function handleReferenceCheckbox(event, citationId) {
-        setBibliographies((prevBibliographies) => {
-            return prevBibliographies.map((bib) => {
-                if (bib.id === bibliographyId) {
-                    return {
-                        ...bib,
-                        citations: bib.citations.map((cit) => {
-                            if (cit.id === citationId) {
-                                return { ...cit, isChecked: event.target.checked };
-                            }
-                            return cit;
-                        }),
-                    };
-                }
-                return bib;
-            });
-        });
+        // setBibliographies((prevBibliographies) => {
+        //     return prevBibliographies.map((bib) => {
+        //         if (bib.id === bibliographyId) {
+        //             return {
+        //                 ...bib,
+        //                 citations: bib.citations.map((cit) => {
+        //                     if (cit.id === citationId) {
+        //                         return { ...cit, isChecked: event.target.checked };
+        //                     }
+        //                     return cit;
+        //                 }),
+        //             };
+        //         }
+        //         return bib;
+        //     });
+        // });
     }
 
     return (
@@ -191,6 +183,9 @@ export default function Bibliography(props) {
 
             {citationWindowVisible && (
                 <CitationWindow
+                    bibliographies={bibliographies}
+                    dispatch={dispatch}
+                    ACTIONS={ACTIONS}
                     {...props}
                     sourceType={sourceType}
                     setCitationWindowVisible={setCitationWindowVisible}

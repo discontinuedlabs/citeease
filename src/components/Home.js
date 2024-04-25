@@ -1,9 +1,8 @@
-import { nanoid } from "nanoid";
 import { Link } from "react-router-dom";
 import ContextMenu from "./ui/ContextMenu";
 
 export default function Home(props) {
-    const { bibliographies, setBibliographies } = props;
+    const { bibliographies, dispatch, ACTIONS } = props;
     const styles = [
         { name: "APA", code: "apa" },
         { name: "MLA", code: "mla" },
@@ -12,19 +11,14 @@ export default function Home(props) {
     ];
 
     function handleAddBibliography(style) {
-        const newBibliography = {
-            title: "Untitled Bibliography", // Default title
-            style: style,
-            id: "bib=" + nanoid(10), // nanoid offers shorter UUIDs than uuid4. Useful for bibId because they are used in URl params
-            citations: [],
-        };
-        setBibliographies((prevBibliographies) => [...prevBibliographies, newBibliography]);
+        dispatch({ type: ACTIONS.ADD_NEW_BIBLIOGRAPHY, bibStyle: style });
     }
 
     return (
         <div className="home">
             <div className="bibliography-cards-container">
-                {bibliographies.length > 0 &&
+                {bibliographies &&
+                    bibliographies.length !== 0 &&
                     bibliographies.map((bib) => (
                         <Link key={bib.id} to={`/${bib.id}`} className="bibliography-card">
                             <h3 className="bibliography-card-title">{bib.title}</h3>

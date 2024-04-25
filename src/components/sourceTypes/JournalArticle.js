@@ -5,7 +5,7 @@ import DateInput from "../formElements/DateInput";
 import AuthorsInput from "../formElements/AuthorsInput";
 
 export default function JournalArticle(props) {
-    const { content, setContent, showAcceptDialog, setCitationWindowVisible } = props;
+    const { content, setContent, showAcceptDialog, handleAddReference, handleCancel } = props;
     const autoFillDoiRef = useRef(null);
 
     function retrieveContent(source) {
@@ -13,15 +13,18 @@ export default function JournalArticle(props) {
             fetch(`https://corsproxy.io/?https://api.crossref.org/works/${source}`)
                 .then((response) => response.json())
                 .then((data) => {
-                    setContent({
-                        ...data.message,
-                        // date.message has all the neccessary naming system to work with citeproc, only the below fields are missing for other purposes.
-                        online: true,
-                        accessed: sourceTypeUtils.createDateObject(new Date()),
-                        author: data.message.author.map((author) => ({
-                            ...author,
-                            id: uuid4(),
-                        })),
+                    setContent((prevContent) => {
+                        return {
+                            ...prevContent,
+                            ...data.message,
+                            // date.message has all the neccessary naming system to work with citeproc, only the below fields are missing for other purposes.
+                            online: true,
+                            accessed: sourceTypeUtils.createDateObject(new Date()),
+                            author: data.message.author.map((author) => ({
+                                ...author,
+                                id: uuid4(),
+                            })),
+                        };
                     });
                 })
                 .catch((error) => {
@@ -40,19 +43,9 @@ export default function JournalArticle(props) {
                 });
     }
 
-    // TODO: handleFillIn, handleAddReference, and handleCancel should be moved to CitationWindow
     function handleFillIn() {
         const autoFillDoi = autoFillDoiRef.current.value;
         retrieveContent(autoFillDoi);
-    }
-
-    function handleAddReference(event) {
-        event.preventDefault();
-        setCitationWindowVisible((prevCitationWindowVisible) => !prevCitationWindowVisible);
-    }
-
-    function handleCancel() {
-        setCitationWindowVisible((prevCitationWindowVisible) => !prevCitationWindowVisible);
     }
 
     function updateContentField(key, value) {

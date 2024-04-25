@@ -8,18 +8,17 @@ import Book from "./sourceTypes/Book";
 
 export default function CitationWindow(props) {
     const { id: bibliographyId } = useParams();
-    const { bibliographies, setBibliographies, sourceType, setCitationWindowVisible, showAcceptDialog } = props;
+    const { bibliographies, dispatch, ACTIONS, sourceType, setCitationWindowVisible, showAcceptDialog } = props;
     const bibliography = bibliographyId ? bibliographies.find((bib) => bib.id === bibliographyId) : undefined;
-
-    const [editedCitation, setEditedCitation] = useState(bibliography.editedCitation);
+    const editedCitation = bibliography.editedCitation;
     const [content, setContent] = useState(editedCitation ? editedCitation.content : {});
 
     const citationControlProps = {
         content,
         setContent,
-        setCitationWindowVisible,
         showAcceptDialog,
         handleAddReference,
+        handleCancel,
     };
 
     const CITATION_COMPONENTS = {
@@ -29,43 +28,27 @@ export default function CitationWindow(props) {
     };
 
     useEffect(() => {
-        console.log(editedCitation);
-        setBibliographies((prevBibliographies) => {
-            return prevBibliographies.map((bib) => {
-                if (bib.id === bibliographyId) {
-                    const citationIndex = bib.citations.findIndex((cit) => cit.id === editedCitation.id);
-                    let updatedCitations;
-
-                    if (citationIndex !== -1) {
-                        // If the citation exists, update it
-                        updatedCitations = bib.citations.map((cit, index) => {
-                            if (index === citationIndex) {
-                                return { ...cit, ...editedCitation }; // Update the existing citation
-                            }
-                            return cit;
-                        });
-                    } else {
-                        // If the citation doesn't exist, add it
-                        updatedCitations = [...bib.citations, editedCitation];
-                    }
-
-                    return {
-                        ...bib,
-                        citations: updatedCitations,
-                    };
-                }
-                return bib;
+        function updateContentInEditedCitation() {
+            dispatch({
+                type: ACTIONS.UPDATE_CONTENT_IN_EDITED_CITATION,
+                bibliographyId: bibliographyId,
+                content: content,
             });
-        });
-    }, [editedCitation, bibliographyId, setBibliographies]);
+        }
+        updateContentInEditedCitation();
+    }, [content]);
 
-    function handleAddReference(event, newContent) {
-        console.log(newContent);
+    function handleAddReference(event) {
         event.preventDefault();
-        setEditedCitation((prevCitation) => {
-            // Create a new object to ensure React recognizes the change
-            return { ...prevCitation, content: newContent };
+        dispatch({
+            type: ACTIONS.UPDATE_CITATION_IN_BIBLIOGRAPHY,
+            bibliographyId: bibliographyId,
+            editedCitation: editedCitation,
         });
+        setCitationWindowVisible(false);
+    }
+
+    function handleCancel() {
         setCitationWindowVisible(false);
     }
 
