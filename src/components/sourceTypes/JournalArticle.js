@@ -1,8 +1,8 @@
-import DateInput from "../formElements/DateInput";
-import AuthorsInput from "../formElements/AuthorsInput";
 import { useRef } from "react";
 import { v4 as uuid4 } from "uuid";
 import * as sourceTypeUtils from "../sourceTypeUtils";
+import DateInput from "../formElements/DateInput.test";
+import AuthorsInput from "../formElements/AuthorsInput";
 
 export default function JournalArticle(props) {
     const { content, setContent, showAcceptDialog, setCitationWindowVisible } = props;
