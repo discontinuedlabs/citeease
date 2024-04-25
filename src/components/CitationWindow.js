@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Cite, plugins } from "@citation-js/core";
-import "@citation-js/plugin-csl";
 
 // Source types
 import JournalArticle from "./sourceTypes/JournalArticle";
@@ -10,26 +8,18 @@ import Book from "./sourceTypes/Book";
 
 export default function CitationWindow(props) {
     const { id: bibliographyId } = useParams();
-    const {
-        id: citationId,
-        bibliographies,
-        setBibliographies,
-        sourceType,
-        setCitationWindowVisible,
-        showAcceptDialog,
-    } = props;
+    const { bibliographies, setBibliographies, sourceType, setCitationWindowVisible, showAcceptDialog } = props;
     const bibliography = bibliographyId ? bibliographies.find((bib) => bib.id === bibliographyId) : undefined;
 
-    const [citation, setCitation] = useState(bibliography.citations.find((cit) => cit.id === citationId));
-    const [cslFile, setCslFile] = useState();
-    const [content, setContent] = useState(citation ? citation.content : {});
+    const [editedCitation, setEditedCitation] = useState(bibliography.editedCitation);
+    const [content, setContent] = useState(editedCitation ? editedCitation.content : {});
 
     const citationControlProps = {
-        citation,
         content,
         setContent,
         setCitationWindowVisible,
         showAcceptDialog,
+        handleAddReference,
     };
 
     const CITATION_COMPONENTS = {
@@ -39,58 +29,45 @@ export default function CitationWindow(props) {
     };
 
     useEffect(() => {
-        fetch(`${process.env.PUBLIC_URL}/cslFiles/${bibliography.style.code}.csl`)
-            .then((response) => response.text())
-            .then((data) => {
-                setCslFile(data);
-            })
-            .catch((error) => console.error("Error fetching CSL file:", error));
-    }, [bibliography.style]);
-
-    useEffect(() => {
+        console.log(editedCitation);
         setBibliographies((prevBibliographies) => {
             return prevBibliographies.map((bib) => {
                 if (bib.id === bibliographyId) {
-                    return {
-                        ...bib,
-                        citations: bib.citations.map((cit) => {
-                            if (cit.id === citationId) {
-                                return citation;
+                    const citationIndex = bib.citations.findIndex((cit) => cit.id === editedCitation.id);
+                    let updatedCitations;
+
+                    if (citationIndex !== -1) {
+                        // If the citation exists, update it
+                        updatedCitations = bib.citations.map((cit, index) => {
+                            if (index === citationIndex) {
+                                return { ...cit, ...editedCitation }; // Update the existing citation
                             }
                             return cit;
-                        }),
+                        });
+                    } else {
+                        // If the citation doesn't exist, add it
+                        updatedCitations = [...bib.citations, editedCitation];
+                    }
+
+                    return {
+                        ...bib,
+                        citations: updatedCitations,
                     };
                 }
                 return bib;
             });
         });
-    }, [citation]);
+    }, [editedCitation, bibliographyId, setBibliographies]);
 
-    useEffect(() => {
-        async function formatCitation() {
-            if (!cslFile) return;
-
-            let config = plugins.config.get("@csl");
-            config.templates.add(bibliography.style.code, cslFile);
-
-            let cite = await Cite.async(content);
-
-            let formattedCitation = cite.format("bibliography", {
-                format: "html",
-                template: bibliography.style.code,
-                lang: "en-US",
-            });
-
-            updateReference(formattedCitation);
-        }
-        formatCitation();
-    }, [content, cslFile, bibliography.style.code]);
-
-    function updateReference(newReference) {
-        setCitation((prevCitation) => {
-            return { ...prevCitation, reference: newReference };
+    function handleAddReference(event, newContent) {
+        console.log(newContent);
+        event.preventDefault();
+        setEditedCitation((prevCitation) => {
+            // Create a new object to ensure React recognizes the change
+            return { ...prevCitation, content: newContent };
         });
+        setCitationWindowVisible(false);
     }
 
-    return CITATION_COMPONENTS[sourceType];
+    return <div className="citation-window">{CITATION_COMPONENTS[sourceType]}</div>;
 }

@@ -6,7 +6,7 @@ import DateInput from "../formElements/DateInput";
 import AuthorsInput from "../formElements/AuthorsInput";
 
 export default function Webpage(props) {
-    const { content, setContent, showAcceptDialog, setCitationWindowVisible } = props;
+    const { content, setContent, showAcceptDialog, setCitationWindowVisible, handleAddReference } = props;
     const autoFillUrlRef = useRef(null);
 
     useEffect(() => {
@@ -93,11 +93,6 @@ export default function Webpage(props) {
         retrieveContent(autoFillUrl);
     }
 
-    function handleAddReference(event) {
-        event.preventDefault();
-        setCitationWindowVisible((prevCitationWindowVisible) => !prevCitationWindowVisible);
-    }
-
     function handleCancel() {
         setCitationWindowVisible((prevCitationWindowVisible) => !prevCitationWindowVisible);
     }
@@ -110,7 +105,7 @@ export default function Webpage(props) {
     }
 
     return (
-        <form className="citation-form" onSubmit={handleAddReference}>
+        <form className="citation-form" onSubmit={(event) => handleAddReference(event, content)}>
             <p>Insert the URL (link) here to fill the fields automatically:</p>
             <label htmlFor="auto-filler-url">URL</label>
             <input type="text" name="auto-filler-url" placeholder="Insert a URL" ref={autoFillUrlRef} />

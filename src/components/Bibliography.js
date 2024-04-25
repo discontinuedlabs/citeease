@@ -4,8 +4,9 @@ import { useParams } from "react-router-dom";
 import ContextMenu from "./ui/ContextMenu";
 import CitationWindow from "./CitationWindow";
 import AutoResizingTextarea from "./formElements/AutoResizingTextarea";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ReferenceEntry from "./ReferenceEntry.js";
+import { plugins as cslPlugins } from "@citation-js/core";
 
 export default function Bibliography(props) {
     const { id: bibliographyId } = useParams();
@@ -15,7 +16,22 @@ export default function Bibliography(props) {
     const [sourceType, setSourceType] = useState("Webpage"); // Can be changed to any other source type as default
     const [citationWindowVisible, setCitationWindowVisible] = useState(false);
     const [addCitationMenuVisible, setAddCitationMenuVisible] = useState(false);
-    const [chosenCitationId, setChosenCitationId] = useState();
+    const [cslFile, setCslFile] = useState();
+
+    useEffect(() => {
+        fetch(`${process.env.PUBLIC_URL}/cslFiles/${bibliography.style.code}.csl`)
+            .then((response) => response.text())
+            .then((data) => {
+                setCslFile(data);
+            })
+            .catch((error) => console.error("Error fetching CSL file:", error));
+    }, [bibliography.style]);
+
+    useEffect(() => {
+        if (!cslFile) return;
+        let config = cslPlugins.config.get("@csl");
+        config.templates.add(bibliography.style.code, cslFile);
+    }, [cslFile, bibliography.style.code]);
 
     // TODO: Change this to an option in the setting that also have an accept button to prevent changing the title by accident
     function updateBibliographyTitle(event) {
@@ -29,7 +45,6 @@ export default function Bibliography(props) {
         // TODO: First check if there are checked reference entries, if no one is checked, it sets the chosenCitation as a newCitation
         const newCitationId = uuid4();
         addNewCitationToBibliography(newCitationId);
-        setChosenCitationId(newCitationId);
         setSourceType(event.target.textContent);
         setCitationWindowVisible(true);
         setAddCitationMenuVisible(false);
@@ -40,13 +55,12 @@ export default function Bibliography(props) {
             id: id,
             content: { id: id, author: [{ given: "", family: "", id: uuid4() }] },
             isChecked: false,
-            reference: "",
-            new: true,
         };
         setBibliographies((prevBibliographies) => {
             return prevBibliographies.map((bib) => {
                 if (bib.id === bibliographyId) {
-                    return { ...bib, citations: [...bib.citations, newCitation] };
+                    // return { ...bib, citations: [...bib.citations, newCitation] };
+                    return { ...bib, editedCitation: newCitation };
                 }
                 return bib;
             });
@@ -97,6 +111,25 @@ export default function Bibliography(props) {
 
     function handleImportCitation() {}
 
+    function handleReferenceCheckbox(event, citationId) {
+        setBibliographies((prevBibliographies) => {
+            return prevBibliographies.map((bib) => {
+                if (bib.id === bibliographyId) {
+                    return {
+                        ...bib,
+                        citations: bib.citations.map((cit) => {
+                            if (cit.id === citationId) {
+                                return { ...cit, isChecked: event.target.checked };
+                            }
+                            return cit;
+                        }),
+                    };
+                }
+                return bib;
+            });
+        });
+    }
+
     return (
         <div className="bibliography">
             <div className="bibliography-header">
@@ -146,15 +179,19 @@ export default function Bibliography(props) {
 
             <div className="citations-container">
                 {bibliography.citations.map((citation) => (
-                    <ReferenceEntry citation={citation} font={font} key={citation.id} />
+                    <ReferenceEntry
+                        citation={citation}
+                        handleReferenceCheckbox={handleReferenceCheckbox}
+                        bibStyle={bibliography.style}
+                        key={citation.id}
+                        style={{ fontFamily: font }}
+                    />
                 ))}
             </div>
 
             {citationWindowVisible && (
                 <CitationWindow
-                    className="citation-window"
                     {...props}
-                    id={chosenCitationId}
                     sourceType={sourceType}
                     setCitationWindowVisible={setCitationWindowVisible}
                 />
