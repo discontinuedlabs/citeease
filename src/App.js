@@ -14,6 +14,7 @@ const ACTIONS = {
     UPDATE_CONTENT_IN_EDITED_CITATION: "Update content in edited citation",
     UPDATE_CITATION_IN_BIBLIOGRAPHY: "Update citation in bibliography",
     TOGGLE_REFERENCE_ENTRY_CHECKBOX: "Toggle reference entry checkbox",
+    HANDLE_MASTER_REFERENCE_ENTRY_CHECKBOX: "Handle manster reference entry checkbox",
 };
 
 function reducer(bibliographies, action) {
@@ -24,6 +25,7 @@ function reducer(bibliographies, action) {
                 style: action.bibStyle,
                 id: "bib=" + nanoid(10), // nanoid offers shorter UUIDs than uuid4. Useful for bibId because they are used in URl params
                 citations: [],
+                masterCheckboxState: "unchecked",
             };
             return [...bibliographies, newBibliography];
 
@@ -99,6 +101,41 @@ function reducer(bibliographies, action) {
                         ...bib,
                         citations: updatedCitations,
                     };
+                }
+                return bib;
+            });
+
+        // FIXME: the masterCheckboxState should be determined bibliography state in the Bibliography.js
+        case ACTIONS.HANDLE_MASTER_REFERENCE_ENTRY_CHECKBOX:
+            return bibliographies.map((bib) => {
+                if (bib.id === action.bibliographyId) {
+                    const allChecked = bib.citations.every((cit) => cit.isChecked);
+                    const allUnchecked = bib.citations.every((cit) => !cit.isChecked);
+
+                    // If all citations are checked, uncheck all of them
+                    if (allChecked) {
+                        return {
+                            ...bib,
+                            citations: bib.citations.map((cit) => ({ ...cit, isChecked: false })),
+                            masterCheckboxState: "unchecked",
+                        };
+                    }
+                    // If all citations are unchecked, check all of them
+                    else if (allUnchecked) {
+                        return {
+                            ...bib,
+                            citations: bib.citations.map((cit) => ({ ...cit, isChecked: true })),
+                            masterCheckboxState: "checked",
+                        };
+                    }
+                    // If some citations are checked, check the rest
+                    else {
+                        return {
+                            ...bib,
+                            citations: bib.citations.map((cit) => ({ ...cit, isChecked: true })),
+                            masterCheckboxState: "indeterminate",
+                        };
+                    }
                 }
                 return bib;
             });

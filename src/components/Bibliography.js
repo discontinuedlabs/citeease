@@ -14,6 +14,7 @@ export default function Bibliography(props) {
     const [sourceType, setSourceType] = useState("Webpage"); // Can be changed to any other source type as default
     const [citationWindowVisible, setCitationWindowVisible] = useState(false);
     const [addCitationMenuVisible, setAddCitationMenuVisible] = useState(false);
+    const [masterCheckboxState, setMasterCheckboxState] = useState(bibliography.masterCheckboxState);
 
     // TODO: Change this to an option in the setting that also have an accept button to prevent changing the title by accident
     function updateBibliographyTitle(event) {
@@ -88,6 +89,10 @@ export default function Bibliography(props) {
         });
     }
 
+    function handleMasterCheck() {
+        dispatch({ type: ACTIONS.HANDLE_MASTER_REFERENCE_ENTRY_CHECKBOX, bibliographyId: bibliographyId });
+    }
+
     return (
         <div className="bibliography">
             <div className="bibliography-header">
@@ -136,6 +141,14 @@ export default function Bibliography(props) {
             />
 
             <div className="citations-container">
+                <input
+                    type="checkbox"
+                    value={() => {
+                        if (masterCheckboxState === "checked") return true;
+                        else return false;
+                    }}
+                    onChange={handleMasterCheck}
+                />
                 {bibliography.citations.map((citation) => (
                     <ReferenceEntry
                         citation={citation}
