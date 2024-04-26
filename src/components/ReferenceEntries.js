@@ -1,6 +1,6 @@
 import { Cite, plugins as cslPlugins } from "@citation-js/core";
 import "@citation-js/plugin-csl";
-import "../css/ReferenceEntry.css";
+import "../css/ReferenceEntries.css";
 import { useEffect, useState } from "react";
 
 const MASTER_CHECKBOX_STATES = {
@@ -46,7 +46,7 @@ export default function ReferenceEntries(props) {
                     })
                     .catch((error) => console.error("Error fetching CSL file:", error));
             } else {
-                if (typeof savedCslFiles === "object" && bibliography.style.code in savedCslFiles) {
+                if (bibliography.style.code in savedCslFiles) {
                     // Get CSL from the savedCslFiles object
                     setCslFile(savedCslFiles[bibliography.style.code]);
                     return;
@@ -133,7 +133,10 @@ export default function ReferenceEntries(props) {
                             checked={cit.isChecked}
                             onChange={() => handleReferenceEntryCheck(cit.id)}
                         />
-                        <div dangerouslySetInnerHTML={{ __html: references[index] }}></div>
+                        <div
+                            className="reference-entry-text"
+                            dangerouslySetInnerHTML={{ __html: references[index] }}
+                        ></div>
                     </div>
                 );
             })}

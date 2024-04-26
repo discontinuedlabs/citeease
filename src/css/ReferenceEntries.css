@@ -1,0 +1,25 @@
+.reference-entries-container {
+    max-width: 50rem;
+    margin: auto;
+    padding: 1rem;
+}
+
+.reference-entry {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 0.5rem;
+    gap: 0.5rem;
+}
+
+.reference-entry-checkbox {
+    top: 0;
+    margin: 0;
+}
+
+.reference-entry-text {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    margin: 0;
+}

@@ -51,6 +51,5 @@ export default function CitationWindow(props) {
         setCitationWindowVisible(false);
     }
 
-    console.log(content.type);
     return <div className="citation-window">{CITATION_COMPONENTS[content.type]}</div>;
 }
