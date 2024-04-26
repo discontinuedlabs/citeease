@@ -8,7 +8,7 @@ import ReferenceEntry from "./ReferenceEntry.js";
 
 export default function Bibliography(props) {
     const { id: bibliographyId } = useParams();
-    const { bibliographies, dispatch, ACTIONS, font } = props;
+    const { bibliographies, dispatch, ACTIONS, font, savedCslFiles, setSavedCslFiles } = props;
     const bibliography = bibliographies.find((bib) => bib.id === bibliographyId);
 
     const [sourceType, setSourceType] = useState("Webpage"); // Can be changed to any other source type as default
@@ -80,23 +80,12 @@ export default function Bibliography(props) {
 
     function handleImportCitation() {}
 
-    function handleReferenceCheckbox(event, citationId) {
-        // setBibliographies((prevBibliographies) => {
-        //     return prevBibliographies.map((bib) => {
-        //         if (bib.id === bibliographyId) {
-        //             return {
-        //                 ...bib,
-        //                 citations: bib.citations.map((cit) => {
-        //                     if (cit.id === citationId) {
-        //                         return { ...cit, isChecked: event.target.checked };
-        //                     }
-        //                     return cit;
-        //                 }),
-        //             };
-        //         }
-        //         return bib;
-        //     });
-        // });
+    function handleReferenceEntryCheck(citationId) {
+        dispatch({
+            type: ACTIONS.TOGGLE_REFERENCE_ENTRY_CHECKBOX,
+            bibliographyId: bibliographyId,
+            citationId: citationId,
+        });
     }
 
     return (
@@ -150,10 +139,12 @@ export default function Bibliography(props) {
                 {bibliography.citations.map((citation) => (
                     <ReferenceEntry
                         citation={citation}
-                        handleReferenceCheckbox={handleReferenceCheckbox}
+                        handleReferenceEntryCheck={handleReferenceEntryCheck}
                         bibStyle={bibliography.style}
                         key={citation.id}
                         style={{ fontFamily: font }}
+                        savedCslFiles={savedCslFiles}
+                        setSavedCslFiles={setSavedCslFiles}
                     />
                 ))}
             </div>

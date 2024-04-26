@@ -1,49 +1,64 @@
-import { Cite } from "@citation-js/core";
+import { Cite, plugins as cslPlugins } from "@citation-js/core";
 import "@citation-js/plugin-csl";
 import "../css/ReferenceEntry.css";
 import { useEffect, useState } from "react";
-import { plugins as cslPlugins } from "@citation-js/core";
 
 export default function ReferenceEntry(props) {
-    const { citation, handleReferenceCheckbox, bibStyle } = props;
+    const { citation, handleReferenceEntryCheck, bibStyle, savedCslFiles, setSavedCslFiles } = props;
     const [reference, setReference] = useState("");
     const [cslFile, setCslFile] = useState();
 
     useEffect(() => {
-        console.log("called getcslFile");
         function getCslFile() {
-            fetch(`${process.env.PUBLIC_URL}/cslFiles/${bibStyle.code}.csl`)
-                .then((response) => response.text())
-                .then((data) => {
-                    console.log(data);
-                    setCslFile(data);
-                })
-                .catch((error) => console.error("Error fetching CSL file:", error));
+            if (bibStyle.builtIn) {
+                // Get CSL file from the public folder
+                fetch(`${process.env.PUBLIC_URL}/cslFiles/${bibStyle.code}.csl`)
+                    .then((response) => response.text())
+                    .then((data) => {
+                        setCslFile(data);
+                    })
+                    .catch((error) => console.error("Error fetching CSL file:", error));
+            } else {
+                if (typeof savedCslFiles === "object" && bibStyle.code in savedCslFiles) {
+                    // Get CSL from the savedCslFiles object
+                    setCslFile(savedCslFiles[bibStyle.code]);
+                    return;
+                } else {
+                    // Get CSL file from raw.githubusercontent.com and save it to the savedCslFiles object
+                    fetch(
+                        `https://raw.githubusercontent.com/citation-style-language/styles/master/${bibStyle.code}.csl`
+                    )
+                        .then((response) => response.text())
+                        .then((data) => {
+                            setCslFile(data);
+                            setSavedCslFiles((prevSavedCslFiles) => {
+                                return { ...prevSavedCslFiles, [bibStyle.code]: data };
+                            });
+                        })
+                        .catch((error) => console.error("Error fetching CSL file:", error));
+                }
+            }
         }
         getCslFile();
     }, [bibStyle]);
 
     useEffect(() => {
-        console.log("called registerNewCsl");
-        function registerNewCsl() {
+        async function formatCitation(newContent) {
             if (!cslFile) return;
             let config = cslPlugins.config.get("@csl");
             config.templates.add(bibStyle.code, cslFile);
-        }
-        registerNewCsl();
-    }, [cslFile, bibStyle]);
 
-    useEffect(() => {
-        console.log("called formatCitation");
-        async function formatCitation(newContent) {
-            let cite = await Cite.async(newContent);
-            let formattedCitation = cite.format("bibliography", {
-                format: "html",
-                template: bibStyle.code,
-                lang: "en-US",
-            });
-            console.log(formattedCitation);
-            setReference(formattedCitation);
+            try {
+                let cite = await Cite.async(newContent);
+                let formattedCitation = cite.format("bibliography", {
+                    format: "html",
+                    template: bibStyle.code,
+                    lang: "en-US",
+                });
+                setReference(formattedCitation);
+            } catch (error) {
+                console.error("Error formatting citation:", error);
+            }
         }
         formatCitation(citation.content);
     }, [citation, bibStyle, cslFile]);
@@ -54,7 +69,7 @@ export default function ReferenceEntry(props) {
                 type="checkbox"
                 name="reference-entry-checkbox"
                 checked={citation?.isChecked}
-                onChange={(event) => handleReferenceCheckbox(event, citation.id)}
+                onChange={() => handleReferenceEntryCheck(citation.id)}
             />
             <div dangerouslySetInnerHTML={{ __html: reference }}></div>
         </div>

@@ -4,10 +4,11 @@ import ContextMenu from "./ui/ContextMenu";
 export default function Home(props) {
     const { bibliographies, dispatch, ACTIONS } = props;
     const styles = [
-        { name: "APA", code: "apa" },
-        { name: "MLA", code: "mla" },
+        { name: "APA", code: "apa", builtIn: true },
+        { name: "MLA", code: "modern-language-association" },
         { name: "Chicago", code: "chicago" },
-        { name: "Harvard", code: "harvard-cite-them-right" },
+        { name: "Harvard", code: "harvard-cite-them-right", builtIn: true },
+        { name: "Vancouver", code: "elsevier-vancouver" },
     ];
 
     function handleAddBibliography(style) {

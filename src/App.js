@@ -13,6 +13,7 @@ const ACTIONS = {
     ADD_NEW_CITATION_TO_BIBLIOGRAPHY: "Add new citation to bibliography",
     UPDATE_CONTENT_IN_EDITED_CITATION: "Update content in edited citation",
     UPDATE_CITATION_IN_BIBLIOGRAPHY: "Update citation in bibliography",
+    TOGGLE_REFERENCE_ENTRY_CHECKBOX: "Toggle reference entry checkbox",
 };
 
 function reducer(bibliographies, action) {
@@ -81,6 +82,27 @@ function reducer(bibliographies, action) {
                 return bib;
             });
 
+        case ACTIONS.TOGGLE_REFERENCE_ENTRY_CHECKBOX:
+            return bibliographies.map((bib) => {
+                if (bib.id === action.bibliographyId) {
+                    const citationIndex = bib.citations.findIndex((cit) => cit.id === action.citationId);
+                    let updatedCitations;
+
+                    updatedCitations = bib.citations.map((cit, index) => {
+                        if (index === citationIndex) {
+                            return { ...cit, isChecked: !cit.isChecked };
+                        }
+                        return cit;
+                    });
+
+                    return {
+                        ...bib,
+                        citations: updatedCitations,
+                    };
+                }
+                return bib;
+            });
+
         default:
             return bibliographies;
     }
@@ -88,6 +110,7 @@ function reducer(bibliographies, action) {
 
 export default function App() {
     const [bibliographies, dispatch] = useReducerWithLocalStorage("bibliographies", reducer, []);
+    const [savedCslFiles, setSavedCslFiles] = useLocalStorage("savedCslFiles", {}); // Used to save the CSL files that don't exist in the public folder
     const [font, setFont] = useLocalStorage("font", { name: "Georgia", family: "Georgia" });
     const [acceptDialog, setAcceptDialog] = useState({});
 
@@ -136,6 +159,8 @@ export default function App() {
                             ACTIONS={ACTIONS}
                             font={font}
                             showAcceptDialog={showAcceptDialog}
+                            savedCslFiles={savedCslFiles}
+                            setSavedCslFiles={setSavedCslFiles}
                         />
                     }
                 />
