@@ -4,7 +4,7 @@ import * as sourceTypeUtils from "../sourceTypeUtils";
 import DateInput from "../formElements/DateInput";
 import AuthorsInput from "../formElements/AuthorsInput";
 
-export default function JournalArticle(props) {
+export default function ArticleJournal(props) {
     const { content, setContent, showAcceptDialog, handleAddReference, handleCancel } = props;
     const [doi, setDoi] = useState("");
     const autoFillDoiRef = useRef(null);
@@ -20,6 +20,7 @@ export default function JournalArticle(props) {
                             ...data.message,
                             // date.message has all the neccessary naming system to work with citeproc, only the below fields are missing for other purposes.
                             online: true,
+                            type: "article-journal", // This API returns the type as "journal-article", but for citeproc, it should be "article-journal"
                             accessed: sourceTypeUtils.createDateObject(new Date()),
                             author: data.message.author.map((author) => ({
                                 ...author,

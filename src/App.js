@@ -10,11 +10,14 @@ import { v4 as uuid4 } from "uuid";
 
 const ACTIONS = {
     ADD_NEW_BIBLIOGRAPHY: "Add new bibliography",
+    UPDATE_BIBLIOGRAPHY_FIELDS: "Update bibliography fields",
     ADD_NEW_CITATION_TO_BIBLIOGRAPHY: "Add new citation to bibliography",
+    ADD_CITATION_TO_EDITED_CITATION: "Add citation to edited citation",
     UPDATE_CONTENT_IN_EDITED_CITATION: "Update content in edited citation",
     UPDATE_CITATION_IN_BIBLIOGRAPHY: "Update citation in bibliography",
     TOGGLE_REFERENCE_ENTRY_CHECKBOX: "Toggle reference entry checkbox",
     HANDLE_MASTER_REFERENCE_ENTRY_CHECKBOX: "Handle manster reference entry checkbox",
+    UNCHECK_ALL_REFERENCE_ENTRCHECKBOXES: "Uncheck all reference entry checkboxes",
 };
 
 function reducer(bibliographies, action) {
@@ -22,22 +25,33 @@ function reducer(bibliographies, action) {
         case ACTIONS.ADD_NEW_BIBLIOGRAPHY:
             const newBibliography = {
                 title: "Untitled Bibliography", // Default title
-                style: action.bibStyle,
-                id: "bib=" + nanoid(10), // nanoid offers shorter UUIDs than uuid4. Useful for bibId because they are used in URl params
+                style: action.payload.bibliographyStyle,
+                id: "bib=" + nanoid(10), // nanoid offers shorter UUIDs than uuid4. Useful for bibliographyId because they are used in URl params
                 citations: [],
-                masterCheckboxState: "unchecked",
             };
             return [...bibliographies, newBibliography];
+
+        case ACTIONS.UPDATE_BIBLIOGRAPHY_FIELDS:
+            return bibliographies.map((bib) => {
+                if (bib.id === action.payload.bibliographyId) {
+                    return { ...bib, [action.payload.key]: action.payload.value };
+                }
+                return bib;
+            });
 
         case ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY:
             const citId = uuid4();
             const newCitation = {
                 id: citId,
-                content: { id: citId, author: [{ given: "", family: "", id: uuid4() }] },
+                content: {
+                    id: citId,
+                    type: action.payload.sourceType,
+                    author: [{ given: "", family: "", id: uuid4() }],
+                },
                 isChecked: false,
             };
             return bibliographies.map((bib) => {
-                if (bib.id === action.bibliographyId) {
+                if (bib.id === action.payload.bibliographyId) {
                     return {
                         ...bib,
                         editedCitation: newCitation,
@@ -46,12 +60,24 @@ function reducer(bibliographies, action) {
                 return bib;
             });
 
-        case ACTIONS.UPDATE_CONTENT_IN_EDITED_CITATION:
+        case ACTIONS.ADD_CITATION_TO_EDITED_CITATION:
             return bibliographies.map((bib) => {
-                if (bib.id === action.bibliographyId) {
+                if (bib.id === action.payload.bibliographyId) {
+                    const targetCitation = bib.citations.find((cit) => cit.id === action.payload.vitationId);
                     return {
                         ...bib,
-                        editedCitation: { ...bib.editedCitation, content: action.content },
+                        editedCitation: { ...targetCitation },
+                    };
+                }
+                return bib;
+            });
+
+        case ACTIONS.UPDATE_CONTENT_IN_EDITED_CITATION:
+            return bibliographies.map((bib) => {
+                if (bib.id === action.payload.bibliographyId) {
+                    return {
+                        ...bib,
+                        editedCitation: { ...bib.editedCitation, content: action.payload.content },
                     };
                 }
                 return bib;
@@ -59,21 +85,21 @@ function reducer(bibliographies, action) {
 
         case ACTIONS.UPDATE_CITATION_IN_BIBLIOGRAPHY:
             return bibliographies.map((bib) => {
-                if (bib.id === action.bibliographyId) {
-                    const citationIndex = bib.citations.findIndex((cit) => cit.id === action.editedCitation.id);
+                if (bib.id === action.payload.bibliographyId) {
+                    const citationIndex = bib.citations.findIndex((cit) => cit.id === action.payload.editedCitation.id);
                     let updatedCitations;
 
                     if (citationIndex !== -1) {
                         // If the citation exists, update it
                         updatedCitations = bib.citations.map((cit, index) => {
                             if (index === citationIndex) {
-                                return { ...cit, ...action.editedCitation }; // Update the existing citation
+                                return { ...cit, ...action.payload.editedCitation }; // Update the existing citation
                             }
                             return cit;
                         });
                     } else {
                         // If the citation doesn't exist, add it
-                        updatedCitations = [...bib.citations, action.editedCitation];
+                        updatedCitations = [...bib.citations, action.payload.editedCitation];
                     }
 
                     return {
@@ -86,8 +112,8 @@ function reducer(bibliographies, action) {
 
         case ACTIONS.TOGGLE_REFERENCE_ENTRY_CHECKBOX:
             return bibliographies.map((bib) => {
-                if (bib.id === action.bibliographyId) {
-                    const citationIndex = bib.citations.findIndex((cit) => cit.id === action.citationId);
+                if (bib.id === action.payload.bibliographyId) {
+                    const citationIndex = bib.citations.findIndex((cit) => cit.id === action.payload.citationId);
                     let updatedCitations;
 
                     updatedCitations = bib.citations.map((cit, index) => {
@@ -105,10 +131,9 @@ function reducer(bibliographies, action) {
                 return bib;
             });
 
-        // FIXME: the masterCheckboxState should be determined bibliography state in the Bibliography.js
         case ACTIONS.HANDLE_MASTER_REFERENCE_ENTRY_CHECKBOX:
             return bibliographies.map((bib) => {
-                if (bib.id === action.bibliographyId) {
+                if (bib.id === action.payload.bibliographyId) {
                     const allChecked = bib.citations.every((cit) => cit.isChecked);
                     const allUnchecked = bib.citations.every((cit) => !cit.isChecked);
 
@@ -117,7 +142,6 @@ function reducer(bibliographies, action) {
                         return {
                             ...bib,
                             citations: bib.citations.map((cit) => ({ ...cit, isChecked: false })),
-                            masterCheckboxState: "unchecked",
                         };
                     }
                     // If all citations are unchecked, check all of them
@@ -125,7 +149,6 @@ function reducer(bibliographies, action) {
                         return {
                             ...bib,
                             citations: bib.citations.map((cit) => ({ ...cit, isChecked: true })),
-                            masterCheckboxState: "checked",
                         };
                     }
                     // If some citations are checked, check the rest
@@ -133,9 +156,19 @@ function reducer(bibliographies, action) {
                         return {
                             ...bib,
                             citations: bib.citations.map((cit) => ({ ...cit, isChecked: true })),
-                            masterCheckboxState: "indeterminate",
                         };
                     }
+                }
+                return bib;
+            });
+
+        case ACTIONS.UNCHECK_ALL_REFERENCE_ENTRCHECKBOXES:
+            return bibliographies.map((bib) => {
+                if (bib.id === action.payload.bibliographyId) {
+                    return {
+                        ...bib,
+                        citations: bib.citations.map((cit) => ({ ...cit, isChecked: false })),
+                    };
                 }
                 return bib;
             });

@@ -8,11 +8,11 @@ export default function Home(props) {
         { name: "MLA", code: "modern-language-association" },
         { name: "Chicago", code: "chicago" },
         { name: "Harvard", code: "harvard-cite-them-right", builtIn: true },
-        { name: "Vancouver", code: "elsevier-vancouver" },
+        { name: "Vancouver", code: "vancouver" },
     ];
 
     function handleAddBibliography(style) {
-        dispatch({ type: ACTIONS.ADD_NEW_BIBLIOGRAPHY, bibStyle: style });
+        dispatch({ type: ACTIONS.ADD_NEW_BIBLIOGRAPHY, payload: { bibliographyStyle: style } });
     }
 
     return (

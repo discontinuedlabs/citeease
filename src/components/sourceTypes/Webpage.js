@@ -10,12 +10,6 @@ export default function Webpage(props) {
     const [url, setUrl] = useState("");
     const autoFillUrlRef = useRef(null);
 
-    useEffect(() => {
-        setContent((prevContent) => {
-            return { ...prevContent, type: "webpage" };
-        });
-    }, []);
-
     function retrieveContent(source) {
         if (source) {
             const website = encodeURIComponent(source);

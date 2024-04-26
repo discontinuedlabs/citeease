@@ -3,38 +3,58 @@ import { useParams } from "react-router-dom";
 import ContextMenu from "./ui/ContextMenu";
 import CitationWindow from "./CitationWindow";
 import AutoResizingTextarea from "./formElements/AutoResizingTextarea";
-import { useState } from "react";
-import ReferenceEntry from "./ReferenceEntry.js";
+import { useEffect, useState } from "react";
+import ReferenceEntries from "./ReferenceEntries";
+
+export const SOURCE_TYPES = {
+    ARTICLE_JOURNAL: {
+        label: "Journal article",
+        code: "article-journal",
+    },
+    BOOK: { label: "Book", code: "book" },
+    WEBPAGE: { label: "Webpage", code: "webpage" },
+};
 
 export default function Bibliography(props) {
     const { id: bibliographyId } = useParams();
     const { bibliographies, dispatch, ACTIONS, font, savedCslFiles, setSavedCslFiles } = props;
     const bibliography = bibliographies.find((bib) => bib.id === bibliographyId);
 
-    const [sourceType, setSourceType] = useState("Webpage"); // Can be changed to any other source type as default
     const [citationWindowVisible, setCitationWindowVisible] = useState(false);
     const [addCitationMenuVisible, setAddCitationMenuVisible] = useState(false);
-    const [masterCheckboxState, setMasterCheckboxState] = useState(bibliography.masterCheckboxState);
+
+    useEffect(() => {
+        // isChecked should not get saved, but since it's in an object that gets saved and loaded, it should be set to false when opening the bibliography page
+        dispatch({ type: ACTIONS.UNCHECK_ALL_REFERENCE_ENTRCHECKBOXES, payload: { bibliographyId: bibliographyId } });
+    }, []);
 
     // TODO: Change this to an option in the setting that also have an accept button to prevent changing the title by accident
     function updateBibliographyTitle(event) {
-        // const newTitle = event.target.value;
-        // setBibliographies((prevBibliographies) => {
-        //     return prevBibliographies.map((bib) => (bib.id === bibliographyId ? { ...bib, title: newTitle } : bib));
-        // });
+        dispatch({
+            type: ACTIONS.UPDATE_BIBLIOGRAPHY_FIELDS,
+            payload: { bibliographyId: bibliographyId, key: "title", value: event.target.value },
+        });
     }
 
-    function openCitationMenu(event) {
-        // TODO: First check if there are checked reference entries, if no one is checked, it sets the chosenCitation as a newCitation
-        // const newCitationId = uuid4();
-        addNewCitationToBibliography();
-        setSourceType(event.target.textContent);
+    function openCitationMenu(event, sourceType, isNew = false) {
+        let checkedCitationsIds = [];
+        bibliography.citations.forEach((cit) => {
+            if (cit.isChecked) {
+                checkedCitationsIds.push(cit.id);
+            }
+        });
+        if (isNew)
+            dispatch({
+                type: ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY,
+                payload: { bibliographyId: bibliographyId, sourceType: sourceType },
+            });
+        else if (checkedCitationsIds.length === 1)
+            dispatch({
+                type: ACTIONS.ADD_CITATION_TO_EDITED_CITATION,
+                payload: { bibliographyId: bibliographyId, citationId: checkedCitationsIds[0] },
+            });
         setCitationWindowVisible(true);
         setAddCitationMenuVisible(false);
-    }
-
-    function addNewCitationToBibliography() {
-        dispatch({ type: ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY, bibliographyId: bibliographyId });
     }
 
     // function handleCopy() {
@@ -84,13 +104,8 @@ export default function Bibliography(props) {
     function handleReferenceEntryCheck(citationId) {
         dispatch({
             type: ACTIONS.TOGGLE_REFERENCE_ENTRY_CHECKBOX,
-            bibliographyId: bibliographyId,
-            citationId: citationId,
+            payload: { bibliographyId: bibliographyId, citationId: citationId },
         });
-    }
-
-    function handleMasterCheck() {
-        dispatch({ type: ACTIONS.HANDLE_MASTER_REFERENCE_ENTRY_CHECKBOX, bibliographyId: bibliographyId });
     }
 
     return (
@@ -140,27 +155,15 @@ export default function Bibliography(props) {
                 spellCheck="false"
             />
 
-            <div className="citations-container">
-                <input
-                    type="checkbox"
-                    value={() => {
-                        if (masterCheckboxState === "checked") return true;
-                        else return false;
-                    }}
-                    onChange={handleMasterCheck}
-                />
-                {bibliography.citations.map((citation) => (
-                    <ReferenceEntry
-                        citation={citation}
-                        handleReferenceEntryCheck={handleReferenceEntryCheck}
-                        bibStyle={bibliography.style}
-                        key={citation.id}
-                        style={{ fontFamily: font }}
-                        savedCslFiles={savedCslFiles}
-                        setSavedCslFiles={setSavedCslFiles}
-                    />
-                ))}
-            </div>
+            <ReferenceEntries
+                style={{ fontFamily: font }}
+                bibliography={bibliography}
+                dispatch={dispatch}
+                ACTIONS={ACTIONS}
+                handleReferenceEntryCheck={handleReferenceEntryCheck}
+                savedCslFiles={savedCslFiles}
+                setSavedCslFiles={setSavedCslFiles}
+            />
 
             {citationWindowVisible && (
                 <CitationWindow
@@ -168,7 +171,6 @@ export default function Bibliography(props) {
                     dispatch={dispatch}
                     ACTIONS={ACTIONS}
                     {...props}
-                    sourceType={sourceType}
                     setCitationWindowVisible={setCitationWindowVisible}
                 />
             )}
@@ -191,11 +193,12 @@ export default function Bibliography(props) {
                     <button onClick={handleImportCitation}>Import citation</button>
                     <ContextMenu
                         label="Choose source type"
-                        options={[
-                            { label: "Webpage", method: openCitationMenu },
-                            { label: "Journal article", method: openCitationMenu },
-                            { label: "Book", method: openCitationMenu },
-                        ]}
+                        options={Object.values(SOURCE_TYPES).map((entry) => {
+                            return {
+                                label: entry.label,
+                                method: (event) => openCitationMenu(event, entry.code, true),
+                            };
+                        })}
                         menuStyle={{ position: "fixed", bottom: "100%", left: "50%", transform: "translateX(-50%)" }}
                     />
                 </div>
