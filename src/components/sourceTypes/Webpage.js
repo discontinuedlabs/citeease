@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import * as cheerio from "cheerio";
 import * as sourceTypeUtils from "../sourceTypeUtils";
@@ -7,6 +7,7 @@ import AuthorsInput from "../formElements/AuthorsInput";
 
 export default function Webpage(props) {
     const { content, setContent, showAcceptDialog, handleAddReference, handleCancel } = props;
+    const [url, setUrl] = useState("");
     const autoFillUrlRef = useRef(null);
 
     useEffect(() => {
@@ -91,8 +92,7 @@ export default function Webpage(props) {
     }
 
     function handleFillIn() {
-        const autoFillUrl = autoFillUrlRef.current.value;
-        retrieveContent(autoFillUrl);
+        retrieveContent(autoFillUrlRef.current.value);
     }
 
     function updateContentField(key, value) {
@@ -102,11 +102,22 @@ export default function Webpage(props) {
         }));
     }
 
+    function handleUrlChange(event) {
+        setUrl(event.target.value);
+    }
+
     return (
         <form className="citation-form" onSubmit={(event) => handleAddReference(event, content)}>
             <p>Insert the URL (link) here to fill the fields automatically:</p>
             <label htmlFor="auto-filler-url">URL</label>
-            <input type="text" name="auto-filler-url" placeholder="Insert a URL" ref={autoFillUrlRef} />
+            <input
+                type="text"
+                name="auto-filler-url"
+                placeholder="Insert a URL"
+                ref={autoFillUrlRef}
+                value={url}
+                onChange={handleUrlChange}
+            />
             <button type="button" onClick={handleFillIn}>
                 Fill in
             </button>
@@ -128,7 +139,7 @@ export default function Webpage(props) {
             <input
                 type="text"
                 name="website"
-                value={content["container-title"]?.[0] ?? ""} // At the time of writing this, this is the only element that throws error when finding an undefined value. It sometimes changes its mind and doesn't do it.
+                value={content["container-title"]?.[0] ?? ""}
                 placeholder="Website title"
                 onChange={(event) => updateContentField("container-title", [event.target.value])}
             />

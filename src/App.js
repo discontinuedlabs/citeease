@@ -1,9 +1,9 @@
 import "./css/App.css";
-import { useReducer, useState } from "react";
+import { useState } from "react";
 import Bibliography from "./components/Bibliography";
 import { Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
-import { useLocalStorage } from "./utils";
+import { useLocalStorage, useReducerWithLocalStorage } from "./utils";
 import AcceptDialog from "./components/ui/AcceptDialog";
 import { nanoid } from "nanoid";
 import { v4 as uuid4 } from "uuid";
@@ -87,8 +87,7 @@ function reducer(bibliographies, action) {
 }
 
 export default function App() {
-    const [bibliographies, dispatch] = useReducer(reducer, []);
-    console.log(bibliographies);
+    const [bibliographies, dispatch] = useReducerWithLocalStorage("bibliographies", reducer, []);
     const [font, setFont] = useLocalStorage("font", { name: "Georgia", family: "Georgia" });
     const [acceptDialog, setAcceptDialog] = useState({});
 

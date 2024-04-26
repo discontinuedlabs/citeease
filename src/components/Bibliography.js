@@ -3,9 +3,8 @@ import { useParams } from "react-router-dom";
 import ContextMenu from "./ui/ContextMenu";
 import CitationWindow from "./CitationWindow";
 import AutoResizingTextarea from "./formElements/AutoResizingTextarea";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import ReferenceEntry from "./ReferenceEntry.js";
-import { plugins as cslPlugins } from "@citation-js/core";
 
 export default function Bibliography(props) {
     const { id: bibliographyId } = useParams();
@@ -15,28 +14,6 @@ export default function Bibliography(props) {
     const [sourceType, setSourceType] = useState("Webpage"); // Can be changed to any other source type as default
     const [citationWindowVisible, setCitationWindowVisible] = useState(false);
     const [addCitationMenuVisible, setAddCitationMenuVisible] = useState(false);
-    const [cslFile, setCslFile] = useState();
-
-    useEffect(() => {
-        function getCslFile() {
-            fetch(`${process.env.PUBLIC_URL}/cslFiles/${bibliography.style.code}.csl`)
-                .then((response) => response.text())
-                .then((data) => {
-                    setCslFile(data);
-                })
-                .catch((error) => console.error("Error fetching CSL file:", error));
-        }
-        getCslFile();
-    }, [bibliography.style]);
-
-    useEffect(() => {
-        function registerNewCsl() {
-            if (!cslFile) return;
-            let config = cslPlugins.config.get("@csl");
-            config.templates.add(bibliography.style.code, cslFile);
-        }
-        registerNewCsl();
-    }, [cslFile, bibliography.style.code]);
 
     // TODO: Change this to an option in the setting that also have an accept button to prevent changing the title by accident
     function updateBibliographyTitle(event) {

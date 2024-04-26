@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { v4 as uuid4 } from "uuid";
 import * as sourceTypeUtils from "../sourceTypeUtils";
 import DateInput from "../formElements/DateInput";
@@ -6,6 +6,7 @@ import AuthorsInput from "../formElements/AuthorsInput";
 
 export default function JournalArticle(props) {
     const { content, setContent, showAcceptDialog, handleAddReference, handleCancel } = props;
+    const [doi, setDoi] = useState("");
     const autoFillDoiRef = useRef(null);
 
     function retrieveContent(source) {
@@ -44,8 +45,7 @@ export default function JournalArticle(props) {
     }
 
     function handleFillIn() {
-        const autoFillDoi = autoFillDoiRef.current.value;
-        retrieveContent(autoFillDoi);
+        retrieveContent(autoFillDoiRef.current.value);
     }
 
     function updateContentField(key, value) {
@@ -55,11 +55,22 @@ export default function JournalArticle(props) {
         }));
     }
 
+    function handleDoiChange(event) {
+        setDoi(event.target.value);
+    }
+
     return (
         <form className="citation-form" onSubmit={handleAddReference}>
             <p>Insert the DOI here to fill the fields automatically:</p>
             <label htmlFor="auto-filler-doi">DOI</label>
-            <input type="text" name="auto-filler-doi" placeholder="Insert a DOI" ref={autoFillDoiRef} />
+            <input
+                type="text"
+                name="auto-filler-doi"
+                placeholder="Insert a DOI"
+                ref={autoFillDoiRef}
+                value={doi}
+                onChange={handleDoiChange}
+            />
             <button type="button" onClick={handleFillIn}>
                 Fill in
             </button>
@@ -81,7 +92,7 @@ export default function JournalArticle(props) {
             <input
                 type="text"
                 name="journal"
-                value={content["container-title"]?.[0] ?? ""} // At the time of writing this, this is the only element that throws error when finding an undefined value. It sometimes changes its mind and doesn't do it.
+                value={content["container-title"]?.[0] ?? ""}
                 placeholder="Journal title"
                 onChange={(event) => updateContentField("container-title", [event.target.value])}
             />
