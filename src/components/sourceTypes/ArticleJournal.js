@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { v4 as uuid4 } from "uuid";
-import * as sourceTypeUtils from "../sourceTypeUtils";
+import * as citationUtils from "../citationUtils";
 import DateInput from "../formElements/DateInput";
 import AuthorsInput from "../formElements/AuthorsInput";
 
@@ -21,7 +21,7 @@ export default function ArticleJournal(props) {
                             // date.message has all the neccessary naming system to work with citeproc, only the below fields are missing for other purposes.
                             online: true,
                             type: "article-journal", // This API returns the type as "journal-article", but for citeproc, it should be "article-journal"
-                            accessed: sourceTypeUtils.createDateObject(new Date()),
+                            accessed: citationUtils.createDateObject(new Date()),
                             author: data.message.author.map((author) => ({
                                 ...author,
                                 id: uuid4(),

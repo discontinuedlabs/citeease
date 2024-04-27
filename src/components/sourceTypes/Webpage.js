@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import * as cheerio from "cheerio";
-import * as sourceTypeUtils from "../sourceTypeUtils";
+import * as citationUtils from "../citationUtils";
 import DateInput from "../formElements/DateInput";
 import AuthorsInput from "../formElements/AuthorsInput";
 
@@ -44,8 +44,8 @@ export default function Webpage(props) {
                 author: extractAuthors($),
                 "container-title": [$("meta[property='og:site_name']").attr("content") || ""], // TODO: Should use the website link as a fallback
                 publisher: $("meta[property='article:publisher']").attr("content"),
-                accessed: sourceTypeUtils.createDateObject(new Date()),
-                issued: sourceTypeUtils.createDateObject(
+                accessed: citationUtils.createDateObject(new Date()),
+                issued: citationUtils.createDateObject(
                     new Date(
                         $("meta[name='date']").attr("content") ||
                             $("meta[name='article:published_time']").attr("content") ||
@@ -82,7 +82,7 @@ export default function Webpage(props) {
             return author.trim() !== "" && self.indexOf(author) === index;
         });
 
-        return sourceTypeUtils.createAuthorsArray(authors);
+        return citationUtils.createAuthorsArray(authors);
     }
 
     function handleFillIn() {

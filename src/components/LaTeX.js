@@ -1,68 +1,48 @@
-export function formatAuthorsforLaTeX(authors) {
-    if (!Array.isArray(authors)) {
-        return "";
-    }
-    const formattedAuthors = authors.map((author) => {
-        const fullName = `${author.firstName || ""} ${author.lastName || ""}`;
-        return fullName.trim();
-    });
-    return formattedAuthors.join(" and ");
-}
+import { useEffect, useState } from "react";
+import { Cite, plugins } from "@citation-js/core";
+import "@citation-js/plugin-bibtex";
+import "../css/LaTeX.css";
 
-export function generateLaTeXCitation(citation) {
-    const { id, content, sourceType } = citation;
-    let LaTeXCitation = "";
+export default function LaTeXWindow(props) {
+    const { checkedCitations, setLaTeXWindowVisible } = props;
+    const [bibtexString, setBibtexString] = useState("");
+    const [biblatexString, setBiblatexString] = useState("");
+    const [displayedLatex, setDisplayedLatex] = useState(bibtexString);
 
-    if (sourceType === "Webpage") {
-        LaTeXCitation += `@online{${id},\n`;
-        LaTeXCitation += content.title && `\ttitle={${content.title}},\n`;
-        LaTeXCitation +=
-            content.authors && content.authors[0] && content.authors[0].firstName
-                ? `\tauthor={${formatAuthorsforLaTeX(content.authors)}},\n`
-                : "";
-        LaTeXCitation += content.publicationDate && `\tyear={${new Date(content.publicationDate).getFullYear()}},\n`;
-        LaTeXCitation += content.url && `\thowpublished={${content.url}}\n`;
-        LaTeXCitation += `}\n\n`;
-    }
+    useEffect(() => {
+        async function formatLaTeX() {
+            let config = plugins.config.get("@bibtex");
+            config.parse.strict = false; // When true, entries are checked for required fields.
+            config.parse.sentenceCase = false; // Convert titles to sentence case when parsing.
+            config.format.useIdAsLabel = false; // Use the entry ID as the label instead of generating one.
 
-    if (sourceType === "Journal") {
-        LaTeXCitation += `@article{${id},\n`;
-        LaTeXCitation += content.title && `\ttitle={${content.title}},\n`;
-        LaTeXCitation +=
-            content.authors && content.authors[0] && content.authors[0].firstName
-                ? `\tauthor={${formatAuthorsforLaTeX(content.authors)}},\n`
-                : "";
-        LaTeXCitation += content.publicationDate && `\tyear={${new Date(content.publicationDate).getFullYear()}},\n`;
-        LaTeXCitation += content.journal && `\tjournal={${content.journal}},\n`;
-        LaTeXCitation += content.volume && `\tvolume={${content.volume}},\n`;
-        LaTeXCitation += content.issue && `\tnumber={${content.issue}},\n`;
-        LaTeXCitation += content.pages && `\tpages={${content.pages}}\n`;
-        LaTeXCitation += `}\n\n`;
-    }
+            const contentArray = checkedCitations.map((cit) => ({ ...cit.content }));
+            let cite = await Cite.async(contentArray);
 
-    if (sourceType === "Book") {
-        LaTeXCitation += `@book{${id},\n`;
-        LaTeXCitation += content.title && `\ttitle={${content.title}},\n`;
-        LaTeXCitation +=
-            content.authors && content.authors[0] && content.authors[0].firstName
-                ? `\tauthor={${formatAuthorsforLaTeX(content.authors)}},\n`
-                : "";
-        LaTeXCitation += content.publicationDate && `\tyear={${new Date(content.publicationDate).getFullYear()}},\n`;
-        LaTeXCitation += content.publisher && `\tpublisher={${content.publisher}}\n`;
-        LaTeXCitation += `}\n\n`;
-    }
+            const bibtexOutput = cite.format("bibtex");
+            const biblatexOutput = cite.format("biblatex");
 
-    return LaTeXCitation;
-}
+            setBibtexString(bibtexOutput);
+            setBiblatexString(biblatexOutput);
 
-export function exportToLaTeX(title, citation) {
-    const newCitation = generateLaTeXCitation(citation);
-    const blob = new Blob([newCitation], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${title}.tex`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+            console.log(bibtexOutput);
+        }
+        formatLaTeX();
+    }, [checkedCitations]);
+
+    return (
+        <div className="latex-window-overlay">
+            <div className="latex-window">
+                <div className="latex-window-header">
+                    <div className="tabs-flex">
+                        <button onClick={() => setDisplayedLatex(bibtexString)}>BibTex</button>
+                        <button onClick={() => setDisplayedLatex(biblatexString)}>BibLaTeX</button>
+                    </div>
+                    <button onClick={() => setLaTeXWindowVisible(false)}>X</button>
+                </div>
+
+                <div className="displayed-latex">{displayedLatex || bibtexString}</div>
+            </div>
+        </div>
+    );
 }

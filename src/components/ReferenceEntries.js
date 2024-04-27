@@ -1,4 +1,4 @@
-import { Cite, plugins as cslPlugins } from "@citation-js/core";
+import { Cite, plugins } from "@citation-js/core";
 import "@citation-js/plugin-csl";
 import "../css/ReferenceEntries.css";
 import { useEffect, useState } from "react";
@@ -71,10 +71,12 @@ export default function ReferenceEntries(props) {
 
     useEffect(() => {
         async function formatCitations() {
-            const contentArray = createContentArray();
+            const contentArray = bibliography.citations.map((cit) => {
+                return { ...cit.content };
+            });
 
             if (!cslFile) return;
-            let config = cslPlugins.config.get("@csl");
+            let config = plugins.config.get("@csl");
             config.templates.add(bibliography.style.code, cslFile);
 
             try {
@@ -92,12 +94,6 @@ export default function ReferenceEntries(props) {
         }
         formatCitations();
     }, [bibliography.citations, bibliography.style, cslFile]);
-
-    function createContentArray() {
-        return bibliography.citations.map((cit) => {
-            return { ...cit.content };
-        });
-    }
 
     function splitContentArray(formattedCitations) {
         const parser = new DOMParser();

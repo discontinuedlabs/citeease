@@ -1,15 +1,11 @@
 import DateInput from "../formElements/DateInput";
 import AuthorsInput from "../formElements/AuthorsInput";
-import { useEffect, useRef } from "react";
-import * as sourceTypeUtils from "../sourceTypeUtils";
+import { useRef } from "react";
+import * as citationUtils from "../citationUtils";
 
 export default function Book(props) {
     const { content, setContent, setCitation, toggleEditMode, showAcceptDialog } = props;
     const autoFillIsbnRef = useRef(null);
-
-    // useEffect(() => {
-    //     console.log(content);
-    // }, [content]);
 
     function retrieveContent(source) {
         if (source)
@@ -23,7 +19,7 @@ export default function Book(props) {
                         title: data.title,
                         city: data.publish_place[0],
                         allCities: data.publish_place,
-                        authors: sourceTypeUtils.createAuthorsArray(data.author_name),
+                        authors: citationUtils.createAuthorsArray(data.author_name),
                         publisher: data.publisher[0],
                         allPublishers: data.publisher,
                         year: data.publish_year[0],
@@ -38,7 +34,7 @@ export default function Book(props) {
                         // online: data,
                         // doi: data.doi,
                         // url: data.url,
-                        accessDate: sourceTypeUtils.createDateObject(new Date()),
+                        accessDate: citationUtils.createDateObject(new Date()),
                     });
                 })
                 .catch((error) => {

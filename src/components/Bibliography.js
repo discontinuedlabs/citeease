@@ -5,6 +5,7 @@ import CitationWindow from "./CitationWindow";
 import AutoResizingTextarea from "./formElements/AutoResizingTextarea";
 import { useEffect, useState } from "react";
 import ReferenceEntries from "./ReferenceEntries";
+import LaTeXWindow from "./LaTeX";
 
 export const SOURCE_TYPES = {
     ARTICLE_JOURNAL: {
@@ -22,11 +23,21 @@ export default function Bibliography(props) {
 
     const [citationWindowVisible, setCitationWindowVisible] = useState(false);
     const [addCitationMenuVisible, setAddCitationMenuVisible] = useState(false);
+    const [intextCitationWindowVisible, setIntextCitationWindowVisible] = useState(false);
+    const [LaTeXWindowVisible, setLaTeXWindowVisible] = useState(false);
+    const [checkedCitations, setCheckedCitations] = useState([]);
 
     useEffect(() => {
         // isChecked should not get saved, but since it's in an object that gets saved and loaded, it should be set to false when opening the bibliography page
         dispatch({ type: ACTIONS.UNCHECK_ALL_REFERENCE_ENTRCHECKBOXES, payload: { bibliographyId: bibliographyId } });
     }, []);
+
+    useEffect(() => {
+        function updateCheckedCitations() {
+            setCheckedCitations(bibliography.citations.filter((cit) => cit.isChecked === true));
+        }
+        updateCheckedCitations();
+    }, [bibliography.citations]);
 
     // TODO: Change this to an option in the setting that also have an accept button to prevent changing the title by accident
     function updateBibliographyTitle(event) {
@@ -57,15 +68,14 @@ export default function Bibliography(props) {
         setAddCitationMenuVisible(false);
     }
 
-    // function handleCopy() {
-    //     try {
-    //         const regex = /(<([^>]+)>)/gi;
-    //         const cleanedReference = citation.reference.replace(regex, "");
-    //         navigator.clipboard.writeText(cleanedReference);
-    //     } catch (err) {
-    //         console.error("Failed to copy text: ", err);
-    //     }
-    // }
+    // TODO: the function that generates citations should be in this component
+    function handleCopy() {
+        try {
+            navigator.clipboard.writeText(bibliography.citations);
+        } catch (err) {
+            console.error("Failed to copy text: ", err);
+        }
+    }
 
     // function handleMove() {}
 
@@ -108,42 +118,46 @@ export default function Bibliography(props) {
         });
     }
 
+    function handleExportToLaTeX() {
+        setLaTeXWindowVisible(true);
+    }
+
     return (
         <div className="bibliography">
             <div className="bibliography-header">
                 <h3>{bibliography.style.name}</h3>
-                {/* <ContextMenu
+                <ContextMenu
                     icon="more_vert"
                     options={[
                         { label: "Copy to clipboard", method: handleCopy },
                         {
                             label: "Export to LaTeX",
-                            method: () => LaTeX.exportToLaTeX(bibliography.title, citation),
+                            method: handleExportToLaTeX,
                         },
 
-                        "DEVIDER",
+                        // "DEVIDER",
 
-                        { label: "Move", method: handleMove },
-                        { label: "Duplicate", method: handleDuplicate },
+                        // { label: "Move", method: handleMove },
+                        // { label: "Duplicate", method: handleDuplicate },
 
-                        "DEVIDER",
+                        // "DEVIDER",
 
-                        content.url && {
-                            label: "Visit website",
-                            method: () => window.open(content.url, "_blank"),
-                        },
-                        { label: "Edit", method: toggleEditMode },
+                        // content.url && {
+                        //     label: "Visit website",
+                        //     method: () => window.open(content.url, "_blank"),
+                        // },
+                        // { label: "Edit", method: toggleEditMode },
 
-                        "DEVIDER",
+                        // "DEVIDER",
 
-                        { label: "Delete", method: handleDelete, icon: "delete", style: { color: "crimson" } },
+                        // { label: "Delete", method: handleDelete, icon: "delete", style: { color: "crimson" } },
                     ]}
                     menuStyle={{
                         position: "absolute",
                         right: "0",
                     }}
                     buttonType={"smallButton"}
-                /> */}
+                />
             </div>
 
             <h1>{bibliography.title}</h1>
@@ -175,6 +189,12 @@ export default function Bibliography(props) {
                     {...props}
                     setCitationWindowVisible={setCitationWindowVisible}
                 />
+            )}
+
+            {intextCitationWindowVisible && <div>intext</div>}
+
+            {LaTeXWindowVisible && (
+                <LaTeXWindow checkedCitations={checkedCitations} setLaTeXWindowVisible={setLaTeXWindowVisible} />
             )}
 
             {addCitationMenuVisible && (
