@@ -46,7 +46,7 @@ export default function ReferenceEntries(props) {
                     })
                     .catch((error) => console.error("Error fetching CSL file:", error));
             } else {
-                if (bibliography.style.code in savedCslFiles) {
+                if (typeof savedCslFiles === "object" && bibliography.style.code in savedCslFiles) {
                     // Get CSL from the savedCslFiles object
                     setCslFile(savedCslFiles[bibliography.style.code]);
                     return;
@@ -115,31 +115,36 @@ export default function ReferenceEntries(props) {
     }
 
     return (
-        <div className="reference-entries-container">
-            {bibliography.citations.length !== 0 && (
-                <input
-                    type="checkbox"
-                    className="master-checkbox"
-                    checked={masterCheckboxState === MASTER_CHECKBOX_STATES.CHECKED}
-                    onChange={handleMasterCheck}
-                />
-            )}
-            {bibliography.citations.map((cit, index) => {
-                return (
-                    <div className="reference-entry" key={cit.id}>
-                        <input
-                            type="checkbox"
-                            className="reference-entry-checkbox"
-                            checked={cit.isChecked}
-                            onChange={() => handleReferenceEntryCheck(cit.id)}
-                        />
-                        <div
-                            className="reference-entry-text"
-                            dangerouslySetInnerHTML={{ __html: references[index] }}
-                        ></div>
-                    </div>
-                );
-            })}
+        <div className="reference-entries-component">
+            <div className="reference-entries-header">
+                {bibliography.citations.length !== 0 && (
+                    <input
+                        type="checkbox"
+                        className="master-checkbox"
+                        checked={masterCheckboxState === MASTER_CHECKBOX_STATES.CHECKED}
+                        onChange={handleMasterCheck}
+                    />
+                )}
+            </div>
+
+            <div className="reference-entries-container">
+                {bibliography.citations.map((cit, index) => {
+                    return (
+                        <div className="reference-entry" key={cit.id}>
+                            <input
+                                type="checkbox"
+                                className="reference-entry-checkbox"
+                                checked={cit.isChecked}
+                                onChange={() => handleReferenceEntryCheck(cit.id)}
+                            />
+                            <div
+                                className="reference-entry-text"
+                                dangerouslySetInnerHTML={{ __html: references[index] }}
+                            ></div>
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
 }

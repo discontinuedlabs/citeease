@@ -10,6 +10,8 @@
 
     --border-radius-regular: 0.5rem;
     --border-regular: 0.1rem solid;
+
+    --transition-regular: all 0.1s ease-in-out;
 }
 
 * {

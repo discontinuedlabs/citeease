@@ -146,14 +146,16 @@ export default function Bibliography(props) {
                 /> */}
             </div>
 
-            <AutoResizingTextarea
+            <h1>{bibliography.title}</h1>
+
+            {/* <AutoResizingTextarea
                 value={bibliography.title}
                 className="bibliography-title"
                 onChange={updateBibliographyTitle}
                 maxLength={200}
                 rows={1}
                 spellCheck="false"
-            />
+            /> */}
 
             <ReferenceEntries
                 style={{ fontFamily: font }}
