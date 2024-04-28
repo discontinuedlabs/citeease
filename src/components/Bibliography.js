@@ -6,6 +6,7 @@ import AutoResizingTextarea from "./formElements/AutoResizingTextarea";
 import { useEffect, useState } from "react";
 import ReferenceEntries from "./ReferenceEntries";
 import LaTeXWindow from "./LaTeX";
+import * as citationEngine from "./citationEngine";
 
 export const SOURCE_TYPES = {
     ARTICLE_JOURNAL: {
@@ -68,10 +69,17 @@ export default function Bibliography(props) {
         setAddCitationMenuVisible(false);
     }
 
-    // TODO: the function that generates citations should be in this component
-    function handleCopy() {
+    async function handleCopy() {
+        const formattedCitations = await citationEngine.formatCitations(
+            checkedCitations,
+            bibliography.style,
+            savedCslFiles,
+            setSavedCslFiles,
+            "text"
+        );
+
         try {
-            navigator.clipboard.writeText(bibliography.citations);
+            navigator.clipboard.writeText(formattedCitations);
         } catch (err) {
             console.error("Failed to copy text: ", err);
         }

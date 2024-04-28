@@ -1,7 +1,6 @@
-import { Cite, plugins } from "@citation-js/core";
-import "@citation-js/plugin-csl";
 import "../css/ReferenceEntries.css";
 import { useEffect, useState } from "react";
+import * as citationEngine from "./citationEngine.js";
 
 const MASTER_CHECKBOX_STATES = {
     CHECKED: "checked", // All reference entries are checked
@@ -12,7 +11,6 @@ const MASTER_CHECKBOX_STATES = {
 export default function ReferenceEntries(props) {
     const { bibliography, dispatch, ACTIONS, handleReferenceEntryCheck, savedCslFiles, setSavedCslFiles } = props;
     const [references, setReferences] = useState([]);
-    const [cslFile, setCslFile] = useState();
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
 
     useEffect(() => {
@@ -36,72 +34,17 @@ export default function ReferenceEntries(props) {
     }, [bibliography.citations]);
 
     useEffect(() => {
-        function getCslFile() {
-            if (bibliography.style.builtIn) {
-                // Get CSL file from the public folder
-                fetch(`${process.env.PUBLIC_URL}/cslFiles/${bibliography.style.code}.csl`)
-                    .then((response) => response.text())
-                    .then((data) => {
-                        setCslFile(data);
-                    })
-                    .catch((error) => console.error("Error fetching CSL file:", error));
-            } else {
-                if (typeof savedCslFiles === "object" && bibliography.style.code in savedCslFiles) {
-                    // Get CSL from the savedCslFiles object
-                    setCslFile(savedCslFiles[bibliography.style.code]);
-                    return;
-                } else {
-                    // Get CSL file from raw.githubusercontent.com and save it to the savedCslFiles object
-                    fetch(
-                        `https://raw.githubusercontent.com/citation-style-language/styles/master/${bibliography.style.code}.csl`
-                    )
-                        .then((response) => response.text())
-                        .then((data) => {
-                            setCslFile(data);
-                            setSavedCslFiles((prevSavedCslFiles) => {
-                                return { ...prevSavedCslFiles, [bibliography.style.code]: data };
-                            });
-                        })
-                        .catch((error) => console.error("Error fetching CSL file:", error));
-                }
-            }
-        }
-        getCslFile();
-    }, [bibliography.style]);
-
-    useEffect(() => {
         async function formatCitations() {
-            const contentArray = bibliography.citations.map((cit) => {
-                return { ...cit.content };
-            });
-
-            if (!cslFile) return;
-            let config = plugins.config.get("@csl");
-            config.templates.add(bibliography.style.code, cslFile);
-
-            try {
-                let cite = await Cite.async(contentArray);
-                let formattedCitations = cite.format("bibliography", {
-                    format: "html",
-                    template: bibliography.style.code,
-                    lang: "en-US",
-                });
-                const splitContent = splitContentArray(formattedCitations);
-                setReferences(splitContent);
-            } catch (error) {
-                console.error("Error formatting citation:", error);
-            }
+            const formattedCitations = await citationEngine.formatCitations(
+                bibliography.citations,
+                bibliography.style,
+                savedCslFiles,
+                setSavedCslFiles
+            );
+            setReferences(formattedCitations);
         }
         formatCitations();
-    }, [bibliography.citations, bibliography.style, cslFile]);
-
-    function splitContentArray(formattedCitations) {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(formattedCitations, "text/html");
-        const divElements = doc.querySelectorAll(".csl-entry");
-        const divArray = Array.from(divElements).map((div) => div.outerHTML);
-        return divArray;
-    }
+    }, [bibliography.citations, bibliography.style]);
 
     function handleMasterCheck() {
         dispatch({
