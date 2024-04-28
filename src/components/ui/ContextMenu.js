@@ -32,25 +32,17 @@ export default function ContextMenu(props) {
                             if (/devider/i.test(option)) {
                                 return <hr className="solid" />;
                             }
-                            if (option.customElement) {
-                                return (
-                                    <div
-                                        dangerouslySetInnerHTML={{
-                                            __html: option.customElement,
-                                        }}
-                                    ></div>
-                                );
-                            }
+
                             return (
                                 <ContextMenuOption
                                     onClick={(event) => {
                                         option.method(event);
                                         setHidden(true);
                                     }}
-                                    key={option.label}
-                                    buttonStyle={{ ...option.style }}
-                                    icon={option.icon}
-                                    label={option.label}
+                                    key={option?.label}
+                                    buttonStyle={{ ...option?.style }}
+                                    icon={option?.icon}
+                                    label={option?.label}
                                 ></ContextMenuOption>
                             );
                         })}

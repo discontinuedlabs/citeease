@@ -1,11 +1,10 @@
 import { Cite, plugins } from "@citation-js/core";
 import "@citation-js/plugin-csl";
+import "@citation-js/plugin-bibtex";
 
 export async function formatCitations(citations, bibStyle, savedCslFiles, setSavedCslFiles, formateType = "html") {
     const cslFile = await getCslFile(bibStyle, savedCslFiles, setSavedCslFiles);
-    const contentArray = citations.map((cit) => {
-        return { ...cit.content };
-    });
+    const contentArray = createContentArray(citations);
 
     let config = plugins.config.get("@csl");
     config.templates.add(bibStyle.code, cslFile);
@@ -18,6 +17,18 @@ export async function formatCitations(citations, bibStyle, savedCslFiles, setSav
         lang: "en-US",
     });
     return formateType === "html" ? splitContentArray(formattedCitations) : formattedCitations;
+}
+
+export async function formatLaTeX(citations, latexFormat = "bibtex") {
+    let config = plugins.config.get("@bibtex");
+    config.parse.strict = false; // When true, entries are checked for required fields.
+    config.parse.sentenceCase = false; // Convert titles to sentence case when parsing.
+    config.format.useIdAsLabel = false; // Use the entry ID as the label instead of generating one.
+
+    const contentArray = createContentArray(citations);
+    let cite = await Cite.async(contentArray);
+
+    return cite.format(latexFormat);
 }
 
 async function getCslFile(bibStyle, savedCslFiles, setSavedCslFiles) {
@@ -35,6 +46,12 @@ async function getCslFile(bibStyle, savedCslFiles, setSavedCslFiles) {
         });
         return data;
     }
+}
+
+function createContentArray(citationsArray) {
+    return citationsArray.map((cit) => {
+        return { ...cit.content };
+    });
 }
 
 function splitContentArray(formattedCitations) {

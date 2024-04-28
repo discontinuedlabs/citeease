@@ -1,7 +1,3 @@
-.styled-button {
-    transition: all 0.1s ease-in-out;
-}
-
 .mechanic-button {
     color: var(--dark-blue);
     background-color: var(--accent-yellow);
@@ -17,6 +13,7 @@
     padding: 0.2rem;
     border: none;
     box-shadow: 0 0 0 transparent;
+    transition: all 0.1s ease-in-out;
 }
 
 .context-menu-option {
@@ -27,6 +24,7 @@
     color: var(--dark-blue);
     border-radius: calc(var(--border-radius-regular) - var(--context-menu-padding));
     padding: 0.7rem;
+    transition: all 0.1s ease-in-out;
 }
 
 .small-button:hover,

@@ -1,5 +1,6 @@
 import "../css/Bibliography.css";
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ContextMenu from "./ui/ContextMenu";
 import CitationWindow from "./CitationWindow";
 import AutoResizingTextarea from "./formElements/AutoResizingTextarea";
@@ -19,21 +20,24 @@ export const SOURCE_TYPES = {
 
 export default function Bibliography(props) {
     const { id: bibliographyId } = useParams();
-    const { bibliographies, dispatch, ACTIONS, font, savedCslFiles, setSavedCslFiles } = props;
+    const { bibliographies, dispatch, ACTIONS, font, savedCslFiles, setSavedCslFiles, showConfirmDialog } = props;
     const bibliography = bibliographies.find((bib) => bib.id === bibliographyId);
 
+    const navigate = useNavigate();
     const [citationWindowVisible, setCitationWindowVisible] = useState(false);
     const [addCitationMenuVisible, setAddCitationMenuVisible] = useState(false);
     const [intextCitationWindowVisible, setIntextCitationWindowVisible] = useState(false);
     const [LaTeXWindowVisible, setLaTeXWindowVisible] = useState(false);
-    const [checkedCitations, setCheckedCitations] = useState([]);
+    const [checkedCitations, setCheckedCitations] = useState([]); // TODO: Change checked to selected
+    const [exportAll, setExportAll] = useState(false); // used for all kind of export in the master context menu
 
     useEffect(() => {
         // isChecked should not get saved, but since it's in an object that gets saved and loaded, it should be set to false when opening the bibliography page
-        dispatch({ type: ACTIONS.UNCHECK_ALL_REFERENCE_ENTRCHECKBOXES, payload: { bibliographyId: bibliographyId } });
+        dispatch({ type: ACTIONS.UNCHECK_ALL_CITATIONS, payload: { bibliographyId: bibliographyId } });
     }, []);
 
     useEffect(() => {
+        // FIXME: If you check one from two citations, it will add the unchecked one. But this doesnt happen with more than two citations
         function updateCheckedCitations() {
             setCheckedCitations(bibliography.citations.filter((cit) => cit.isChecked === true));
         }
@@ -69,9 +73,9 @@ export default function Bibliography(props) {
         setAddCitationMenuVisible(false);
     }
 
-    async function handleCopy() {
+    async function handleCopyAll() {
         const formattedCitations = await citationEngine.formatCitations(
-            checkedCitations,
+            bibliography.citations,
             bibliography.style,
             savedCslFiles,
             setSavedCslFiles,
@@ -102,18 +106,10 @@ export default function Bibliography(props) {
     //     });
     // }
 
-    // function handleDelete() {
-    //     setBibliographies((prevBibliographies) => {
-    //         return prevBibliographies.map((biblio) =>
-    //             biblio.id === bibliographyId
-    //                 ? {
-    //                       ...biblio,
-    //                       citations: biblio.citations.filter((c) => c.id !== id),
-    //                   }
-    //                 : biblio
-    //         );
-    //     });
-    // }
+    function handleDeleteBibliography() {
+        navigate("/");
+        dispatch({ type: ACTIONS.DELETE_BIBLIOGRAPHY, payload: { bibliographyId: bibliographyId } });
+    }
 
     function searchByIdentifier() {}
 
@@ -126,7 +122,8 @@ export default function Bibliography(props) {
         });
     }
 
-    function handleExportToLaTeX() {
+    function handleExportAllToLatex() {
+        setExportAll(true);
         setLaTeXWindowVisible(true);
     }
 
@@ -137,13 +134,13 @@ export default function Bibliography(props) {
                 <ContextMenu
                     icon="more_vert"
                     options={[
-                        { label: "Copy to clipboard", method: handleCopy },
+                        { label: "Copy all to clipboard", method: handleCopyAll },
                         {
-                            label: "Export to LaTeX",
-                            method: handleExportToLaTeX,
+                            label: "Export all to LaTeX",
+                            method: handleExportAllToLatex,
                         },
 
-                        // "DEVIDER",
+                        "DEVIDER",
 
                         // { label: "Move", method: handleMove },
                         // { label: "Duplicate", method: handleDuplicate },
@@ -156,9 +153,21 @@ export default function Bibliography(props) {
                         // },
                         // { label: "Edit", method: toggleEditMode },
 
-                        // "DEVIDER",
+                        "DEVIDER",
 
-                        // { label: "Delete", method: handleDelete, icon: "delete", style: { color: "crimson" } },
+                        {
+                            label: "Delete bibliography?",
+                            method: () =>
+                                showConfirmDialog(
+                                    "Delete bibliography",
+                                    "You'll no longer see this bibliography in your list. This will also delete related work and citations.",
+                                    handleDeleteBibliography,
+                                    "Delete",
+                                    "Cancel"
+                                ),
+                            icon: "delete",
+                            style: { color: "crimson" },
+                        },
                     ]}
                     menuStyle={{
                         position: "absolute",
@@ -187,6 +196,10 @@ export default function Bibliography(props) {
                 handleReferenceEntryCheck={handleReferenceEntryCheck}
                 savedCslFiles={savedCslFiles}
                 setSavedCslFiles={setSavedCslFiles}
+                checkedCitations={checkedCitations}
+                setLaTeXWindowVisible={setLaTeXWindowVisible}
+                setExportAll={setExportAll}
+                showConfirmDialog={showConfirmDialog}
             />
 
             {citationWindowVisible && (
@@ -202,7 +215,12 @@ export default function Bibliography(props) {
             {intextCitationWindowVisible && <div>intext</div>}
 
             {LaTeXWindowVisible && (
-                <LaTeXWindow checkedCitations={checkedCitations} setLaTeXWindowVisible={setLaTeXWindowVisible} />
+                <LaTeXWindow
+                    citations={bibliography.citations}
+                    checkedCitations={checkedCitations}
+                    setLaTeXWindowVisible={setLaTeXWindowVisible}
+                    exportAll={exportAll}
+                />
             )}
 
             {addCitationMenuVisible && (

@@ -1,6 +1,7 @@
 import "../css/ReferenceEntries.css";
 import { useEffect, useState } from "react";
 import * as citationEngine from "./citationEngine.js";
+import ContextMenu from "./ui/ContextMenu.js";
 
 const MASTER_CHECKBOX_STATES = {
     CHECKED: "checked", // All reference entries are checked
@@ -9,7 +10,18 @@ const MASTER_CHECKBOX_STATES = {
 };
 
 export default function ReferenceEntries(props) {
-    const { bibliography, dispatch, ACTIONS, handleReferenceEntryCheck, savedCslFiles, setSavedCslFiles } = props;
+    const {
+        bibliography,
+        dispatch,
+        ACTIONS,
+        handleReferenceEntryCheck,
+        savedCslFiles,
+        setSavedCslFiles,
+        checkedCitations,
+        setLaTeXWindowVisible,
+        setExportAll,
+        showConfirmDialog,
+    } = props;
     const [references, setReferences] = useState([]);
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
 
@@ -53,6 +65,41 @@ export default function ReferenceEntries(props) {
         });
     }
 
+    async function handleCopy() {
+        const formattedCitations = await citationEngine.formatCitations(
+            checkedCitations,
+            bibliography.style,
+            savedCslFiles,
+            setSavedCslFiles,
+            "text"
+        );
+
+        try {
+            navigator.clipboard.writeText(formattedCitations);
+        } catch (err) {
+            console.error("Failed to copy text: ", err);
+        }
+    }
+
+    function handleExportToLatex() {
+        setExportAll(false);
+        setLaTeXWindowVisible(true);
+    }
+
+    function handleDuplicate() {
+        dispatch({
+            type: ACTIONS.DUPLICATE_SELECTED_CITATIONS,
+            payload: { bibliographyId: bibliography.id, checkedCitations: checkedCitations },
+        });
+    }
+
+    function handleDelete() {
+        dispatch({
+            type: ACTIONS.DELETE_SELECTED_CITATIONS,
+            payload: { bibliographyId: bibliography.id, checkedCitations: checkedCitations },
+        });
+    }
+
     return (
         <div className="reference-entries-component">
             <div className="reference-entries-header">
@@ -62,6 +109,55 @@ export default function ReferenceEntries(props) {
                         className="master-checkbox"
                         checked={masterCheckboxState === MASTER_CHECKBOX_STATES.CHECKED}
                         onChange={handleMasterCheck}
+                    />
+                )}
+                {checkedCitations.length >= 1 && (
+                    <ContextMenu
+                        icon="more_vert"
+                        options={[
+                            { label: "Copy to clipboard", method: handleCopy },
+                            {
+                                label: "Export to LaTeX",
+                                method: handleExportToLatex,
+                            },
+
+                            "DEVIDER",
+
+                            // { label: "Move", method: handleMove },
+                            { label: "Duplicate", method: handleDuplicate },
+
+                            "DEVIDER",
+
+                            checkedCitations.length === 1 &&
+                                checkedCitations[0].content.url && {
+                                    label: "Visit website",
+                                    method: () => window.open(checkedCitations[0].content.url, "_blank"),
+                                },
+                            // { label: "Edit", method: toggleEditMode },
+
+                            "DEVIDER",
+
+                            {
+                                label: "Delete",
+                                method: () =>
+                                    showConfirmDialog(
+                                        `Delete ${checkedCitations.length === 1 ? "citation" : "citations"}?`,
+                                        `Are you sure you want to delete ${
+                                            checkedCitations.length === 1 ? "this citation" : "these citations"
+                                        }?`,
+                                        handleDelete,
+                                        "Delete",
+                                        "Cancel"
+                                    ),
+                                icon: "delete",
+                                style: { color: "crimson" },
+                            },
+                        ]}
+                        menuStyle={{
+                            position: "absolute",
+                            left: "0",
+                        }}
+                        buttonType={"smallButton"}
                     />
                 )}
             </div>

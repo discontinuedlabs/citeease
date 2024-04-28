@@ -7,6 +7,7 @@ import { useLocalStorage, useReducerWithLocalStorage } from "./utils";
 import AcceptDialog from "./components/ui/AcceptDialog";
 import { nanoid } from "nanoid";
 import { v4 as uuid4 } from "uuid";
+import ConfirmDialog from "./components/ui/ConfirmDialog";
 
 const ACTIONS = {
     ADD_NEW_BIBLIOGRAPHY: "Add new bibliography",
@@ -17,7 +18,10 @@ const ACTIONS = {
     UPDATE_CITATION_IN_BIBLIOGRAPHY: "Update citation in bibliography",
     TOGGLE_REFERENCE_ENTRY_CHECKBOX: "Toggle reference entry checkbox",
     HANDLE_MASTER_REFERENCE_ENTRY_CHECKBOX: "Handle manster reference entry checkbox",
-    UNCHECK_ALL_REFERENCE_ENTRCHECKBOXES: "Uncheck all reference entry checkboxes",
+    UNCHECK_ALL_CITATIONS: "Uncheck all citations",
+    DELETE_BIBLIOGRAPHY: "Delete bibliography",
+    DELETE_SELECTED_CITATIONS: "Delete selected citations",
+    DUPLICATE_SELECTED_CITATIONS: "Duplicate selected citations",
 };
 
 function reducer(bibliographies, action) {
@@ -162,12 +166,42 @@ function reducer(bibliographies, action) {
                 return bib;
             });
 
-        case ACTIONS.UNCHECK_ALL_REFERENCE_ENTRCHECKBOXES:
+        case ACTIONS.UNCHECK_ALL_CITATIONS:
             return bibliographies.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     return {
                         ...bib,
                         citations: bib.citations.map((cit) => ({ ...cit, isChecked: false })),
+                    };
+                }
+                return bib;
+            });
+
+        case ACTIONS.DELETE_BIBLIOGRAPHY:
+            return bibliographies.filter((bib) => bib.id !== action.payload.bibliographyId);
+
+        case ACTIONS.DUPLICATE_SELECTED_CITATIONS:
+            return bibliographies.map((bib) => {
+                if (bib.id === action.payload.bibliographyId) {
+                    const duplicatedCitations = action.payload.checkedCitations.map((cit) => {
+                        const newId = uuid4();
+                        return { ...cit, id: newId, content: { ...cit.content, id: newId } };
+                    });
+                    return {
+                        ...bib,
+                        citations: [...bib.citations, ...duplicatedCitations],
+                    };
+                }
+                return bib;
+            });
+
+        case ACTIONS.DELETE_SELECTED_CITATIONS:
+            return bibliographies.map((bib) => {
+                if (bib.id === action.payload.bibliographyId) {
+                    const targetIds = action.payload.checkedCitations.map((cit) => cit.id);
+                    return {
+                        ...bib,
+                        citations: bib.citations.filter((cit) => !targetIds.includes(cit.id)),
                     };
                 }
                 return bib;
@@ -183,6 +217,7 @@ export default function App() {
     const [savedCslFiles, setSavedCslFiles] = useLocalStorage("savedCslFiles", {}); // Used to save the CSL files that don't exist in the public folder
     const [font, setFont] = useLocalStorage("font", { name: "Georgia", family: "Georgia" });
     const [acceptDialog, setAcceptDialog] = useState({});
+    const [confirmDialog, setConfirmDialog] = useState({});
 
     const FONTS = [
         { name: "Default", family: "unset" },
@@ -201,7 +236,11 @@ export default function App() {
     ];
 
     function showAcceptDialog(title, body = "") {
-        setAcceptDialog({ title, body });
+        setAcceptDialog({ message: { title, body } });
+    }
+
+    function showConfirmDialog(title, body, onConfirmMethod, yesLabel = "Yes", noLabel = "No") {
+        setConfirmDialog({ message: { title, body }, onConfirmMethod, yesLabel, noLabel });
     }
 
     return (
@@ -229,13 +268,17 @@ export default function App() {
                             ACTIONS={ACTIONS}
                             font={font}
                             showAcceptDialog={showAcceptDialog}
+                            showConfirmDialog={showConfirmDialog}
                             savedCslFiles={savedCslFiles}
                             setSavedCslFiles={setSavedCslFiles}
                         />
                     }
                 />
             </Routes>
-            {acceptDialog.title && <AcceptDialog message={acceptDialog} closeToast={() => setAcceptDialog("")} />}
+            {acceptDialog.message && (
+                <AcceptDialog message={acceptDialog.message} closeDialog={() => setAcceptDialog({})} />
+            )}
+            {confirmDialog.message && <ConfirmDialog {...confirmDialog} closeDialog={() => setConfirmDialog({})} />}
         </div>
     );
 }
