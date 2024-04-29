@@ -15,9 +15,18 @@
 }
 
 /* @font-face {
-    font-family: "YourCustomFont";
-    src: url("%PUBLIC_URL%/fonts/YourCustomFont.woff2") format("woff2"),
-        url("%PUBLIC_URL%/fonts/YourCustomFont.woff") format("woff");
+    font-family: "Georgia";
+    src: url("%PUBLIC_URL%/fonts/georgia.ttf") format("ttf"),
+} */
+
+/* @font-face {
+    font-family: "Times New Roman";
+    src: url("%PUBLIC_URL%/fonts/times-new-roman.ttf") format("ttf"),
+} */
+
+/* @font-face {
+    font-family: "Arial";
+    src: url("%PUBLIC_URL%/fonts/arial.ttf") format("ttf"),
 } */
 
 * {

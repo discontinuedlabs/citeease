@@ -202,9 +202,6 @@ export default function ReferenceEntries(props) {
                         </div>
                     );
                 })}
-                <div style={{ fontFamily: font.family }} className="reference-entry-text">
-                    Yusef Almamari
-                </div>
             </div>
         </div>
     );
