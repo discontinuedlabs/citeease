@@ -20,7 +20,16 @@ export const SOURCE_TYPES = {
 
 export default function Bibliography(props) {
     const { id: bibliographyId } = useParams();
-    const { bibliographies, dispatch, ACTIONS, font, savedCslFiles, setSavedCslFiles, showConfirmDialog } = props;
+    const {
+        bibliographies,
+        dispatch,
+        ACTIONS,
+        font,
+        savedCslFiles,
+        setSavedCslFiles,
+        showConfirmDialog,
+        showAcceptDialog,
+    } = props;
     const bibliography = bibliographies.find((bib) => bib.id === bibliographyId);
 
     const navigate = useNavigate();
@@ -30,6 +39,7 @@ export default function Bibliography(props) {
     const [LaTeXWindowVisible, setLaTeXWindowVisible] = useState(false);
     const [checkedCitations, setCheckedCitations] = useState([]); // TODO: Change checked to selected
     const [exportAll, setExportAll] = useState(false); // used for all kind of export in the master context menu
+    const [moveWindowVisible, setMoveWindowVisible] = useState(false);
 
     useEffect(() => {
         // isChecked should not get saved, but since it's in an object that gets saved and loaded, it should be set to false when opening the bibliography page
@@ -59,7 +69,6 @@ export default function Bibliography(props) {
                 checkedCitationsIds.push(cit.id);
             }
         });
-        console.log(checkedCitationsIds);
         if (isNew)
             dispatch({
                 type: ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY,
@@ -111,6 +120,11 @@ export default function Bibliography(props) {
         setLaTeXWindowVisible(true);
     }
 
+    function handleMove() {
+        if (bibliographies.length > 1) setMoveWindowVisible(true);
+        else showAcceptDialog("No bibliographies to move", "You have no other bibliography to move citations to.");
+    }
+
     return (
         <div className="bibliography">
             <div className="bibliography-header">
@@ -125,6 +139,8 @@ export default function Bibliography(props) {
                         },
 
                         "DEVIDER",
+
+                        // { label: "Move all to bibliography", method: handleMoveAll },
 
                         {
                             label: "Delete bibliography?",
@@ -172,6 +188,7 @@ export default function Bibliography(props) {
                 setExportAll={setExportAll}
                 showConfirmDialog={showConfirmDialog}
                 openCitationWindow={openCitationWindow}
+                handleMove={handleMove}
             />
 
             {citationWindowVisible && (
@@ -193,6 +210,34 @@ export default function Bibliography(props) {
                     setLaTeXWindowVisible={setLaTeXWindowVisible}
                     exportAll={exportAll}
                 />
+            )}
+
+            {moveWindowVisible && (
+                <div className="move-window">
+                    <button onClick={() => setMoveWindowVisible(false)}>X</button>
+                    {bibliographies.map((bib) => {
+                        if (bib.id !== bibliographyId)
+                            return (
+                                <div
+                                    className="bibliography-card"
+                                    onClick={() => {
+                                        dispatch({
+                                            type: ACTIONS.DUPLICATE_SELECTED_CITATIONS,
+                                            payload: { bibliographyId: bib.id, checkedCitations: checkedCitations },
+                                        });
+                                        setMoveWindowVisible(false);
+                                    }}
+                                >
+                                    <h4>{bib.title}</h4>
+                                    <p>{bib.style.name}</p>
+                                    <p>{bib.dateCreated}</p>
+                                    <p>{bib.dateModified}</p>
+                                    <p>{bib.citations.length} sources</p>
+                                </div>
+                            );
+                        return null;
+                    })}
+                </div>
             )}
 
             {addCitationMenuVisible && (

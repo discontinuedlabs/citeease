@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import axios from "axios";
 import * as cheerio from "cheerio";
 import * as citationUtils from "../citationUtils";

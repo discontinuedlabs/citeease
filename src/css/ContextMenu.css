@@ -4,6 +4,14 @@
     height: fit-content;
 }
 
+.context-menu-overlay {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    right: 0;
+    top: 0;
+}
+
 .context-menu {
     --context-menu-padding: 0.2rem;
     background-color: white;

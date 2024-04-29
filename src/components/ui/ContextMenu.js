@@ -26,26 +26,28 @@ export default function ContextMenu(props) {
             {buttonTypes[buttonType] || buttonTypes.mechanicButton}
 
             {!hidden && (
-                <div className="context-menu" style={{ ...menuStyle }}>
-                    {options &&
-                        options.map((option) => {
-                            if (/devider/i.test(option)) {
-                                return <hr className="solid" />;
-                            }
+                <div className="context-menu-overlay" onClick={toggleVisibility}>
+                    <div className="context-menu" style={{ ...menuStyle }}>
+                        {options &&
+                            options.map((option) => {
+                                if (/devider/i.test(option)) {
+                                    return <hr className="solid" />;
+                                }
 
-                            return (
-                                <ContextMenuOption
-                                    onClick={(event) => {
-                                        option.method(event);
-                                        setHidden(true);
-                                    }}
-                                    key={option?.label}
-                                    buttonStyle={{ ...option?.style }}
-                                    icon={option?.icon}
-                                    label={option?.label}
-                                ></ContextMenuOption>
-                            );
-                        })}
+                                return (
+                                    <ContextMenuOption
+                                        onClick={(event) => {
+                                            option.method(event);
+                                            setHidden(true);
+                                        }}
+                                        key={option?.label}
+                                        buttonStyle={{ ...option?.style }}
+                                        icon={option?.icon}
+                                        label={option?.label}
+                                    ></ContextMenuOption>
+                                );
+                            })}
+                    </div>
                 </div>
             )}
         </div>

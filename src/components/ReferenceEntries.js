@@ -2,6 +2,8 @@ import "../css/ReferenceEntries.css";
 import { useEffect, useState } from "react";
 import * as citationEngine from "./citationEngine.js";
 import ContextMenu from "./ui/ContextMenu.js";
+import ReactHtmlParser from "react-html-parser";
+import DOMPurify from "dompurify";
 
 const MASTER_CHECKBOX_STATES = {
     CHECKED: "checked", // All reference entries are checked
@@ -22,8 +24,10 @@ export default function ReferenceEntries(props) {
         setExportAll,
         showConfirmDialog,
         openCitationWindow,
+        handleMove,
     } = props;
     const [references, setReferences] = useState([]);
+    const [intextCitation, setIntextCitation] = useState("");
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
 
     useEffect(() => {
@@ -58,6 +62,8 @@ export default function ReferenceEntries(props) {
         }
         formatCitations();
     }, [bibliography.citations, bibliography.style]);
+
+    // TODO: Merge all these functions with the ones in bibiliography component
 
     function handleMasterCheck() {
         dispatch({
@@ -101,6 +107,10 @@ export default function ReferenceEntries(props) {
         });
     }
 
+    function handleShowIntextCitation() {
+        console.log();
+    }
+
     return (
         <div className="reference-entries-component">
             <div className="reference-entries-header">
@@ -113,69 +123,68 @@ export default function ReferenceEntries(props) {
                     />
                 )}
                 {checkedCitations.length >= 1 && (
-                    <ContextMenu
-                        icon="more_vert"
-                        options={[
-                            { label: "Copy", method: handleCopy },
-                            {
-                                label: "Export to LaTeX",
-                                method: handleExportToLatex,
-                            },
+                    <>
+                        {/* <button onClick={handleShowIntextCitation}>In-text citation</button> */}
+                        <ContextMenu
+                            icon="more_vert"
+                            options={[
+                                { label: "Copy to clipboard", method: handleCopy },
+                                {
+                                    label: "Export to LaTeX",
+                                    method: handleExportToLatex,
+                                },
 
-                            "DEVIDER",
+                                "DEVIDER",
 
-                            // { label: "Move", method: handleMove },
-                            { label: "Duplicate", method: handleDuplicate },
+                                { label: "Move", method: handleMove },
+                                { label: "Duplicate", method: handleDuplicate },
 
-                            "DEVIDER",
+                                "DEVIDER",
 
-                            ...(checkedCitations.length === 1 && checkedCitations[0].content.URL
-                                ? [
-                                      {
-                                          label: "Visit website",
-                                          method: () => window.open(checkedCitations[0].content.URL, "_blank"),
-                                      },
-                                      {
-                                          label: "Edit",
-                                          method: () => openCitationWindow(checkedCitations[0].content.type),
-                                      },
-                                      "DEVIDER",
-                                  ]
-                                : []),
+                                ...(checkedCitations.length === 1 && checkedCitations[0].content.URL
+                                    ? [
+                                          {
+                                              label: "Visit website",
+                                              method: () => window.open(checkedCitations[0].content.URL, "_blank"),
+                                          },
+                                          {
+                                              label: "Edit",
+                                              method: () => openCitationWindow(checkedCitations[0].content.type),
+                                          },
+                                          "DEVIDER",
+                                      ]
+                                    : []),
 
-                            {
-                                label: "Delete",
-                                method: () =>
-                                    showConfirmDialog(
-                                        `Delete ${checkedCitations.length === 1 ? "citation" : "citations"}?`,
-                                        `Are you sure you want to delete ${
-                                            checkedCitations.length === 1 ? "this citation" : "these citations"
-                                        }?`,
-                                        handleDelete,
-                                        "Delete",
-                                        "Cancel"
-                                    ),
-                                icon: "delete",
-                                style: { color: "crimson" },
-                            },
-                        ]}
-                        menuStyle={{
-                            position: "absolute",
-                            left: "0",
-                        }}
-                        buttonType={"smallButton"}
-                    />
+                                {
+                                    label: "Delete",
+                                    method: () =>
+                                        showConfirmDialog(
+                                            `Delete ${checkedCitations.length === 1 ? "citation" : "citations"}?`,
+                                            `Are you sure you want to delete ${
+                                                checkedCitations.length === 1 ? "this citation" : "these citations"
+                                            }?`,
+                                            handleDelete,
+                                            "Delete",
+                                            "Cancel"
+                                        ),
+                                    icon: "delete",
+                                    style: { color: "crimson" },
+                                },
+                            ]}
+                            menuStyle={{
+                                position: "absolute",
+                                left: "0",
+                            }}
+                            buttonType={"smallButton"}
+                        />
+                    </>
                 )}
             </div>
 
             <div className="reference-entries-container">
                 {bibliography.citations.map((cit, index) => {
                     return (
-                        <div
-                            className="reference-entry"
-                            key={cit.id}
-                            // onClick={() => openCitationWindow(cit.content.type, false, cit.id)} // FIXME: it can be clicked when you click on the checkbox
-                        >
+                        <div className="reference-entry" key={cit.id}>
                             <input
                                 type="checkbox"
                                 className="reference-entry-checkbox"
@@ -184,8 +193,10 @@ export default function ReferenceEntries(props) {
                             />
                             <div
                                 className="reference-entry-text"
-                                dangerouslySetInnerHTML={{ __html: references[index] }}
-                            ></div>
+                                onClick={() => openCitationWindow(cit.content.type, false, cit.id)}
+                            >
+                                {ReactHtmlParser(DOMPurify.sanitize(references[index]))}
+                            </div>
                         </div>
                     );
                 })}

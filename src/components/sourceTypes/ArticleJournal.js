@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { v4 as uuid4 } from "uuid";
+import { nanoid } from "nanoid";
 import * as citationUtils from "../citationUtils";
 import DateInput from "../formElements/DateInput";
 import AuthorsInput from "../formElements/AuthorsInput";
@@ -24,7 +24,7 @@ export default function ArticleJournal(props) {
                             accessed: citationUtils.createDateObject(new Date()),
                             author: data.message.author.map((author) => ({
                                 ...author,
-                                id: uuid4(),
+                                id: nanoid(),
                             })),
                         };
                     });

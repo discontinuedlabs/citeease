@@ -1,4 +1,4 @@
-import { v4 as uuid4 } from "uuid";
+import { nanoid } from "nanoid";
 import DateInput from "../DateInput";
 import AuthorsInput from "../AuthorsInput";
 
@@ -35,7 +35,7 @@ export default function SourceTemplate(props) {
             const names = author.split(/\s+/);
             const firstName = names.shift() || "";
             const lastName = names.join(" ");
-            return { firstName, lastName, id: uuid4() };
+            return { firstName, lastName, id: nanoid() };
         });
 
         return result;

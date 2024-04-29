@@ -1,4 +1,4 @@
-import { v4 as uuid4 } from "uuid";
+import { nanoid } from "nanoid";
 
 export function createDateObject(yearOrDate, month = undefined, day = undefined) {
     if (yearOrDate === undefined) return;
@@ -36,7 +36,7 @@ export function createAuthorsArray(authors) {
         const names = author.split(/\s+/);
         const given = names.shift() || "";
         const family = names.join(" ");
-        return { given, family, id: uuid4() };
+        return { given, family, id: nanoid() };
     });
 
     return result;
