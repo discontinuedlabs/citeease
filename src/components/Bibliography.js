@@ -52,13 +52,14 @@ export default function Bibliography(props) {
         });
     }
 
-    function openCitationMenu(event, sourceType, isNew = false) {
-        let checkedCitationsIds = [];
+    function openCitationWindow(sourceType, isNew = false, specificId = "") {
+        let checkedCitationsIds = [...(specificId ? [specificId] : [])];
         bibliography.citations.forEach((cit) => {
             if (cit.isChecked) {
                 checkedCitationsIds.push(cit.id);
             }
         });
+        console.log(checkedCitationsIds);
         if (isNew)
             dispatch({
                 type: ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY,
@@ -88,23 +89,6 @@ export default function Bibliography(props) {
             console.error("Failed to copy text: ", err);
         }
     }
-
-    // function handleMove() {}
-
-    // function handleDuplicate() {
-    //     const newCitation = { ...citation, id: uuid4() };
-
-    //     setBibliographies((prevBibliographies) => {
-    //         return prevBibliographies.map((biblio) =>
-    //             biblio.id === bibliographyId
-    //                 ? {
-    //                       ...biblio,
-    //                       citations: [...biblio.citations, newCitation],
-    //                   }
-    //                 : biblio
-    //         );
-    //     });
-    // }
 
     function handleDeleteBibliography() {
         navigate("/");
@@ -139,19 +123,6 @@ export default function Bibliography(props) {
                             label: "Export all to LaTeX",
                             method: handleExportAllToLatex,
                         },
-
-                        "DEVIDER",
-
-                        // { label: "Move", method: handleMove },
-                        // { label: "Duplicate", method: handleDuplicate },
-
-                        // "DEVIDER",
-
-                        // content.url && {
-                        //     label: "Visit website",
-                        //     method: () => window.open(content.url, "_blank"),
-                        // },
-                        // { label: "Edit", method: toggleEditMode },
 
                         "DEVIDER",
 
@@ -200,6 +171,7 @@ export default function Bibliography(props) {
                 setLaTeXWindowVisible={setLaTeXWindowVisible}
                 setExportAll={setExportAll}
                 showConfirmDialog={showConfirmDialog}
+                openCitationWindow={openCitationWindow}
             />
 
             {citationWindowVisible && (
@@ -244,7 +216,7 @@ export default function Bibliography(props) {
                         options={Object.values(SOURCE_TYPES).map((entry) => {
                             return {
                                 label: entry.label,
-                                method: (event) => openCitationMenu(event, entry.code, true),
+                                method: () => openCitationWindow(entry.code, true),
                             };
                         })}
                         menuStyle={{ position: "fixed", bottom: "100%", left: "50%", transform: "translateX(-50%)" }}

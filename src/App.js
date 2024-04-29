@@ -67,7 +67,7 @@ function reducer(bibliographies, action) {
         case ACTIONS.ADD_CITATION_TO_EDITED_CITATION:
             return bibliographies.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
-                    const targetCitation = bib.citations.find((cit) => cit.id === action.payload.vitationId);
+                    const targetCitation = bib.citations.find((cit) => cit.id === action.payload.citationId);
                     return {
                         ...bib,
                         editedCitation: { ...targetCitation },

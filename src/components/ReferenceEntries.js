@@ -21,6 +21,7 @@ export default function ReferenceEntries(props) {
         setLaTeXWindowVisible,
         setExportAll,
         showConfirmDialog,
+        openCitationWindow,
     } = props;
     const [references, setReferences] = useState([]);
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
@@ -115,7 +116,7 @@ export default function ReferenceEntries(props) {
                     <ContextMenu
                         icon="more_vert"
                         options={[
-                            { label: "Copy to clipboard", method: handleCopy },
+                            { label: "Copy", method: handleCopy },
                             {
                                 label: "Export to LaTeX",
                                 method: handleExportToLatex,
@@ -128,14 +129,19 @@ export default function ReferenceEntries(props) {
 
                             "DEVIDER",
 
-                            checkedCitations.length === 1 &&
-                                checkedCitations[0].content.url && {
-                                    label: "Visit website",
-                                    method: () => window.open(checkedCitations[0].content.url, "_blank"),
-                                },
-                            // { label: "Edit", method: toggleEditMode },
-
-                            "DEVIDER",
+                            ...(checkedCitations.length === 1 && checkedCitations[0].content.URL
+                                ? [
+                                      {
+                                          label: "Visit website",
+                                          method: () => window.open(checkedCitations[0].content.URL, "_blank"),
+                                      },
+                                      {
+                                          label: "Edit",
+                                          method: () => openCitationWindow(checkedCitations[0].content.type),
+                                      },
+                                      "DEVIDER",
+                                  ]
+                                : []),
 
                             {
                                 label: "Delete",
@@ -165,7 +171,11 @@ export default function ReferenceEntries(props) {
             <div className="reference-entries-container">
                 {bibliography.citations.map((cit, index) => {
                     return (
-                        <div className="reference-entry" key={cit.id}>
+                        <div
+                            className="reference-entry"
+                            key={cit.id}
+                            // onClick={() => openCitationWindow(cit.content.type, false, cit.id)} // FIXME: it can be clicked when you click on the checkbox
+                        >
                             <input
                                 type="checkbox"
                                 className="reference-entry-checkbox"
