@@ -14,6 +14,12 @@
     --transition-regular: all 0.1s ease-in-out;
 }
 
+/* @font-face {
+    font-family: "YourCustomFont";
+    src: url("%PUBLIC_URL%/fonts/YourCustomFont.woff2") format("woff2"),
+        url("%PUBLIC_URL%/fonts/YourCustomFont.woff") format("woff");
+} */
+
 * {
     font-family: "Josefin Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
         Cantarell, "Open Sans", "Helvetica Neue", sans-serif;

@@ -19,7 +19,7 @@ export const SOURCE_TYPES = {
 };
 
 export default function Bibliography(props) {
-    const { id: bibliographyId } = useParams();
+    const { bibId: bibliographyId } = useParams();
     const {
         bibliographies,
         dispatch,
@@ -134,13 +134,20 @@ export default function Bibliography(props) {
                     options={[
                         { label: "Copy all to clipboard", method: handleCopyAll },
                         {
-                            label: "Export all to LaTeX",
+                            label: "Export all to LaTeX", // TODO: This should be "export" only, and gives you more options to export to.
                             method: handleExportAllToLatex,
                         },
 
                         "DEVIDER",
 
-                        // { label: "Move all to bibliography", method: handleMoveAll },
+                        // { label: "Merge with bibliography", method: handleMerge },
+                        // { label: "Duplicate all citations", method: handleDuplicateAll },
+
+                        // "DEVIDER",
+
+                        // { label: "bibliography settings", method: navigate(`/${bibliographyId}/settings`) },
+
+                        // "DEVIDER",
 
                         {
                             label: "Delete bibliography?",
@@ -178,6 +185,7 @@ export default function Bibliography(props) {
             <ReferenceEntries
                 style={{ fontFamily: font }}
                 bibliography={bibliography}
+                font={font}
                 dispatch={dispatch}
                 ACTIONS={ACTIONS}
                 handleReferenceEntryCheck={handleReferenceEntryCheck}
@@ -191,7 +199,7 @@ export default function Bibliography(props) {
                 handleMove={handleMove}
             />
 
-            {citationWindowVisible && (
+            {citationWindowVisible && bibliography.editedCitation && (
                 <CitationWindow
                     bibliographies={bibliographies}
                     dispatch={dispatch}

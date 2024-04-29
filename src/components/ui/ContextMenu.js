@@ -26,7 +26,7 @@ export default function ContextMenu(props) {
             {buttonTypes[buttonType] || buttonTypes.mechanicButton}
 
             {!hidden && (
-                <div className="context-menu-overlay" onClick={toggleVisibility}>
+                <div className="context-menu-overlay" onClick={() => setHidden(true)}>
                     <div className="context-menu" style={{ ...menuStyle }}>
                         {options &&
                             options.map((option) => {

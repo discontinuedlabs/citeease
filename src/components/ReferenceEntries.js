@@ -14,6 +14,7 @@ const MASTER_CHECKBOX_STATES = {
 export default function ReferenceEntries(props) {
     const {
         bibliography,
+        font,
         dispatch,
         ACTIONS,
         handleReferenceEntryCheck,
@@ -192,6 +193,7 @@ export default function ReferenceEntries(props) {
                                 onChange={() => handleReferenceEntryCheck(cit.id)}
                             />
                             <div
+                                style={{ fontFamily: font.family }}
                                 className="reference-entry-text"
                                 onClick={() => openCitationWindow(cit.content.type, false, cit.id)}
                             >
@@ -200,6 +202,9 @@ export default function ReferenceEntries(props) {
                         </div>
                     );
                 })}
+                <div style={{ fontFamily: font.family }} className="reference-entry-text">
+                    Yusef Almamari
+                </div>
             </div>
         </div>
     );

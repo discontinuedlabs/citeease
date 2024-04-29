@@ -11,7 +11,7 @@ export default function CitationWindow(props) {
     const { id: bibliographyId } = useParams();
     const { bibliographies, dispatch, ACTIONS, setCitationWindowVisible, showAcceptDialog } = props;
     const bibliography = bibliographyId ? bibliographies.find((bib) => bib.id === bibliographyId) : undefined;
-    const editedCitation = bibliography.editedCitation;
+    const editedCitation = bibliography?.editedCitation;
     const [content, setContent] = useState(editedCitation ? editedCitation.content : {});
 
     const citationControlProps = {

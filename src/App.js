@@ -7,6 +7,7 @@ import { useLocalStorage, useReducerWithLocalStorage } from "./utils";
 import AcceptDialog from "./components/ui/AcceptDialog";
 import ConfirmDialog from "./components/ui/ConfirmDialog";
 import bibliographyReducer, { ACTIONS } from "./components/reducers/bibliographyReducer";
+import ContextMenu from "./components/ui/ContextMenu";
 
 export default function App() {
     const [bibliographies, dispatch] = useReducerWithLocalStorage("bibliographies", bibliographyReducer, []);
@@ -20,15 +21,12 @@ export default function App() {
         { name: "Arial", family: "Arial" },
         { name: "Calibri", family: "Calibri" },
         { name: "Georgia", family: "Georgia" },
-        { name: "Helvetica", family: "Helvetica" },
         { name: "Lucida Sans Unicode", family: "Lucida Sans Unicode" },
-        {
-            name: "System UI",
-            family: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif",
-        },
-        { name: "Tahoma", family: "Tahoma" },
+        // {
+        //     name: "System UI",
+        //     family: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif",
+        // },
         { name: "Times New Roman", family: "Times New Roman" },
-        { name: "Verdana", family: "Verdana" },
     ];
 
     function showAcceptDialog(title, body = "") {
@@ -41,14 +39,14 @@ export default function App() {
 
     return (
         <div className="app">
-            {/* <ContextMenu
+            <ContextMenu
                 label={font.name}
-                options={fonts.map((f) => ({
+                options={FONTS.map((f) => ({
                     label: f.name,
                     method: () => setFont(f),
                     style: { fontFamily: f.family },
                 }))}
-            /> */}
+            />
 
             <Routes>
                 <Route
@@ -56,7 +54,7 @@ export default function App() {
                     element={<Home bibliographies={bibliographies} dispatch={dispatch} ACTIONS={ACTIONS} />}
                 />
                 <Route
-                    path="/:id"
+                    path="/:bibId"
                     element={
                         <Bibliography
                             bibliographies={bibliographies}
@@ -70,6 +68,7 @@ export default function App() {
                         />
                     }
                 />
+                {/* <Route path="/:bibId/settings" element={<BibliographySettings />} /> */}
             </Routes>
             {acceptDialog.message && (
                 <AcceptDialog message={acceptDialog.message} closeDialog={() => setAcceptDialog({})} />
