@@ -8,7 +8,7 @@ import Webpage from "./sourceTypes/Webpage";
 import Book from "./sourceTypes/Book";
 
 export default function CitationWindow(props) {
-    const { id: bibliographyId } = useParams();
+    const { bibId: bibliographyId } = useParams();
     const { bibliographies, dispatch, ACTIONS, setCitationWindowVisible, showAcceptDialog } = props;
     const bibliography = bibliographyId ? bibliographies.find((bib) => bib.id === bibliographyId) : undefined;
     const editedCitation = bibliography?.editedCitation;

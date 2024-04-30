@@ -11,6 +11,13 @@ export default function Home(props) {
         { name: "Vancouver", code: "vancouver" },
     ];
 
+    const dateOptions = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    };
+
     function handleAddBibliography(style) {
         dispatch({ type: ACTIONS.ADD_NEW_BIBLIOGRAPHY, payload: { bibliographyStyle: style } });
     }
@@ -18,13 +25,15 @@ export default function Home(props) {
     return (
         <div className="home">
             <div className="bibliography-cards-container">
-                {bibliographies.length > 0 ? (
+                {bibliographies && bibliographies.length > 0 ? (
                     bibliographies.map((bib) => (
                         <Link key={bib.id} to={`/${bib.id}`} className="bibliography-card">
                             <h3 className="bibliography-card-title">{bib.title}</h3>
                             <p className="bibliography-card-style">{bib.style.name}</p>
-                            <p>{bib.dateCreated.toLocaleDateString()}</p>
-                            {bib.dateCreated !== bib.dateModified && <p>{bib.dateModified.toLocaleDateString()}</p>}
+                            <p>{new Date(bib.dateCreated).toLocaleDateString(undefined, dateOptions)}</p>
+                            {new Date(bib.dateCreated) !== new Date(bib.dateModified) && (
+                                <p>{new Date(bib.dateModified).toLocaleDateString(undefined, dateOptions)}</p>
+                            )}
                             <p>
                                 {bib.citations.length === 0
                                     ? "No sources added"

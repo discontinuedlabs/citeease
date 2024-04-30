@@ -14,20 +14,20 @@
     --transition-regular: all 0.1s ease-in-out;
 }
 
-/* @font-face {
+@font-face {
     font-family: "Georgia";
-    src: url("%PUBLIC_URL%/fonts/georgia.ttf") format("ttf"),
-} */
+    src: local("Georgia"), url("../fonts/georgia.ttf") format("truetype");
+}
 
-/* @font-face {
+@font-face {
     font-family: "Times New Roman";
-    src: url("%PUBLIC_URL%/fonts/times-new-roman.ttf") format("ttf"),
-} */
+    src: local("Times New Roman"), url("../fonts/times-new-roman.ttf") format("truetype");
+}
 
-/* @font-face {
+@font-face {
     font-family: "Arial";
-    src: url("%PUBLIC_URL%/fonts/arial.ttf") format("ttf"),
-} */
+    src: local("Arial"), url("../fonts/arial.ttf") format("truetype");
+}
 
 * {
     font-family: "Josefin Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
