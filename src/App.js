@@ -7,28 +7,16 @@ import { useLocalStorage, useReducerWithLocalStorage } from "./utils";
 import AcceptDialog from "./components/ui/AcceptDialog";
 import ConfirmDialog from "./components/ui/ConfirmDialog";
 import bibliographyReducer, { ACTIONS } from "./components/reducers/bibliographyReducer";
-import ContextMenu from "./components/ui/ContextMenu";
-import Settings from "./components/Settings";
+import Settings, { FONTS } from "./components/Settings";
 import BibliographySettings from "./components/BibliographySettings";
+import settingsReducer from "./components/reducers/settingsReducer";
 
 export default function App() {
     const [bibliographies, dispatch] = useReducerWithLocalStorage("bibliographies", bibliographyReducer, []);
+    const [settings, settingsDispatch] = useReducerWithLocalStorage("settings", settingsReducer, { font: FONTS[1] });
     const [savedCslFiles, setSavedCslFiles] = useLocalStorage("savedCslFiles", {}); // Used to save the CSL files that don't exist in the public folder
-    const [font, setFont] = useLocalStorage("font", { name: "Georgia", family: "Georgia" });
     const [acceptDialog, setAcceptDialog] = useState({});
     const [confirmDialog, setConfirmDialog] = useState({});
-
-    // TODO: Move this to settings
-    const FONTS = [
-        { name: "Default", family: "unset" },
-        { name: "Arial", family: "Arial" },
-        { name: "Georgia", family: "Georgia" },
-        {
-            name: "System Font",
-            family: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif",
-        },
-        { name: "Times New Roman", family: "Times New Roman" },
-    ];
 
     function showAcceptDialog(title, body = "") {
         setAcceptDialog({ message: { title, body } });
@@ -39,23 +27,16 @@ export default function App() {
     }
 
     return (
-        <div className="app">
-            <ContextMenu
-                style={{ fontFamily: font.family }}
-                label={font.name}
-                options={FONTS.map((font) => ({
-                    label: font.name,
-                    method: () => setFont(font),
-                    style: { fontFamily: font.family },
-                }))}
-            />
-
+        <div className="app" style={{ fontFamily: "Georgia" }}>
             <Routes>
                 <Route
                     path="/"
                     element={<Home bibliographies={bibliographies} dispatch={dispatch} ACTIONS={ACTIONS} />}
                 />
-                <Route path="/settings" element={<Settings />} />
+                <Route
+                    path="/settings"
+                    element={<Settings settings={settings} settingsDispatch={settingsDispatch} />}
+                />
                 <Route
                     path="/:bibId"
                     element={
@@ -63,7 +44,7 @@ export default function App() {
                             bibliographies={bibliographies}
                             dispatch={dispatch}
                             ACTIONS={ACTIONS}
-                            font={font}
+                            settings={settings}
                             showAcceptDialog={showAcceptDialog}
                             showConfirmDialog={showConfirmDialog}
                             savedCslFiles={savedCslFiles}
@@ -72,6 +53,10 @@ export default function App() {
                     }
                 />
                 <Route path="/:bibId/settings" element={<BibliographySettings bibliographies={bibliographies} />} />
+
+                {/* <Route path="/about" element={<About />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} /> */}
             </Routes>
             {acceptDialog.message && (
                 <AcceptDialog message={acceptDialog.message} closeDialog={() => setAcceptDialog({})} />

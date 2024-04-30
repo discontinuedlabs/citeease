@@ -14,7 +14,7 @@ const MASTER_CHECKBOX_STATES = {
 export default function ReferenceEntries(props) {
     const {
         bibliography,
-        font,
+        settings,
         dispatch,
         ACTIONS,
         handleReferenceEntryCheck,
@@ -22,13 +22,13 @@ export default function ReferenceEntries(props) {
         setSavedCslFiles,
         checkedCitations,
         setLaTeXWindowVisible,
-        setExportAll,
+        setApplyOnAll,
         showConfirmDialog,
         openCitationWindow,
         handleMove,
     } = props;
     const [references, setReferences] = useState([]);
-    const [intextCitation, setIntextCitation] = useState("");
+    // const [intextCitation, setIntextCitation] = useState("");
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
 
     useEffect(() => {
@@ -90,7 +90,7 @@ export default function ReferenceEntries(props) {
     }
 
     function handleExportToLatex() {
-        setExportAll(false);
+        setApplyOnAll(false);
         setLaTeXWindowVisible(true);
     }
 
@@ -192,8 +192,9 @@ export default function ReferenceEntries(props) {
                                 checked={cit.isChecked}
                                 onChange={() => handleReferenceEntryCheck(cit.id)}
                             />
+                            {console.log(settings.font)}
                             <div
-                                style={{ fontFamily: font.family }}
+                                style={{ fontFamily: settings.font.family }} // FIXME
                                 className="reference-entry-text"
                                 onClick={() => openCitationWindow(cit.content.type, false, cit.id)}
                             >

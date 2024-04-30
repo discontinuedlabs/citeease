@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import ContextMenu from "./ui/ContextMenu";
+import { useNavigate } from "react-router-dom";
 
 export default function Home(props) {
     const { bibliographies, dispatch, ACTIONS } = props;
+    const navigate = useNavigate();
     const styles = [
         { name: "APA", code: "apa", builtIn: true },
         { name: "MLA", code: "modern-language-association" },
@@ -24,6 +26,13 @@ export default function Home(props) {
 
     return (
         <div className="home">
+            <h1>Home</h1>
+            <ContextMenu
+                icon="more_vert"
+                menuStyle={{}}
+                buttonType={"smallButton"}
+                options={[{ label: "Settings", method: () => navigate("/settings") }]}
+            />
             <div className="bibliography-cards-container">
                 {bibliographies && bibliographies.length > 0 ? (
                     bibliographies.map((bib) => (

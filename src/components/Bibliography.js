@@ -24,7 +24,7 @@ export default function Bibliography(props) {
         bibliographies,
         dispatch,
         ACTIONS,
-        font,
+        settings,
         savedCslFiles,
         setSavedCslFiles,
         showConfirmDialog,
@@ -38,7 +38,7 @@ export default function Bibliography(props) {
     const [intextCitationWindowVisible, setIntextCitationWindowVisible] = useState(false);
     const [LaTeXWindowVisible, setLaTeXWindowVisible] = useState(false);
     const [checkedCitations, setCheckedCitations] = useState([]); // TODO: Change checked to selected
-    const [exportAll, setExportAll] = useState(false); // used for all kind of export in the master context menu
+    const [applyOnAll, setApplyOnAll] = useState(false); // used for some settings in the bibliography context menu
     const [moveWindowVisible, setMoveWindowVisible] = useState(false);
 
     useEffect(() => {
@@ -116,11 +116,12 @@ export default function Bibliography(props) {
     }
 
     function handleExportAllToLatex() {
-        setExportAll(true);
+        setApplyOnAll(true);
         setLaTeXWindowVisible(true);
     }
 
-    function handleMove() {
+    // TODO: Handle applyOnAll for Merge option
+    function handleMove(applyOnAll = false) {
         if (bibliographies.length > 1) setMoveWindowVisible(true);
         else showAcceptDialog("No bibliographies to move", "You have no other bibliography to move citations to.");
     }
@@ -128,9 +129,15 @@ export default function Bibliography(props) {
     return (
         <div className="bibliography">
             <div className="bibliography-header">
+                <h1>{bibliography.title}</h1>
                 <h3>{bibliography.style.name}</h3>
                 <ContextMenu
                     icon="more_vert"
+                    menuStyle={{
+                        position: "absolute",
+                        right: "0",
+                    }}
+                    buttonType={"smallButton"}
                     options={[
                         { label: "Copy all to clipboard", method: handleCopyAll },
                         {
@@ -140,14 +147,11 @@ export default function Bibliography(props) {
 
                         "DEVIDER",
 
-                        // { label: "Merge with bibliography", method: handleMerge },
-                        // { label: "Duplicate all citations", method: handleDuplicateAll },
-
-                        // "DEVIDER",
+                        { label: "Merge with bibliography", method: () => handleMove(true) },
 
                         { label: "bibliography settings", method: () => navigate(`/${bibliographyId}/settings`) },
 
-                        // "DEVIDER",
+                        "DEVIDER",
 
                         {
                             label: "Delete bibliography?",
@@ -163,15 +167,8 @@ export default function Bibliography(props) {
                             style: { color: "crimson" },
                         },
                     ]}
-                    menuStyle={{
-                        position: "absolute",
-                        right: "0",
-                    }}
-                    buttonType={"smallButton"}
                 />
             </div>
-
-            <h1>{bibliography.title}</h1>
 
             {/* <AutoResizingTextarea
                 value={bibliography.title}
@@ -183,9 +180,8 @@ export default function Bibliography(props) {
             /> */}
 
             <ReferenceEntries
-                style={{ fontFamily: font }}
                 bibliography={bibliography}
-                font={font}
+                settings={settings}
                 dispatch={dispatch}
                 ACTIONS={ACTIONS}
                 handleReferenceEntryCheck={handleReferenceEntryCheck}
@@ -193,7 +189,7 @@ export default function Bibliography(props) {
                 setSavedCslFiles={setSavedCslFiles}
                 checkedCitations={checkedCitations}
                 setLaTeXWindowVisible={setLaTeXWindowVisible}
-                setExportAll={setExportAll}
+                setApplyOnAll={setApplyOnAll}
                 showConfirmDialog={showConfirmDialog}
                 openCitationWindow={openCitationWindow}
                 handleMove={handleMove}
@@ -216,7 +212,7 @@ export default function Bibliography(props) {
                     citations={bibliography.citations}
                     checkedCitations={checkedCitations}
                     setLaTeXWindowVisible={setLaTeXWindowVisible}
-                    exportAll={exportAll}
+                    setApplyOnAll={setApplyOnAll}
                 />
             )}
 

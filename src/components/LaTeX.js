@@ -3,7 +3,7 @@ import * as citationEngine from "./citationEngine";
 import "../css/LaTeX.css";
 
 export default function LaTeXWindow(props) {
-    const { citations, checkedCitations, setLaTeXWindowVisible, exportAll } = props;
+    const { citations, checkedCitations, setLaTeXWindowVisible, applyOnAll } = props;
     const [bibtexString, setBibtexString] = useState("");
     const [biblatexString, setBiblatexString] = useState("");
     const [bibTxtString, setBibTxtString] = useState("");
@@ -11,9 +11,9 @@ export default function LaTeXWindow(props) {
 
     useEffect(() => {
         async function formatLaTeX() {
-            setBibtexString(await citationEngine.formatLaTeX(exportAll ? citations : checkedCitations, "bibtex"));
-            setBiblatexString(await citationEngine.formatLaTeX(exportAll ? citations : checkedCitations, "biblatex"));
-            setBibTxtString(await citationEngine.formatLaTeX(exportAll ? citations : checkedCitations, "bibtxt"));
+            setBibtexString(await citationEngine.formatLaTeX(applyOnAll ? citations : checkedCitations, "bibtex"));
+            setBiblatexString(await citationEngine.formatLaTeX(applyOnAll ? citations : checkedCitations, "biblatex"));
+            setBibTxtString(await citationEngine.formatLaTeX(applyOnAll ? citations : checkedCitations, "bibtxt"));
         }
         formatLaTeX();
     }, [checkedCitations]);
