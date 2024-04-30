@@ -145,7 +145,7 @@ export default function Bibliography(props) {
 
                         // "DEVIDER",
 
-                        // { label: "bibliography settings", method: navigate(`/${bibliographyId}/settings`) },
+                        { label: "bibliography settings", method: () => navigate(`/${bibliographyId}/settings`) },
 
                         // "DEVIDER",
 

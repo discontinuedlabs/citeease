@@ -8,6 +8,8 @@ import AcceptDialog from "./components/ui/AcceptDialog";
 import ConfirmDialog from "./components/ui/ConfirmDialog";
 import bibliographyReducer, { ACTIONS } from "./components/reducers/bibliographyReducer";
 import ContextMenu from "./components/ui/ContextMenu";
+import Settings from "./components/Settings";
+import BibliographySettings from "./components/BibliographySettings";
 
 export default function App() {
     const [bibliographies, dispatch] = useReducerWithLocalStorage("bibliographies", bibliographyReducer, []);
@@ -19,13 +21,13 @@ export default function App() {
     // TODO: Move this to settings
     const FONTS = [
         { name: "Default", family: "unset" },
-        { name: "Arial", family: "Arial" }, // Download this
-        { name: "Georgia", family: "Georgia" }, // Download this
+        { name: "Arial", family: "Arial" },
+        { name: "Georgia", family: "Georgia" },
         {
             name: "System Font",
             family: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif",
         },
-        { name: "Times New Roman", family: "Times New Roman" }, // Download this
+        { name: "Times New Roman", family: "Times New Roman" },
     ];
 
     function showAcceptDialog(title, body = "") {
@@ -53,7 +55,7 @@ export default function App() {
                     path="/"
                     element={<Home bibliographies={bibliographies} dispatch={dispatch} ACTIONS={ACTIONS} />}
                 />
-                {/* <Route path="/settings" element={<Settings />} /> */}
+                <Route path="/settings" element={<Settings />} />
                 <Route
                     path="/:bibId"
                     element={
@@ -69,7 +71,7 @@ export default function App() {
                         />
                     }
                 />
-                {/* <Route path="/:bibId/settings" element={<BibliographySettings />} /> */}
+                <Route path="/:bibId/settings" element={<BibliographySettings bibliographies={bibliographies} />} />
             </Routes>
             {acceptDialog.message && (
                 <AcceptDialog message={acceptDialog.message} closeDialog={() => setAcceptDialog({})} />
