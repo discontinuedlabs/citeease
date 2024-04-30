@@ -1,16 +1,15 @@
 {
   "files": {
-    "main.css": "/citeease/static/css/main.4da3a17c.css",
-    "main.js": "/citeease/static/js/main.e0262472.js",
+    "main.css": "/citeease/static/css/main.8d8a6074.css",
+    "main.js": "/citeease/static/js/main.98a915be.js",
     "static/media/georgia.ttf": "/citeease/static/media/georgia.7eb0e3cec9d41a50efd7.ttf",
     "static/media/times-new-roman.ttf": "/citeease/static/media/times-new-roman.f85717dad92d60284052.ttf",
-    "static/media/arial.ttf": "/citeease/static/media/arial.5ae17c1655e3429bc731.ttf",
     "index.html": "/citeease/index.html",
-    "main.4da3a17c.css.map": "/citeease/static/css/main.4da3a17c.css.map",
-    "main.e0262472.js.map": "/citeease/static/js/main.e0262472.js.map"
+    "main.8d8a6074.css.map": "/citeease/static/css/main.8d8a6074.css.map",
+    "main.98a915be.js.map": "/citeease/static/js/main.98a915be.js.map"
   },
   "entrypoints": [
-    "static/css/main.4da3a17c.css",
-    "static/js/main.e0262472.js"
+    "static/css/main.8d8a6074.css",
+    "static/js/main.98a915be.js"
   ]
 }
