@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import ReferenceEntries from "./ReferenceEntries";
 import LaTeXWindow from "./LaTeX";
 import * as citationEngine from "./citationEngine";
+import MoveWindow from "./MoveWindow";
 
 export const SOURCE_TYPES = {
     ARTICLE_JOURNAL: {
@@ -122,6 +123,7 @@ export default function Bibliography(props) {
 
     // TODO: Handle applyOnAll for Merge option
     function handleMove(applyOnAll = false) {
+        setApplyOnAll(applyOnAll);
         if (bibliographies.length > 1) setMoveWindowVisible(true);
         else showAcceptDialog("No bibliographies to move", "You have no other bibliography to move citations to.");
     }
@@ -217,31 +219,16 @@ export default function Bibliography(props) {
             )}
 
             {moveWindowVisible && (
-                <div className="move-window">
-                    <button onClick={() => setMoveWindowVisible(false)}>X</button>
-                    {bibliographies.map((bib) => {
-                        if (bib.id !== bibliographyId)
-                            return (
-                                <div
-                                    className="bibliography-card"
-                                    onClick={() => {
-                                        dispatch({
-                                            type: ACTIONS.DUPLICATE_SELECTED_CITATIONS,
-                                            payload: { bibliographyId: bib.id, checkedCitations: checkedCitations },
-                                        });
-                                        setMoveWindowVisible(false);
-                                    }}
-                                >
-                                    <h4>{bib.title}</h4>
-                                    <p>{bib.style.name}</p>
-                                    <p>{bib.dateCreated}</p>
-                                    <p>{bib.dateModified}</p>
-                                    <p>{bib.citations.length} sources</p>
-                                </div>
-                            );
-                        return null;
-                    })}
-                </div>
+                <MoveWindow
+                    bibliographies={bibliographies}
+                    bibliographyId={bibliographyId}
+                    citations={bibliography.citations}
+                    checkedCitations={checkedCitations}
+                    setMoveWindowVisible={setMoveWindowVisible}
+                    applyOnAll={applyOnAll}
+                    dispatch={dispatch}
+                    showConfirmDialog={showConfirmDialog}
+                />
             )}
 
             {addCitationMenuVisible && (
