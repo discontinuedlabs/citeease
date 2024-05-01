@@ -176,7 +176,7 @@ export default function ReferenceEntries(props) {
                                 position: "absolute",
                                 left: "0",
                             }}
-                            buttonType={"smallButton"}
+                            buttonType={"Small Button"}
                         />
                     </>
                 )}

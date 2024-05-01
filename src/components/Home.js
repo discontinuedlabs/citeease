@@ -4,15 +4,8 @@ import { useNavigate } from "react-router-dom";
 import BibliographyCard from "./ui/BibliographyCard";
 
 export default function Home(props) {
-    const { bibliographies, dispatch, ACTIONS } = props;
+    const { bibliographies, CITATION_STYLES, dispatch, ACTIONS } = props;
     const navigate = useNavigate();
-    const styles = [
-        { name: "APA", code: "apa", builtIn: true },
-        { name: "MLA", code: "modern-language-association" },
-        { name: "Chicago", code: "chicago" },
-        { name: "Harvard", code: "harvard-cite-them-right", builtIn: true },
-        { name: "Vancouver", code: "vancouver" },
-    ];
 
     function handleAddBibliography(style) {
         dispatch({ type: ACTIONS.ADD_NEW_BIBLIOGRAPHY, payload: { bibliographyStyle: style } });
@@ -24,7 +17,7 @@ export default function Home(props) {
             <ContextMenu
                 icon="more_vert"
                 menuStyle={{}}
-                buttonType={"smallButton"}
+                buttonType={"Small Button"}
                 options={[{ label: "Settings", method: () => navigate("/settings") }]}
             />
             <div className="bibliography-cards-container">
@@ -46,7 +39,7 @@ export default function Home(props) {
                 <ContextMenu
                     className="add-bibliography-button"
                     label="Add bibliography"
-                    options={styles.map((style) => ({
+                    options={CITATION_STYLES.map((style) => ({
                         label: style.name,
                         method: () => handleAddBibliography(style),
                     }))}

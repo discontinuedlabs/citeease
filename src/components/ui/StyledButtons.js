@@ -2,7 +2,7 @@ import { useState } from "react";
 import "../../css/StyledButtons.css";
 
 export function Button(props) {
-    const { label, onClick, icon, buttonStyle, className, styles } = props;
+    const { label, onClick, icon, buttonStyle, className, styles, badge } = props;
     const [originalStyle, setOriginalStyle] = useState({});
 
     return (
@@ -14,10 +14,15 @@ export function Button(props) {
             onTouchEnd={() => setOriginalStyle((prevStyle) => ({ ...prevStyle, ...styles.up }))}
             onMouseDown={() => setOriginalStyle((prevStyle) => ({ ...prevStyle, ...styles.down }))}
             onMouseUp={() => setOriginalStyle((prevStyle) => ({ ...prevStyle, ...styles.up }))}
-            onMouseLeave={() => setOriginalStyle((prevStyle) => ({ ...prevStyle, ...styles.up }))}
         >
             <i className="material-icons-round">{icon}</i>
             {label}
+            <div
+                className="context-menu-badge"
+                style={{ color: badge?.color, backgroundColor: badge?.backgroundColor }}
+            >
+                {badge?.label}
+            </div>
         </button>
     );
 }
@@ -48,8 +53,9 @@ export function SmallButton(props) {
     return <Button {...props} className="small-button" styles={styles} />;
 }
 
+// TODO: Make this type use Button component
 export function ContextMenuOption(props) {
-    const { onClick, buttonStyle, icon, label } = props;
+    const { onClick, buttonStyle, icon, label, badge } = props;
     const [originalStyle, setOriginalStyle] = useState({});
     const styles = {
         down: {
@@ -69,10 +75,15 @@ export function ContextMenuOption(props) {
             onTouchEnd={() => setOriginalStyle((prevStyle) => ({ ...prevStyle, ...styles.up }))}
             onMouseDown={() => setOriginalStyle((prevStyle) => ({ ...prevStyle, ...styles.down }))}
             onMouseUp={() => setOriginalStyle((prevStyle) => ({ ...prevStyle, ...styles.up }))}
-            onMouseLeave={() => setOriginalStyle((prevStyle) => ({ ...prevStyle, ...styles.up }))}
         >
             <i className="material-icons-round">{icon}</i>
             {label}
+            <div
+                className="context-menu-badge"
+                style={{ color: badge?.color, backgroundColor: badge?.backgroundColor }}
+            >
+                {badge?.label}
+            </div>
         </button>
     );
 }

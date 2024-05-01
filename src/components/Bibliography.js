@@ -23,6 +23,7 @@ export default function Bibliography(props) {
     const { bibId: bibliographyId } = useParams();
     const {
         bibliographies,
+        CITATION_STYLES,
         dispatch,
         ACTIONS,
         settings,
@@ -34,6 +35,7 @@ export default function Bibliography(props) {
     const bibliography = bibliographies.find((bib) => bib.id === bibliographyId);
 
     const navigate = useNavigate();
+    const [collaborationOpened, setCollaborationOpened] = useState(false);
     const [citationWindowVisible, setCitationWindowVisible] = useState(false);
     const [addCitationMenuVisible, setAddCitationMenuVisible] = useState(false);
     const [intextCitationWindowVisible, setIntextCitationWindowVisible] = useState(false);
@@ -41,6 +43,7 @@ export default function Bibliography(props) {
     const [checkedCitations, setCheckedCitations] = useState([]); // TODO: Change checked to selected
     const [applyOnAll, setApplyOnAll] = useState(false); // used for some settings in the bibliography context menu
     const [moveWindowVisible, setMoveWindowVisible] = useState(false);
+    const [renameWindowVisible, setRenameWindowVisible] = useState(false);
 
     useEffect(() => {
         // isChecked should not get saved, but since it's in an object that gets saved and loaded, it should be set to false when opening the bibliography page
@@ -55,13 +58,15 @@ export default function Bibliography(props) {
         updateCheckedCitations();
     }, [bibliography.citations]);
 
-    // TODO: Change this to an option in the setting that also have an accept button to prevent changing the title by accident
-    function updateBibliographyTitle(event) {
+    function handleRename(event) {
         dispatch({
             type: ACTIONS.UPDATE_BIBLIOGRAPHY_FIELDS,
-            payload: { bibliographyId: bibliographyId, key: "title", value: event.target.value },
+            payload: { bibliographyId: bibliographyId, key: "title", value: event.target[0].value },
         });
+        setRenameWindowVisible(false);
     }
+
+    function handleChangeStyle() {}
 
     function openCitationWindow(sourceType, isNew = false, specificId = "") {
         let checkedCitationsIds = [...(specificId ? [specificId] : [])];
@@ -121,11 +126,28 @@ export default function Bibliography(props) {
         setLaTeXWindowVisible(true);
     }
 
-    // TODO: Handle applyOnAll for Merge option
     function handleMove(applyOnAll = false) {
         setApplyOnAll(applyOnAll);
         if (bibliographies.length > 1) setMoveWindowVisible(true);
         else showAcceptDialog("No bibliographies to move", "You have no other bibliography to move citations to.");
+    }
+
+    function handleOpenCollaboration() {
+        /*
+         * If it's the first time, prompts the user with a dialog explaining the benefits of collaboration.
+         * Checks whether the user owns any collaborative bibliographies to determine if it's the first time.
+         * If the user is not signed in, prompts them to sign in to access this feature. Once signed in, they proceed to create a unique identifier and password for the collaborative bibliography.
+         * If the user attempts to open a bibliography that was previously set up for collaboration, they are presented with a confirmation message: "Are you sure you want to open this bibliography for collaboration?"
+         */
+        setCollaborationOpened(true);
+    }
+
+    function handleCloseCollaboration() {
+        showConfirmDialog(
+            "Close collaboration?",
+            "This will remove all collaborators, permanently delete the collaboration history, and revoke access foe all contributors. The bibliography will be removed from their list of accessible bibliographies. Are you sure you want to proceed? Collaboration can be opened anytime if needed.",
+            () => setCollaborationOpened(false)
+        );
     }
 
     return (
@@ -139,11 +161,30 @@ export default function Bibliography(props) {
                         position: "absolute",
                         right: "0",
                     }}
-                    buttonType={"smallButton"}
+                    buttonType={"Small Button"}
                     options={[
-                        { label: "Copy all to clipboard", method: handleCopyAll },
+                        { label: "Rename", method: () => setRenameWindowVisible(true) },
                         {
-                            label: "Export all to LaTeX", // TODO: This should be "export" only, and gives you more options to export to.
+                            label: "Change style",
+                            method: [
+                                CITATION_STYLES.map((style) => {
+                                    return {
+                                        label: style.name,
+                                        method: () =>
+                                            dispatch({
+                                                type: ACTIONS.UPDATE_BIBLIOGRAPHY_FIELDS,
+                                                payload: { bibliographyId: bibliographyId, key: "style", value: style },
+                                            }),
+                                    };
+                                }),
+                            ],
+                        },
+
+                        "DEVIDER",
+
+                        { label: "Copy to clipboard", method: handleCopyAll },
+                        {
+                            label: "Export to LaTeX", // TODO: This should be "export" only, and gives you more options to export to.
                             method: handleExportAllToLatex,
                         },
 
@@ -152,6 +193,22 @@ export default function Bibliography(props) {
                         { label: "Merge with bibliography", method: () => handleMove(true) },
 
                         { label: "bibliography settings", method: () => navigate(`/${bibliographyId}/settings`) },
+
+                        "DEVIDER",
+
+                        {
+                            ...(collaborationOpened
+                                ? {
+                                      label: "Close collaboratiofg n",
+                                      method: handleCloseCollaboration,
+                                  }
+                                : {
+                                      label: "Open collaboration",
+                                      method: handleOpenCollaboration,
+                                  }),
+
+                            badge: { label: "test", color: "white", backgroundColor: "blue" },
+                        },
 
                         "DEVIDER",
 
@@ -229,6 +286,14 @@ export default function Bibliography(props) {
                     dispatch={dispatch}
                     showConfirmDialog={showConfirmDialog}
                 />
+            )}
+
+            {renameWindowVisible && (
+                <form className="rename-window" onSubmit={handleRename}>
+                    <input type="text" placeholder={bibliography.title} />
+                    <button type="submit">Rename</button>
+                    <button onClick={() => setRenameWindowVisible(false)}>Cancel</button>
+                </form>
             )}
 
             {addCitationMenuVisible && (

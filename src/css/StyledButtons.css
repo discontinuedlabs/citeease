@@ -31,3 +31,7 @@
 .context-menu-option:hover {
     background-color: var(--transparent-black);
 }
+
+.context-menu-badge {
+    width: fit-content;
+}
