@@ -2,10 +2,12 @@ import { Link } from "react-router-dom";
 import ContextMenu from "./ui/ContextMenu";
 import { useNavigate } from "react-router-dom";
 import BibliographyCard from "./ui/BibliographyCard";
+import { useDocumentTitle } from "../utils";
 
 export default function Home(props) {
     const { bibliographies, CITATION_STYLES, dispatch, ACTIONS } = props;
     const navigate = useNavigate();
+    useDocumentTitle("Home");
 
     function handleAddBibliography(style) {
         dispatch({ type: ACTIONS.ADD_NEW_BIBLIOGRAPHY, payload: { bibliographyStyle: style } });

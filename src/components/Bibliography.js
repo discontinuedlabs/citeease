@@ -9,6 +9,7 @@ import ReferenceEntries from "./ReferenceEntries";
 import LaTeXWindow from "./LaTeX";
 import * as citationEngine from "./citationEngine";
 import MoveWindow from "./MoveWindow";
+import { useDocumentTitle } from "../utils";
 
 export const SOURCE_TYPES = {
     ARTICLE_JOURNAL: {
@@ -33,6 +34,7 @@ export default function Bibliography(props) {
         showAcceptDialog,
     } = props;
     const bibliography = bibliographies.find((bib) => bib.id === bibliographyId);
+    useDocumentTitle(bibliography.title);
 
     const navigate = useNavigate();
     const [collaborationOpened, setCollaborationOpened] = useState(false);
@@ -190,25 +192,25 @@ export default function Bibliography(props) {
 
                         "DEVIDER",
 
-                        { label: "Merge with bibliography", method: () => handleMove(true) },
+                        ...(collaborationOpened
+                            ? [
+                                  {
+                                      label: "bibliography settings",
+                                      method: () => navigate(`/${bibliographyId}/settings`),
+                                  },
 
-                        { label: "bibliography settings", method: () => navigate(`/${bibliographyId}/settings`) },
-
-                        "DEVIDER",
-
-                        {
-                            ...(collaborationOpened
-                                ? {
+                                  {
                                       label: "Close collaboration",
                                       method: handleCloseCollaboration,
-                                  }
-                                : {
+                                  },
+                              ]
+                            : [
+                                  {
                                       label: "Open collaboration",
                                       method: handleOpenCollaboration,
-                                  }),
-
-                            badge: { label: "test", color: "white", backgroundColor: "blue" },
-                        },
+                                      badge: { label: "test", color: "white", backgroundColor: "blue" },
+                                  },
+                              ]),
 
                         "DEVIDER",
 

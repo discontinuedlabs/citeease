@@ -12,10 +12,10 @@ import BibliographySettings from "./components/BibliographySettings";
 import settingsReducer from "./components/reducers/settingsReducer";
 
 const CITATION_STYLES = [
-    { name: "APA", code: "apa", builtIn: true },
+    { name: "APA", code: "apa" },
     { name: "MLA", code: "modern-language-association" },
     { name: "Chicago", code: "chicago" },
-    { name: "Harvard", code: "harvard-cite-them-right", builtIn: true },
+    { name: "Harvard", code: "harvard-cite-them-right" },
     { name: "Vancouver", code: "vancouver" },
 ];
 

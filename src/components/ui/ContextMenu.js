@@ -3,7 +3,7 @@ import { MechanicButton, SmallButton, ContextMenuOption } from "./StyledButtons"
 import "../../css/ContextMenu.css";
 
 export default function ContextMenu(props) {
-    const { label, icon, options, buttonType, menuStyle, buttonStyle, _isNestedContextMenu } = props;
+    const { label, icon, options, buttonType, menuStyle, buttonStyle } = props;
     const [visible, setVisible] = useState(false);
 
     const buttonProps = {
@@ -24,16 +24,11 @@ export default function ContextMenu(props) {
     }
 
     return (
-        <div className="context-menu-container" style={_isNestedContextMenu ? { width: "100%" } : {}}>
-            {buttonTypes[buttonType] || buttonTypes.mechanicButton}
+        <div className="context-menu-container">
+            {buttonTypes[buttonType] || buttonTypes["Mechanic Button"]}
 
             {visible && (
-                <div
-                    className="context-menu-overlay"
-                    onClick={() => {
-                        if (!_isNestedContextMenu) setVisible(false);
-                    }}
-                >
+                <div className="context-menu-overlay" onClick={() => setVisible(false)}>
                     <div className="context-menu" style={{ ...menuStyle }}>
                         {options &&
                             options.map((option) => {
@@ -41,30 +36,11 @@ export default function ContextMenu(props) {
                                     return <hr className="solid" />;
                                 }
 
-                                // If the method is an array, it will be converted to a nested context menu
-                                if (Array.isArray(option.method)) {
-                                    return (
-                                        <ContextMenu
-                                            label={option.label}
-                                            options={option.method.map((nestedOption) => ({
-                                                label: nestedOption.label,
-                                                method: nestedOption.method,
-                                            }))}
-                                            buttonType={"Context Menu Option"}
-                                            buttonStyle={{ width: "100%" }}
-                                            _isNestedContextMenu={true}
-                                        />
-                                    );
-                                }
-
-                                // Handle regular options
                                 return (
                                     <ContextMenuOption
                                         onClick={(event) => {
-                                            if (!_isNestedContextMenu) {
-                                                option.method(event);
-                                                setVisible(false);
-                                            }
+                                            option.method(event);
+                                            setVisible(false);
                                         }}
                                         key={option?.label}
                                         buttonStyle={{ ...option?.style }}

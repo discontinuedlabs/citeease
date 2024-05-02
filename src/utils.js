@@ -33,3 +33,9 @@ export function useReducerWithLocalStorage(key, reducer, initialState) {
 
     return [state, dispatch];
 }
+
+export function useDocumentTitle(title) {
+    useEffect(() => {
+        document.title = `${title} - CiteEase`;
+    }, [title]);
+}

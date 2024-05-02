@@ -194,7 +194,9 @@ export default function ReferenceEntries(props) {
                             />
 
                             <div
-                                className="reference-entry-text"
+                                className={`reference-entry-text ${
+                                    /^(APA|MLA|Chicago)$/i.test(bibliography.style.name) ? "hanging-indentation" : ""
+                                }`}
                                 onClick={() => openCitationWindow(cit.content.type, false, cit.id)}
                             >
                                 {ReactHtmlParser(DOMPurify.sanitize(references[index]))}

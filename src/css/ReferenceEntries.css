@@ -51,3 +51,8 @@
 .reference-entry-text > div.csl-entry > .csl-left-margin {
     min-width: fit-content;
 }
+
+.hanging-indentation div {
+    text-indent: -2rem;
+    padding-left: 2rem;
+}

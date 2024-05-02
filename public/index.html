@@ -3,12 +3,18 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="canonical" href="https://discontinuedlabs.github.io/citeease/" />
         <meta
             name="description"
-            content="Explore CiteEase, the open-source Progressive Web App (PWA) designed for effortless citation management. Enjoy a completely free and user-friendly experience, packed with a multitude of features to enhance your citation process. Simplify your academic or professional writing with CiteEase."
+            content="Effortlessly manage citations with CiteEase, the free, open-source Progressive Web App (PWA).  Supercharge your academic or professional writing with a user-friendly interface and powerful features."
         />
-        <meta name="theme-color" content="#ffd60a" />
-        <title>CiteEase</title>
+        <title>CiteEase: Simplify Your Research Workflow</title>
+
+        <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+        <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/images/favicons/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/images/favicons/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/images/favicons/favicon-16x16.png" />
+        <meta name="theme-color" content="#ffffff" />
 
         <link rel="canonical" href="https://discontinuedlabs.github.io/citeease/" />
 
@@ -19,27 +25,16 @@
             href="https://fonts.googleapis.com/css2?family=Cambo&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap"
             rel="stylesheet"
         />
-
-        <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-        <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/images/favicons/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/images/favicons/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/images/favicons/favicon-16x16.png" />
-        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#ffd60a" />
     </head>
 
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
         <div id="root"></div>
 
-        <!-- <script>
-            if ('serviceWorker' in navigator) {
-                   navigator.serviceWorker.register('discontinuedlabs.github.io/citeease/service-worker.js')
-      .then(function(registration) {
-        console.log('Service Worker registered with scope:', registration.scope);
-      }).catch(function(error) {
-        console.error('Service Worker registration failed:', error);
-      });
-  }
-        </script> -->
+        <script>
+            if (navigator.serviceWorker) {
+                navigator.serviceWorker.register("/citeease/service-worker.js", { scope: "/citeease/" });
+            }
+        </script>
     </body>
 </html>
