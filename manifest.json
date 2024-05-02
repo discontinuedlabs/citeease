@@ -1,7 +1,7 @@
 {
     "short_name": "CiteEase",
-    "name": "CiteEase",
-    "description": "Explore CiteEase, the open-source Progressive Web App (PWA) designed for effortless citation management. Enjoy a completely free and user-friendly experience, packed with a multitude of features to enhance your citation process. Simplify your academic or professional writing with CiteEase.",
+    "name": "CiteEase: Simplify Your Research Workflow",
+    "description": "Effortlessly manage citations with CiteEase, the free, open-source Progressive Web App (PWA).  Supercharge your academic or professional writing with a user-friendly interface and powerful features.",
     "icons": [
         {
             "src": "/citeease/favicon.ico",
@@ -21,6 +21,6 @@
     ],
     "start_url": ".",
     "display": "standalone",
-    "theme_color": "#ffd60a",
-    "background_color": "#ffd60a"
+    "theme_color": "#ffffff",
+    "background_color": "#ffffff"
 }
