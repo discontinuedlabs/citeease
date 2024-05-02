@@ -199,7 +199,7 @@ export default function Bibliography(props) {
                         {
                             ...(collaborationOpened
                                 ? {
-                                      label: "Close collaboratiofg n",
+                                      label: "Close collaboration",
                                       method: handleCloseCollaboration,
                                   }
                                 : {

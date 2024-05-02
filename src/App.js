@@ -7,7 +7,7 @@ import { useLocalStorage, useReducerWithLocalStorage, use } from "./utils";
 import AcceptDialog from "./components/ui/AcceptDialog";
 import ConfirmDialog from "./components/ui/ConfirmDialog";
 import bibliographyReducer, { ACTIONS } from "./components/reducers/bibliographyReducer";
-import Settings, { FONTS } from "./components/Settings";
+import Settings from "./components/Settings";
 import BibliographySettings from "./components/BibliographySettings";
 import settingsReducer from "./components/reducers/settingsReducer";
 
@@ -21,7 +21,7 @@ const CITATION_STYLES = [
 
 export default function App() {
     const [bibliographies, dispatch] = useReducerWithLocalStorage("bibliographies", bibliographyReducer, []);
-    const [settings, settingsDispatch] = useReducerWithLocalStorage("settings", settingsReducer, { font: FONTS[1] });
+    const [settings, settingsDispatch] = useReducerWithLocalStorage("settings", settingsReducer, {});
     const [savedCslFiles, setSavedCslFiles] = useLocalStorage("savedCslFiles", {}); // Used to save the CSL files that don't exist in the public folder
     const [acceptDialog, setAcceptDialog] = useState({});
     const [confirmDialog, setConfirmDialog] = useState({});
@@ -35,7 +35,7 @@ export default function App() {
     }
 
     return (
-        <div className="app" style={{ fontFamily: "Georgia" }}>
+        <div className="app">
             <Routes>
                 <Route
                     path="/"

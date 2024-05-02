@@ -32,6 +32,10 @@
     margin: 0;
 }
 
+.reference-entry-text * {
+    font-family: "Cambo", serif;
+}
+
 .reference-entry-text div {
     word-wrap: break-word;
     overflow-wrap: break-word;

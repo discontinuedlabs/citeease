@@ -1,11 +1,9 @@
-export const ACTIONS = {
-    CHANGE_FONT: "Change font",
-};
+export const ACTIONS = {};
 
 export default function settingsReducer(settings, action) {
     switch (action.type) {
-        case ACTIONS.CHANGE_FONT:
-            return { ...settings, font: action.payload.font };
+        case ACTIONS:
+            return settings;
 
         default:
             return settings;

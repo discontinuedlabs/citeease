@@ -192,9 +192,8 @@ export default function ReferenceEntries(props) {
                                 checked={cit.isChecked}
                                 onChange={() => handleReferenceEntryCheck(cit.id)}
                             />
-                            {console.log(settings.font)}
+
                             <div
-                                style={{ fontFamily: settings.font.family }} // FIXME
                                 className="reference-entry-text"
                                 onClick={() => openCitationWindow(cit.content.type, false, cit.id)}
                             >
