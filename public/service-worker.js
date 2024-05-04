@@ -1,25 +1,27 @@
-var APP_PREFIX = "citeease_";
-var VERSION = "v2";
-var URLS = ["/citeease/"];
+/* eslint-disable no-restricted-globals */
 
-var CACHE_NAME = APP_PREFIX + VERSION;
-self.addEventListener("fetch", function (e) {
-    console.log("Fetch request : " + e.request.url);
-    e.respondWith(
-        caches.match(e.request).then(function (request) {
+const APP_PREFIX = "citeease_";
+const VERSION = "v2";
+const URLS = ["/citeease/"];
+const CACHE_NAME = APP_PREFIX + VERSION;
+
+self.addEventListener("fetch", function (event) {
+    console.log("Fetch request : " + event.request.url);
+    event.respondWith(
+        caches.match(event.request).then(function (request) {
             if (request) {
-                console.log("Responding with cache : " + e.request.url);
+                console.log("Responding with cache : " + event.request.url);
                 return request;
             } else {
-                console.log("File is not cached, fetching : " + e.request.url);
-                return fetch(e.request);
+                console.log("File is not cached, fetching : " + event.request.url);
+                return fetch(event.request);
             }
         })
     );
 });
 
-self.addEventListener("install", function (e) {
-    e.waitUntil(
+self.addEventListener("install", function (event) {
+    event.waitUntil(
         caches.open(CACHE_NAME).then(function (cache) {
             console.log("Installing cache : " + CACHE_NAME);
             return cache.addAll(URLS);
@@ -27,8 +29,8 @@ self.addEventListener("install", function (e) {
     );
 });
 
-self.addEventListener("activate", function (e) {
-    e.waitUntil(
+self.addEventListener("activate", function (event) {
+    event.waitUntil(
         caches.keys().then(function (keyList) {
             var cacheWhitelist = keyList.filter(function (key) {
                 return key.indexOf(APP_PREFIX);
@@ -39,6 +41,8 @@ self.addEventListener("activate", function (e) {
                     if (cacheWhitelist.indexOf(key) === -1) {
                         console.log("Deleting cache : " + keyList[i]);
                         return caches.delete(keyList[i]);
+                    } else {
+                        return Promise.resolve();
                     }
                 })
             );
