@@ -1,15 +1,6 @@
-var GHPATH = "/citeease";
 var APP_PREFIX = "citeease_";
 var VERSION = "v1";
-var URLS = [
-    `${GHPATH}/`,
-    `${GHPATH}/index.html`,
-    `${GHPATH}/static/js/main.chunk.js`,
-    `${GHPATH}/static/js/bundle.js`,
-    `${GHPATH}/static/js/0.chunk.js`,
-    `${GHPATH}/static/css/main.1fe0c195.css`,
-    `${GHPATH}/static/js/main.0fa6b5ab.js`,
-];
+var URLS = ["/citeease/*", "/citeease/static/*", "/citeease/static/js/*", "/citeease/static/css/*"];
 
 var CACHE_NAME = APP_PREFIX + VERSION;
 self.addEventListener("fetch", function (e) {
