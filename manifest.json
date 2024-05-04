@@ -19,7 +19,8 @@
             "type": "image/png"
         }
     ],
-    "start_url": ".",
+    "scope": "/citeease/",
+    "start_url": "/citeease/",
     "display": "standalone",
     "theme_color": "#ffffff",
     "background_color": "#ffffff"
