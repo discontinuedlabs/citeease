@@ -10,13 +10,11 @@
         />
         <title>CiteEase: Simplify Your Research Workflow</title>
 
-        <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-        <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/images/favicons/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/images/favicons/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/images/favicons/favicon-16x16.png" />
+        <link rel="manifest" href="/citeease/manifest.json" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/citeease/images/favicons/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/citeease/images/favicons/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/citeease/images/favicons/favicon-16x16.png" />
         <meta name="theme-color" content="#ffffff" />
-
-        <link rel="canonical" href="https://discontinuedlabs.github.io/citeease/" />
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -33,7 +31,11 @@
 
         <script>
             if (navigator.serviceWorker) {
-                navigator.serviceWorker.register("/citeease/service-worker.js", { scope: "/citeease/" });
+                navigator.serviceWorker
+                    .register("/citeease/service-worker.js", { scope: "/citeease/" })
+                    .then(function (registration) {
+                        console.log("ServiceWorker registration successful with scope: ", registration.scope);
+                    });
             }
         </script>
     </body>
