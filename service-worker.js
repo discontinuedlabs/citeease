@@ -1,6 +1,6 @@
 var APP_PREFIX = "citeease_";
-var VERSION = "v1";
-var URLS = ["/citeease/*", "/citeease/static/*", "/citeease/static/js/*", "/citeease/static/css/*"];
+var VERSION = "v2";
+var URLS = ["/citeease/"];
 
 var CACHE_NAME = APP_PREFIX + VERSION;
 self.addEventListener("fetch", function (e) {
