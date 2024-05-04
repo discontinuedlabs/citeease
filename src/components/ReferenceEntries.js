@@ -11,6 +11,12 @@ const MASTER_CHECKBOX_STATES = {
     INDETERMINATE: "indeterminate", // Some reference entries are checked
 };
 
+// TODO:
+// Merge all context menu functions with the ones in the bibiliography component.
+// The bibliography page should only have one context menu.
+// When there are selected citations, it will show the context menu that targets the citations.
+// When nothing is selected, it will show the context menu that targets the bibliography itself.
+
 export default function ReferenceEntries(props) {
     const {
         bibliography,
@@ -63,8 +69,6 @@ export default function ReferenceEntries(props) {
         }
         formatCitations();
     }, [bibliography.citations, bibliography.style]);
-
-    // TODO: Merge all these functions with the ones in bibiliography component
 
     function handleMasterCheck() {
         dispatch({
