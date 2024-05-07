@@ -3,7 +3,7 @@ import { useState } from "react";
 import Bibliography from "./components/Bibliography";
 import { Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
-import { useLocalStorage, useReducerWithLocalStorage, use } from "./utils";
+import { useLocalStorage, useReducerWithLocalStorage } from "./utils";
 import AcceptDialog from "./components/ui/AcceptDialog";
 import ConfirmDialog from "./components/ui/ConfirmDialog";
 import bibliographyReducer, { ACTIONS } from "./components/reducers/bibliographyReducer";
@@ -12,10 +12,10 @@ import BibliographySettings from "./components/BibliographySettings";
 import settingsReducer from "./components/reducers/settingsReducer";
 
 const CITATION_STYLES = [
-    { name: "APA", code: "apa" },
-    { name: "MLA", code: "modern-language-association" },
-    { name: "Chicago", code: "chicago" },
-    { name: "Harvard", code: "harvard-cite-them-right" },
+    { name: "American Psychological Association 7th edition", code: "apa" },
+    { name: "Modern Language Association 9th edition", code: "modern-language-association" },
+    { name: "Chicago Manual of Style 17th edition (author-date)", code: "chicago-author-date" },
+    { name: "Cite Them Right 12th edition - Harvard", code: "harvard-cite-them-right" },
     { name: "Vancouver", code: "vancouver" },
 ];
 
