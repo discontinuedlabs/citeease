@@ -10,6 +10,7 @@ import bibliographyReducer, { ACTIONS } from "./components/reducers/bibliography
 import Settings from "./components/Settings";
 import BibliographySettings from "./components/BibliographySettings";
 import settingsReducer from "./components/reducers/settingsReducer";
+import MarkdownPage from "./components/MarkdownPage";
 
 const CITATION_STYLES = [
     { name: "American Psychological Association 7th edition", code: "apa" },
@@ -70,9 +71,18 @@ export default function App() {
                 />
                 <Route path="/:bibId/settings" element={<BibliographySettings bibliographies={bibliographies} />} />
 
-                {/* <Route path="/about" element={<About />} />
-                <Route path="/terms" element={<Terms />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} /> */}
+                <Route
+                    path="/about"
+                    element={<MarkdownPage title={"About CiteEase"} filePath={"/citeease/markdown/about.md"} />}
+                />
+                <Route
+                    path="/terms"
+                    element={<MarkdownPage title={"Terms of Use"} filePath={"/citeease/markdown/terms.md"} />}
+                />
+                <Route
+                    path="/privacy"
+                    element={<MarkdownPage title={"Privacy Policy"} filePath={"/citeease/markdown/privacy.md"} />}
+                />
 
                 {/* <Route path="*" element={<NotFoundPage />} /> */}
             </Routes>

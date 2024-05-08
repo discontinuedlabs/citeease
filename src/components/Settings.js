@@ -1,20 +1,20 @@
-// import ContextMenu from "./ui/ContextMenu";
-// import { ACTIONS as SETTINGS_ACTIONS } from "./reducers/settingsReducer";
-// import { useNavigate } from "react-router-dom";
+import { ACTIONS as SETTINGS_ACTIONS } from "./reducers/settingsReducer";
 import { useDocumentTitle } from "../utils";
+import { SettingsSection, SettingsNavigate, SettingsButton, SettingsCheckButton } from "./ui/SettingsComponents";
 
 export default function Settings(props) {
     useDocumentTitle("Settings");
-    // const { settings, settingsDispatch } = props;
-    // const navigate = useNavigate();
+    const { settings, settingsDispatch } = props;
 
     return (
         <div className="settings-page">
             <h1>Settings</h1>
 
-            {/* <button onClick={() => navigate("/about")}>About CiteEase</button>
-            <button onClick={() => navigate("/terms")}>Terms</button>
-            <button onClick={() => navigate("/privacy-policy")}>Privacy Policy</button> */}
+            <SettingsSection>
+                <SettingsNavigate label="About CiteEase" to="/about" />
+                <SettingsNavigate label="Terms of Use" to="/terms" />
+                <SettingsNavigate label="Privacy Policy" to="/privacy" />
+            </SettingsSection>
         </div>
     );
 }

@@ -53,6 +53,6 @@
 }
 
 .hanging-indentation div {
-    text-indent: -2rem;
-    padding-left: 2rem;
+    text-indent: -1em;
+    padding-left: 1em;
 }

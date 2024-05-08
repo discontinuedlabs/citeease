@@ -1,0 +1,55 @@
+## CiteEase: Open-Source Citation Management App
+
+**Welcome to CiteEase, your one-stop shop for managing citations and collaborating on bibliographies!**
+
+**What is CiteEase?**
+
+CiteEase is a powerful and user-friendly open-source citation management app designed for students, researchers, and anyone who values efficiency and organization.
+
+**Key Features:**
+
+-   **Offline Functionality:** Work on your bibliographies seamlessly, even without an internet connection.
+-   **Cross-Platform Compatibility:** Access CiteEase from any device, regardless of operating system.
+-   **Unlimited Usage:** No sign-in required for basic functionalities. Enjoy the freedom to manage your citations without limitations.
+-   **Open-Source Development:** Contribute to the project's growth and customize CiteEase to fit your specific needs.
+-   **Advanced Citation Management:**
+    -   Over 1000 citation styles supported, with the ability to add custom CSL files for even more flexibility.
+    -   Manage citations with ease: add, edit, move, copy, delete, and export them in various formats (CSL, BibTeX, BibLaTeX, Bibtxt, JSON, Word, PDF).
+    -   Search, filter, group by, and sort your citations for effortless organization.
+-   **Collaboration Features:**
+    -   Open collaboration on bibliographies using a unique identifier and password.
+    -   Collaborate with others in real-time, allowing everyone to add, modify, or delete citations within a shared bibliography.
+-   **Customization Options:**
+    -   Choose between a 12-hour or 24-hour clock format.
+    -   Select which information to display in the bibliography entry (date modified or date created).
+    -   Manage your account settings (optional: create an account for syncing data across devices, restoring passwords, and collaborating).
+
+**Getting Started**
+
+1. **Clone the Repository:**
+
+    ```bash
+    git clone https://github.com/your-username/citeease.git
+    ```
+
+    Replace `your-username` with your GitHub username.
+
+2. **Install Dependencies:**
+   Follow the instructions in the `installation.md` file to set up the development environment and install necessary dependencies.
+
+3. **Run the App:**
+   Once the dependencies are installed, you can start the development server using the following command:
+
+    ```bash
+    npm start
+    ```
+
+**Contributing**
+
+We welcome contributions from the open-source community! If you'd like to contribute to CiteEase, please refer to the `contributing.md` file for guidelines and instructions.
+
+**License**
+
+CiteEase is licensed under the MIT License. See the `LICENSE` file for details.
+
+**We hope you find CiteEase to be a valuable tool for your research endeavors!**

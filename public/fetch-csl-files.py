@@ -29,13 +29,20 @@ for file_info in csl_files:
     content = response.text
     
     # Parse the CSL file to extract the required information
-    title = content.split('<title>')[1].split('</title>')[0].strip()
+    longTitle = content.split('<title>')[1].split('</title>')[0].strip()
+    if '<title-short>' in content:
+        shortTitle = content.split('<title-short>')[1].split('</title-short>')[0].strip()
+    else:
+        shortTitle = None
     code = file_info['name'].replace('.csl', '')
     license_text = content.split('<rights license="http://creativecommons.org/licenses/by-sa/3.0/">')[1].split('</rights>')[0].strip()
     
     # Create a JSON object
     item = {
-        'name': title,
+        'name': {
+            'long': longTitle,
+            'short': shortTitle
+        },
         'code': code,
         'license': {
             'text': license_text,
