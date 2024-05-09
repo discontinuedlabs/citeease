@@ -25,16 +25,16 @@ export default function App() {
     const [bibliographies, dispatch] = useReducerWithIndexedDB(
         "bibliographies",
         bibliographiesReducer,
-        useLiveQuery(() => db.bibliographies?.get())
+        useLiveQuery(() => db.bibliographies?.get()) || []
     );
     const [settings, settingsDispatch] = useReducerWithIndexedDB(
         "settings",
         settingsReducer,
-        useLiveQuery(() => db.settings?.get())
+        useLiveQuery(() => db.settings?.get()) || {}
     );
     const [savedCslFiles, setSavedCslFiles] = useIndexedDB(
         "savedCslFiles",
-        useLiveQuery(() => db.savedCslFiles?.get())
+        useLiveQuery(() => db.savedCslFiles?.get()) || {}
     );
     const [acceptDialog, setAcceptDialog] = useState({});
     const [confirmDialog, setConfirmDialog] = useState({});
