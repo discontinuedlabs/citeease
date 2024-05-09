@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import ContextMenu from "./ui/ContextMenu";
 import CitationWindow from "./CitationWindow";
-import AutoResizingTextarea from "./formElements/AutoResizingTextarea";
 import { useEffect, useState } from "react";
 import ReferenceEntries from "./ReferenceEntries";
 import LaTeXWindow from "./LaTeX";
@@ -33,8 +32,8 @@ export default function Bibliography(props) {
         showConfirmDialog,
         showAcceptDialog,
     } = props;
-    const bibliography = bibliographies.find((bib) => bib.id === bibliographyId);
-    useDocumentTitle(bibliography.title);
+    const bibliography = bibliographies?.find((bib) => bib.id === bibliographyId);
+    useDocumentTitle(bibliography?.title);
 
     const navigate = useNavigate();
     const [collaborationOpened, setCollaborationOpened] = useState(false);
@@ -55,10 +54,10 @@ export default function Bibliography(props) {
     useEffect(() => {
         // FIXME: If you check one from two citations, it will add the unchecked one. But this doesnt happen with more than two citations
         function updateCheckedCitations() {
-            setCheckedCitations(bibliography.citations.filter((cit) => cit.isChecked === true));
+            setCheckedCitations(bibliography?.citations.filter((cit) => cit.isChecked === true));
         }
         updateCheckedCitations();
-    }, [bibliography.citations]);
+    }, [bibliography?.citations]);
 
     function handleRename(event) {
         dispatch({
@@ -72,7 +71,7 @@ export default function Bibliography(props) {
 
     function openCitationWindow(sourceType, isNew = false, specificId = "") {
         let checkedCitationsIds = [...(specificId ? [specificId] : [])];
-        bibliography.citations.forEach((cit) => {
+        bibliography?.citations.forEach((cit) => {
             if (cit.isChecked) {
                 checkedCitationsIds.push(cit.id);
             }
@@ -93,8 +92,8 @@ export default function Bibliography(props) {
 
     async function handleCopyAll() {
         const formattedCitations = await citationEngine.formatCitations(
-            bibliography.citations,
-            bibliography.style,
+            bibliography?.citations,
+            bibliography?.style,
             savedCslFiles,
             setSavedCslFiles,
             "text"
@@ -155,8 +154,8 @@ export default function Bibliography(props) {
     return (
         <div className="bibliography">
             <div className="bibliography-header">
-                <h1>{bibliography.title}</h1>
-                <h3>{bibliography.style.name}</h3>
+                <h1>{bibliography?.title}</h1>
+                <h3>{bibliography?.style.name}</h3>
                 <ContextMenu
                     icon="more_vert"
                     menuStyle={{
@@ -231,15 +230,6 @@ export default function Bibliography(props) {
                 />
             </div>
 
-            {/* <AutoResizingTextarea
-                value={bibliography.title}
-                className="bibliography-title"
-                onChange={updateBibliographyTitle}
-                maxLength={200}
-                rows={1}
-                spellCheck="false"
-            /> */}
-
             <ReferenceEntries
                 bibliography={bibliography}
                 settings={settings}
@@ -256,7 +246,7 @@ export default function Bibliography(props) {
                 handleMove={handleMove}
             />
 
-            {citationWindowVisible && bibliography.editedCitation && (
+            {citationWindowVisible && bibliography?.editedCitation && (
                 <CitationWindow
                     bibliographies={bibliographies}
                     dispatch={dispatch}
@@ -270,7 +260,7 @@ export default function Bibliography(props) {
 
             {LaTeXWindowVisible && (
                 <LaTeXWindow
-                    citations={bibliography.citations}
+                    citations={bibliography?.citations}
                     checkedCitations={checkedCitations}
                     setLaTeXWindowVisible={setLaTeXWindowVisible}
                     setApplyOnAll={setApplyOnAll}
@@ -281,7 +271,7 @@ export default function Bibliography(props) {
                 <MoveWindow
                     bibliographies={bibliographies}
                     bibliographyId={bibliographyId}
-                    citations={bibliography.citations}
+                    citations={bibliography?.citations}
                     checkedCitations={checkedCitations}
                     setMoveWindowVisible={setMoveWindowVisible}
                     applyOnAll={applyOnAll}
@@ -292,7 +282,7 @@ export default function Bibliography(props) {
 
             {renameWindowVisible && (
                 <form className="rename-window" onSubmit={handleRename}>
-                    <input type="text" placeholder={bibliography.title} />
+                    <input type="text" placeholder={bibliography?.title} />
                     <button type="submit">Rename</button>
                     <button onClick={() => setRenameWindowVisible(false)}>Cancel</button>
                 </form>

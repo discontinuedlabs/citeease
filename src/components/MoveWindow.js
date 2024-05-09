@@ -1,4 +1,4 @@
-import { ACTIONS } from "../components/reducers/bibliographyReducer";
+import { ACTIONS } from "./reducers/bibliographiesReducer";
 import BibliographyCard from "./ui/BibliographyCard";
 
 export default function MoveWindow(props) {

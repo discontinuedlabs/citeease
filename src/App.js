@@ -3,14 +3,15 @@ import { useState } from "react";
 import Bibliography from "./components/Bibliography";
 import { Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
-import { useLocalStorage, useReducerWithLocalStorage } from "./utils";
+import { db, useIndexedDB, useReducerWithIndexedDB } from "./utils";
 import AcceptDialog from "./components/ui/AcceptDialog";
 import ConfirmDialog from "./components/ui/ConfirmDialog";
-import bibliographyReducer, { ACTIONS } from "./components/reducers/bibliographyReducer";
+import bibliographiesReducer, { ACTIONS } from "./components/reducers/bibliographiesReducer";
 import Settings from "./components/Settings";
 import BibliographySettings from "./components/BibliographySettings";
 import settingsReducer from "./components/reducers/settingsReducer";
 import MarkdownPage from "./components/MarkdownPage";
+import { useLiveQuery } from "dexie-react-hooks";
 
 const CITATION_STYLES = [
     { name: "American Psychological Association 7th edition", code: "apa" },
@@ -21,9 +22,20 @@ const CITATION_STYLES = [
 ];
 
 export default function App() {
-    const [bibliographies, dispatch] = useReducerWithLocalStorage("bibliographies", bibliographyReducer, []);
-    const [settings, settingsDispatch] = useReducerWithLocalStorage("settings", settingsReducer, {});
-    const [savedCslFiles, setSavedCslFiles] = useLocalStorage("savedCslFiles", {}); // Used to save the CSL files that don't exist in the public folder
+    const [bibliographies, dispatch] = useReducerWithIndexedDB(
+        "bibliographies",
+        bibliographiesReducer,
+        useLiveQuery(() => db.bibliographies?.get())
+    );
+    const [settings, settingsDispatch] = useReducerWithIndexedDB(
+        "settings",
+        settingsReducer,
+        useLiveQuery(() => db.settings?.get())
+    );
+    const [savedCslFiles, setSavedCslFiles] = useIndexedDB(
+        "savedCslFiles",
+        useLiveQuery(() => db.savedCslFiles?.get())
+    );
     const [acceptDialog, setAcceptDialog] = useState({});
     const [confirmDialog, setConfirmDialog] = useState({});
 
@@ -31,6 +43,7 @@ export default function App() {
         setAcceptDialog({ message: { title, body } });
     }
 
+    // TODO: Move this to utils.js, and use it instead of the error message of citationEngine.formatCitation
     function showConfirmDialog(title, body, onConfirmMethod, yesLabel = "Yes", noLabel = "No") {
         setConfirmDialog({ message: { title, body }, onConfirmMethod, yesLabel, noLabel });
     }

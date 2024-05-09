@@ -18,7 +18,7 @@ export const ACTIONS = {
 // TODO: Each function that needs selecting citations should unselect all after running the function
 // TODO: Each function that modifies a bibliography should change the bib.dateModified
 
-export default function bibliographyReducer(bibliographies, action) {
+export default function bibliographiesReducer(bibliographies, action) {
     switch (action.type) {
         case ACTIONS.ADD_NEW_BIBLIOGRAPHY:
             const newBibliography = {
@@ -32,7 +32,7 @@ export default function bibliographyReducer(bibliographies, action) {
             return [...bibliographies, newBibliography];
 
         case ACTIONS.UPDATE_BIBLIOGRAPHY_FIELDS:
-            return bibliographies.map((bib) => {
+            return bibliographies?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     return { ...bib, [action.payload.key]: action.payload.value };
                 }
@@ -50,7 +50,7 @@ export default function bibliographyReducer(bibliographies, action) {
                 },
                 isChecked: false,
             };
-            return bibliographies.map((bib) => {
+            return bibliographies?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     return {
                         ...bib,
@@ -61,7 +61,7 @@ export default function bibliographyReducer(bibliographies, action) {
             });
 
         case ACTIONS.ADD_CITATION_TO_EDITED_CITATION:
-            return bibliographies.map((bib) => {
+            return bibliographies?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const targetCitation = bib.citations.find((cit) => cit.id === action.payload.citationId);
                     return {
@@ -73,7 +73,7 @@ export default function bibliographyReducer(bibliographies, action) {
             });
 
         case ACTIONS.UPDATE_CONTENT_IN_EDITED_CITATION:
-            return bibliographies.map((bib) => {
+            return bibliographies?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     return {
                         ...bib,
@@ -84,7 +84,7 @@ export default function bibliographyReducer(bibliographies, action) {
             });
 
         case ACTIONS.UPDATE_CITATION_IN_BIBLIOGRAPHY:
-            return bibliographies.map((bib) => {
+            return bibliographies?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const citationIndex = bib.citations.findIndex((cit) => cit.id === action.payload.editedCitation.id);
                     let updatedCitations;
@@ -111,7 +111,7 @@ export default function bibliographyReducer(bibliographies, action) {
             });
 
         case ACTIONS.TOGGLE_REFERENCE_ENTRY_CHECKBOX:
-            return bibliographies.map((bib) => {
+            return bibliographies?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const citationIndex = bib.citations.findIndex((cit) => cit.id === action.payload.citationId);
                     let updatedCitations;
@@ -132,7 +132,7 @@ export default function bibliographyReducer(bibliographies, action) {
             });
 
         case ACTIONS.HANDLE_MASTER_REFERENCE_ENTRY_CHECKBOX:
-            return bibliographies.map((bib) => {
+            return bibliographies?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const allChecked = bib.citations.every((cit) => cit.isChecked);
                     const allUnchecked = bib.citations.every((cit) => !cit.isChecked);
@@ -163,7 +163,7 @@ export default function bibliographyReducer(bibliographies, action) {
             });
 
         case ACTIONS.UNCHECK_ALL_CITATIONS:
-            return bibliographies.map((bib) => {
+            return bibliographies?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     return {
                         ...bib,
@@ -174,10 +174,10 @@ export default function bibliographyReducer(bibliographies, action) {
             });
 
         case ACTIONS.DELETE_BIBLIOGRAPHY:
-            return bibliographies.filter((bib) => bib.id !== action.payload.bibliographyId);
+            return bibliographies?.filter((bib) => bib.id !== action.payload.bibliographyId);
 
         case ACTIONS.DUPLICATE_SELECTED_CITATIONS:
-            return bibliographies.map((bib) => {
+            return bibliographies?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const duplicatedCitations = action.payload.checkedCitations.map((cit) => {
                         const newId = nanoid();
@@ -192,7 +192,7 @@ export default function bibliographyReducer(bibliographies, action) {
             });
 
         case ACTIONS.DELETE_SELECTED_CITATIONS:
-            return bibliographies.map((bib) => {
+            return bibliographies?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const targetIds = action.payload.checkedCitations.map((cit) => cit.id);
                     return {

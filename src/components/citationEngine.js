@@ -7,13 +7,13 @@ export async function formatCitations(citations, bibStyle, savedCslFiles, setSav
     const contentArray = createContentArray(citations);
 
     let config = plugins.config.get("@csl");
-    config.templates.add(bibStyle.code, cslFile);
+    config.templates.add(bibStyle?.code, cslFile);
 
     if (!cslFile) return;
     let cite = await Cite.async(contentArray);
     let formattedCitations = cite.format("bibliography", {
         format: formateType,
-        template: bibStyle.code,
+        template: bibStyle?.code,
         lang: "en-US",
     });
     return formateType === "html" ? splitContentArray(formattedCitations) : formattedCitations;
@@ -31,26 +31,33 @@ export async function formatLaTeX(citations, latexFormat = "bibtex") {
     return cite.format(latexFormat);
 }
 
+// TODO: It's better to also check if the cslFile is saved when the user adds a new bibliography and download if it doesn't exist
 async function getCslFile(bibStyle, savedCslFiles, setSavedCslFiles) {
-    if (typeof savedCslFiles === Object && bibStyle.code in savedCslFiles) {
+    if (savedCslFiles && typeof savedCslFiles === "object" && bibStyle?.code in savedCslFiles) {
         // Get CSL from the savedCslFiles object
-        return savedCslFiles[bibStyle.code];
+        return savedCslFiles?.[bibStyle?.code];
     } else {
-        // Get CSL file from raw.githubusercontent.com and save it to the savedCslFiles object
-        const response = await fetch(
-            `https://raw.githubusercontent.com/citation-style-language/styles/master/${bibStyle.code}.csl`
-        );
-        const data = await response.text();
-        setSavedCslFiles((prevSavedCslFiles) => {
-            return { ...prevSavedCslFiles, [bibStyle.code]: data };
-        });
-        return data;
+        if (navigator.onLine && bibStyle?.code) {
+            // Get CSL file from citation-style-language/styles repository and save it to the savedCslFiles object
+            const response = await fetch(
+                `https://raw.githubusercontent.com/citation-style-language/styles/master/${bibStyle?.code}.csl`
+            );
+            const data = await response.text();
+            setSavedCslFiles((prevSavedCslFiles) => {
+                return { ...prevSavedCslFiles, [bibStyle?.code]: data };
+            });
+            return data;
+        } else {
+            console.error(
+                `It seems like ${bibStyle?.name}'s rules haven't been saved on your device. Please connect to the internet and refresh the page to download ${bibStyle?.name}'s rules for offline use. Alternatively, you can switch to a citation style you've used before.`
+            );
+        }
     }
 }
 
 function createContentArray(citationsArray) {
-    return citationsArray.map((cit) => {
-        return { ...cit.content };
+    return citationsArray?.map((cit) => {
+        return { ...cit?.content };
     });
 }
 
