@@ -2,8 +2,8 @@ import "../css/ReferenceEntries.css";
 import { useEffect, useState } from "react";
 import * as citationEngine from "./citationEngine.js";
 import ContextMenu from "./ui/ContextMenu.js";
-import ReactHtmlParser from "react-html-parser";
 import DOMPurify from "dompurify";
+import HTMLReactParser from "html-react-parser/lib/index";
 
 const MASTER_CHECKBOX_STATES = {
     CHECKED: "checked", // All reference entries are checked
@@ -199,11 +199,13 @@ export default function ReferenceEntries(props) {
 
                             <div
                                 className={`reference-entry-text ${
-                                    /^(APA|MLA|Chicago)$/i.test(bibliography?.style.name) ? "hanging-indentation" : ""
+                                    /^(apa|modern-language-association|chicago)$/i.test(bibliography?.style.code)
+                                        ? "hanging-indentation"
+                                        : ""
                                 }`}
                                 onClick={() => openCitationWindow(cit.content.type, false, cit.id)}
                             >
-                                {ReactHtmlParser(DOMPurify.sanitize(references?.[index]))}
+                                {HTMLReactParser(DOMPurify.sanitize(references?.[index]))}
                             </div>
                         </div>
                     );

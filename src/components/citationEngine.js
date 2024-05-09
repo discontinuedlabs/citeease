@@ -33,6 +33,7 @@ export async function formatLaTeX(citations, latexFormat = "bibtex") {
 
 // TODO: It's better to also check if the cslFile is saved when the user adds a new bibliography and download if it doesn't exist
 async function getCslFile(bibStyle, savedCslFiles, setSavedCslFiles) {
+    if (!bibStyle) return;
     if (savedCslFiles && typeof savedCslFiles === "object" && bibStyle?.code in savedCslFiles) {
         // Get CSL from the savedCslFiles object
         return savedCslFiles?.[bibStyle?.code];

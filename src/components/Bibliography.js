@@ -5,7 +5,7 @@ import ContextMenu from "./ui/ContextMenu";
 import CitationWindow from "./CitationWindow";
 import { useEffect, useState } from "react";
 import ReferenceEntries from "./ReferenceEntries";
-import LaTeXWindow from "./LaTeX";
+import LaTeXWindow from "./LaTeXWindow";
 import * as citationEngine from "./citationEngine";
 import MoveWindow from "./MoveWindow";
 import { useDocumentTitle } from "../utils";
@@ -60,10 +60,15 @@ export default function Bibliography(props) {
     }, [bibliography?.citations]);
 
     function handleRename(event) {
-        dispatch({
-            type: ACTIONS.UPDATE_BIBLIOGRAPHY_FIELDS,
-            payload: { bibliographyId: bibliographyId, key: "title", value: event.target[0].value },
-        });
+        console.log(/^\s*$/.test(event.target.value), event.target[0].value);
+        if (/^\s*$/.test(event.target[0].value)) {
+            showAcceptDialog("Title is empty", "You cant't set the title to an emdpty value.");
+        } else {
+            dispatch({
+                type: ACTIONS.UPDATE_BIBLIOGRAPHY_FIELDS,
+                payload: { bibliographyId: bibliographyId, key: "title", value: event.target[0].value },
+            });
+        }
         setRenameWindowVisible(false);
     }
 

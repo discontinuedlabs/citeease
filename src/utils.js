@@ -21,8 +21,6 @@ export function useIndexedDB(key, defaultValue) {
         saveData();
     }, [key, value]);
 
-    console.log(key, value || defaultValue);
-
     return [value || defaultValue, setValue];
 }
 

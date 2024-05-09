@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { MechanicButton, SmallButton, ContextMenuOption } from "./StyledButtons";
 import "../../css/ContextMenu.css";
+import { nanoid } from "nanoid";
 
 export default function ContextMenu(props) {
     const { label, icon, options, buttonType, menuStyle, buttonStyle } = props;
@@ -33,7 +34,7 @@ export default function ContextMenu(props) {
                         {options &&
                             options.map((option) => {
                                 if (typeof option === "string" && /devider/i.test(option)) {
-                                    return <hr className="solid" />;
+                                    return <hr className="solid" key={nanoid()} />;
                                 }
 
                                 return (
@@ -42,7 +43,7 @@ export default function ContextMenu(props) {
                                             option.method(event);
                                             setVisible(false);
                                         }}
-                                        key={option?.label}
+                                        key={nanoid()}
                                         buttonStyle={{ ...option?.style }}
                                         icon={option?.icon}
                                         label={option?.label}
