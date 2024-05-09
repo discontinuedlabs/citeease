@@ -19,6 +19,7 @@ export const ACTIONS = {
 // TODO: Each function that modifies a bibliography should change the bib.dateModified
 
 export default function bibliographiesReducer(bibliographies, action) {
+    if (!bibliographies) return;
     switch (action.type) {
         case ACTIONS.ADD_NEW_BIBLIOGRAPHY:
             const newBibliography = {
