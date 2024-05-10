@@ -1,8 +1,8 @@
 /* eslint-disable no-restricted-globals */
 
 const APP_PREFIX = "citeease_";
-const VERSION = "v3";
-const URLS = ["/citeease/"];
+const VERSION = "v4";
+const URLS = ["/citeease/", "/citeease/index.html", "/citeease/*"];
 const CACHE_NAME = APP_PREFIX + VERSION;
 
 self.addEventListener("fetch", function (event) {
