@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-globals */
 
 const APP_PREFIX = "citeease_";
-const VERSION = "v2";
+const VERSION = "v3";
 const URLS = [
     "/citeease/",
     "/citeease/index.html",
