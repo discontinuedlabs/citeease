@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-globals */
 
 const APP_PREFIX = "citeease_";
-const VERSION = "v1";
+const VERSION = "v2";
 const URLS = ["/citeease/", "/citeease/index.html", "/citeease/static/js/bundle.js"];
 const CACHE_NAME = APP_PREFIX + VERSION;
 
