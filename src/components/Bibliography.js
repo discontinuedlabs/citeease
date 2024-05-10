@@ -2,13 +2,11 @@ import "../css/Bibliography.css";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import ContextMenu from "./ui/ContextMenu";
-import CitationWindow from "./CitationWindow";
 import { useEffect, useState } from "react";
 import ReferenceEntries from "./ReferenceEntries";
-import LaTeXWindow from "./LaTeXWindow";
 import * as citationEngine from "./citationEngine";
-import MoveWindow from "./MoveWindow";
 import { useDocumentTitle } from "../utils";
+import { MoveWindow, CitationWindow, LaTeXWindow } from "./BibliographyTools";
 
 export const SOURCE_TYPES = {
     ARTICLE_JOURNAL: {

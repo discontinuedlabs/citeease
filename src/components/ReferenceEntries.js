@@ -17,6 +17,8 @@ const MASTER_CHECKBOX_STATES = {
 // When there are selected citations, it will show the context menu that targets the citations.
 // When nothing is selected, it will show the context menu that targets the bibliography itself.
 
+// This component might become much smaller than this. So you can it to the BIbliographyTools.js script.
+
 export default function ReferenceEntries(props) {
     const {
         bibliography,
