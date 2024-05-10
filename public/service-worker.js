@@ -7,6 +7,10 @@ const URLS = [
     "/citeease/index.html",
     "/citeease/static/js/main.f1bd621d.js",
     "/citeease/static/css/main.8932a3aa.css",
+    "/citeease/styles.json",
+    "/citeease/markdown/about.md",
+    "/citeease/markdown/privacy.md",
+    "/citeease/markdown/terms.md",
 ];
 const CACHE_NAME = APP_PREFIX + VERSION;
 
