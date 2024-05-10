@@ -2,7 +2,12 @@
 
 const APP_PREFIX = "citeease_";
 const VERSION = "v2";
-const URLS = ["/citeease/", "/citeease/index.html", "/citeease/static/js/bundle.js"];
+const URLS = [
+    "/citeease/",
+    "/citeease/index.html",
+    "/citeease/static/js/main.f1bd621d.js",
+    "/citeease/static/css/main.8932a3aa.css",
+];
 const CACHE_NAME = APP_PREFIX + VERSION;
 
 self.addEventListener("fetch", function (event) {
