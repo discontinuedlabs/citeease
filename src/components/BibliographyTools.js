@@ -1,15 +1,149 @@
 import { useEffect, useState } from "react";
 import * as citationEngine from "./citationEngine";
-import "../css/LaTeX.css";
+import "../css/BibliographyTools.css";
 import { useParams } from "react-router-dom";
 import { SOURCE_TYPES } from "./Bibliography";
 import { ACTIONS } from "./reducers/bibliographiesReducer";
 import BibliographyCard from "./ui/BibliographyCard";
+import ContextMenu from "./ui/ContextMenu";
+import DOMPurify from "dompurify";
+import HTMLReactParser from "html-react-parser/lib/index";
 
 // Source types
 import ArticleJournal from "./sourceTypes/ArticleJournal";
 import Webpage from "./sourceTypes/Webpage";
 import Book from "./sourceTypes/Book";
+
+const MASTER_CHECKBOX_STATES = {
+    CHECKED: "checked", // All reference entries are checked
+    UNCHECKED: "unchecked", // All reference entries are unchecked
+    INDETERMINATE: "indeterminate", // Some reference entries are checked
+};
+
+export function ReferenceEntries(props) {
+    const { bibliography, dispatch, ACTIONS, savedCslFiles, setSavedCslFiles, openCitationWindow } = props;
+    const [references, setReferences] = useState([]);
+    const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
+
+    useEffect(() => {
+        function updateMasterCheckboxState() {
+            let checkedCount = 0;
+            bibliography?.citations.forEach((cit) => {
+                if (cit.isChecked) {
+                    checkedCount++;
+                }
+            });
+
+            if (checkedCount === bibliography?.citations.length) {
+                setMasterCheckboxState(MASTER_CHECKBOX_STATES.CHECKED);
+            } else if (checkedCount === 0) {
+                setMasterCheckboxState(MASTER_CHECKBOX_STATES.UNCHECKED);
+            } else {
+                setMasterCheckboxState(MASTER_CHECKBOX_STATES.INDETERMINATE);
+            }
+        }
+        updateMasterCheckboxState();
+    }, [bibliography?.citations]);
+
+    useEffect(() => {
+        async function formatCitations() {
+            const formattedCitations = await citationEngine.formatCitations(
+                bibliography?.citations,
+                bibliography?.style,
+                savedCslFiles,
+                setSavedCslFiles
+            );
+            setReferences(formattedCitations);
+        }
+        formatCitations();
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [bibliography?.citations, bibliography?.style, savedCslFiles]); // Adding setSavedCslFiles to the dependency array will cause the component to rerender infinitely
+
+    function handleMasterCheck() {
+        dispatch({
+            type: ACTIONS.HANDLE_MASTER_REFERENCE_ENTRY_CHECKBOX,
+            payload: { bibliographyId: bibliography?.id },
+        });
+    }
+
+    function handleReferenceEntryCheck(citationId) {
+        dispatch({
+            type: ACTIONS.TOGGLE_REFERENCE_ENTRY_CHECKBOX,
+            payload: { bibliographyId: bibliography.id, citationId: citationId },
+        });
+    }
+
+    return (
+        <div className="reference-entries-component">
+            <div className="reference-entries-header">
+                {bibliography?.citations.length !== 0 && (
+                    <input
+                        type="checkbox"
+                        className="master-checkbox"
+                        checked={masterCheckboxState === MASTER_CHECKBOX_STATES.CHECKED}
+                        onChange={handleMasterCheck}
+                    />
+                )}
+            </div>
+
+            <div className="reference-entries-container">
+                {bibliography?.citations.map((cit, index) => {
+                    return (
+                        <div className="reference-entry" key={cit.id}>
+                            <input
+                                type="checkbox"
+                                className="reference-entry-checkbox"
+                                checked={cit.isChecked}
+                                onChange={() => handleReferenceEntryCheck(cit.id)}
+                            />
+
+                            <div
+                                className={`reference-entry-text ${
+                                    /^(apa|modern-language-association|chicago)$/i.test(bibliography?.style.code)
+                                        ? "hanging-indentation"
+                                        : ""
+                                }`}
+                                onClick={() => openCitationWindow(cit.content.type, false, cit.id)}
+                            >
+                                {HTMLReactParser(DOMPurify.sanitize(references?.[index]))}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+export function AddCitationMenu(props) {
+    const { setAddCitationMenuVisible, openCitationWindow, searchByIdentifier, handleImportCitation } = props;
+
+    return (
+        <div
+            style={{ position: "fixed", bottom: "1rem", left: "50%", transform: "translateX(-50%)" }}
+            className="add-citation-menu"
+        >
+            <h3>Add citation</h3>
+            <button onClick={() => setAddCitationMenuVisible(false)}>X</button>
+            <div>
+                <input type="text" name="search-by-identifier" placeholder="Search by title, URL, DOI, or ISBN"></input>
+                <button onClick={searchByIdentifier}>Search</button>
+            </div>
+            <button onClick={handleImportCitation}>Import citation</button>
+            <ContextMenu
+                label="Choose source type"
+                options={Object.values(SOURCE_TYPES).map((entry) => {
+                    return {
+                        label: entry.label,
+                        method: () => openCitationWindow(entry.code, true),
+                    };
+                })}
+                menuStyle={{ position: "fixed", bottom: "100%", left: "50%", transform: "translateX(-50%)" }}
+            />
+        </div>
+    );
+}
 
 export function CitationWindow(props) {
     const { bibId: bibliographyId } = useParams();
@@ -140,6 +274,26 @@ export function MoveWindow(props) {
                     );
                 return null;
             })}
+        </div>
+    );
+}
+
+export function RenameWindow(props) {
+    const { handleRename, setRenameWindowVisible } = props;
+    const [title, setTitle] = useState(props.title);
+
+    return (
+        <div>
+            <form className="rename-window" onSubmit={() => handleRename(title)}>
+                <input
+                    type="text"
+                    onChange={(event) => setTitle(event.target.value)}
+                    placeholder="Untitled Bibliography"
+                    value={title}
+                />
+                <button type="submit">Rename</button>
+                <button onClick={() => setRenameWindowVisible(false)}>Cancel</button>
+            </form>
         </div>
     );
 }

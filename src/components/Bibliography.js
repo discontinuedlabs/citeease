@@ -3,10 +3,16 @@ import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import ContextMenu from "./ui/ContextMenu";
 import { useEffect, useState } from "react";
-import ReferenceEntries from "./ReferenceEntries";
 import * as citationEngine from "./citationEngine";
 import { useDocumentTitle } from "../utils";
-import { MoveWindow, CitationWindow, LaTeXWindow } from "./BibliographyTools";
+import {
+    ReferenceEntries,
+    MoveWindow,
+    CitationWindow,
+    LaTeXWindow,
+    RenameWindow,
+    AddCitationMenu,
+} from "./BibliographyTools";
 
 export const SOURCE_TYPES = {
     ARTICLE_JOURNAL: {
@@ -19,17 +25,8 @@ export const SOURCE_TYPES = {
 
 export default function Bibliography(props) {
     const { bibId: bibliographyId } = useParams();
-    const {
-        bibliographies,
-        CITATION_STYLES,
-        dispatch,
-        ACTIONS,
-        settings,
-        savedCslFiles,
-        setSavedCslFiles,
-        showConfirmDialog,
-        showAcceptDialog,
-    } = props;
+    const { bibliographies, dispatch, ACTIONS, savedCslFiles, setSavedCslFiles, showConfirmDialog, showAcceptDialog } =
+        props;
     const bibliography = bibliographies?.find((bib) => bib.id === bibliographyId);
     useDocumentTitle(bibliography?.title);
 
@@ -37,7 +34,6 @@ export default function Bibliography(props) {
     const [collaborationOpened, setCollaborationOpened] = useState(false);
     const [citationWindowVisible, setCitationWindowVisible] = useState(false);
     const [addCitationMenuVisible, setAddCitationMenuVisible] = useState(false);
-    const [intextCitationWindowVisible, setIntextCitationWindowVisible] = useState(false);
     const [LaTeXWindowVisible, setLaTeXWindowVisible] = useState(false);
     const [checkedCitations, setCheckedCitations] = useState([]); // TODO: Change checked to selected
     const [applyOnAll, setApplyOnAll] = useState(false); // used for some settings in the bibliography context menu
@@ -47,6 +43,7 @@ export default function Bibliography(props) {
     useEffect(() => {
         // isChecked should not get saved, but since it's in an object that gets saved and loaded, it should be set to false when opening the bibliography page
         dispatch({ type: ACTIONS.UNCHECK_ALL_CITATIONS, payload: { bibliographyId: bibliographyId } });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -56,21 +53,6 @@ export default function Bibliography(props) {
         }
         updateCheckedCitations();
     }, [bibliography?.citations]);
-
-    function handleRename(event) {
-        console.log(/^\s*$/.test(event.target.value), event.target[0].value);
-        if (/^\s*$/.test(event.target[0].value)) {
-            showAcceptDialog("Title is empty", "You cant't set the title to an emdpty value.");
-        } else {
-            dispatch({
-                type: ACTIONS.UPDATE_BIBLIOGRAPHY_FIELDS,
-                payload: { bibliographyId: bibliographyId, key: "title", value: event.target[0].value },
-            });
-        }
-        setRenameWindowVisible(false);
-    }
-
-    function handleChangeStyle() {}
 
     function openCitationWindow(sourceType, isNew = false, specificId = "") {
         let checkedCitationsIds = [...(specificId ? [specificId] : [])];
@@ -93,9 +75,13 @@ export default function Bibliography(props) {
         setAddCitationMenuVisible(false);
     }
 
-    async function handleCopyAll() {
+    function handleSearchByIdentifier() {}
+
+    function handleImportCitation() {}
+
+    async function handleCopy() {
         const formattedCitations = await citationEngine.formatCitations(
-            bibliography?.citations,
+            bibliography?.checkedCitations,
             bibliography?.style,
             savedCslFiles,
             setSavedCslFiles,
@@ -109,40 +95,59 @@ export default function Bibliography(props) {
         }
     }
 
-    function handleDeleteBibliography() {
-        navigate("/");
-        dispatch({ type: ACTIONS.DELETE_BIBLIOGRAPHY, payload: { bibliographyId: bibliographyId } });
-    }
-
-    function searchByIdentifier() {}
-
-    function handleImportCitation() {}
-
-    function handleReferenceEntryCheck(citationId) {
-        dispatch({
-            type: ACTIONS.TOGGLE_REFERENCE_ENTRY_CHECKBOX,
-            payload: { bibliographyId: bibliographyId, citationId: citationId },
-        });
-    }
-
-    function handleExportAllToLatex() {
-        setApplyOnAll(true);
+    function handleExportToLatex() {
         setLaTeXWindowVisible(true);
     }
 
-    function handleMove(applyOnAll = false) {
-        setApplyOnAll(applyOnAll);
+    function handleMove() {
         if (bibliographies.length > 1) setMoveWindowVisible(true);
-        else showAcceptDialog("No bibliographies to move", "You have no other bibliography to move citations to.");
+        else
+            showConfirmDialog(
+                "No bibliographies to move",
+                "You have no other bibliography to move citations to. Would you like to create a new bibliography and move the selected citations to it?",
+                () =>
+                    dispatch({
+                        type: ACTIONS.ADD_NEW_BIBLIOGRAPHY_AND_MOVE_CITATIONS,
+                        payload: { checkedCitations: checkedCitations, bibliographyStyle: bibliography?.style },
+                    }),
+                "Create new bibliography",
+                "Cancel"
+            );
     }
 
+    function handleDuplicate() {
+        dispatch({
+            type: ACTIONS.DUPLICATE_SELECTED_CITATIONS,
+            payload: { bibliographyId: bibliography?.id, checkedCitations: checkedCitations },
+        });
+    }
+
+    function handleDelete() {
+        dispatch({
+            type: ACTIONS.DELETE_SELECTED_CITATIONS,
+            payload: { bibliographyId: bibliography?.id, checkedCitations: checkedCitations },
+        });
+    }
+
+    function handleRename(value) {
+        if (/^\s*$/.test(value)) {
+            showAcceptDialog("Title is empty", "You cant't set the title to an emdpty value.");
+        } else {
+            dispatch({
+                type: ACTIONS.UPDATE_BIBLIOGRAPHY_FIELDS,
+                payload: { bibliographyId: bibliographyId, key: "title", value: value },
+            });
+        }
+        setRenameWindowVisible(false);
+    }
+
+    function handleChangeStyle() {}
+
     function handleOpenCollaboration() {
-        /*
-         * If it's the first time, prompts the user with a dialog explaining the benefits of collaboration.
-         * Checks whether the user owns any collaborative bibliographies to determine if it's the first time.
-         * If the user is not signed in, prompts them to sign in to access this feature. Once signed in, they proceed to create a unique identifier and password for the collaborative bibliography.
-         * If the user attempts to open a bibliography that was previously set up for collaboration, they are presented with a confirmation message: "Are you sure you want to open this bibliography for collaboration?"
-         */
+        // If it's the first time, prompts the user with a dialog explaining the benefits of collaboration.
+        // Checks whether the user owns any collaborative bibliographies to determine if it's the first time.
+        // If the user is not signed in, prompts them to sign in to access this feature. Once signed in, they proceed to create a unique identifier and password for the collaborative bibliography.
+        // If the user attempts to open a bibliography that was previously set up for collaboration, they are presented with a confirmation message: "Are you sure you want to open this bibliography for collaboration?"
         setCollaborationOpened(true);
     }
 
@@ -152,6 +157,11 @@ export default function Bibliography(props) {
             "This will remove all collaborators, permanently delete the collaboration history, and revoke access foe all contributors. The bibliography will be removed from their list of accessible bibliographies. Are you sure you want to proceed? Collaboration can be opened anytime if needed.",
             () => setCollaborationOpened(false)
         );
+    }
+
+    function handleDeleteBibliography() {
+        navigate("/");
+        dispatch({ type: ACTIONS.DELETE_BIBLIOGRAPHY, payload: { bibliographyId: bibliographyId } });
     }
 
     return (
@@ -167,86 +177,109 @@ export default function Bibliography(props) {
                     }}
                     buttonType={"Small Button"}
                     options={[
-                        { label: "Rename", method: () => setRenameWindowVisible(true) },
-                        {
-                            label: "Change style",
-                            method: [
-                                CITATION_STYLES.map((style) => {
-                                    return {
-                                        label: style.name,
-                                        method: () =>
-                                            dispatch({
-                                                type: ACTIONS.UPDATE_BIBLIOGRAPHY_FIELDS,
-                                                payload: { bibliographyId: bibliographyId, key: "style", value: style },
-                                            }),
-                                    };
-                                }),
-                            ],
-                        },
-
-                        "DEVIDER",
-
-                        { label: "Copy to clipboard", method: handleCopyAll },
-                        {
-                            label: "Export to LaTeX", // TODO: This should be "export" only, and gives you more options to export to.
-                            method: handleExportAllToLatex,
-                        },
-
-                        "DEVIDER",
-
-                        ...(collaborationOpened
-                            ? [
+                        ...(checkedCitations.length !== 0
+                            ? // When there are selected ciattions, only options that target citations show to the user
+                              [
+                                  { label: "Copy to clipboard", method: handleCopy }, // TODO: This should give options to choose the type of copied text: Text, HTML, or Markdown.
                                   {
-                                      label: "bibliography settings",
-                                      method: () => navigate(`/${bibliographyId}/settings`),
+                                      label: "Export to LaTeX",
+                                      method: handleExportToLatex, // TODO: This should be "Export" only, and gives you more options to export to: LaTeX, HTML, Markdown, PDF, Word, or JSON.
                                   },
 
+                                  "DEVIDER",
+
+                                  { label: "Move", method: handleMove },
+                                  { label: "Duplicate", method: handleDuplicate },
+
+                                  "DEVIDER",
+
+                                  ...(checkedCitations.length === 1 && checkedCitations[0].content.URL
+                                      ? [
+                                            {
+                                                label: "Visit website",
+                                                method: () => window.open(checkedCitations[0].content.URL, "_blank"),
+                                            },
+                                            {
+                                                label: "Edit",
+                                                method: () => openCitationWindow(checkedCitations[0].content.type),
+                                            },
+                                            "DEVIDER",
+                                        ]
+                                      : []),
+
                                   {
-                                      label: "Close collaboration",
-                                      method: handleCloseCollaboration,
+                                      label: "Delete",
+                                      method: () =>
+                                          showConfirmDialog(
+                                              `Delete ${checkedCitations.length === 1 ? "citation" : "citations"}?`,
+                                              `Are you sure you want to delete ${
+                                                  checkedCitations.length === 1 ? "this citation" : "these citations"
+                                              }?`,
+                                              handleDelete,
+                                              "Delete",
+                                              "Cancel"
+                                          ),
+                                      icon: "delete",
+                                      style: { color: "crimson" },
                                   },
                               ]
-                            : [
+                            : // When nothing is selected, only options that target the bibliography itself show to the user
+                              [
+                                  { label: "Rename", method: () => setRenameWindowVisible(true) },
                                   {
-                                      label: "Open collaboration",
-                                      method: handleOpenCollaboration,
-                                      badge: { label: "test", color: "white", backgroundColor: "blue" },
+                                      label: "Change style",
+                                      method: handleChangeStyle,
+                                  },
+
+                                  "DEVIDER",
+
+                                  ...(collaborationOpened
+                                      ? [
+                                            {
+                                                label: "bibliography settings",
+                                                method: () => navigate(`/${bibliographyId}/settings`),
+                                            },
+
+                                            {
+                                                label: "Close collaboration",
+                                                method: handleCloseCollaboration,
+                                            },
+                                        ]
+                                      : [
+                                            {
+                                                label: "Open collaboration",
+                                                method: handleOpenCollaboration,
+                                                badge: { label: "test", color: "white", backgroundColor: "blue" },
+                                            },
+                                        ]),
+
+                                  "DEVIDER",
+
+                                  {
+                                      label: "Delete bibliography?",
+                                      method: () =>
+                                          showConfirmDialog(
+                                              "Delete bibliography",
+                                              "You'll no longer see this bibliography in your list. This will also delete related work and citations.",
+                                              handleDeleteBibliography,
+                                              "Delete",
+                                              "Cancel"
+                                          ),
+                                      icon: "delete",
+                                      style: { color: "crimson" },
                                   },
                               ]),
-
-                        "DEVIDER",
-
-                        {
-                            label: "Delete bibliography?",
-                            method: () =>
-                                showConfirmDialog(
-                                    "Delete bibliography",
-                                    "You'll no longer see this bibliography in your list. This will also delete related work and citations.",
-                                    handleDeleteBibliography,
-                                    "Delete",
-                                    "Cancel"
-                                ),
-                            icon: "delete",
-                            style: { color: "crimson" },
-                        },
                     ]}
                 />
             </div>
 
             <ReferenceEntries
                 bibliography={bibliography}
-                settings={settings}
                 dispatch={dispatch}
                 ACTIONS={ACTIONS}
-                handleReferenceEntryCheck={handleReferenceEntryCheck}
                 savedCslFiles={savedCslFiles}
                 setSavedCslFiles={setSavedCslFiles}
-                checkedCitations={checkedCitations}
-                setLaTeXWindowVisible={setLaTeXWindowVisible}
-                setApplyOnAll={setApplyOnAll}
-                showConfirmDialog={showConfirmDialog}
                 openCitationWindow={openCitationWindow}
-                handleMove={handleMove}
             />
 
             {citationWindowVisible && bibliography?.editedCitation && (
@@ -258,8 +291,6 @@ export default function Bibliography(props) {
                     setCitationWindowVisible={setCitationWindowVisible}
                 />
             )}
-
-            {intextCitationWindowVisible && <div>intext</div>}
 
             {LaTeXWindowVisible && (
                 <LaTeXWindow
@@ -283,41 +314,16 @@ export default function Bibliography(props) {
                 />
             )}
 
-            {renameWindowVisible && (
-                <form className="rename-window" onSubmit={handleRename}>
-                    <input type="text" placeholder={bibliography?.title} />
-                    <button type="submit">Rename</button>
-                    <button onClick={() => setRenameWindowVisible(false)}>Cancel</button>
-                </form>
-            )}
+            {renameWindowVisible && <RenameWindow title={bibliography?.title} handleRename={handleRename} />}
 
             {addCitationMenuVisible && (
-                <div
-                    style={{ position: "fixed", bottom: "1rem", left: "50%", transform: "translateX(-50%)" }}
-                    className="add-citation-menu"
-                >
-                    <h3>Add citation</h3>
-                    <button onClick={() => setAddCitationMenuVisible(false)}>X</button>
-                    <div>
-                        <input
-                            type="text"
-                            name="search-by-identifier"
-                            placeholder="Search by title, URL, DOI, or ISBN"
-                        ></input>
-                        <button onClick={searchByIdentifier}>Search</button>
-                    </div>
-                    <button onClick={handleImportCitation}>Import citation</button>
-                    <ContextMenu
-                        label="Choose source type"
-                        options={Object.values(SOURCE_TYPES).map((entry) => {
-                            return {
-                                label: entry.label,
-                                method: () => openCitationWindow(entry.code, true),
-                            };
-                        })}
-                        menuStyle={{ position: "fixed", bottom: "100%", left: "50%", transform: "translateX(-50%)" }}
-                    />
-                </div>
+                // Since the openCitationWindow is passed to this component, make the handleSearchByIdentifier and handleImportCitation inside it
+                <AddCitationMenu
+                    setAddCitationMenuVisible={setAddCitationMenuVisible}
+                    openCitationWindow={openCitationWindow}
+                    handleSearchByIdentifier={handleSearchByIdentifier}
+                    handleImportCitation={handleImportCitation}
+                />
             )}
 
             <button onClick={() => setAddCitationMenuVisible(true)}>Add citation</button>

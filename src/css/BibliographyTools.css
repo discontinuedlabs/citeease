@@ -1,12 +1,33 @@
+.latex-window-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--transparent-black);
+}
+
+.latex-window {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50rem;
+    min-height: 70vh;
+    max-height: 80vh;
+    background-color: white;
+    box-shadow: 0 5px 5px 0 var(--transparent-black);
+}
+
+.displayed-latex {
+    white-space: pre-wrap;
+}
+
 .reference-entries-container {
     max-width: 50rem;
     margin: auto;
     padding: 1rem;
 }
-
-/* * {
-    outline: 1px black solid;
-} */
 
 .reference-entry {
     display: flex;

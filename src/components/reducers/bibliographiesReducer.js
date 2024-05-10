@@ -13,16 +13,20 @@ export const ACTIONS = {
     DELETE_BIBLIOGRAPHY: "Delete bibliography",
     DELETE_SELECTED_CITATIONS: "Delete selected citations",
     DUPLICATE_SELECTED_CITATIONS: "Duplicate selected citations",
+    ADD_NEW_BIBLIOGRAPHY_AND_MOVE_CITATIONS: "Add new bibliography and move citations",
 };
 
-// TODO: Each function that needs selecting citations should unselect all after running the function
-// TODO: Each function that modifies a bibliography should change the bib.dateModified
+// TODO:
+//      - Each function that needs selecting citations should unselect all after running the function
+//      - Each function that modifies a bibliography should change the bib.dateModified
+
+let newBibliography;
 
 export default function bibliographiesReducer(bibliographies, action) {
     if (!bibliographies || typeof bibliographies === Array) return;
     switch (action.type) {
         case ACTIONS.ADD_NEW_BIBLIOGRAPHY:
-            const newBibliography = {
+            newBibliography = {
                 title: "Untitled Bibliography",
                 style: action.payload.bibliographyStyle,
                 dateCreated: new Date(),
@@ -203,6 +207,17 @@ export default function bibliographiesReducer(bibliographies, action) {
                 }
                 return bib;
             });
+
+        case ACTIONS.ADD_NEW_BIBLIOGRAPHY_AND_MOVE_CITATIONS:
+            newBibliography = {
+                title: "Untitled Bibliography",
+                style: action.payload.bibliographyStyle,
+                dateCreated: new Date(),
+                dateModified: new Date(),
+                id: "bib=" + nanoid(10),
+                citations: [...action.payload.checkedCitations],
+            };
+            return [...bibliographies, newBibliography];
 
         default:
             return bibliographies;
