@@ -1,12 +1,12 @@
 /* eslint-disable no-restricted-globals */
 
 const APP_PREFIX = "citeease_";
-const VERSION = "v4";
+const VERSION = "v5";
 const URLS = [
     "/citeease/",
     "/citeease/index.html",
-    "/citeease/static/js/main.f1bd621d.js",
-    "/citeease/static/css/main.8932a3aa.css",
+    "/citeease/static/js/*.js",
+    "/citeease/static/css/*.css",
     "/citeease/styles.json",
     "/citeease/markdown/about.md",
     "/citeease/markdown/privacy.md",

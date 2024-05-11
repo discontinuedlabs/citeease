@@ -70,33 +70,3 @@ ul {
 .hidden {
     display: none;
 }
-
-.home {
-    margin-inline: auto;
-    max-width: 50rem;
-}
-
-.add-bibliography-button {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-}
-
-.bibliography-cards-container {
-    display: grid;
-    grid-row: 1;
-    gap: 0.5rem;
-}
-
-.bibliography-card {
-    border-radius: var(--border-radius-regular);
-    border: var(--border-regular) var(--main-blue);
-    text-decoration: none;
-    color: var(--main-black);
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.6rem;
-    box-shadow: 0 0.2rem 0 var(--main-blue);
-}

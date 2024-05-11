@@ -3,6 +3,7 @@ import ContextMenu from "./ui/ContextMenu";
 import { useNavigate } from "react-router-dom";
 import BibliographyCard from "./ui/BibliographyCard";
 import { useDocumentTitle } from "../utils";
+import "../css/Home.css";
 
 export default function Home(props) {
     const { bibliographies, CITATION_STYLES, dispatch, ACTIONS } = props;
@@ -25,7 +26,7 @@ export default function Home(props) {
             <div className="bibliography-cards-container">
                 {bibliographies && bibliographies.length > 0 ? (
                     bibliographies.map((bib) => (
-                        <Link key={bib.id} to={`/${bib.id}`}>
+                        <Link key={bib.id} to={`/${bib.id}`} className="bibliography-link">
                             <BibliographyCard bibliography={bib} />
                         </Link>
                     ))
