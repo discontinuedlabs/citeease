@@ -313,10 +313,10 @@ export function CitationStylesMenu(props) {
         fetchStyles();
     }, []);
 
-    const normalizedSearchTerm = searchTerm.toLowerCase().replace(/\W+/g, "");
-    const regexPattern = new RegExp(`\\b${searchTerm}\\b`, "gi");
-    console.log(regexPattern);
-    const filteredStyles = styles?.filter((style) => style.name.long.toLowerCase().match(regexPattern));
+    const regexPattern = new RegExp(`${searchTerm.replace(/\s+/, "|")}`, "gi");
+    const filteredStyles = styles?.filter((style) => {
+        return style.name.long.toLowerCase().match(regexPattern) || style.name.short?.toLowerCase().match(regexPattern);
+    });
 
     return (
         <div className="citation-styles-menu">
