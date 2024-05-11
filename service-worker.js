@@ -6,7 +6,7 @@ const URLS = [
     "/citeease/",
     "/citeease/index.html",
     "/citeease/static/css/main.68b1a744.css",
-    "/citeease/static/js/main.2ab94d1a.js",
+    "/citeease/static/js/main.e2e0ec6b.js",
     "/citeease/styles.json",
     "/citeease/markdown/about.md",
     "/citeease/markdown/privacy.md",
