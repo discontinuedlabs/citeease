@@ -300,22 +300,40 @@ export function RenameWindow(props) {
 }
 
 export function CitationStylesMenu() {
-    const [styles, setStyles] = useState(() => {
+    const [styles, setStyles] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    useEffect(() => {
         async function fetchStyles() {
-            const response = await fetch("/%PUBLIC_URL%/styles.json");
-            const data = await response.text();
-            return data;
+            const response = await fetch(`${process.env.PUBLIC_URL}/styles.json`);
+            const data = await response.json(); // Use.json() to parse JSON data
+            setStyles(data); // Set the fetched styles
         }
         fetchStyles();
-    });
+    }, []);
+
+    const filteredStyles = styles?.filter((style) => style.name.long.toLowerCase().includes(searchTerm.toLowerCase()));
+    console.log(filteredStyles);
+
     return (
         <div className="citation-styles-menu">
             <search>
                 <form>
-                    <input type="text" placeholder="Find style by name" />
+                    <input
+                        type="text"
+                        name="citation-style-search-input"
+                        placeholder="Find style by name..."
+                        value={searchTerm}
+                        onChange={(event) => setSearchTerm(event.target.value)}
+                    />
                 </form>
             </search>
-            {/* I want to map the styles based on the search input */}
+
+            {filteredStyles.map((style, index) => (
+                <div key={index}>
+                    <p>{style.name.long}</p>
+                </div>
+            ))}
         </div>
     );
 }

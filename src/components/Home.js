@@ -4,9 +4,12 @@ import { useNavigate } from "react-router-dom";
 import BibliographyCard from "./ui/BibliographyCard";
 import { useDocumentTitle } from "../utils";
 import "../css/Home.css";
+import { useState } from "react";
+import { CitationStylesMenu } from "./BibliographyTools";
 
 export default function Home(props) {
     const { bibliographies, dispatch, ACTIONS } = props;
+    const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
     const navigate = useNavigate();
     useDocumentTitle("Home");
 
@@ -38,17 +41,10 @@ export default function Home(props) {
                 )}
             </div>
 
-            <div style={{ position: "fixed", bottom: "1rem", left: "50%", transform: "translateX(-50%)" }}>
-                <ContextMenu
-                    className="add-bibliography-button"
-                    label="Add bibliography"
-                    options={CITATION_STYLES.map((style) => ({
-                        label: style.name,
-                        method: () => handleAddBibliography(style),
-                    }))}
-                    menuStyle={{ position: "fixed", bottom: "100%", left: "50%", transform: "translateX(-50%)" }}
-                />
-            </div>
+            {citationStyleMenuVisible && <CitationStylesMenu />}
+            <button className="add-bibliography-button" onClick={() => setCitationStyleMenuVisible(true)}>
+                Add bibliography
+            </button>
         </div>
     );
 }
