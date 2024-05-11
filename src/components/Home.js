@@ -26,6 +26,7 @@ export default function Home(props) {
                 buttonType={"Small Button"}
                 options={[{ label: "Settings", method: () => navigate("/settings") }]}
             />
+            {console.log(bibliographies)}
             <div className="bibliography-cards-container">
                 {bibliographies && bibliographies.length > 0 ? (
                     bibliographies.map((bib) => (
@@ -41,7 +42,13 @@ export default function Home(props) {
                 )}
             </div>
 
-            {citationStyleMenuVisible && <CitationStylesMenu />}
+            {citationStyleMenuVisible && (
+                <CitationStylesMenu
+                    dispatch={dispatch}
+                    action={ACTIONS.ADD_NEW_BIBLIOGRAPHY}
+                    setCitationStyleMenuVisible={setCitationStyleMenuVisible}
+                />
+            )}
             <button className="add-bibliography-button" onClick={() => setCitationStyleMenuVisible(true)}>
                 Add bibliography
             </button>

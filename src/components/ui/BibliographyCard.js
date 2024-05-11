@@ -31,7 +31,7 @@ export default function BibliographyCard(props) {
     return (
         <div className="bibliography-card">
             <h3 className="bibliography-card-title">{bibliography.title}</h3>
-            <p className="bibliography-card-style">{bibliography.style.name}</p>
+            <p className="bibliography-card-style">{bibliography.style.name.short || bibliography.style.name.long}</p>
             <p>{new Date(bibliography.dateCreated).toLocaleDateString(undefined, dateOptions)}</p>
             {/* {new Date(bibliography.dateCreated) !== new Date(bibliography.dateModified) && (
                 <p>{new Date(bibliography.dateModified).toLocaleDateString(undefined, dateOptions)}</p>

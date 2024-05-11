@@ -299,21 +299,24 @@ export function RenameWindow(props) {
     );
 }
 
-export function CitationStylesMenu() {
+export function CitationStylesMenu(props) {
+    const { dispatch, action, setCitationStyleMenuVisible } = props;
     const [styles, setStyles] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
         async function fetchStyles() {
             const response = await fetch(`${process.env.PUBLIC_URL}/styles.json`);
-            const data = await response.json(); // Use.json() to parse JSON data
-            setStyles(data); // Set the fetched styles
+            const data = await response.json();
+            setStyles(data);
         }
         fetchStyles();
     }, []);
 
-    const filteredStyles = styles?.filter((style) => style.name.long.toLowerCase().includes(searchTerm.toLowerCase()));
-    console.log(filteredStyles);
+    const normalizedSearchTerm = searchTerm.toLowerCase().replace(/\W+/g, "");
+    const regexPattern = new RegExp(`\\b${searchTerm}\\b`, "gi");
+    console.log(regexPattern);
+    const filteredStyles = styles?.filter((style) => style.name.long.toLowerCase().match(regexPattern));
 
     return (
         <div className="citation-styles-menu">
@@ -330,9 +333,15 @@ export function CitationStylesMenu() {
             </search>
 
             {filteredStyles.map((style, index) => (
-                <div key={index}>
-                    <p>{style.name.long}</p>
-                </div>
+                <button
+                    key={index}
+                    onClick={() => {
+                        setCitationStyleMenuVisible(false);
+                        dispatch({ type: action, payload: { bibliographyStyle: style } });
+                    }}
+                >
+                    {style.name.long}
+                </button>
             ))}
         </div>
     );
