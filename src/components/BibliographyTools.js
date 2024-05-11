@@ -315,8 +315,25 @@ export function CitationStylesMenu(props) {
 
     const regexPattern = new RegExp(`${searchTerm.replace(/\s+/, "|")}`, "gi");
     const filteredStyles = styles?.filter((style) => {
-        return style.name.long.toLowerCase().match(regexPattern) || style.name.short?.toLowerCase().match(regexPattern);
+        return (
+            // advancedTestRegex(style.name.long, searchTerm, regexPattern) ||
+            // advancedTestRegex(style.name?.short, searchTerm, regexPattern) ||
+            advancedTestRegex(style.code, searchTerm, regexPattern)
+        );
     });
+
+    function advancedTestRegex(stringToTest, searchTerm, regex) {
+        if (!stringToTest) return;
+
+        const splitString = stringToTest.split(/\s+|-/);
+        for (let i = 0; i < splitString.length; i++) {
+            if (searchTerm[i] === splitString[i][0]) {
+                return true;
+            }
+        }
+
+        return regex.test(stringToTest.toLowerCase());
+    }
 
     return (
         <div className="citation-styles-menu">
