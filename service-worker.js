@@ -5,8 +5,8 @@ const VERSION = "v5";
 const URLS = [
     "/citeease/",
     "/citeease/index.html",
-    "/citeease/static/js/main.27a8d800.js",
-    "/citeease/static/css/main.1d5fdffc.css",
+    "/citeease/static/js/main.302d9cc7.js",
+    "/citeease/static/css/main.e84376dc.css",
     "/citeease/styles.json",
     "/citeease/markdown/about.md",
     "/citeease/markdown/privacy.md",
