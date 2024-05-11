@@ -12,15 +12,15 @@ import MarkdownPage from "./components/MarkdownPage";
 import { useLiveQuery } from "dexie-react-hooks";
 import { AcceptDialog, ConfirmDialog } from "./components/ui/Dialogs";
 
-const CITATION_STYLES = [
-    { name: "American Psychological Association 7th edition", code: "apa" },
-    { name: "Modern Language Association 9th edition", code: "modern-language-association" },
-    { name: "Chicago Manual of Style 17th edition (author-date)", code: "chicago-author-date" },
-    { name: "Cite Them Right 12th edition - Harvard", code: "harvard-cite-them-right" },
-    { name: "Vancouver", code: "vancouver" },
-    { name: "IEEE", code: "ieee" },
-    { name: "Council of Science Editors-Sequence (numeric)", code: "council-of-science-editors" },
-];
+// const CITATION_STYLES = [
+//     { name: "American Psychological Association 7th edition", code: "apa" },
+//     { name: "Modern Language Association 9th edition", code: "modern-language-association" },
+//     { name: "Chicago Manual of Style 17th edition (author-date)", code: "chicago-author-date" },
+//     { name: "Cite Them Right 12th edition - Harvard", code: "harvard-cite-them-right" },
+//     { name: "Vancouver", code: "vancouver" },
+//     { name: "IEEE", code: "ieee" },
+//     { name: "Council of Science Editors-Sequence (numeric)", code: "council-of-science-editors" },
+// ];
 
 export default function App() {
     const [bibliographies, dispatch] = useReducerWithIndexedDB(
@@ -53,14 +53,7 @@ export default function App() {
             <Routes>
                 <Route
                     path="/"
-                    element={
-                        <Home
-                            bibliographies={bibliographies}
-                            CITATION_STYLES={CITATION_STYLES}
-                            dispatch={dispatch}
-                            ACTIONS={ACTIONS}
-                        />
-                    }
+                    element={<Home bibliographies={bibliographies} dispatch={dispatch} ACTIONS={ACTIONS} />}
                 />
                 <Route
                     path="/settings"
@@ -71,7 +64,6 @@ export default function App() {
                     element={
                         <Bibliography
                             bibliographies={bibliographies}
-                            CITATION_STYLES={CITATION_STYLES}
                             dispatch={dispatch}
                             ACTIONS={ACTIONS}
                             settings={settings}

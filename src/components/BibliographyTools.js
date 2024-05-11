@@ -283,17 +283,39 @@ export function RenameWindow(props) {
     const [title, setTitle] = useState(props.title);
 
     return (
-        <div>
-            <form className="rename-window" onSubmit={() => handleRename(title)}>
+        <div className="rename-window">
+            <form onSubmit={() => handleRename(title)}>
                 <input
                     type="text"
                     onChange={(event) => setTitle(event.target.value)}
                     placeholder="Untitled Bibliography"
                     value={title}
+                    name="title-input"
                 />
                 <button type="submit">Rename</button>
                 <button onClick={() => setRenameWindowVisible(false)}>Cancel</button>
             </form>
+        </div>
+    );
+}
+
+export function CitationStylesMenu() {
+    const [styles, setStyles] = useState(() => {
+        async function fetchStyles() {
+            const response = await fetch("/%PUBLIC_URL%/styles.json");
+            const data = await response.text();
+            return data;
+        }
+        fetchStyles();
+    });
+    return (
+        <div className="citation-styles-menu">
+            <search>
+                <form>
+                    <input type="text" placeholder="Find style by name" />
+                </form>
+            </search>
+            {/* I want to map the styles based on the search input */}
         </div>
     );
 }

@@ -20,8 +20,9 @@
 }
 
 .bibliography-card {
+    background-color: white;
     border-radius: var(--border-radius-regular);
-    border: var(--border-regular) var(--main-blue);
+    border: var(--border-regular) var(--transparent-blue);
     text-decoration: none;
     color: var(--main-black);
     padding: 1rem;
@@ -29,5 +30,11 @@
     justify-content: space-between;
     align-items: center;
     gap: 0.6rem;
-    box-shadow: 0 0.2rem 0 var(--main-blue);
+    box-shadow: 0 0.2rem 0 var(--transparent-black);
+    transition: var(--transition-regular);
+}
+
+.bibliography-card:hover {
+    background-color: var(--light-blue);
+    border: var(--border-regular) var(--main-blue);
 }

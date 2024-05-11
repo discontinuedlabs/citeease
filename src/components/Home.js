@@ -6,7 +6,7 @@ import { useDocumentTitle } from "../utils";
 import "../css/Home.css";
 
 export default function Home(props) {
-    const { bibliographies, CITATION_STYLES, dispatch, ACTIONS } = props;
+    const { bibliographies, dispatch, ACTIONS } = props;
     const navigate = useNavigate();
     useDocumentTitle("Home");
 
