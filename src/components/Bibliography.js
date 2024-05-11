@@ -168,7 +168,7 @@ export default function Bibliography(props) {
         <div className="bibliography">
             <div className="bibliography-header">
                 <h1>{bibliography?.title}</h1>
-                <h3>{bibliography?.style.name}</h3>
+                <h3>{bibliography?.style.name.long}</h3>
                 <ContextMenu
                     icon="more_vert"
                     menuStyle={{
@@ -177,7 +177,7 @@ export default function Bibliography(props) {
                     }}
                     buttonType={"Small Button"}
                     options={[
-                        ...(checkedCitations.length !== 0
+                        ...(checkedCitations?.length !== 0
                             ? // When there are selected ciattions, only options that target citations show to the user
                               [
                                   { label: "Copy to clipboard", method: handleCopy }, // TODO: This should give options to choose the type of copied text: Text, HTML, or Markdown.
@@ -193,7 +193,7 @@ export default function Bibliography(props) {
 
                                   "DEVIDER",
 
-                                  ...(checkedCitations.length === 1 && checkedCitations[0].content.URL
+                                  ...(checkedCitations?.length === 1 && checkedCitations[0].content.URL
                                       ? [
                                             {
                                                 label: "Visit website",
@@ -211,9 +211,9 @@ export default function Bibliography(props) {
                                       label: "Delete",
                                       method: () =>
                                           showConfirmDialog(
-                                              `Delete ${checkedCitations.length === 1 ? "citation" : "citations"}?`,
+                                              `Delete ${checkedCitations?.length === 1 ? "citation" : "citations"}?`,
                                               `Are you sure you want to delete ${
-                                                  checkedCitations.length === 1 ? "this citation" : "these citations"
+                                                  checkedCitations?.length === 1 ? "this citation" : "these citations"
                                               }?`,
                                               handleDelete,
                                               "Delete",

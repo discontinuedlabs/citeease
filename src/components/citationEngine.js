@@ -50,7 +50,7 @@ async function getCslFile(bibStyle, savedCslFiles, setSavedCslFiles) {
             return data;
         } else {
             console.error(
-                `It seems like ${bibStyle?.name}'s rules haven't been saved on your device. Please connect to the internet and refresh the page to download ${bibStyle?.name}'s rules for offline use. Alternatively, you can switch to a citation style you've used before.`
+                `It seems like ${bibStyle?.name.long}'s rules haven't been saved on your device. Please connect to the internet and refresh the page to download ${bibStyle?.name.long}'s rules for offline use. Alternatively, you can switch to a citation style you've used before.`
             );
         }
     }
