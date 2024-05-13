@@ -26,10 +26,10 @@ CiteEase is a powerful and user-friendly open-source citation management app des
 
 **Upcoming Features (to-do):**
 
-- [ ] Integration with popular reference managers (Zotero, Mendeley, EndNote).
-- [ ] Version control to track changes and revert to previous versions (local for privacy).
-- [ ] Advanced search with filters and Boolean operators for specific fields.
-- [ ] CSL file manager to create, customize, and manage citation styles (including update checks and adding new ones).
+-   Integration with popular reference managers (Zotero, Mendeley, EndNote).
+-   Version control to track changes and revert to previous versions (local for privacy).
+-   Advanced search with filters and Boolean operators for specific fields.
+-   CSL file manager to create, customize, and manage citation styles (including update checks and adding new ones).
 
 **Getting Started**
 
