@@ -35,24 +35,18 @@ export default function Bibliography(props) {
     const [citationWindowVisible, setCitationWindowVisible] = useState(false);
     const [addCitationMenuVisible, setAddCitationMenuVisible] = useState(false);
     const [LaTeXWindowVisible, setLaTeXWindowVisible] = useState(false);
-    const [checkedCitations, setCheckedCitations] = useState([]); // TODO: Change checked to selected
     const [applyOnAll, setApplyOnAll] = useState(false); // used for some settings in the bibliography context menu
     const [moveWindowVisible, setMoveWindowVisible] = useState(false);
     const [renameWindowVisible, setRenameWindowVisible] = useState(false);
+
+    // FIXME: If you check one from two citations, it will add the unchecked one. But this doesnt happen with more than two citations
+    const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
 
     useEffect(() => {
         // isChecked should not get saved, but since it's in an object that gets saved and loaded, it should be set to false when opening the bibliography page
         dispatch({ type: ACTIONS.UNCHECK_ALL_CITATIONS, payload: { bibliographyId: bibliographyId } });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    useEffect(() => {
-        // FIXME: If you check one from two citations, it will add the unchecked one. But this doesnt happen with more than two citations
-        function updateCheckedCitations() {
-            setCheckedCitations(bibliography?.citations.filter((cit) => cit.isChecked === true));
-        }
-        updateCheckedCitations();
-    }, [bibliography?.citations]);
 
     function openCitationWindow(sourceType, isNew = false, specificId = "") {
         let checkedCitationsIds = [...(specificId ? [specificId] : [])];
@@ -81,7 +75,7 @@ export default function Bibliography(props) {
 
     async function handleCopy() {
         const formattedCitations = await citationEngine.formatCitations(
-            bibliography?.checkedCitations,
+            checkedCitations,
             bibliography?.style,
             savedCslFiles,
             setSavedCslFiles,

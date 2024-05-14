@@ -22,8 +22,12 @@ const MASTER_CHECKBOX_STATES = {
 
 export function ReferenceEntries(props) {
     const { bibliography, dispatch, ACTIONS, savedCslFiles, setSavedCslFiles, openCitationWindow } = props;
-    const [references, setReferences] = useState([]);
+    const [references, setReferences] = useState([]); // FIXME: Dont use this state because they get reorganized according to the csl file rules
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
+
+    console.log(bibliography?.citations);
+
+    const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked === true);
 
     useEffect(() => {
         function updateMasterCheckboxState() {
@@ -51,9 +55,11 @@ export function ReferenceEntries(props) {
                 bibliography?.citations,
                 bibliography?.style,
                 savedCslFiles,
-                setSavedCslFiles
+                setSavedCslFiles,
+                "html"
             );
             setReferences(formattedCitations);
+            console.log(formattedCitations);
         }
         formatCitations();
 
@@ -67,11 +73,37 @@ export function ReferenceEntries(props) {
         });
     }
 
-    function handleReferenceEntryCheck(citationId) {
+    function handleEntryCheck(citationId) {
+        console.log(citationId);
         dispatch({
             type: ACTIONS.TOGGLE_REFERENCE_ENTRY_CHECKBOX,
-            payload: { bibliographyId: bibliography.id, citationId: citationId },
+            payload: { bibliographyId: bibliography.id, citationId: citationId.id },
         });
+    }
+
+    async function handleDrag(event) {
+        if (!checkedCitations.length) {
+            event.dataTransfer.setData("text/html", event.target.innerHTML);
+        } else {
+            const formattedCitations = await citationEngine.formatCitations(
+                checkedCitations,
+                bibliography?.style,
+                savedCslFiles,
+                setSavedCslFiles,
+                "html"
+            );
+
+            // TODO: Include a break line between each entry
+            const div = document.createElement("div");
+            for (const reference of formattedCitations) {
+                const parser = new DOMParser();
+                const docFragment = parser.parseFromString(reference, "text/html");
+                const element = docFragment.body.firstChild;
+                div.appendChild(element);
+            }
+            event.dataTransfer.setData("text/html", div.innerHTML);
+            div.remove();
+        }
     }
 
     return (
@@ -90,23 +122,24 @@ export function ReferenceEntries(props) {
             <div className="reference-entries-container">
                 {bibliography?.citations.map((cit, index) => {
                     return (
-                        <div className="reference-entry" key={cit.id}>
+                        <div className="reference-entry" key={cit.id} draggable={true} onDragStart={handleDrag}>
                             <input
                                 type="checkbox"
                                 className="reference-entry-checkbox"
                                 checked={cit.isChecked}
-                                onChange={() => handleReferenceEntryCheck(cit.id)}
+                                onChange={() => handleEntryCheck(cit)}
                             />
 
                             <div
                                 className={`reference-entry-text ${
-                                    /^(apa|modern-language-association|chicago)$/i.test(bibliography?.style.code)
+                                    /^(apa|modern-language-association|chicago)$/i.test(bibliography?.style.code) // Include any other style that needs hanging indentation
                                         ? "hanging-indentation"
                                         : ""
                                 }`}
                                 onClick={() => openCitationWindow(cit.content.type, false, cit.id)}
                             >
-                                {HTMLReactParser(DOMPurify.sanitize(references?.[index]))}
+                                {HTMLReactParser(DOMPurify.sanitize(references?.[index]))}{" "}
+                                {/* Find a way to get the write reference without using index because it gets reorganized according to the csl file rules */}
                             </div>
                         </div>
                     );
@@ -299,6 +332,7 @@ export function RenameWindow(props) {
     );
 }
 
+// TODO...
 export function CitationStylesMenu(props) {
     const { dispatch, action, setCitationStyleMenuVisible } = props;
     const [styles, setStyles] = useState([]);
@@ -322,17 +356,19 @@ export function CitationStylesMenu(props) {
         );
     });
 
+    // FIXME: adding a space in searchTerm cancels the previos filter
     function advancedTestRegex(stringToTest, searchTerm, regex) {
-        if (!stringToTest) return;
+        if (!stringToTest || !searchTerm) return true;
 
-        const splitString = stringToTest.split(/\s+|-/);
-        for (let i = 0; i < splitString.length; i++) {
-            if (searchTerm[i] === splitString[i][0]) {
-                return true;
+        const splitStringToTest = stringToTest.toLowerCase().split(/\s+|-/);
+        let allMatch = true;
+        for (let i = 0; i < searchTerm.length; i++) {
+            if (searchTerm[i] !== splitStringToTest[i]?.[0]) {
+                allMatch = false;
             }
         }
-
-        return regex.test(stringToTest.toLowerCase());
+        // TODO: Also test without words like "of" "in"
+        return allMatch || regex.test(stringToTest.toLowerCase());
     }
 
     return (
