@@ -31,18 +31,18 @@ export default function Bibliography(props) {
     useDocumentTitle(bibliography?.title);
 
     const navigate = useNavigate();
-    const [collaborationOpened, setCollaborationOpened] = useState(false);
+    // const [collaborationOpened, setCollaborationOpened] = useState(false);
     const [citationWindowVisible, setCitationWindowVisible] = useState(false);
     const [addCitationMenuVisible, setAddCitationMenuVisible] = useState(false);
     const [LaTeXWindowVisible, setLaTeXWindowVisible] = useState(false);
-    const [applyOnAll, setApplyOnAll] = useState(false); // used for some settings in the bibliography context menu
     const [moveWindowVisible, setMoveWindowVisible] = useState(false);
     const [renameWindowVisible, setRenameWindowVisible] = useState(false);
 
-    // FIXME: If you check one from two citations, it will add the unchecked one. But this doesnt happen with more than two citations
     const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
 
+    // FIXME: This doesnt run when the component mounts because the bibliographyId is still defined as useIndexedDB is asynchronous
     useEffect(() => {
+        console.log(bibliographyId);
         // isChecked should not get saved, but since it's in an object that gets saved and loaded, it should be set to false when opening the bibliography page
         dispatch({ type: ACTIONS.UNCHECK_ALL_CITATIONS, payload: { bibliographyId: bibliographyId } });
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -137,21 +137,21 @@ export default function Bibliography(props) {
 
     function handleChangeStyle() {}
 
-    function handleOpenCollaboration() {
-        // If it's the first time, prompts the user with a dialog explaining the benefits of collaboration.
-        // Checks whether the user owns any collaborative bibliographies to determine if it's the first time.
-        // If the user is not signed in, prompts them to sign in to access this feature. Once signed in, they proceed to create a unique identifier and password for the collaborative bibliography.
-        // If the user attempts to open a bibliography that was previously set up for collaboration, they are presented with a confirmation message: "Are you sure you want to open this bibliography for collaboration?"
-        setCollaborationOpened(true);
-    }
+    // function handleOpenCollaboration() {
+    //     // If it's the first time, prompts the user with a dialog explaining the benefits of collaboration.
+    //     // Checks whether the user owns any collaborative bibliographies to determine if it's the first time.
+    //     // If the user is not signed in, prompts them to sign in to access this feature. Once signed in, they proceed to create a unique identifier and password for the collaborative bibliography.
+    //     // If the user attempts to open a bibliography that was previously set up for collaboration, they are presented with a confirmation message: "Are you sure you want to open this bibliography for collaboration?"
+    //     setCollaborationOpened(true);
+    // }
 
-    function handleCloseCollaboration() {
-        showConfirmDialog(
-            "Close collaboration?",
-            "This will remove all collaborators, permanently delete the collaboration history, and revoke access foe all contributors. The bibliography will be removed from their list of accessible bibliographies. Are you sure you want to proceed? Collaboration can be opened anytime if needed.",
-            () => setCollaborationOpened(false)
-        );
-    }
+    // function handleCloseCollaboration() {
+    //     showConfirmDialog(
+    //         "Close collaboration?",
+    //         "This will remove all collaborators, permanently delete the collaboration history, and revoke access foe all contributors. The bibliography will be removed from their list of accessible bibliographies. Are you sure you want to proceed? Collaboration can be opened anytime if needed.",
+    //         () => setCollaborationOpened(false)
+    //     );
+    // }
 
     function handleDeleteBibliography() {
         navigate("/");
@@ -227,27 +227,27 @@ export default function Bibliography(props) {
 
                                   "DEVIDER",
 
-                                  ...(collaborationOpened
-                                      ? [
-                                            {
-                                                label: "bibliography settings",
-                                                method: () => navigate(`/${bibliographyId}/settings`),
-                                            },
+                                  //   ...(collaborationOpened
+                                  //       ? [
+                                  //             {
+                                  //                 label: "bibliography settings",
+                                  //                 method: () => navigate(`/${bibliographyId}/settings`),
+                                  //             },
 
-                                            {
-                                                label: "Close collaboration",
-                                                method: handleCloseCollaboration,
-                                            },
-                                        ]
-                                      : [
-                                            {
-                                                label: "Open collaboration",
-                                                method: handleOpenCollaboration,
-                                                badge: { label: "test", color: "white", backgroundColor: "blue" },
-                                            },
-                                        ]),
+                                  //             {
+                                  //                 label: "Close collaboration",
+                                  //                 method: handleCloseCollaboration,
+                                  //             },
+                                  //         ]
+                                  //       : [
+                                  //             {
+                                  //                 label: "Open collaboration",
+                                  //                 method: handleOpenCollaboration,
+                                  //                 badge: { label: "test", color: "white", backgroundColor: "blue" },
+                                  //             },
+                                  //         ]),
 
-                                  "DEVIDER",
+                                  //   "DEVIDER",
 
                                   {
                                       label: "Delete bibliography?",
@@ -291,7 +291,6 @@ export default function Bibliography(props) {
                     citations={bibliography?.citations}
                     checkedCitations={checkedCitations}
                     setLaTeXWindowVisible={setLaTeXWindowVisible}
-                    setApplyOnAll={setApplyOnAll}
                 />
             )}
 
@@ -299,12 +298,9 @@ export default function Bibliography(props) {
                 <MoveWindow
                     bibliographies={bibliographies}
                     bibliographyId={bibliographyId}
-                    citations={bibliography?.citations}
                     checkedCitations={checkedCitations}
                     setMoveWindowVisible={setMoveWindowVisible}
-                    applyOnAll={applyOnAll}
                     dispatch={dispatch}
-                    showConfirmDialog={showConfirmDialog}
                 />
             )}
 

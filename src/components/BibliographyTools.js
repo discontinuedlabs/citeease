@@ -22,10 +22,8 @@ const MASTER_CHECKBOX_STATES = {
 
 export function ReferenceEntries(props) {
     const { bibliography, dispatch, ACTIONS, savedCslFiles, setSavedCslFiles, openCitationWindow } = props;
-    const [references, setReferences] = useState([]); // FIXME: Dont use this state because they get reorganized according to the csl file rules
+    const [references, setReferences] = useState([]);
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
-
-    console.log(bibliography?.citations);
 
     const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked === true);
 
@@ -59,7 +57,6 @@ export function ReferenceEntries(props) {
                 "html"
             );
             setReferences(formattedCitations);
-            console.log(formattedCitations);
         }
         formatCitations();
 
@@ -74,7 +71,6 @@ export function ReferenceEntries(props) {
     }
 
     function handleEntryCheck(citationId) {
-        console.log(citationId);
         dispatch({
             type: ACTIONS.TOGGLE_REFERENCE_ENTRY_CHECKBOX,
             payload: { bibliographyId: bibliography.id, citationId: citationId.id },
@@ -93,14 +89,15 @@ export function ReferenceEntries(props) {
                 "html"
             );
 
-            // TODO: Include a break line between each entry
             const div = document.createElement("div");
-            for (const reference of formattedCitations) {
+            for (const cit of formattedCitations) {
                 const parser = new DOMParser();
-                const docFragment = parser.parseFromString(reference, "text/html");
+                const docFragment = parser.parseFromString(cit, "text/html");
                 const element = docFragment.body.firstChild;
                 div.appendChild(element);
+                div.appendChild(document.createElement("br"));
             }
+
             event.dataTransfer.setData("text/html", div.innerHTML);
             div.remove();
         }
@@ -120,14 +117,22 @@ export function ReferenceEntries(props) {
             </div>
 
             <div className="reference-entries-container">
-                {bibliography?.citations.map((cit, index) => {
+                {/* IMPORTANT: Entries need to be mapped by the references array because it gets sorted according to the CSL file rules, unlike the bibliography.citations array */}
+                {references?.map((ref) => {
+                    const refId = () => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(ref, "text/html");
+                        return doc.querySelector("[data-csl-entry-id]").getAttribute("data-csl-entry-id");
+                    };
+                    const citation = bibliography?.citations.find((cit) => cit.id === refId());
+                    const sanitizedReferences = DOMPurify.sanitize(ref);
                     return (
-                        <div className="reference-entry" key={cit.id} draggable={true} onDragStart={handleDrag}>
+                        <div className="reference-entry" key={citation.id} draggable={true} onDragStart={handleDrag}>
                             <input
                                 type="checkbox"
                                 className="reference-entry-checkbox"
-                                checked={cit.isChecked}
-                                onChange={() => handleEntryCheck(cit)}
+                                checked={citation.isChecked}
+                                onChange={() => handleEntryCheck(citation)}
                             />
 
                             <div
@@ -136,10 +141,9 @@ export function ReferenceEntries(props) {
                                         ? "hanging-indentation"
                                         : ""
                                 }`}
-                                onClick={() => openCitationWindow(cit.content.type, false, cit.id)}
+                                onClick={() => openCitationWindow(citation.content.type, false, citation.id)}
                             >
-                                {HTMLReactParser(DOMPurify.sanitize(references?.[index]))}{" "}
-                                {/* Find a way to get the write reference without using index because it gets reorganized according to the csl file rules */}
+                                {HTMLReactParser(sanitizedReferences)}
                             </div>
                         </div>
                     );
@@ -226,7 +230,7 @@ export function CitationWindow(props) {
 }
 
 export function LaTeXWindow(props) {
-    const { citations, checkedCitations, setLaTeXWindowVisible, applyOnAll } = props;
+    const { citations, checkedCitations, setLaTeXWindowVisible } = props;
     const [bibtexString, setBibtexString] = useState("");
     const [biblatexString, setBiblatexString] = useState("");
     const [bibTxtString, setBibTxtString] = useState("");
@@ -234,9 +238,9 @@ export function LaTeXWindow(props) {
 
     useEffect(() => {
         async function formatLaTeX() {
-            setBibtexString(await citationEngine.formatLaTeX(applyOnAll ? citations : checkedCitations, "bibtex"));
-            setBiblatexString(await citationEngine.formatLaTeX(applyOnAll ? citations : checkedCitations, "biblatex"));
-            setBibTxtString(await citationEngine.formatLaTeX(applyOnAll ? citations : checkedCitations, "bibtxt"));
+            setBibtexString(await citationEngine.formatLaTeX(checkedCitations, "bibtex"));
+            setBiblatexString(await citationEngine.formatLaTeX(checkedCitations, "biblatex"));
+            setBibTxtString(await citationEngine.formatLaTeX(checkedCitations, "bibtxt"));
         }
         formatLaTeX();
     }, [checkedCitations]);
@@ -260,24 +264,14 @@ export function LaTeXWindow(props) {
 }
 
 export function MoveWindow(props) {
-    const {
-        bibliographies,
-        bibliographyId,
-        citations,
-        checkedCitations,
-        setMoveWindowVisible,
-        applyOnAll,
-        dispatch,
-        showConfirmDialog,
-    } = props;
+    const { bibliographies, bibliographyId, checkedCitations, setMoveWindowVisible, dispatch } = props;
 
     function handleMove(bibliographyId) {
-        console.log(applyOnAll);
         dispatch({
             type: ACTIONS.DUPLICATE_SELECTED_CITATIONS, // Duplicate has the same effect of moving, but the bibliographyId is different
             payload: {
                 bibliographyId: bibliographyId,
-                checkedCitations: applyOnAll ? citations : checkedCitations,
+                checkedCitations: checkedCitations,
             },
         });
         setMoveWindowVisible(false);
@@ -289,19 +283,7 @@ export function MoveWindow(props) {
             {bibliographies.map((bib) => {
                 if (bib.id !== bibliographyId)
                     return (
-                        <div
-                            onClick={() => {
-                                if (applyOnAll)
-                                    showConfirmDialog(
-                                        `Merge with ${bib.title}?`,
-                                        "This will move all citations in this bibliography to the selected one. Are you sure you want to proceed?",
-                                        () => handleMove(bib.id),
-                                        "Merge",
-                                        "Cancel"
-                                    );
-                                else handleMove(bib.id); // Move without showing ConfirmDialog
-                            }}
-                        >
+                        <div onClick={() => handleMove(bib.id)}>
                             <BibliographyCard bibliography={bib} />
                         </div>
                     );
