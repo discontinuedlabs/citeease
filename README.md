@@ -31,7 +31,9 @@ CiteEase is a powerful and user-friendly open-source citation management app des
 -   Advanced search with filters and Boolean operators for specific fields.
 -   CSL file manager to create, customize, and manage citation styles (including update checks and adding new ones).
 
-**Getting Started**
+**Getting Started:**
+
+* **Node.js:** You'll need Node.js (version 14 or later) installed on your system. You can download it from the official website: [https://nodejs.org/en](https://nodejs.org/en).
 
 1. **Clone the Repository:**
 
@@ -40,10 +42,12 @@ CiteEase is a powerful and user-friendly open-source citation management app des
     ```
 
 2. **Install Dependencies:**
-   Follow the instructions in the `installation.md` file to set up the development environment and install necessary dependencies.
+
+    ```bash
+    npm install
+    ```
 
 3. **Run the App:**
-   Once the dependencies are installed, you can start the development server using the following command:
 
     ```bash
     npm start
