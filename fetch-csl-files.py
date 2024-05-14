@@ -16,15 +16,20 @@ This script automates the creation and update of a local JSON file ("styles.json
 - **Efficiency:** Leverages local processing to overcome limitations of the GitHub REST API, which restricts file retrieval to 1,000 per request.
 - **Performance:** Local processing significantly improves speed compared to using the API.
 
+**Prerequisties:**
+
+- **Git:** https://git-scm.com/downloads
+- **Python:** https://www.python.org/downloads/
+
 **Usage:**
 
 1. Clone the official CSL styles repository:
-    $ git clone https://github.com/citation-style-language/styles.git
+    `git clone https://github.com/citation-style-language/styles.git`
 2. Update the `directory` variable within the script to point to the location of your cloned repository.
 3. Install required Python packages:
-    $ pip install tqdm colorist
+    `pip install tqdm colorist`
 4. Run the script to process the CSL files and generate an updated "styles.json" file:
-    $ python fetch-csl-files.py
+    `python fetch-csl-files.py`
 
 **Scheduled Execution:**
 
