@@ -1,19 +1,19 @@
-## CiteEase: Open-Source Citation Management App
+# CiteEase: Open-Source Citation Management App
 
 **Welcome to CiteEase, your one-stop shop for managing citations and collaborating on bibliographies!**
 
-**What is CiteEase?**
+## 📚 What is CiteEase?
 
 CiteEase is a powerful and user-friendly open-source citation management app designed for students, researchers, and anyone who values efficiency and organization.
 
-**Key Features:**
+## 🛠️ Key Features
 
 -   **Offline Functionality:** Work on your bibliographies seamlessly, even without an internet connection.
 -   **Cross-Platform Compatibility:** Access CiteEase from any device, regardless of operating system.
 -   **Unlimited Usage:** No sign-in required for basic functionalities. Enjoy the freedom to manage your citations without limitations.
--   **Open-Source Development:** Contribute to the project's growth and customize CiteEase to fit your specific needs.
+-   **Open-Source Availability:** CiteEase is open-source, with code freely available for anyone to view, modify, and share. This allows for transparency and customization to your needs.
 -   **Advanced Citation Management:**
-    -   Over 1000 citation styles supported, with the ability to add custom CSL files for even more flexibility.
+    -   Over 10,000 citation styles supported, with the ability to add custom CSL files for even more flexibility.
     -   Manage citations with ease: add, edit, move, copy, delete, and export them in various formats (CSL, BibTeX, BibLaTeX, Bibtxt, JSON, Word, PDF).
     -   Search, filter, group by, and sort your citations for effortless organization.
 -   **Collaboration Features:**
@@ -24,32 +24,45 @@ CiteEase is a powerful and user-friendly open-source citation management app des
     -   Select which information to display in the bibliography entry (date modified or date created).
     -   Manage your account settings (optional: create an account for syncing data across devices, restoring passwords, and collaborating).
 
-**Getting Started**
+## 📋 Upcoming Features (to-do)
+
+-   Integration with popular reference managers (Zotero, Mendeley, EndNote).
+-   Version control to track changes and revert to previous versions (local for privacy).
+-   Advanced search with filters and Boolean operators for specific fields.
+-   CSL file manager to create, customize, and manage citation styles (including update checks and adding new ones).
+
+## 🚀 Getting Started
+
+* **Node.js:** You'll need Node.js (version 14 or later) installed on your system. You can download it from the official website: [https://nodejs.org/en](https://nodejs.org/en).
 
 1. **Clone the Repository:**
 
     ```bash
-    git clone https://github.com/your-username/citeease.git
+    git clone https://github.com/discontinuedlabs/citeease.git
     ```
 
-    Replace `your-username` with your GitHub username.
-
 2. **Install Dependencies:**
-   Follow the instructions in the `installation.md` file to set up the development environment and install necessary dependencies.
+
+    ```bash
+    npm install
+    ```
 
 3. **Run the App:**
-   Once the dependencies are installed, you can start the development server using the following command:
 
     ```bash
     npm start
     ```
 
-**Contributing**
-
-We welcome contributions from the open-source community! If you'd like to contribute to CiteEase, please refer to the `contributing.md` file for guidelines and instructions.
-
-**License**
+## 📜 License
 
 CiteEase is licensed under the MIT License. See the `LICENSE` file for details.
+
+## 🤝 Contributing
+
+While we don't actively seek contributions, we appreciate your interest. If you encounter issues or have suggestions, please feel free to open an issue.
+
+## 📧 Contact
+
+For inquiries or more information, you can reach out to us at [discontinuedlabs@gmail.com](mailto:discontinuedlabs@gmail.com).
 
 **We hope you find CiteEase to be a valuable tool for your research endeavors!**
