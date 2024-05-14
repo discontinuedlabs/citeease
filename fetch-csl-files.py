@@ -1,9 +1,7 @@
 """
-**Fetches and Processes CSL Styles for Local Citation Engine**
+**Fetches and Processes CSL Styles for citationEngine.js**
 
-This script automates the creation and update of a local JSON file ("styles.json")
-containing information about citation styles. It retrieves data from a cloned copy
-of the official Citation Style Language (CSL) styles repository (https://github.com/citation-style-language).
+This script automates the creation and update of a local JSON file ("styles.json") containing information about citation styles. It retrieves data from a cloned copy of the official Citation Style Language (CSL) styles repository (https://github.com/citation-style-language).
 
 **Function:**
 
@@ -15,24 +13,22 @@ of the official Citation Style Language (CSL) styles repository (https://github.
 
 **Benefits:**
 
-- **Efficiency:** Leverages local processing to overcome limitations of the GitHub
-  REST API, which restricts file retrieval to 1,000 per request.
-- **Performance:** Local processing significantly improves speed compared to using
-  the API.
+- **Efficiency:** Leverages local processing to overcome limitations of the GitHub REST API, which restricts file retrieval to 1,000 per request.
+- **Performance:** Local processing significantly improves speed compared to using the API.
 
 **Usage:**
 
 1. Clone the official CSL styles repository:
-   https://github.com/citation-style-language
-2. Update the `directory` variable within the script to point to the location
-   of your cloned repository.
-3. Run the script to process the CSL files and generate an updated "styles.json"
-   file.
+    $ git clone https://github.com/citation-style-language/styles.git
+2. Update the `directory` variable within the script to point to the location of your cloned repository.
+3. Install required Python packages:
+    $ pip install tqdm colorist
+4. Run the script to process the CSL files and generate an updated "styles.json" file:
+    $ python fetch-csl-files.py
 
 **Scheduled Execution:**
 
-This script can be integrated into a scheduled task to ensure "styles.json" 
-remains current with the latest CSL styles.
+This script can be integrated into a scheduled task to ensure "styles.json" remains current with the latest CSL styles.
 """
 
 import os
