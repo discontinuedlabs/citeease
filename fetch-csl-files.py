@@ -47,8 +47,11 @@ def fetch_local_csl_files(directory):
     Returns:
     - A list of dictionaries, each representing a CSL file with its details.
     """
+
+    if not os.path.exists(directory):
+        raise FileNotFoundError(red(f"The directory {directory} does not exist."))
+    
     all_files = []
-    # Wrap os.walk with tqdm to show progress
     for root, dirs, files in tqdm(os.walk(directory), desc="Fetching CSL files"):
         for file in files:
             if file.endswith('.csl'):
