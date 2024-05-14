@@ -11,9 +11,9 @@ CiteEase is a powerful and user-friendly open-source citation management app des
 -   **Offline Functionality:** Work on your bibliographies seamlessly, even without an internet connection.
 -   **Cross-Platform Compatibility:** Access CiteEase from any device, regardless of operating system.
 -   **Unlimited Usage:** No sign-in required for basic functionalities. Enjoy the freedom to manage your citations without limitations.
--   **Open-Source Development:** Contribute to the project's growth and customize CiteEase to fit your specific needs.
+-   **Open-Source Availability:** CiteEase is open-source, with code freely available for anyone to view, modify, and share. This allows for transparency and customization to your needs.
 -   **Advanced Citation Management:**
-    -   Over 1000 citation styles supported, with the ability to add custom CSL files for even more flexibility.
+    -   Over 10,000 citation styles supported, with the ability to add custom CSL files for even more flexibility.
     -   Manage citations with ease: add, edit, move, copy, delete, and export them in various formats (CSL, BibTeX, BibLaTeX, Bibtxt, JSON, Word, PDF).
     -   Search, filter, group by, and sort your citations for effortless organization.
 -   **Collaboration Features:**
@@ -36,10 +36,8 @@ CiteEase is a powerful and user-friendly open-source citation management app des
 1. **Clone the Repository:**
 
     ```bash
-    git clone https://github.com/your-username/citeease.git
+    git clone https://github.com/discontinuedlabs/citeease.git
     ```
-
-    Replace `your-username` with your GitHub username.
 
 2. **Install Dependencies:**
    Follow the instructions in the `installation.md` file to set up the development environment and install necessary dependencies.
@@ -53,7 +51,11 @@ CiteEase is a powerful and user-friendly open-source citation management app des
 
 **Contributing**
 
-We welcome contributions from the open-source community! If you'd like to contribute to CiteEase, please refer to the `contributing.md` file for guidelines and instructions.
+While we don't actively seek contributions, we appreciate your interest. If you encounter issues or have suggestions, please feel free to open an issue.
+
+**Contact**
+
+For inquiries or more information, you can reach out to us at [discontinuedlabs@gmail.com](mailto:discontinuedlabs@gmail.com).
 
 **License**
 
