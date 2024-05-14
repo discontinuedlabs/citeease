@@ -38,6 +38,8 @@ remains current with the latest CSL styles.
 import os
 import re
 import json
+from tqdm import tqdm
+from colorist import red, green, blue
 
 def fetch_local_csl_files(directory):
     """
@@ -50,11 +52,11 @@ def fetch_local_csl_files(directory):
     - A list of dictionaries, each representing a CSL file with its details.
     """
     all_files = []
-    for root, dirs, files in os.walk(directory):
+    # Wrap os.walk with tqdm to show progress
+    for root, dirs, files in tqdm(os.walk(directory), desc="Fetching CSL files"):
         for file in files:
             if file.endswith('.csl'):
                 file_path = os.path.join(root, file)
-                print(f"Reading file: {file_path}") 
                 
                 with open(file_path, 'r', encoding='utf-8') as file:
                     content = file.read()
@@ -86,7 +88,6 @@ def fetch_local_csl_files(directory):
                 }
                 
                 all_files.append(item)
-                print(f"Added {file} to the list.")
     
     return all_files
 
@@ -101,29 +102,28 @@ def process_csl_files(all_files):
     - A list of dictionaries, each representing a processed CSL file.
     """
     data = []
-    for file_info in all_files:
-        print(f"Processing {file_info['name']}...")
+    for file_info in tqdm(all_files, colour="green", desc="Processing CSL files: "):
         data.append(file_info)
-        print(f"Processed {file_info['name']}.")
     
     return data
 
 def main():
     directory = r'C:\Users\USERNAME\styles' # Make sure to change this to the specified 'styles' directory
-    print(f"Starting to fetch CSL files from {directory}...")
+    print(blue(f"Starting to fetch CSL files from {directory}..."))
     
     all_files = fetch_local_csl_files(directory)
     data = process_csl_files(all_files)
     
     json_data = json.dumps(data, indent=4)
     output_file_path = './styles.json'
-    
+
     try:
         with open(output_file_path, 'w', encoding='utf-8') as file:
             file.write(json_data)
-        print(f"Citation styles data saved to {output_file_path}")
+        print(green("Citation styles data saved to " + output_file_path))
     except IOError as error:
-        print(f"Error writing to file: {error}")
+        print(red("Error writing to file: " + str(error)))
+
 
 if __name__ == "__main__":
     main()
