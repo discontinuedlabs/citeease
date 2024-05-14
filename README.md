@@ -1,12 +1,12 @@
-## CiteEase: Open-Source Citation Management App
+# CiteEase: Open-Source Citation Management App
 
 **Welcome to CiteEase, your one-stop shop for managing citations and collaborating on bibliographies!**
 
-**What is CiteEase?**
+## 📚 What is CiteEase?
 
 CiteEase is a powerful and user-friendly open-source citation management app designed for students, researchers, and anyone who values efficiency and organization.
 
-**Key Features:**
+## 🛠️ Key Features
 
 -   **Offline Functionality:** Work on your bibliographies seamlessly, even without an internet connection.
 -   **Cross-Platform Compatibility:** Access CiteEase from any device, regardless of operating system.
@@ -24,14 +24,14 @@ CiteEase is a powerful and user-friendly open-source citation management app des
     -   Select which information to display in the bibliography entry (date modified or date created).
     -   Manage your account settings (optional: create an account for syncing data across devices, restoring passwords, and collaborating).
 
-**Upcoming Features (to-do):**
+## 📋 Upcoming Features (to-do)
 
 -   Integration with popular reference managers (Zotero, Mendeley, EndNote).
 -   Version control to track changes and revert to previous versions (local for privacy).
 -   Advanced search with filters and Boolean operators for specific fields.
 -   CSL file manager to create, customize, and manage citation styles (including update checks and adding new ones).
 
-**Getting Started:**
+## 🚀 Getting Started
 
 * **Node.js:** You'll need Node.js (version 14 or later) installed on your system. You can download it from the official website: [https://nodejs.org/en](https://nodejs.org/en).
 
@@ -53,16 +53,16 @@ CiteEase is a powerful and user-friendly open-source citation management app des
     npm start
     ```
 
-**Contributing**
+## 📜 License
+
+CiteEase is licensed under the MIT License. See the `LICENSE` file for details.
+
+## 🤝 Contributing
 
 While we don't actively seek contributions, we appreciate your interest. If you encounter issues or have suggestions, please feel free to open an issue.
 
-**Contact**
+## 📧 Contact
 
 For inquiries or more information, you can reach out to us at [discontinuedlabs@gmail.com](mailto:discontinuedlabs@gmail.com).
-
-**License**
-
-CiteEase is licensed under the MIT License. See the `LICENSE` file for details.
 
 **We hope you find CiteEase to be a valuable tool for your research endeavors!**
