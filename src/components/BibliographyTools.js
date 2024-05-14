@@ -329,29 +329,48 @@ export function CitationStylesMenu(props) {
         fetchStyles();
     }, []);
 
-    const regexPattern = new RegExp(`${searchTerm.replace(/\s+/, "|")}`, "gi");
     const filteredStyles = styles?.filter((style) => {
-        return (
-            // advancedTestRegex(style.name.long, searchTerm, regexPattern) ||
-            // advancedTestRegex(style.name?.short, searchTerm, regexPattern) ||
-            advancedTestRegex(style.code, searchTerm, regexPattern)
-        );
-    });
-
-    // FIXME: adding a space in searchTerm cancels the previos filter
-    function advancedTestRegex(stringToTest, searchTerm, regex) {
-        if (!stringToTest || !searchTerm) return true;
-
-        const splitStringToTest = stringToTest.toLowerCase().split(/\s+|-/);
-        let allMatch = true;
-        for (let i = 0; i < searchTerm.length; i++) {
-            if (searchTerm[i] !== splitStringToTest[i]?.[0]) {
-                allMatch = false;
+        function testStrings(stringsArray) {
+            let found = false;
+            for (let i = 0; i < stringsArray.length; i++) {
+                if (
+                    // eg. chicago manual of style 17th edition => Chicago Manual of Style 17th edition
+                    stringsArray[i]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    // eg. cmos17e => Chicago Manual of Style 17th edition
+                    stringsArray[i]
+                        ?.toLowerCase()
+                        .split(/\s+|-/)
+                        .map((sect) => {
+                            if (/\d/.test(sect)) return sect.replace(/\D/g, "");
+                            else return sect[0];
+                        })
+                        .join("")
+                        .includes(searchTerm.toLowerCase()) ||
+                    // eg. cms17e => Chicago Manual of Style 17th edition
+                    stringsArray[i]
+                        ?.toLowerCase()
+                        .replace(/of|in|on|at|the|from/gi, "")
+                        .split(/\s+|-/)
+                        .map((sect) => {
+                            if (/\d/.test(sect)) return sect.replace(/\D/g, "");
+                            else return sect[0];
+                        })
+                        .join("")
+                        .includes(searchTerm.toLowerCase())
+                ) {
+                    found = true;
+                    break;
+                }
             }
+            return found;
         }
-        // TODO: Also test without words like "of" "in"
-        return allMatch || regex.test(stringToTest.toLowerCase());
-    }
+
+        if (searchTerm) {
+            return testStrings([style.name.long, style.name.short, style.code]);
+        } else {
+            return true;
+        }
+    });
 
     return (
         <div className="citation-styles-menu">
