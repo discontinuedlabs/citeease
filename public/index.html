@@ -28,15 +28,5 @@
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
         <div id="root"></div>
-
-        <script>
-            if (navigator.serviceWorker) {
-                navigator.serviceWorker
-                    .register("/citeease/service-worker.js", { scope: "/citeease/" })
-                    .then(function (registration) {
-                        console.log("ServiceWorker registration successful with scope: ", registration.scope);
-                    });
-            }
-        </script>
     </body>
 </html>

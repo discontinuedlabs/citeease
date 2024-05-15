@@ -42,7 +42,6 @@ export default function Bibliography(props) {
 
     // FIXME: This doesnt run when the component mounts because the bibliographyId is still defined as useIndexedDB is asynchronous
     useEffect(() => {
-        console.log(bibliographyId);
         // isChecked should not get saved, but since it's in an object that gets saved and loaded, it should be set to false when opening the bibliography page
         dispatch({ type: ACTIONS.UNCHECK_ALL_CITATIONS, payload: { bibliographyId: bibliographyId } });
         // eslint-disable-next-line react-hooks/exhaustive-deps
