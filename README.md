@@ -1,6 +1,6 @@
 # CiteEase: Open-Source Citation Management App
 
-**Welcome to CiteEase, your one-stop shop for managing citations and collaborating on bibliographies!**
+**Welcome to CiteEase, an open-source Progressive Web App for managing citations and collaborating on bibliographies!**
 
 ## 📚 What is CiteEase?
 
@@ -8,8 +8,8 @@ CiteEase is a powerful and user-friendly open-source citation management app des
 
 ## 🛠️ Key Features
 
+-   **Drag-and-Drop Everywhere**: Effortlessly interact with your citations using intuitive drag-and-drop actions. Add references to your Word doc, delete unwanted entries, import citations or bibliographies, and export your data with a simple drag-and-drop.
 -   **Offline Functionality:** Work on your bibliographies seamlessly, even without an internet connection.
--   **Cross-Platform Compatibility:** Access CiteEase from any device, regardless of operating system.
 -   **Unlimited Usage:** No sign-in required for basic functionalities. Enjoy the freedom to manage your citations without limitations.
 -   **Open-Source Availability:** CiteEase is open-source, with code freely available for anyone to view, modify, and share. This allows for transparency and customization to your needs.
 -   **Advanced Citation Management:**
