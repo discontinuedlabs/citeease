@@ -134,7 +134,6 @@ export default function Bibliography(props) {
                 payload: { bibliographyId: bibliographyId, key: "title", value: value },
             });
         }
-        setRenameWindowVisible(false);
     }
 
     function handleChangeStyle() {}
@@ -306,7 +305,13 @@ export default function Bibliography(props) {
                 />
             )}
 
-            {renameWindowVisible && <RenameWindow title={bibliography?.title} handleRename={handleRename} />}
+            {renameWindowVisible && (
+                <RenameWindow
+                    title={bibliography?.title}
+                    setRenameWindowVisible={setRenameWindowVisible}
+                    handleRename={handleRename}
+                />
+            )}
 
             {addCitationMenuVisible && (
                 // Since the openCitationWindow is passed to this component, make the handleSearchByIdentifier and handleImportCitation inside it

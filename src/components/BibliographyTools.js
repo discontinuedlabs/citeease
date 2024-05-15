@@ -292,7 +292,6 @@ export function MoveWindow(props) {
     }
 
     function handleCopy() {
-        console.log(selectedBibliographyIds);
         dispatch({
             type: ACTIONS.COPY_SELECTED_CITATIONS,
             payload: {
@@ -336,9 +335,14 @@ export function RenameWindow(props) {
     const { handleRename, setRenameWindowVisible } = props;
     const [title, setTitle] = useState(props.title);
 
+    function handleSubmit() {
+        setRenameWindowVisible(false);
+        handleRename(title);
+    }
+
     return (
         <div className="rename-window">
-            <form onSubmit={() => handleRename(title)}>
+            <form onSubmit={handleSubmit}>
                 <input
                     type="text"
                     onChange={(event) => setTitle(event.target.value)}
