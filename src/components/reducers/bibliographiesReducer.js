@@ -12,13 +12,13 @@ export const ACTIONS = {
     UNCHECK_ALL_CITATIONS: "Uncheck all citations",
     DELETE_BIBLIOGRAPHY: "Delete bibliography",
     DELETE_SELECTED_CITATIONS: "Delete selected citations",
+    MOVE_SELECTED_CITATIONS: "Move selected citations",
+    COPY_SELECTED_CITATIONS: "Copy selected citations",
     DUPLICATE_SELECTED_CITATIONS: "Duplicate selected citations",
     ADD_NEW_BIBLIOGRAPHY_AND_MOVE_CITATIONS: "Add new bibliography and move citations",
 };
 
-// TODO:
-//      - Each function that needs selecting citations should unselect all after running the function
-//      - Each function that modifies a bibliography should change the bib.dateModified
+// TODO: Each function that modifies a bibliography should change the bib.dateModified
 
 let newBibliography;
 
@@ -39,7 +39,7 @@ export default function bibliographiesReducer(bibliographies, action) {
         case ACTIONS.UPDATE_BIBLIOGRAPHY_FIELDS:
             return bibliographies?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
-                    return { ...bib, [action.payload.key]: action.payload.value };
+                    return { ...bib, [action.payload.key]: action.payload.value, dateModified: new Date() };
                 }
                 return bib;
             });
@@ -60,6 +60,7 @@ export default function bibliographiesReducer(bibliographies, action) {
                     return {
                         ...bib,
                         editedCitation: newCitation,
+                        dateModified: new Date(),
                     };
                 }
                 return bib;
@@ -72,6 +73,7 @@ export default function bibliographiesReducer(bibliographies, action) {
                     return {
                         ...bib,
                         editedCitation: { ...targetCitation },
+                        dateModified: new Date(),
                     };
                 }
                 return bib;
@@ -83,6 +85,7 @@ export default function bibliographiesReducer(bibliographies, action) {
                     return {
                         ...bib,
                         editedCitation: { ...bib.editedCitation, content: action.payload.content },
+                        dateModified: new Date(),
                     };
                 }
                 return bib;
@@ -98,7 +101,7 @@ export default function bibliographiesReducer(bibliographies, action) {
                         // If the citation exists, update it
                         updatedCitations = bib.citations.map((cit, index) => {
                             if (index === citationIndex) {
-                                return { ...cit, ...action.payload.editedCitation }; // Update the existing citation
+                                return { ...cit, ...action.payload.editedCitation, isChecked: false }; // Update the existing citation
                             }
                             return cit;
                         });
@@ -110,6 +113,7 @@ export default function bibliographiesReducer(bibliographies, action) {
                     return {
                         ...bib,
                         citations: updatedCitations,
+                        dateModified: new Date(),
                     };
                 }
                 return bib;
@@ -181,16 +185,59 @@ export default function bibliographiesReducer(bibliographies, action) {
         case ACTIONS.DELETE_BIBLIOGRAPHY:
             return bibliographies?.filter((bib) => bib.id !== action.payload.bibliographyId);
 
+        case ACTIONS.MOVE_SELECTED_CITATIONS:
+            return bibliographies?.map((bib) => {
+                if (bib.id === action.payload.toId) {
+                    return {
+                        ...bib,
+                        citations: [...bib.citations, ...action.payload.checkedCitations],
+                        dateModified: new Date(),
+                    };
+                } else if (bib.id === action.payload.fromId) {
+                    const idsForDelete = action.payload.checkedCitations.map((cit) => cit.id);
+                    return {
+                        ...bib,
+                        citations: bib.citations.filter((cit) => !idsForDelete.includes(cit.id)),
+                        dateModified: new Date(),
+                    };
+                }
+                return bib;
+            });
+
+        case ACTIONS.COPY_SELECTED_CITATIONS:
+            return bibliographies?.map((bib) => {
+                const filteredCitations = bib.citations.filter(
+                    (cit) => !action.payload.checkedCitations.some((checkedCit) => checkedCit.id === cit.id)
+                );
+                const updatedCitations = filteredCitations.map((cit) => ({ ...cit, isChecked: false }));
+                const copiedCitations = action.payload.checkedCitations.map((cit) => {
+                    const newId = nanoid();
+                    return { ...cit, id: newId, content: { ...cit.content, id: newId }, isChecked: false };
+                });
+                return {
+                    ...bib,
+                    citations: [...updatedCitations, ...copiedCitations],
+                    dateModified: new Date(),
+                };
+            });
+
         case ACTIONS.DUPLICATE_SELECTED_CITATIONS:
             return bibliographies?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
-                    const duplicatedCitations = action.payload.checkedCitations.map((cit) => {
-                        const newId = nanoid();
-                        return { ...cit, id: newId, content: { ...cit.content, id: newId } };
-                    });
+                    const newIds = action.payload.checkedCitations.map(() => nanoid());
+                    const duplicatedCitations = action.payload.checkedCitations.map((cit, index) => ({
+                        ...cit,
+                        id: newIds[index],
+                        content: { ...cit.content, id: newIds[index] },
+                        isChecked: false,
+                    }));
                     return {
                         ...bib,
-                        citations: [...bib.citations, ...duplicatedCitations],
+                        citations: [
+                            ...bib.citations.map((cit) => ({ ...cit, isChecked: false })),
+                            ...duplicatedCitations,
+                        ],
+                        dateModified: new Date(),
                     };
                 }
                 return bib;
@@ -203,6 +250,7 @@ export default function bibliographiesReducer(bibliographies, action) {
                     return {
                         ...bib,
                         citations: bib.citations.filter((cit) => !targetIds.includes(cit.id)),
+                        dateModified: new Date(),
                     };
                 }
                 return bib;

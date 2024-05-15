@@ -26,7 +26,7 @@ export default function Home(props) {
                 buttonType={"Small Button"}
                 options={[{ label: "Settings", method: () => navigate("/settings") }]}
             />
-            {console.log(bibliographies)}
+
             <div className="bibliography-cards-container">
                 {bibliographies && bibliographies.length > 0 ? (
                     bibliographies.map((bib) => (

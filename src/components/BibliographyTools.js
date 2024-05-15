@@ -25,13 +25,13 @@ export function ReferenceEntries(props) {
     const [references, setReferences] = useState([]);
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
 
-    const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked === true);
+    const checkedCitations = bibliography?.citations.filter((cit) => cit?.isChecked === true);
 
     useEffect(() => {
         function updateMasterCheckboxState() {
             let checkedCount = 0;
             bibliography?.citations.forEach((cit) => {
-                if (cit.isChecked) {
+                if (cit?.isChecked) {
                     checkedCount++;
                 }
             });
@@ -124,14 +124,14 @@ export function ReferenceEntries(props) {
                         const doc = parser.parseFromString(ref, "text/html");
                         return doc.querySelector("[data-csl-entry-id]").getAttribute("data-csl-entry-id");
                     };
-                    const citation = bibliography?.citations.find((cit) => cit.id === refId());
+                    const citation = bibliography?.citations.find((cit) => cit?.id === refId());
                     const sanitizedReferences = DOMPurify.sanitize(ref);
                     return (
-                        <div className="reference-entry" key={citation.id} draggable={true} onDragStart={handleDrag}>
+                        <div className="reference-entry" key={citation?.id} draggable={true} onDragStart={handleDrag}>
                             <input
                                 type="checkbox"
                                 className="reference-entry-checkbox"
-                                checked={citation.isChecked}
+                                checked={citation?.isChecked || false}
                                 onChange={() => handleEntryCheck(citation)}
                             />
 
@@ -141,7 +141,7 @@ export function ReferenceEntries(props) {
                                         ? "hanging-indentation"
                                         : ""
                                 }`}
-                                onClick={() => openCitationWindow(citation.content.type, false, citation.id)}
+                                onClick={() => openCitationWindow(citation?.content.type, false, citation?.id)}
                             >
                                 {HTMLReactParser(sanitizedReferences)}
                             </div>
@@ -265,16 +265,43 @@ export function LaTeXWindow(props) {
 
 export function MoveWindow(props) {
     const { bibliographies, bibliographyId, checkedCitations, setMoveWindowVisible, dispatch } = props;
+    const [selectedBibliographyIds, setSelectedBibliographyIds] = useState([]);
 
-    function handleMove(bibliographyId) {
+    function handleSelect(bibId) {
+        const index = selectedBibliographyIds.indexOf(bibId);
+        if (index !== -1) {
+            setSelectedBibliographyIds((prevSelectedBibliographyIds) =>
+                prevSelectedBibliographyIds.filter((id) => id !== bibId)
+            );
+        } else {
+            setSelectedBibliographyIds((prevSelectedBibliographyIds) => [...prevSelectedBibliographyIds, bibId]);
+        }
+    }
+
+    function handleMove(toId) {
         dispatch({
-            type: ACTIONS.DUPLICATE_SELECTED_CITATIONS, // Duplicate has the same effect of moving, but the bibliographyId is different
+            type: ACTIONS.MOVE_SELECTED_CITATIONS,
             payload: {
-                bibliographyId: bibliographyId,
+                fromId: bibliographyId,
+                toId: toId,
                 checkedCitations: checkedCitations,
             },
         });
         setMoveWindowVisible(false);
+        setSelectedBibliographyIds([]);
+    }
+
+    function handleCopy() {
+        console.log(selectedBibliographyIds);
+        dispatch({
+            type: ACTIONS.COPY_SELECTED_CITATIONS,
+            payload: {
+                toIds: selectedBibliographyIds,
+                checkedCitations: checkedCitations,
+            },
+        });
+        setMoveWindowVisible(false);
+        setSelectedBibliographyIds([]);
     }
 
     return (
@@ -283,12 +310,24 @@ export function MoveWindow(props) {
             {bibliographies.map((bib) => {
                 if (bib.id !== bibliographyId)
                     return (
-                        <div onClick={() => handleMove(bib.id)}>
-                            <BibliographyCard bibliography={bib} />
+                        <div onClick={() => handleSelect(bib.id)}>
+                            <BibliographyCard
+                                bibliography={bib}
+                                styles={{ backgroundColor: bib.id in selectedBibliographyIds ? "red" : "unset" }}
+                            />
                         </div>
                     );
                 return null;
             })}
+            <button
+                disabled={selectedBibliographyIds.length !== 1}
+                onClick={() => handleMove(selectedBibliographyIds[0])}
+            >
+                Move
+            </button>
+            <button disabled={selectedBibliographyIds.length === 0} onClick={handleCopy}>
+                Copy
+            </button>
         </div>
     );
 }

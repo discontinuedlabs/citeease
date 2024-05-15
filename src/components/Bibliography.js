@@ -37,15 +37,18 @@ export default function Bibliography(props) {
     const [LaTeXWindowVisible, setLaTeXWindowVisible] = useState(false);
     const [moveWindowVisible, setMoveWindowVisible] = useState(false);
     const [renameWindowVisible, setRenameWindowVisible] = useState(false);
+    const [firstTimeLoaded, setFirstTimeLoaded] = useState(true); // Needed because the bibliographies array doesn't load as soon as the component mounts because it's loaded from useReducerWithIndexedDB
 
     const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
 
-    // FIXME: This doesnt run when the component mounts because the bibliographyId is still defined as useIndexedDB is asynchronous
     useEffect(() => {
-        // isChecked should not get saved, but since it's in an object that gets saved and loaded, it should be set to false when opening the bibliography page
-        dispatch({ type: ACTIONS.UNCHECK_ALL_CITATIONS, payload: { bibliographyId: bibliographyId } });
+        if (bibliography && firstTimeLoaded) {
+            // isChecked should not get saved, but since it's in an object that gets saved and loaded, it should be set to false when opening the bibliography page
+            dispatch({ type: ACTIONS.UNCHECK_ALL_CITATIONS, payload: { bibliographyId: bibliographyId } });
+            setFirstTimeLoaded(false);
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [bibliography]);
 
     function openCitationWindow(sourceType, isNew = false, specificId = "") {
         let checkedCitationsIds = [...(specificId ? [specificId] : [])];

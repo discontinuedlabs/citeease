@@ -11,6 +11,7 @@ import settingsReducer from "./components/reducers/settingsReducer";
 import MarkdownPage from "./components/MarkdownPage";
 import { useLiveQuery } from "dexie-react-hooks";
 import { AcceptDialog, ConfirmDialog } from "./components/ui/Dialogs";
+import NotFoundPage from "./components/NotFoundPage";
 
 export default function App() {
     const [bibliographies, dispatch] = useReducerWithIndexedDB(
@@ -79,7 +80,7 @@ export default function App() {
                     element={<MarkdownPage title={"Privacy Policy"} filePath={"/citeease/markdown/privacy.md"} />}
                 />
 
-                {/* <Route path="*" element={<NotFoundPage />} /> */}
+                <Route path="*" element={<NotFoundPage />} />
             </Routes>
 
             {acceptDialog.message && (

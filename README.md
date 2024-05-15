@@ -1,6 +1,6 @@
 # CiteEase: Open-Source Citation Management App
 
-**Welcome to CiteEase, an open-source Progressive Web App for managing citations and collaborating on bibliographies!**
+**Welcome to CiteEase, an open-source Progressive Web App (PWA) for managing citations and collaborating on bibliographies.**
 
 ## 📚 What is CiteEase?
 
@@ -33,7 +33,7 @@ CiteEase is a powerful and user-friendly open-source citation management app des
 
 ## 🚀 Getting Started
 
-* **Node.js:** You'll need Node.js (version 14 or later) installed on your system. You can download it from the official website: [https://nodejs.org/en](https://nodejs.org/en).
+-   **Node.js:** You'll need Node.js (version 14 or later) installed on your system. You can download it from the official website: [https://nodejs.org/en](https://nodejs.org/en).
 
 1. **Clone the Repository:**
 
