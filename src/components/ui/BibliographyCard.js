@@ -1,3 +1,5 @@
+import { timeAgo } from "../../utils";
+
 export default function BibliographyCard(props) {
     const { bibliography } = props;
     const dateOptions = {
@@ -29,20 +31,15 @@ export default function BibliographyCard(props) {
     };
 
     return (
-        <div className="bibliography-card">
-            <h3 className="bibliography-card-title">{bibliography.title}</h3>
-            <p className="bibliography-card-style">{bibliography.style.name.short || bibliography.style.name.long}</p>
-            <p>{new Date(bibliography.dateCreated).toLocaleDateString(undefined, dateOptions)}</p>
-            {/* {new Date(bibliography.dateCreated) !== new Date(bibliography.dateModified) && (
-                <p>{new Date(bibliography.dateModified).toLocaleDateString(undefined, dateOptions)}</p>
-            )} */}
-            <p>
-                {bibliography.citations.length === 0
+        <div className="text-neutral-black shadow-hardTransparent border-2 border-solid border-neutral-transparentBlue rounded-lg flex justify-between items-center p-4 bg-white transition duration-150 ease-in-out hover:bg-secondary-100">
+            <h3>{bibliography.title}</h3>
+            <p>{`${bibliography.style.name.short || bibliography.style.name.long.replace(/\((.*?)\)/g, "")} • ${
+                bibliography.citations.length === 0
                     ? "No sources added"
                     : bibliography.citations.length === 1
                     ? "1 source"
-                    : `${bibliography.citations.length} sources`}
-            </p>
+                    : `${bibliography.citations.length} sources`
+            } • ${timeAgo(bibliography.dateModified)}`}</p>
         </div>
     );
 }

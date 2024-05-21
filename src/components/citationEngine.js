@@ -1,6 +1,14 @@
 import { Cite, plugins } from "@citation-js/core";
+import "@citation-js/plugin-doi";
+import "@citation-js/plugin-isbn";
+import "@citation-js/plugin-pubmed";
+import "@citation-js/plugin-wikidata";
+import "@citation-js/plugin-software-formats";
 import "@citation-js/plugin-csl";
 import "@citation-js/plugin-bibtex";
+import axios from "axios";
+import * as cheerio from "cheerio";
+import * as citationUtils from "./citationUtils";
 
 export async function formatCitations(citations, bibStyle, savedCslFiles, setSavedCslFiles, formateType = "html") {
     const cslFile = await getCslFile(bibStyle, savedCslFiles, setSavedCslFiles);
@@ -16,6 +24,47 @@ export async function formatCitations(citations, bibStyle, savedCslFiles, setSav
         template: bibStyle?.code,
         lang: "en-US",
     });
+    return formateType === "html" ? splitContentArray(formattedCitations) : formattedCitations;
+}
+
+// FIXME: This function should check each value type in the array and try to create the citation.content object for each one
+export async function citeWithIdentifier(
+    uniqueIdentifers,
+    bibStyle,
+    savedCslFiles,
+    setSavedCslFiles,
+    formateType = "html"
+) {
+    const cslFile = await getCslFile(bibStyle, savedCslFiles, setSavedCslFiles);
+
+    let config = plugins.config.get("@csl");
+    config.templates.add(bibStyle?.code, cslFile);
+
+    plugins.add("@doi");
+    plugins.add("@isbn");
+    plugins.add("@pubmed");
+    plugins.add("@wikidata");
+    plugins.add("@software-formats");
+
+    for (let i = 0; i < uniqueIdentifers.length; i++) {
+        if (/(https?:\/\/[^\s]+)/g.test(uniqueIdentifers[i])) {
+            const url = uniqueIdentifers[i];
+            const website = encodeURIComponent(url);
+            const response = await axios.get(`https://corsproxy.io/?${website}`);
+            const $ = cheerio.load(response.data);
+            const urlContent = citationUtils.retrieveContentFromWebsite($, url);
+            uniqueIdentifers[i] = urlContent;
+        }
+    }
+
+    if (!cslFile) return;
+    let cite = await Cite.async(uniqueIdentifers);
+    let formattedCitations = cite.format("bibliography", {
+        format: formateType,
+        template: bibStyle?.code,
+        lang: "en-US",
+    });
+
     return formateType === "html" ? splitContentArray(formattedCitations) : formattedCitations;
 }
 

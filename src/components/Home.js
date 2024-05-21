@@ -3,7 +3,6 @@ import ContextMenu from "./ui/ContextMenu";
 import { useNavigate } from "react-router-dom";
 import BibliographyCard from "./ui/BibliographyCard";
 import { useDocumentTitle } from "../utils";
-import "../css/Home.css";
 import { useState } from "react";
 import { CitationStylesMenu } from "./BibliographyTools";
 
@@ -13,12 +12,8 @@ export default function Home(props) {
     const navigate = useNavigate();
     useDocumentTitle("Home");
 
-    function handleAddBibliography(style) {
-        dispatch({ type: ACTIONS.ADD_NEW_BIBLIOGRAPHY, payload: { bibliographyStyle: style } });
-    }
-
     return (
-        <div className="home">
+        <div className="mx-auto max-w-[50rem]">
             <h1>Home</h1>
             <ContextMenu
                 icon="more_vert"
@@ -27,10 +22,10 @@ export default function Home(props) {
                 options={[{ label: "Settings", method: () => navigate("/settings") }]}
             />
 
-            <div className="bibliography-cards-container">
+            <div className="grid place-items-start gap-y-2">
                 {bibliographies && bibliographies.length > 0 ? (
                     bibliographies.map((bib) => (
-                        <Link key={bib.id} to={`/${bib.id}`} className="bibliography-link">
+                        <Link key={bib.id} to={`/${bib.id}`} style={{ textDecoration: "none" }}>
                             <BibliographyCard bibliography={bib} />
                         </Link>
                     ))
@@ -49,7 +44,10 @@ export default function Home(props) {
                     setCitationStyleMenuVisible={setCitationStyleMenuVisible}
                 />
             )}
-            <button className="add-bibliography-button" onClick={() => setCitationStyleMenuVisible(true)}>
+            <button
+                className="border-2 border-neutral-black fixed p-3 bottom-5 right-5 bg-primary-500"
+                onClick={() => setCitationStyleMenuVisible(true)}
+            >
                 Add bibliography
             </button>
         </div>

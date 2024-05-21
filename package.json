@@ -7,6 +7,11 @@
         "@citation-js/core": "^0.7.11",
         "@citation-js/plugin-bibtex": "^0.7.11",
         "@citation-js/plugin-csl": "^0.7.11",
+        "@citation-js/plugin-doi": "^0.7.11",
+        "@citation-js/plugin-isbn": "^0.4.0",
+        "@citation-js/plugin-pubmed": "^0.3.0",
+        "@citation-js/plugin-software-formats": "^0.6.1",
+        "@citation-js/plugin-wikidata": "^0.7.11",
         "@testing-library/jest-dom": "^5.17.0",
         "@testing-library/react": "^13.4.0",
         "@testing-library/user-event": "^13.5.0",
@@ -20,9 +25,11 @@
         "nanoid": "^5.0.7",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
+        "react-hotkeys": "^2.0.0",
         "react-markdown": "^9.0.1",
         "react-router-dom": "^6.21.1",
         "react-scripts": "5.0.1",
+        "react-window": "^1.8.10",
         "web-vitals": "^2.1.4",
         "workbox-background-sync": "^6.6.0",
         "workbox-broadcast-update": "^6.6.0",
@@ -64,6 +71,9 @@
         ]
     },
     "devDependencies": {
-        "gh-pages": "^6.1.1"
+        "autoprefixer": "^10.4.19",
+        "gh-pages": "^6.1.1",
+        "postcss": "^8.4.38",
+        "tailwindcss": "^3.4.3"
     }
 }

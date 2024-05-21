@@ -17,7 +17,12 @@ export default function Webpage(props) {
                 .get(`https://corsproxy.io/?${website}`)
                 .then((response) => {
                     const $ = cheerio.load(response.data);
-                    updateContentFromFetchedData($, source);
+                    setContent((prevContent) => {
+                        return {
+                            ...prevContent,
+                            ...citationUtils.retrieveContentFromWebsite($, source),
+                        };
+                    });
                 })
                 .catch((error) => {
                     if (!error.response && error.message === "Network Error") {
@@ -34,55 +39,6 @@ export default function Webpage(props) {
                     console.error(error);
                 });
         }
-    }
-
-    function updateContentFromFetchedData($, sourceURL) {
-        setContent((prevContent) => {
-            return {
-                ...prevContent,
-                title: $("title").text(), // TODO: Give option to prioritize h1 tag instead of title tag $("h1").text()
-                author: extractAuthors($),
-                "container-title": [$("meta[property='og:site_name']").attr("content") || ""], // TODO: Should use the website link as a fallback
-                publisher: $("meta[property='article:publisher']").attr("content"),
-                accessed: citationUtils.createDateObject(new Date()),
-                issued: citationUtils.createDateObject(
-                    new Date(
-                        $("meta[name='date']").attr("content") ||
-                            $("meta[name='article:published_time']").attr("content") ||
-                            $("meta[property='article:published_time']").attr("content") ||
-                            $("meta[name='article:modified_time']").attr("content") ||
-                            $("meta[property='article:modified_time']").attr("content") ||
-                            $("meta[name='og:updated_time']").attr("content") ||
-                            $("meta[property='og:updated_time']").attr("content") ||
-                            $(".publication-date").text()
-                    )
-                ),
-                URL:
-                    $("meta[property='og:url']").attr("content") ||
-                    $("meta[name='url']").attr("content") ||
-                    $("link[rel='canonical']").attr("href") ||
-                    sourceURL,
-            };
-        });
-    }
-
-    function extractAuthors($) {
-        let authors = [];
-
-        authors.push($(".author[rel='author']").text());
-        $('meta[name="author"], meta[name="article:author"]').each((index, element) => {
-            authors.push($(element).attr("content"));
-        });
-
-        $('span.css-1baulvz.last-byline[itemprop="name"]').each((index, element) => {
-            authors.push($(element).text().trim());
-        });
-
-        authors = authors.filter((author, index, self) => {
-            return author.trim() !== "" && self.indexOf(author) === index;
-        });
-
-        return citationUtils.createAuthorsArray(authors);
     }
 
     function handleFillIn() {

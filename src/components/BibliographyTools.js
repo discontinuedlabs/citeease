@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as citationEngine from "./citationEngine";
 import "../css/BibliographyTools.css";
 import { useParams } from "react-router-dom";
@@ -8,6 +8,7 @@ import BibliographyCard from "./ui/BibliographyCard";
 import ContextMenu from "./ui/ContextMenu";
 import DOMPurify from "dompurify";
 import HTMLReactParser from "html-react-parser/lib/index";
+import { FixedSizeList as List } from "react-window";
 
 // Source types
 import ArticleJournal from "./sourceTypes/ArticleJournal";
@@ -154,20 +155,42 @@ export function ReferenceEntries(props) {
 }
 
 export function AddCitationMenu(props) {
-    const { setAddCitationMenuVisible, openCitationWindow, searchByIdentifier, handleImportCitation } = props;
+    const {
+        setAddCitationMenuVisible,
+        openCitationWindow,
+        handleSearchByIdentifiers,
+        handleImportCitation,
+        handleSearchByTitle,
+    } = props;
+    const identifierRef = useRef();
 
     return (
-        <div
-            style={{ position: "fixed", bottom: "1rem", left: "50%", transform: "translateX(-50%)" }}
-            className="add-citation-menu"
-        >
-            <h3>Add citation</h3>
-            <button onClick={() => setAddCitationMenuVisible(false)}>X</button>
+        <div className="fixed bottom-[1rem] left-1/2 transform -translate-x-1/2">
             <div>
-                <input type="text" name="search-by-identifier" placeholder="Search by title, URL, DOI, or ISBN"></input>
-                <button onClick={searchByIdentifier}>Search</button>
+                <h3>Add citation</h3>
+                <button onClick={() => setAddCitationMenuVisible(false)}>X</button>
             </div>
+
+            <div>
+                <label>Search by URL, DOI, ISBN, or PubMed and PMC identifiers:</label>
+                <textarea
+                    ref={identifierRef}
+                    name="search-by-identifiers"
+                    placeholder="Search by unique identifiers..."
+                ></textarea>
+                <small>You can list all the identifiers at the same time.</small>
+                <button onClick={() => handleSearchByIdentifiers(identifierRef.current.value)}>
+                    Generate citations
+                </button>
+            </div>
+
+            <search>
+                <input type="text" name="search-by-title" placeholder="Search by title..."></input>
+                <button onClick={handleSearchByTitle}>Search</button>
+            </search>
+
             <button onClick={handleImportCitation}>Import citation</button>
+
             <ContextMenu
                 label="Choose source type"
                 options={Object.values(SOURCE_TYPES).map((entry) => {
@@ -182,7 +205,7 @@ export function AddCitationMenu(props) {
     );
 }
 
-export function CitationWindow(props) {
+export function CitationForm(props) {
     const { bibId: bibliographyId } = useParams();
     const { bibliographies, dispatch, ACTIONS, setCitationWindowVisible, showAcceptDialog } = props;
     const bibliography = bibliographyId ? bibliographies.find((bib) => bib.id === bibliographyId) : undefined;
@@ -229,7 +252,7 @@ export function CitationWindow(props) {
     return <div className="citation-window">{CITATION_COMPONENTS[content.type]}</div>;
 }
 
-export function LaTeXWindow(props) {
+export function LaTeXDialog(props) {
     const { citations, checkedCitations, setLaTeXWindowVisible } = props;
     const [bibtexString, setBibtexString] = useState("");
     const [biblatexString, setBiblatexString] = useState("");
@@ -263,7 +286,7 @@ export function LaTeXWindow(props) {
     );
 }
 
-export function MoveWindow(props) {
+export function MoveDialog(props) {
     const { bibliographies, bibliographyId, checkedCitations, setMoveWindowVisible, dispatch } = props;
     const [selectedBibliographyIds, setSelectedBibliographyIds] = useState([]);
 
@@ -331,7 +354,7 @@ export function MoveWindow(props) {
     );
 }
 
-export function RenameWindow(props) {
+export function RenameDialog(props) {
     const { handleRename, setRenameWindowVisible } = props;
     const [title, setTitle] = useState(props.title);
 
@@ -357,7 +380,6 @@ export function RenameWindow(props) {
     );
 }
 
-// TODO...
 export function CitationStylesMenu(props) {
     const { dispatch, action, setCitationStyleMenuVisible } = props;
     const [styles, setStyles] = useState([]);
@@ -377,9 +399,9 @@ export function CitationStylesMenu(props) {
             let found = false;
             for (let i = 0; i < stringsArray.length; i++) {
                 if (
-                    // eg. chicago manual of style 17th edition => Chicago Manual of Style 17th edition
+                    // eg. "chicago manual of style 17th edition" => Chicago Manual of Style 17th edition
                     stringsArray[i]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    // eg. cmos17e => Chicago Manual of Style 17th edition
+                    // eg. "cmos17e" || "c m o s 1 7 e" => Chicago Manual of Style 17th edition
                     stringsArray[i]
                         ?.toLowerCase()
                         .split(/\s+|-/)
@@ -388,18 +410,21 @@ export function CitationStylesMenu(props) {
                             else return sect[0];
                         })
                         .join("")
-                        .includes(searchTerm.toLowerCase()) ||
-                    // eg. cms17e => Chicago Manual of Style 17th edition
+                        .includes(searchTerm.toLowerCase().replace(/\s+/g, "")) ||
+                    // eg. "cms17e" || "c m s 1 7 e" => Chicago Manual of Style 17th edition
                     stringsArray[i]
                         ?.toLowerCase()
-                        .replace(/of|in|on|at|the|from/gi, "")
+                        .replace(
+                            /\b(of|and|in|on|at|the|from|to|with|about|against|between|into|through|during|before|after|above|below|by|for|over|under|\(|\))\b/gi,
+                            ""
+                        )
                         .split(/\s+|-/)
                         .map((sect) => {
                             if (/\d/.test(sect)) return sect.replace(/\D/g, "");
                             else return sect[0];
                         })
                         .join("")
-                        .includes(searchTerm.toLowerCase())
+                        .includes(searchTerm.toLowerCase().replace(/\s+/g, ""))
                 ) {
                     found = true;
                     break;
@@ -429,17 +454,24 @@ export function CitationStylesMenu(props) {
                 </form>
             </search>
 
-            {filteredStyles.map((style, index) => (
-                <button
-                    key={index}
-                    onClick={() => {
-                        setCitationStyleMenuVisible(false);
-                        dispatch({ type: action, payload: { bibliographyStyle: style } });
-                    }}
-                >
-                    {style.name.long}
-                </button>
-            ))}
+            <List
+                height={500} // Adjust based on your needs
+                itemCount={filteredStyles.length}
+                itemSize={35} // Adjust based on the height of your items
+                width={300} // Adjust based on your needs
+            >
+                {({ index, style }) => (
+                    <button
+                        style={style}
+                        onClick={() => {
+                            setCitationStyleMenuVisible(false);
+                            dispatch({ type: action, payload: { bibliographyStyle: filteredStyles[index] } });
+                        }}
+                    >
+                        {filteredStyles[index].name.long}
+                    </button>
+                )}
+            </List>
         </div>
     );
 }

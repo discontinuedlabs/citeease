@@ -1,4 +1,3 @@
-import "./css/App.css";
 import { useState } from "react";
 import Bibliography from "./components/Bibliography";
 import { Route, Routes } from "react-router-dom";
@@ -40,7 +39,7 @@ export default function App() {
     }
 
     return (
-        <div className="app">
+        <div className="font-sans bg-neutral-white p-5 min-h-screen text-neutral-black">
             <Routes>
                 <Route
                     path="/"

@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom global styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+    @apply text-neutral-black;
+    @apply bg-neutral-yellow;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+ul {
+    margin-bottom: 1rem;
+}
+
+a {
+    @apply text-secondary-800;
+}
