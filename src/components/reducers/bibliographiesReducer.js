@@ -45,30 +45,41 @@ export default function bibliographiesReducer(bibliographies, action) {
             });
 
         case ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY:
-            const citId = nanoid();
-            const newCitation = {
-                id: citId,
-                content: {
+            if (action.payload.citations) {
+                console.log(action.payload.citations);
+                return bibliographies?.map((bib) => {
+                    if (bib.id === action.payload.bibliographyId) {
+                        return {
+                            ...bib,
+                            citations: [...bib.citations, ...action.payload.citations],
+                            dateModified: new Date(),
+                        };
+                    }
+                    return bib;
+                });
+            } else {
+                const citId = nanoid();
+                const newCitation = {
                     id: citId,
-                    type: action.payload.sourceType,
-                    author: [{ given: "", family: "", id: nanoid() }],
-                },
-                isChecked: false,
-            };
-            if (action.payload.content) {
-                // Add new citation with reaady content
-                newCitation.content = { ...newCitation.content, ...action.payload.content };
+                    content: {
+                        id: citId,
+                        type: action.payload.sourceType,
+                        author: [{ given: "", family: "", id: nanoid() }],
+                    },
+                    isChecked: false,
+                };
+
+                return bibliographies?.map((bib) => {
+                    if (bib.id === action.payload.bibliographyId) {
+                        return {
+                            ...bib,
+                            editedCitation: newCitation,
+                            dateModified: new Date(),
+                        };
+                    }
+                    return bib;
+                });
             }
-            return bibliographies?.map((bib) => {
-                if (bib.id === action.payload.bibliographyId) {
-                    return {
-                        ...bib,
-                        editedCitation: newCitation,
-                        dateModified: new Date(),
-                    };
-                }
-                return bib;
-            });
 
         case ACTIONS.ADD_CITATION_TO_EDITED_CITATION:
             return bibliographies?.map((bib) => {

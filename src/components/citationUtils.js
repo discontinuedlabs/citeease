@@ -72,6 +72,7 @@ export async function retrieveContentFromURL(url) {
         const $ = cheerio.load(response.data);
 
         return {
+            type: "webpage",
             title: $("title").text(), // TODO: Give option to prioritize h1 tag instead of title tag $("h1").text()
             author: extractAuthors($),
             "container-title": [$("meta[property='og:site_name']").attr("content") || ""], // TODO: Should use the website link as a fallback

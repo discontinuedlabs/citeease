@@ -13,6 +13,7 @@ import {
     AddCitationMenu,
 } from "./BibliographyTools";
 import { HotKeys } from "react-hotkeys";
+import { nanoid } from "nanoid";
 
 export const SOURCE_TYPES = {
     ARTICLE_JOURNAL: {
@@ -84,35 +85,51 @@ export default function Bibliography(props) {
         setAddCitationMenuVisible(false);
     }
 
-    // FIXME: It should mention what identifier couldnt be resolved
-    function handleSearchByIdentifiers(input) {
+    // TODO: It should mention what identifier couldnt be resolved
+    async function handleSearchByIdentifiers(input) {
         const identifiers = input.split(/\s+|\n+/);
 
+        // Define patterns outside the loop for efficiency
         const urlPattern = /(https?:\/\/[^\s]+)/g;
         const doiPattern = /\b10\.\d{4,9}[-\.\w]+\b/g;
-        const isbnPattern = /\b(978|979)(?:-\d+){0,2}\b/g;
+        const isbnPattern = /^(97[89])(?:-\d+){0,2}|\d{10}\s?|\d{13}\s?$|((97[89])?\d{9}\s?)(\d{5})$/;
         const pubmedIdPattern = /\bPMC\d+\b/g;
         const pmcIdPattern = /\bPMCID\d+\b/g;
 
         let pubmedIds = [];
         let pmcIds = [];
 
-        let content;
-        identifiers.forEach(async (identifier) => {
-            if (urlPattern.test(identifier)) {
-                content = await citationUtils.retrieveContentFromURL(identifier);
-            }
+        const citationsToAdd = [];
+        const citId = nanoid();
+        const citationTemplate = {
+            id: citId,
+            content: {
+                id: citId,
+                author: [{ given: "", family: "", id: nanoid() }],
+            },
+            isChecked: false,
+        };
 
+        for (const identifier of identifiers) {
+            if (urlPattern.test(identifier)) {
+                const urlContent = await citationUtils.retrieveContentFromURL(identifier);
+                citationsToAdd.push({ ...citationTemplate, content: urlContent });
+            }
             if (doiPattern.test(identifier)) {
-                content = await citationUtils.retrieveContentFromDOI(identifier);
+                const doiContent = await citationUtils.retrieveContentFromDOI(identifier);
+                citationsToAdd.push({ ...citationTemplate, content: doiContent });
             }
             if (isbnPattern.test(identifier)) {
-                content = await citationUtils.retrieveContentFromISBN(identifier);
+                const isbnContent = await citationUtils.retrieveContentFromISBN(identifier);
+                citationsToAdd.push({ ...citationTemplate, content: isbnContent });
             }
             if (pubmedIdPattern.test(identifier)) pubmedIds.push(identifier);
             if (pmcIdPattern.test(identifier)) pmcIds.push(identifier);
+        }
 
-            dispatch({ type: ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY, payload: { content: content } });
+        dispatch({
+            type: ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY,
+            payload: { bibliographyId: bibliographyId, citations: citationsToAdd },
         });
     }
 

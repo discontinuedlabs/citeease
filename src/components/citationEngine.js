@@ -1,16 +1,7 @@
 import { Cite, plugins } from "@citation-js/core";
-import "@citation-js/plugin-doi";
-import "@citation-js/plugin-isbn";
-import "@citation-js/plugin-pubmed";
-import "@citation-js/plugin-wikidata";
-import "@citation-js/plugin-software-formats";
 import "@citation-js/plugin-csl";
 import "@citation-js/plugin-bibtex";
-import axios from "axios";
-import * as cheerio from "cheerio";
-import * as citationUtils from "./citationUtils";
 import DOMPurify from "dompurify";
-import { nanoid } from "nanoid";
 
 export async function formatCitations(citations, bibStyle, savedCslFiles, setSavedCslFiles, formateType = "html") {
     const cslFile = await getCslFile(bibStyle, savedCslFiles, setSavedCslFiles);
