@@ -21,9 +21,22 @@ h3,
 h4,
 p,
 ul {
-    margin-bottom: 1rem;
+    @apply mb-4;
 }
 
 a {
     @apply text-secondary-800;
+}
+
+.hanging-indentation {
+    @apply pl-5; 
+    @apply -indent-5; 
+}
+
+.csl-entry:has(.csl-left-margin) {
+    @apply flex items-start space-x-2
+}
+
+.csl-entry > .csl-left-margin {
+    @apply min-w-fit;
 }

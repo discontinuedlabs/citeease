@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import { nanoid } from "nanoid";
 import * as citationUtils from "../citationUtils";
 import DateInput from "../formElements/DateInput";
 import AuthorsInput from "../formElements/AuthorsInput";
@@ -9,40 +8,29 @@ export default function ArticleJournal(props) {
     const [doi, setDoi] = useState("");
     const autoFillDoiRef = useRef(null);
 
-    function retrieveContent(source) {
-        if (source)
-            fetch(`https://corsproxy.io/?https://api.crossref.org/works/${source}`)
-                .then((response) => response.json())
-                .then((data) => {
-                    setContent((prevContent) => {
-                        return {
-                            ...prevContent,
-                            ...data.message,
-                            // date.message has all the neccessary naming system to work with citeproc, only the below fields are missing for other purposes.
-                            online: true,
-                            type: "article-journal", // This API returns the type as "journal-article", but for citeproc, it should be "article-journal"
-                            accessed: citationUtils.createDateObject(new Date()),
-                            author: data.message.author.map((author) => ({
-                                ...author,
-                                id: nanoid(),
-                            })),
-                        };
-                    });
-                })
-                .catch((error) => {
-                    if (!error.response && error.message === "Network Error") {
-                        showAcceptDialog(
-                            "Network Error",
-                            "Unable to retrieve the webpage due to network issues. Please check your internet connection and try again."
-                        );
-                    } else {
-                        showAcceptDialog(
-                            "No results found",
-                            "Failed to retrieve information from DOI. Please check your internet connection and ensure the provided DOI is correct."
-                        );
-                    }
-                    console.error(error);
-                });
+    async function retrieveContent(source) {
+        try {
+            const content = await citationUtils.retrieveContentFromDOI(source);
+            setContent((prevContent) => {
+                return {
+                    ...prevContent,
+                    ...content,
+                };
+            });
+        } catch (error) {
+            if (!error.response && error.message === "Network Error") {
+                showAcceptDialog(
+                    "Network Error",
+                    "Unable to retrieve the webpage due to network issues. Please check your internet connection and try again."
+                );
+            } else {
+                showAcceptDialog(
+                    "No results found",
+                    "Failed to retrieve information from DOI. Please check your internet connection and ensure the provided DOI is correct."
+                );
+            }
+            console.error(error);
+        }
     }
 
     function handleFillIn() {

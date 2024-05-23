@@ -1,6 +1,4 @@
 import { useRef, useState } from "react";
-import axios from "axios";
-import * as cheerio from "cheerio";
 import * as citationUtils from "../citationUtils";
 import DateInput from "../formElements/DateInput";
 import AuthorsInput from "../formElements/AuthorsInput";
@@ -10,34 +8,28 @@ export default function Webpage(props) {
     const [url, setUrl] = useState("");
     const autoFillUrlRef = useRef(null);
 
-    function retrieveContent(source) {
-        if (source) {
-            const website = encodeURIComponent(source);
-            axios
-                .get(`https://corsproxy.io/?${website}`)
-                .then((response) => {
-                    const $ = cheerio.load(response.data);
-                    setContent((prevContent) => {
-                        return {
-                            ...prevContent,
-                            ...citationUtils.retrieveContentFromWebsite($, source),
-                        };
-                    });
-                })
-                .catch((error) => {
-                    if (!error.response && error.message === "Network Error") {
-                        showAcceptDialog(
-                            "Network Error",
-                            "Unable to retrieve the webpage due to network issues. Please check your internet connection and try again."
-                        );
-                    } else {
-                        showAcceptDialog(
-                            "Webpage Access Error",
-                            "We couldn't retrieve the information from the webpage you're attempting to cite. This may be due to the webpage being protected by a login or paywall."
-                        );
-                    }
-                    console.error(error);
-                });
+    async function retrieveContent(source) {
+        try {
+            const content = await citationUtils.retrieveContentFromURL(source);
+            setContent((prevContent) => {
+                return {
+                    ...prevContent,
+                    ...content,
+                };
+            });
+        } catch (error) {
+            if (!error.response && error.message === "Network Error") {
+                showAcceptDialog(
+                    "Network Error",
+                    "Unable to retrieve the webpage due to network issues. Please check your internet connection and try again."
+                );
+            } else {
+                showAcceptDialog(
+                    "Webpage Access Error",
+                    "We couldn't retrieve the information from the webpage you're attempting to cite. This may be due to the webpage being protected by a login or paywall."
+                );
+            }
+            console.error(error);
         }
     }
 

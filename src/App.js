@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Bibliography from "./components/Bibliography";
 import { Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
@@ -29,6 +29,13 @@ export default function App() {
     );
     const [acceptDialog, setAcceptDialog] = useState({});
     const [confirmDialog, setConfirmDialog] = useState({});
+
+    useEffect(() => {
+        const h1 = document.querySelector("h1");
+        if (h1) document.title = h1.textContent + " - CiteEase" || "CiteEase";
+
+        return () => (document.title = "CiteEase");
+    });
 
     function showAcceptDialog(title, body = "") {
         setAcceptDialog({ message: { title, body } });

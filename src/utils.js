@@ -72,12 +72,6 @@ export function useReducerWithLocalStorage(key, reducer, initialState) {
     return [state, dispatch];
 }
 
-export function useDocumentTitle(title) {
-    useEffect(() => {
-        document.title = `${title} - CiteEase`;
-    }, [title]);
-}
-
 export function timeAgo(dateString) {
     const now = new Date();
     const then = new Date(dateString);

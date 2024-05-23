@@ -1,83 +1,65 @@
 import DateInput from "../formElements/DateInput";
 import AuthorsInput from "../formElements/AuthorsInput";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import * as citationUtils from "../citationUtils";
 
 export default function Book(props) {
-    const { content, setContent, setCitation, toggleEditMode, showAcceptDialog } = props;
+    const { content, setContent, showAcceptDialog, handleAddReference, handleCancel } = props;
+    const [ISBN, setISBN] = useState("");
     const autoFillIsbnRef = useRef(null);
 
-    function retrieveContent(source) {
-        if (source)
-            fetch(`https://openlibrary.org/search.json?q=isbn:${source}&mode=everything&fields=*,editions`)
-                .then((response) => response.json())
-                .then((data) => {
-                    data = data.docs[0];
-                    console.log(data);
-
-                    setContent({
-                        title: data.title,
-                        city: data.publish_place[0],
-                        allCities: data.publish_place,
-                        authors: citationUtils.createAuthorsArray(data.author_name),
-                        publisher: data.publisher[0],
-                        allPublishers: data.publisher,
-                        year: data.publish_year[0],
-                        allYears: data.publish_year,
-                        pages: data.number_of_pages_median,
-                        edition: data.edition_count,
-                        originalPublished: data.first_publish_year || Math.min(...data.publish_year),
-                        isbn: selectBestIsbn(data.isbn),
-                        // multiVolume: data,
-                        // volume: data.volume,
-                        // volumeTitle: data.volumeTitle,
-                        // online: data,
-                        // doi: data.doi,
-                        // url: data.url,
-                        accessDate: citationUtils.createDateObject(new Date()),
-                    });
-                })
-                .catch((error) => {
-                    if (!error.response && error.message === "Network Error") {
-                        showAcceptDialog(
-                            "Network Error",
-                            "Unable to retrieve the webpage due to network issues. Please check your internet connection and try again."
-                        );
-                    } else {
-                        showAcceptDialog(
-                            "No results found",
-                            "Failed to retrieve information from ISBN. Please check your internet connection and ensure the provided ISBN is correct."
-                        );
-                    }
-                    console.error(error);
-                });
-    }
-
-    function selectBestIsbn(isbnArray) {
-        isbnArray.sort((a, b) => b.length - a.length);
-        return isbnArray[0];
+    async function retrieveContent(source) {
+        try {
+            const content = await citationUtils.retrieveContentFromISBN(source);
+            setContent((prevContent) => {
+                return {
+                    ...prevContent,
+                    ...content,
+                };
+            });
+        } catch (error) {
+            if (!error.response && error.message === "Network Error") {
+                showAcceptDialog(
+                    "Network Error",
+                    "Unable to retrieve the webpage due to network issues. Please check your internet connection and try again."
+                );
+            } else {
+                showAcceptDialog(
+                    "No results found",
+                    "Failed to retrieve information from ISBN. Please check your internet connection and ensure the provided ISBN is correct."
+                );
+            }
+            console.error(error);
+        }
     }
 
     function handleFillIn() {
-        const autoFillIsbn = autoFillIsbnRef.current.value;
-        retrieveContent(autoFillIsbn);
+        retrieveContent(autoFillIsbnRef.current.value);
     }
 
-    function handleAddReference(event) {
-        event.preventDefault();
-        setCitation((prevCitation) => ({ ...prevCitation, referenceCompleted: true }));
-        toggleEditMode();
+    function updateContentField(key, value) {
+        setContent((prevContent) => ({
+            ...prevContent,
+            [key]: value,
+        }));
     }
 
-    function handleCancel() {
-        toggleEditMode(true);
+    function handleDoiChange(event) {
+        setISBN(event.target.value);
     }
 
     return (
         <form className="citation-form" onSubmit={handleAddReference}>
             <p>Insert the ISBN here to fill the fields automatically:</p>
             <label htmlFor="auto-filler-isbn">ISBN</label>
-            <input type="text" name="auto-filler-isbn" placeholder="Insert an ISBN" ref={autoFillIsbnRef} />
+            <input
+                type="text"
+                name="auto-filler-isbn"
+                placeholder="Insert an ISBN"
+                value={ISBN}
+                ref={autoFillIsbnRef}
+                onChange={handleDoiChange}
+            />
             <button type="button" onClick={handleFillIn}>
                 Fill in
             </button>
@@ -89,213 +71,104 @@ export default function Book(props) {
             <input
                 type="text"
                 name="title"
-                value={content.title}
+                value={content?.title}
                 placeholder="Book title"
-                onChange={(event) =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        title: event.target.value,
-                    }))
-                }
+                onChange={(event) => updateContentField("title", event.target.value)}
                 required
             />
 
-            <label htmlFor="city">City</label>
+            <label htmlFor="city">Publisher place</label>
             <input
                 type="text"
-                name="city"
-                value={content.city}
-                placeholder="City"
-                onChange={(event) =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        city: event.target.value,
-                    }))
-                }
+                name="publisher-place"
+                value={content?.["publisher-place"]}
+                placeholder="Publisher place"
+                onChange={(event) => updateContentField("publisher-place", event.target.value)}
             />
-
-            {content.allCities && content.allCities.length > 1 && (
-                <>
-                    <label>Choose another city</label>
-                    <select
-                        value={content.city}
-                        onChange={(event) =>
-                            setContent((prevContent) => ({
-                                ...prevContent,
-                                city: event.target.value,
-                            }))
-                        }
-                    >
-                        {content.allCities.map((city) => (
-                            <option value={city}>{city}</option>
-                        ))}
-                    </select>
-                </>
-            )}
 
             <label htmlFor="publisher">Publisher</label>
             <input
                 type="text"
                 name="publisher"
-                value={content.publisher}
+                value={content?.publisher}
                 placeholder="Publisher"
-                onChange={(event) =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        publisher: event.target.value,
-                    }))
-                }
+                onChange={(event) => updateContentField("publisher", event.target.value)}
             />
 
-            {content.allPublishers && content.allPublishers.length > 1 && (
-                <>
-                    <label>Choose another publisher</label>
-                    <select
-                        value={content.allPublishers}
-                        onChange={(event) =>
-                            setContent((prevContent) => ({
-                                ...prevContent,
-                                publisher: event.target.value,
-                            }))
-                        }
-                    >
-                        {content.allPublishers.map((publisher) => (
-                            <option value={publisher}>{publisher}</option>
-                        ))}
-                    </select>
-                </>
-            )}
-
-            <label htmlFor="year">Year</label>
-            <input
-                type="number"
-                name="year"
-                value={content.year || new Date(content.publicationDate).getFullYear()}
-                placeholder="Year"
-                onChange={(event) =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        year: event.target.value,
-                    }))
-                }
-            />
-
-            {content.allYears && content.allYears.length > 1 && (
-                <>
-                    <label>Choose another year</label>
-                    <select
-                        value={content.year}
-                        onChange={(event) =>
-                            setContent((prevContent) => ({
-                                ...prevContent,
-                                year: event.target.value,
-                            }))
-                        }
-                    >
-                        {content.allYears.map((year) => (
-                            <option value={year}>{year}</option>
-                        ))}
-                    </select>
-                </>
-            )}
+            <label htmlFor="publication-date">Publication date</label>
+            <DateInput name="publication-date" content={content} setContent={setContent} dateKey="issued" />
 
             <label htmlFor="pages">Number of pages</label>
             <input
                 type="number"
-                name="pages"
-                value={content.pages}
+                name="number-of-pages"
+                value={content?.["number-of-pages"]}
                 placeholder="Number of pages"
-                onChange={(event) =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        pages: event.target.value,
-                    }))
-                }
+                onChange={(event) => updateContentField("number-of-pages", event.target.value)}
             />
 
             <label htmlFor="edition">Edition No.</label>
             <input
                 type="number"
                 name="edition"
-                value={content.edition}
-                placeholder="Edition number (exepct 1)"
-                onChange={(event) =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        edition: event.target.value,
-                    }))
-                }
+                value={content?.edition}
+                placeholder="Edition number (exept 1)"
+                onChange={(event) => updateContentField("edition", event.target.value)}
             />
 
             <label htmlFor="original-year">Original published</label>
             <input
                 type="number"
                 name="original-published"
-                value={content.originalPublished}
+                value={content?.first_publish_year}
                 placeholder="Original published (year)"
-                onChange={(event) =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        originalPublished: event.target.value,
-                    }))
-                }
+                onChange={(event) => updateContentField("first_publish_year", event.target.value)}
             />
 
             <label htmlFor="isbn">ISBN</label>
             <input
                 type="text"
                 name="isbn"
-                value={content.isbn}
+                value={content?.ISBN}
                 placeholder="ISBN number"
-                onChange={(event) =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        isbn: event.target.value,
-                    }))
-                }
+                onChange={(event) => updateContentField("ISBN", event.target.value)}
             />
 
             <label htmlFor="multi-volume">Part of a multi-volume book?</label>
             <input
                 type="checkbox"
                 name="multi-volume"
-                checked={content.multiVolume}
-                onChange={() =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        multiVolume: !prevContent.multiVolume,
-                    }))
-                }
+                checked={content?.multiVolume}
+                onChange={(event) => updateContentField("multiVolume", event.target.checked)}
             />
 
-            {content.multiVolume && (
+            {content?.multiVolume && (
                 <>
                     <label htmlFor="volume">Volume No.</label>
                     <input
                         type="number"
                         name="volume"
-                        value={content.volume}
+                        value={content?.volume}
                         placeholder="Volume number"
-                        onChange={(event) =>
-                            setContent((prevContent) => ({
-                                ...prevContent,
-                                volume: event.target.value,
-                            }))
-                        }
+                        onChange={(event) => updateContentField("volume", event.target.value)}
+                    />
+
+                    <label htmlFor="volume">Number of volumes</label>
+                    <input
+                        type="number"
+                        name="number-of-volumes"
+                        value={content?.["number-of-volumes"]}
+                        placeholder="Number of volumes"
+                        onChange={(event) => updateContentField("number-of-volumes", event.target.value)}
                     />
 
                     <label htmlFor="volume-title">Volume title</label>
                     <input
                         type="text"
                         name="volume-title"
-                        value={content.volumeTitle}
+                        value={content?.volumeTitle}
                         placeholder="Volume title"
-                        onChange={(event) =>
-                            setContent((prevContent) => ({
-                                ...prevContent,
-                                volumeTitle: event.target.value,
-                            }))
-                        }
+                        onChange={(event) => updateContentField("volumeTitle", event.target.value)}
                     />
                 </>
             )}
@@ -304,29 +177,19 @@ export default function Book(props) {
             <input
                 type="checkbox"
                 name="online"
-                checked={content.online}
-                onChange={() =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        online: !prevContent.online,
-                    }))
-                }
+                checked={content?.online}
+                onChange={(event) => updateContentField("online", event.target.checked)}
             />
 
-            {content.online && (
+            {content?.online && (
                 <>
-                    <label htmlFor="url">DOI / URL</label>
+                    <label htmlFor="url">DOI/URL</label>
                     <input
                         type="text"
                         name="url"
-                        value={content.doi || content.url}
-                        placeholder="DOI / URL"
-                        onChange={(event) =>
-                            setContent((prevContent) => ({
-                                ...prevContent,
-                                url: event.target.value,
-                            }))
-                        }
+                        value={content?.url || content?.doi}
+                        placeholder="DOI/URL"
+                        onChange={(event) => updateContentField("url", event.target.value)}
                     />
 
                     <label htmlFor="access-date">Access date</label>

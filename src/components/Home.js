@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import ContextMenu from "./ui/ContextMenu";
 import { useNavigate } from "react-router-dom";
 import BibliographyCard from "./ui/BibliographyCard";
-import { useDocumentTitle } from "../utils";
 import { useState } from "react";
 import { CitationStylesMenu } from "./BibliographyTools";
 
@@ -10,7 +9,6 @@ export default function Home(props) {
     const { bibliographies, dispatch, ACTIONS } = props;
     const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
     const navigate = useNavigate();
-    useDocumentTitle("Home");
 
     return (
         <div className="mx-auto max-w-[50rem]">
@@ -25,7 +23,7 @@ export default function Home(props) {
             <div className="grid place-items-start gap-y-2">
                 {bibliographies && bibliographies.length > 0 ? (
                     bibliographies.map((bib) => (
-                        <Link key={bib.id} to={`/${bib.id}`} style={{ textDecoration: "none" }}>
+                        <Link key={bib.id} to={`/${bib.id}`} className="w-full" style={{ textDecoration: "none" }}>
                             <BibliographyCard bibliography={bib} />
                         </Link>
                     ))

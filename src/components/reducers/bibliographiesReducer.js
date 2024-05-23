@@ -55,6 +55,10 @@ export default function bibliographiesReducer(bibliographies, action) {
                 },
                 isChecked: false,
             };
+            if (action.payload.content) {
+                // Add new citation with reaady content
+                newCitation.content = { ...newCitation.content, ...action.payload.content };
+            }
             return bibliographies?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     return {

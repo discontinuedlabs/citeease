@@ -18,7 +18,7 @@ module.exports = {
                     "Helvetica Neue",
                     "sans-serif",
                 ],
-                system: ["Times New Roman"],
+                cambo: ["Cambo", "serif"],
             },
             colors: {
                 primary: {
@@ -43,12 +43,22 @@ module.exports = {
                     800: "hsl(209, 98%, 20%)",
                     900: "hsl(209, 98%, 10%)",
                 },
+                overlay: {
+                    100: "hsla(215, 100%, 4%, 0.1)",
+                    200: "hsla(215, 100%, 4%, 0.2)",
+                    300: "hsla(215, 100%, 4%, 0.3)",
+                    400: "hsla(215, 100%, 4%, 0.4)",
+                    500: "hsla(215, 100%, 4%, 0.5)",
+                    600: "hsla(215, 100%, 4%, 0.6)",
+                    700: "hsla(215, 100%, 4%, 0.7)",
+                    800: "hsla(215, 100%, 4%, 0.8)",
+                    900: "hsla(215, 100%, 4%, 0.9)",
+                },
                 neutral: {
                     black: "#000813",
                     yellow: "#ffd60a",
                     lightGray: "#cce6ff",
                     white: "#f6f8f9",
-                    transparentBlack: "hsla(215, 100%, 4%, 0.5)",
                     transparentBlue: "hsla(211, 100%, 12%, 0.5)",
                 },
             },

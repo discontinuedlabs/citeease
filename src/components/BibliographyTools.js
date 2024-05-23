@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import * as citationEngine from "./citationEngine";
-import "../css/BibliographyTools.css";
 import { useParams } from "react-router-dom";
 import { SOURCE_TYPES } from "./Bibliography";
 import { ACTIONS } from "./reducers/bibliographiesReducer";
@@ -79,28 +78,42 @@ export function ReferenceEntries(props) {
     }
 
     async function handleDrag(event) {
-        if (!checkedCitations.length) {
-            event.dataTransfer.setData("text/html", event.target.innerHTML);
+        let sanitizedInnerHTML;
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+        if (/Android/i.test(userAgent)) {
+            sanitizedInnerHTML = event.target.textContent;
+            event.dataTransfer.setData("text/plain", sanitizedInnerHTML);
+        } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+            sanitizedInnerHTML = event.target.textContent;
+            event.dataTransfer.setData("text/plain", sanitizedInnerHTML);
         } else {
-            const formattedCitations = await citationEngine.formatCitations(
-                checkedCitations,
-                bibliography?.style,
-                savedCslFiles,
-                setSavedCslFiles,
-                "html"
-            );
+            if (checkedCitations.length !== 0) {
+                sanitizedInnerHTML = DOMPurify.sanitize(event.target.innerHTML);
+                event.dataTransfer.setData("text/html", sanitizedInnerHTML);
+            } else {
+                const formattedCitations = await citationEngine.formatCitations(
+                    checkedCitations,
+                    bibliography?.style,
+                    savedCslFiles,
+                    setSavedCslFiles,
+                    "html"
+                );
 
-            const div = document.createElement("div");
-            for (const cit of formattedCitations) {
-                const parser = new DOMParser();
-                const docFragment = parser.parseFromString(cit, "text/html");
-                const element = docFragment.body.firstChild;
-                div.appendChild(element);
-                div.appendChild(document.createElement("br"));
+                const div = document.createElement("div");
+                for (const cit of formattedCitations) {
+                    const parser = new DOMParser();
+                    const docFragment = parser.parseFromString(cit, "text/html");
+                    const element = docFragment.body.firstChild;
+                    div.appendChild(element);
+                    div.appendChild(document.createElement("br"));
+                }
+
+                sanitizedInnerHTML = DOMPurify.sanitize(div.innerHTML);
+                event.dataTransfer.setData("text/html", sanitizedInnerHTML);
+
+                div.remove();
             }
-
-            event.dataTransfer.setData("text/html", div.innerHTML);
-            div.remove();
         }
     }
 
@@ -117,7 +130,7 @@ export function ReferenceEntries(props) {
                 )}
             </div>
 
-            <div className="reference-entries-container">
+            <div className="max-w-[50rem] mx-auto p-4">
                 {/* IMPORTANT: Entries need to be mapped by the references array because it gets sorted according to the CSL file rules, unlike the bibliography.citations array */}
                 {references?.map((ref) => {
                     const refId = () => {
@@ -128,16 +141,23 @@ export function ReferenceEntries(props) {
                     const citation = bibliography?.citations.find((cit) => cit?.id === refId());
                     const sanitizedReferences = DOMPurify.sanitize(ref);
                     return (
-                        <div className="reference-entry" key={citation?.id} draggable={true} onDragStart={handleDrag}>
+                        <div
+                            className={`flex items-start justify-between py-2 px-2 space-y-2 space-x-2 rounded-md mb-1 transition-all duration-200 hover:bg-overlay-100 ${
+                                citation?.isChecked ? "bg-secondary-100 hover:bg-secondary-200" : ""
+                            }`}
+                            key={citation?.id}
+                            draggable={true}
+                            onDragStart={handleDrag}
+                        >
                             <input
                                 type="checkbox"
-                                className="reference-entry-checkbox"
+                                className="top-0 m-0"
                                 checked={citation?.isChecked || false}
                                 onChange={() => handleEntryCheck(citation)}
                             />
 
                             <div
-                                className={`reference-entry-text ${
+                                className={`font-cambo break-words ${
                                     /^(apa|modern-language-association|chicago)$/i.test(bibliography?.style.code) // Include any other style that needs hanging indentation
                                         ? "hanging-indentation"
                                         : ""
@@ -268,11 +288,13 @@ export function LaTeXDialog(props) {
         formatLaTeX();
     }, [checkedCitations]);
 
+    console.log("run");
+
     return (
-        <div className="latex-window-overlay">
-            <div className="latex-window">
-                <div className="latex-window-header">
-                    <div className="tabs-flex">
+        <div className="fixed top-0 left-0 w-screen h-screen bg-transparent bg-overlay-500">
+            <div className="top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] w-[50rem] min-h-[70vh] max-h-[80vh] bg-white">
+                <div className="flex">
+                    <div className="flex">
                         <button onClick={() => setDisplayedLatex(bibtexString)}>BibTex</button>
                         <button onClick={() => setDisplayedLatex(biblatexString)}>BibLaTeX</button>
                         <button onClick={() => setDisplayedLatex(bibTxtString)}>BibTXT</button>
@@ -280,7 +302,7 @@ export function LaTeXDialog(props) {
                     <button onClick={() => setLaTeXWindowVisible(false)}>X</button>
                 </div>
 
-                <div className="displayed-latex">{displayedLatex || bibtexString}</div>
+                <div className="whitespace-pre-wrap">{displayedLatex || bibtexString}</div>
             </div>
         </div>
     );

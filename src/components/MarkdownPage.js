@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
-import { useDocumentTitle } from "../utils";
 import ReactMarkdown from "react-markdown";
 
 export default function MarkdownPage(props) {
     const { title, filePath } = props;
-    useDocumentTitle(title);
     const [content, setContent] = useState("");
 
     useEffect(() => {

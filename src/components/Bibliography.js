@@ -1,10 +1,9 @@
-import "../css/Bibliography.css";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import ContextMenu from "./ui/ContextMenu";
 import { useEffect, useState } from "react";
 import * as citationEngine from "./citationEngine";
-import { useDocumentTitle } from "../utils";
+import * as citationUtils from "./citationUtils";
 import {
     ReferenceEntries,
     MoveDialog,
@@ -29,7 +28,6 @@ export default function Bibliography(props) {
     const { bibliographies, dispatch, ACTIONS, savedCslFiles, setSavedCslFiles, showConfirmDialog, showAcceptDialog } =
         props;
     const bibliography = bibliographies?.find((bib) => bib.id === bibliographyId);
-    useDocumentTitle(bibliography?.title);
 
     const navigate = useNavigate();
     // const [collaborationOpened, setCollaborationOpened] = useState(false);
@@ -86,38 +84,36 @@ export default function Bibliography(props) {
         setAddCitationMenuVisible(false);
     }
 
+    // FIXME: It should mention what identifier couldnt be resolved
     function handleSearchByIdentifiers(input) {
         const identifiers = input.split(/\s+|\n+/);
 
-        console.log(
-            citationEngine.citeWithIdentifier(identifiers, bibliography.style, savedCslFiles, setSavedCslFiles)
-        );
+        const urlPattern = /(https?:\/\/[^\s]+)/g;
+        const doiPattern = /\b10\.\d{4,9}[-\.\w]+\b/g;
+        const isbnPattern = /\b(978|979)(?:-\d+){0,2}\b/g;
+        const pubmedIdPattern = /\bPMC\d+\b/g;
+        const pmcIdPattern = /\bPMCID\d+\b/g;
 
-        // const urlPattern = /(https?:\/\/[^\s]+)/g;
-        // const doiPattern = /\b10\.\d{4,9}[-\.\w]+\b/g;
-        // const isbnPattern = /\b(978|979)?\d{10}\b/g;
-        // const pubmedIdPattern = /\bPMC\d+\b/g;
-        // const pmcIdPattern = /\bPMCID\d+\b/g;
+        let pubmedIds = [];
+        let pmcIds = [];
 
-        // let urls = [];
-        // let dois = [];
-        // let isbns = [];
-        // let pubmedIds = [];
-        // let pmcIds = [];
+        let content;
+        identifiers.forEach(async (identifier) => {
+            if (urlPattern.test(identifier)) {
+                content = await citationUtils.retrieveContentFromURL(identifier);
+            }
 
-        // identifiers.forEach((identifier) => {
-        //     if (urlPattern.test(identifier)) urls.push(identifier);
-        //     if (doiPattern.test(identifier)) dois.push(identifier);
-        //     if (isbnPattern.test(identifier)) isbns.push(identifier);
-        //     if (pubmedIdPattern.test(identifier)) pubmedIds.push(identifier);
-        //     if (pmcIdPattern.test(identifier)) pmcIds.push(identifier);
-        // });
+            if (doiPattern.test(identifier)) {
+                content = await citationUtils.retrieveContentFromDOI(identifier);
+            }
+            if (isbnPattern.test(identifier)) {
+                content = await citationUtils.retrieveContentFromISBN(identifier);
+            }
+            if (pubmedIdPattern.test(identifier)) pubmedIds.push(identifier);
+            if (pmcIdPattern.test(identifier)) pmcIds.push(identifier);
 
-        // console.log("URLs:", urls);
-        // console.log("DOIs:", dois);
-        // console.log("ISBNs:", isbns);
-        // console.log("PubMed IDs:", pubmedIds);
-        // console.log("PMC IDs:", pmcIds);
+            dispatch({ type: ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY, payload: { content: content } });
+        });
     }
 
     function handleImportCitation() {}
@@ -209,7 +205,7 @@ export default function Bibliography(props) {
     return (
         <div className="bibliography">
             <HotKeys keyMap={keyMap}>
-                <div className="bibliography-header">
+                <div className="flex justify-between items-center">
                     <h1>{bibliography?.title}</h1>
                     <h3>{bibliography?.style.name.long}</h3>
                     <ContextMenu
