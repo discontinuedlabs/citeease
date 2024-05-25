@@ -21,7 +21,7 @@ const MASTER_CHECKBOX_STATES = {
 };
 
 export function ReferenceEntries(props) {
-    const { bibliography, dispatch, ACTIONS, savedCslFiles, setSavedCslFiles, openCitationWindow } = props;
+    const { bibliography, dispatch, ACTIONS, savedCslFiles, updateSavedCslFiles, openCitationWindow } = props;
     const [references, setReferences] = useState([]);
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
 
@@ -53,7 +53,7 @@ export function ReferenceEntries(props) {
                 bibliography?.citations,
                 bibliography?.style,
                 savedCslFiles,
-                setSavedCslFiles,
+                updateSavedCslFiles,
                 "html"
             );
             setReferences(formattedCitations);
@@ -96,7 +96,7 @@ export function ReferenceEntries(props) {
                     checkedCitations,
                     bibliography?.style,
                     savedCslFiles,
-                    setSavedCslFiles,
+                    updateSavedCslFiles,
                     "html"
                 );
 

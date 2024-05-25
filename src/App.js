@@ -2,37 +2,25 @@ import { useEffect, useState } from "react";
 import Bibliography from "./components/Bibliography";
 import { Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
-import { db, useIndexedDB, useReducerWithIndexedDB } from "./utils";
+import { useIndexedDB, useReducerWithIndexedDB } from "./utils";
 import bibliographiesReducer, { ACTIONS } from "./components/reducers/bibliographiesReducer";
 import Settings from "./components/Settings";
 import BibliographySettings from "./components/BibliographySettings";
 import settingsReducer from "./components/reducers/settingsReducer";
 import MarkdownPage from "./components/MarkdownPage";
-import { useLiveQuery } from "dexie-react-hooks";
 import { AcceptDialog, ConfirmDialog } from "./components/ui/Dialogs";
 import NotFoundPage from "./components/NotFoundPage";
 
 export default function App() {
-    const [bibliographies, dispatch] = useReducerWithIndexedDB(
-        "bibliographies",
-        bibliographiesReducer,
-        useLiveQuery(() => db.bibliographies?.get()) || []
-    );
-    const [settings, settingsDispatch] = useReducerWithIndexedDB(
-        "settings",
-        settingsReducer,
-        useLiveQuery(() => db.settings?.get()) || {}
-    );
-    const [savedCslFiles, setSavedCslFiles] = useIndexedDB(
-        "savedCslFiles",
-        useLiveQuery(() => db.savedCslFiles?.get()) || {}
-    );
+    const [bibliographies, dispatch] = useReducerWithIndexedDB("bibliographies", bibliographiesReducer, []);
+    const [settings, settingsDispatch] = useReducerWithIndexedDB("settings", settingsReducer, {});
+    const [savedCslFiles, updateSavedCslFiles] = useIndexedDB("savedCslFiles", {});
     const [acceptDialog, setAcceptDialog] = useState({});
     const [confirmDialog, setConfirmDialog] = useState({});
 
     useEffect(() => {
         const h1 = document.querySelector("h1");
-        if (h1) document.title = h1.textContent + " - CiteEase" || "CiteEase";
+        if (h1) document.title = `${h1.textContent} - CiteEase` || "CiteEase";
 
         return () => (document.title = "CiteEase");
     });
@@ -67,7 +55,7 @@ export default function App() {
                             showAcceptDialog={showAcceptDialog}
                             showConfirmDialog={showConfirmDialog}
                             savedCslFiles={savedCslFiles}
-                            setSavedCslFiles={setSavedCslFiles}
+                            updateSavedCslFiles={updateSavedCslFiles}
                         />
                     }
                 />

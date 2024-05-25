@@ -46,6 +46,39 @@ export function createAuthorsArray(authors) {
     return result;
 }
 
+export function recognizeIdentifierType(string) {
+    const urlPattern = /(https?:\/\/[^\s]+)/g;
+    const doiPatterns = [
+        /^\s*(https?:\/\/(?:dx\.)?doi\.org\/(10.\d{4,9}\/[-._;()/:A-Z0-9[\]<>]+))\s*$/i,
+        /^\s*((?:dx\.)?doi\.org\/(10.\d{4,9}\/[-._;()/:A-Z0-9[\]<>]+))\s*$/i,
+        /^\s*(10.\d{4,9}\/[-._;()/:A-Z0-9[\]<>]+)\s*$/i,
+        /^10.\d{4,9}\/[-._;()/:A-Z0-9[\]<>]+$/i,
+        /\b10\.\d{4,9}[-.\w]+\b/i,
+    ];
+    const pmcidPattern = /^PMC\d+$/i;
+    const pmidPatern = /^pmid:\d+$/i;
+    const isbnPatterns = [
+        /^(97[89])(?:-\d+){0,2}|\d{10}\s?|\d{13}\s?$|((97[89])?\d{9}\s?)(\d{5})$/,
+        /^10\.(978|979)\.\d{2,8}\/\d{2,7}$/,
+        /^(978|979)\d{10}$/,
+        /^\d{10}$/,
+    ];
+
+    if (urlPattern.test(string)) return "url";
+
+    for (let doiPattern of doiPatterns) {
+        if (doiPattern.test(string)) return "doi";
+    }
+
+    if (pmcidPattern.test(string)) return "pmcid";
+
+    if (pmidPatern.test(string)) return "pmid";
+
+    for (let isbnPattern of isbnPatterns) {
+        if (isbnPattern.test(string.replace(/-/g, ""))) return "isbn";
+    }
+}
+
 export async function retrieveContentFromURL(url) {
     function extractAuthors($) {
         let authors = [];
@@ -142,3 +175,7 @@ export async function retrieveContentFromISBN(isbn) {
         };
     }
 }
+
+export function retrieveContentFromPMCID(pmcid) {}
+
+export function retrieveContentFromPMID(pmid) {}

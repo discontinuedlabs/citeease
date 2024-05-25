@@ -18,15 +18,11 @@ export const ACTIONS = {
     ADD_NEW_BIBLIOGRAPHY_AND_MOVE_CITATIONS: "Add new bibliography and move citations",
 };
 
-// TODO: Each function that modifies a bibliography should change the bib.dateModified
-
-let newBibliography;
-
 export default function bibliographiesReducer(bibliographies, action) {
     if (!bibliographies || typeof bibliographies === Array) return;
     switch (action.type) {
         case ACTIONS.ADD_NEW_BIBLIOGRAPHY:
-            newBibliography = {
+            const newBibliography = {
                 title: "Untitled Bibliography",
                 style: action.payload.bibliographyStyle,
                 dateCreated: new Date(),
@@ -272,7 +268,7 @@ export default function bibliographiesReducer(bibliographies, action) {
             });
 
         case ACTIONS.ADD_NEW_BIBLIOGRAPHY_AND_MOVE_CITATIONS:
-            newBibliography = {
+            const newQuickBibliography = {
                 title: "Untitled Bibliography",
                 style: action.payload.bibliographyStyle,
                 dateCreated: new Date(),
@@ -280,7 +276,7 @@ export default function bibliographiesReducer(bibliographies, action) {
                 id: "bib=" + nanoid(10),
                 citations: [...action.payload.checkedCitations],
             };
-            return [...bibliographies, newBibliography];
+            return [...bibliographies, newQuickBibliography];
 
         default:
             return bibliographies;

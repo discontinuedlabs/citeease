@@ -3,8 +3,8 @@ import "@citation-js/plugin-csl";
 import "@citation-js/plugin-bibtex";
 import DOMPurify from "dompurify";
 
-export async function formatCitations(citations, bibStyle, savedCslFiles, setSavedCslFiles, formateType = "html") {
-    const cslFile = await getCslFile(bibStyle, savedCslFiles, setSavedCslFiles);
+export async function formatCitations(citations, bibStyle, savedCslFiles, updateSavedCslFiles, formateType = "html") {
+    const cslFile = await getCslFile(bibStyle, savedCslFiles, updateSavedCslFiles);
     const contentArray = createContentArray(citations);
 
     let config = plugins.config.get("@csl");
@@ -33,7 +33,7 @@ export async function formatLaTeX(citations, latexFormat = "bibtex") {
 }
 
 // TODO: It's better to also check if the cslFile is saved when the user adds a new bibliography and download if it doesn't exist
-async function getCslFile(bibStyle, savedCslFiles, setSavedCslFiles) {
+async function getCslFile(bibStyle, savedCslFiles, updateSavedCslFiles) {
     if (!bibStyle) return;
     if (savedCslFiles && typeof savedCslFiles === "object" && bibStyle?.code in savedCslFiles) {
         // Get CSL from the savedCslFiles object
@@ -45,9 +45,7 @@ async function getCslFile(bibStyle, savedCslFiles, setSavedCslFiles) {
                 `https://raw.githubusercontent.com/citation-style-language/styles/master/${bibStyle?.code}.csl`
             );
             const data = await response.text();
-            setSavedCslFiles((prevSavedCslFiles) => {
-                return { ...prevSavedCslFiles, [bibStyle?.code]: data };
-            });
+            updateSavedCslFiles({ ...savedCslFiles, [bibStyle?.code]: data });
             return data;
         } else {
             console.error(

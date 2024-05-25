@@ -26,8 +26,15 @@ export const SOURCE_TYPES = {
 
 export default function Bibliography(props) {
     const { bibId: bibliographyId } = useParams();
-    const { bibliographies, dispatch, ACTIONS, savedCslFiles, setSavedCslFiles, showConfirmDialog, showAcceptDialog } =
-        props;
+    const {
+        bibliographies,
+        dispatch,
+        ACTIONS,
+        savedCslFiles,
+        updateSavedCslFiles,
+        showConfirmDialog,
+        showAcceptDialog,
+    } = props;
     const bibliography = bibliographies?.find((bib) => bib.id === bibliographyId);
 
     const navigate = useNavigate();
@@ -89,16 +96,6 @@ export default function Bibliography(props) {
     async function handleSearchByIdentifiers(input) {
         const identifiers = input.split(/\s+|\n+/);
 
-        // Define patterns outside the loop for efficiency
-        const urlPattern = /(https?:\/\/[^\s]+)/g;
-        const doiPattern = /\b10\.\d{4,9}[-\.\w]+\b/g;
-        const isbnPattern = /^(97[89])(?:-\d+){0,2}|\d{10}\s?|\d{13}\s?$|((97[89])?\d{9}\s?)(\d{5})$/;
-        const pubmedIdPattern = /\bPMC\d+\b/g;
-        const pmcIdPattern = /\bPMCID\d+\b/g;
-
-        let pubmedIds = [];
-        let pmcIds = [];
-
         const citationsToAdd = [];
         const citId = nanoid();
         const citationTemplate = {
@@ -111,20 +108,30 @@ export default function Bibliography(props) {
         };
 
         for (const identifier of identifiers) {
-            if (urlPattern.test(identifier)) {
-                const urlContent = await citationUtils.retrieveContentFromURL(identifier);
-                citationsToAdd.push({ ...citationTemplate, content: urlContent });
+            switch (citationUtils.recognizeIdentifierType(identifier)) {
+                case "url":
+                    const urlContent = await citationUtils.retrieveContentFromURL(identifier);
+                    citationsToAdd.push({ ...citationTemplate, content: urlContent });
+                    break;
+                case "doi":
+                    const doiContent = await citationUtils.retrieveContentFromDOI(identifier);
+                    citationsToAdd.push({ ...citationTemplate, content: doiContent });
+                    break;
+                case "pmcid":
+                    const pmcidContent = await citationUtils.retrieveContentFromPMCID(identifier);
+                    citationsToAdd.push({ ...citationTemplate, content: pmcidContent });
+                    break;
+                case "pmid":
+                    const pmidContent = await citationUtils.retrieveContentFromPMID(identifier);
+                    citationsToAdd.push({ ...citationTemplate, content: pmidContent });
+                    break;
+                case "isbn":
+                    const isbnContent = await citationUtils.retrieveContentFromISBN(identifier);
+                    citationsToAdd.push({ ...citationTemplate, content: isbnContent });
+                    break;
+                default:
+                    return;
             }
-            if (doiPattern.test(identifier)) {
-                const doiContent = await citationUtils.retrieveContentFromDOI(identifier);
-                citationsToAdd.push({ ...citationTemplate, content: doiContent });
-            }
-            if (isbnPattern.test(identifier)) {
-                const isbnContent = await citationUtils.retrieveContentFromISBN(identifier);
-                citationsToAdd.push({ ...citationTemplate, content: isbnContent });
-            }
-            if (pubmedIdPattern.test(identifier)) pubmedIds.push(identifier);
-            if (pmcIdPattern.test(identifier)) pmcIds.push(identifier);
         }
 
         dispatch({
@@ -140,7 +147,7 @@ export default function Bibliography(props) {
             checkedCitations,
             bibliography?.style,
             savedCslFiles,
-            setSavedCslFiles,
+            updateSavedCslFiles,
             "text"
         );
 
@@ -339,7 +346,7 @@ export default function Bibliography(props) {
                     dispatch={dispatch}
                     ACTIONS={ACTIONS}
                     savedCslFiles={savedCslFiles}
-                    setSavedCslFiles={setSavedCslFiles}
+                    updateSavedCslFiles={updateSavedCslFiles}
                     openCitationWindow={openCitationWindow}
                 />
 

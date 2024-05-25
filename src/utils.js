@@ -1,51 +1,85 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Dexie from "dexie";
+import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 
-export const db = new Dexie("CiteEaseDB");
-db.version(1).stores({
-    items: "++id,name,value",
+const db = new Dexie("CiteEaseDB");
+db.version(2).stores({
+    items: "++id, name, value",
 });
 
-export function useIndexedDB(key, defaultValue) {
-    const [value, setValue] = useState(() => {
-        async function fetchData() {
-            const item = await db.items.get(key);
-            if (item) setValue(item.value);
-        }
-        fetchData();
-    });
-    useEffect(() => {
-        async function saveData() {
-            await db.items.put({ id: key, value });
-        }
-        saveData();
-    }, [key, value]);
+// export function useIndexedDB(key, defaultValue) {
+//     const [value, setValue] = useState(() => {
+//         async function fetchData() {
+//             const item = await db.items.get(key);
+//             if (item) setValue(item.value);
+//         }
+//         fetchData();
+//     });
+//     useEffect(() => {
+//         async function saveData() {
+//             await db.items.put({ id: key, value });
+//         }
+//         saveData();
+//     }, [key, value]);
 
-    return [value || defaultValue, setValue];
+//     return [value || defaultValue, setValue];
+// }
+async function fetchData(key, initialValue) {
+    const item = await db.items.get(key);
+    return item.value || initialValue;
 }
 
-export function useReducerWithIndexedDB(key, reducer, initialState) {
-    const [state, setState] = useIndexedDB(key, initialState);
+// IMPORTANT: updateValue function does not accept the syntax "updateValue(prevValue => prevValue + 1)" like the setValue function from useState does
+export function useIndexedDB(key, initialValue = undefined) {
+    const queryClient = useQueryClient();
+
+    const {
+        data: value,
+        isLoading,
+        error,
+    } = useQuery({
+        queryKey: ["indexedDB", key],
+        queryFn: () => fetchData(key, initialValue),
+    });
+
+    const mutation = useMutation({
+        mutationKey: ["indexedDB", key],
+        mutationFn: (newValue) => {
+            return db.items.put({ id: key, value: newValue });
+        },
+        onSuccess: () => queryClient.invalidateQueries(["indexedDB", key]),
+    });
+
+    function updateValue(newValue) {
+        mutation.mutate(newValue);
+    }
+
+    return [value || initialValue, updateValue, isLoading, error];
+}
+
+export function useReducerWithIndexedDB(key, reducer, initialValue = undefined) {
+    const [state, updateState, isLoading, error] = useIndexedDB(key, initialValue);
 
     const dispatch = useCallback(
         (action) => {
             const newState = reducer(state, action);
-            setState(newState);
+            console.log(reducer(state, action));
+            updateState(newState);
         },
-        [state, setState, reducer]
+        [state, updateState, reducer]
     );
 
-    return [state, dispatch];
+    return [state, dispatch, isLoading, error];
 }
 
-export function useLocalStorage(key, defaultValue) {
+export function useLocalStorage(key, initialValue) {
     const [value, setValue] = useState(() => {
         let currentValue;
 
         try {
-            currentValue = JSON.parse(localStorage.getItem(key)) || defaultValue;
+            currentValue = JSON.parse(localStorage.getItem(key)) || initialValue;
         } catch (error) {
-            currentValue = defaultValue;
+            currentValue = initialValue;
         }
 
         return currentValue;
@@ -58,8 +92,8 @@ export function useLocalStorage(key, defaultValue) {
     return [value, setValue];
 }
 
-export function useReducerWithLocalStorage(key, reducer, initialState) {
-    const [state, setState] = useLocalStorage(key, initialState);
+export function useReducerWithLocalStorage(key, reducer, initialValue) {
+    const [state, setState] = useLocalStorage(key, initialValue);
 
     const dispatch = useCallback(
         (action) => {
