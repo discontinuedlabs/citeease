@@ -16,6 +16,8 @@ precacheAndRoute([
     process.env.PUBLIC_URL + "/markdown/terms.md",
 ]);
 
+console.log(process.env.PUBLIC_URL + "/styles.json");
+
 const fileExtensionRegexp = new RegExp("/[^/?]+\\.[^/]+$");
 registerRoute(
     // Return false to exempt requests from being fulfilled by index.html.
@@ -51,12 +53,3 @@ self.addEventListener("message", (event) => {
         self.skipWaiting();
     }
 });
-
-precacheAndRoute([
-    process.env.PUBLIC_URL + "/styles.json",
-    process.env.PUBLIC_URL + "/markdown/about.md",
-    process.env.PUBLIC_URL + "/markdown/privacy.md",
-    process.env.PUBLIC_URL + "/markdown/terms.md",
-]);
-
-const ignored = self.__WB_MANIFEST;
