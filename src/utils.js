@@ -1,43 +1,60 @@
 import { useEffect, useState, useCallback } from "react";
 import Dexie from "dexie";
-import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 
-const db = new Dexie("CiteEaseDB");
+export const db = new Dexie("CiteEaseDB");
 db.version(2).stores({
     items: "++id, name, value",
 });
 
-async function fetchData(key, initialValue) {
-    const item = await db.items.get(key);
-    return item.value || initialValue;
-}
-
 // IMPORTANT: updateValue function does not accept the syntax "updateValue(prevValue => prevValue + 1)" like the setValue function from useState does
-export function useIndexedDB(key, initialValue = undefined) {
-    const queryClient = useQueryClient();
+// export function useIndexedDB(key, initialValue = undefined) {
+//     const queryClient = useQueryClient();
 
-    const {
-        data: value,
-        isLoading,
-        error,
-    } = useQuery({
-        queryKey: ["indexedDB", key],
-        queryFn: () => fetchData(key, initialValue),
+//     const {
+//         data: value,
+//         isLoading,
+//         error,
+//     } = useQuery({
+//         queryKey: ["indexedDB", key],
+//         queryFn: () => {
+//             async function fetchData() {
+//                 const item = await db.items.get(key);
+//                 return item.value || initialValue;
+//             }
+//             return fetchData();
+//         },
+//     });
+
+//     const mutation = useMutation({
+//         mutationKey: ["indexedDB", key],
+//         mutationFn: (newValue) => {
+//             return db.items.put({ id: key, value: newValue });
+//         },
+//         onSuccess: () => queryClient.invalidateQueries(["indexedDB", key]),
+//     });
+
+//     function updateValue(newValue) {
+//         mutation.mutate(newValue);
+//     }
+
+//     return [value || initialValue, updateValue, isLoading, error];
+// }
+
+export function useIndexedDB(key, defaultValue) {
+    const [value, setValue] = useState(() => {
+        async function fetchData() {
+            const item = await db.items.get(key);
+            if (item) setValue(item.value);
+        }
+        fetchData();
     });
-
-    const mutation = useMutation({
-        mutationKey: ["indexedDB", key],
-        mutationFn: (newValue) => {
-            return db.items.put({ id: key, value: newValue });
-        },
-        onSuccess: () => queryClient.invalidateQueries(["indexedDB", key]),
-    });
-
-    function updateValue(newValue) {
-        mutation.mutate(newValue);
-    }
-
-    return [value || initialValue, updateValue, isLoading, error];
+    useEffect(() => {
+        async function saveData() {
+            await db.items.put({ id: key, value });
+        }
+        saveData();
+    }, [key, value]);
+    return [value || defaultValue, setValue];
 }
 
 export function useReducerWithIndexedDB(key, reducer, initialValue = undefined) {
@@ -45,8 +62,7 @@ export function useReducerWithIndexedDB(key, reducer, initialValue = undefined) 
 
     const dispatch = useCallback(
         (action) => {
-            const newState = reducer(state, action); // FIXME: This reducer always shows old states
-            updateState(newState);
+            updateState(reducer(state, action)); // FIXME: This reducer always shows old states
         },
         [state, updateState, reducer]
     );

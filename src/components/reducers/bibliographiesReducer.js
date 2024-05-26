@@ -80,10 +80,6 @@ export default function bibliographiesReducer(bibliographies, action) {
             return bibliographies?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const targetCitation = bib.citations.find((cit) => cit.id === action.payload.citationId);
-                    console.warn({
-                        ...bib,
-                        editedCitation: targetCitation,
-                    });
                     return {
                         ...bib,
                         editedCitation: targetCitation,

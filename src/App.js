@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Bibliography from "./components/Bibliography";
 import { Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
-import { useIndexedDB, useReducerWithIndexedDB } from "./utils";
+import { db, useIndexedDB, useReducerWithIndexedDB } from "./utils";
 import bibliographiesReducer, { ACTIONS } from "./components/reducers/bibliographiesReducer";
 import Settings from "./components/Settings";
 import BibliographySettings from "./components/BibliographySettings";
@@ -10,11 +10,23 @@ import settingsReducer from "./components/reducers/settingsReducer";
 import MarkdownPage from "./components/MarkdownPage";
 import { AcceptDialog, ConfirmDialog } from "./components/ui/Dialogs";
 import NotFoundPage from "./components/NotFoundPage";
+import { useLiveQuery } from "dexie-react-hooks";
 
 export default function App() {
-    const [bibliographies, dispatch] = useReducerWithIndexedDB("bibliographies", bibliographiesReducer, []);
-    const [settings, settingsDispatch] = useReducerWithIndexedDB("settings", settingsReducer, {});
-    const [savedCslFiles, updateSavedCslFiles] = useIndexedDB("savedCslFiles", {});
+    const [bibliographies, dispatch] = useReducerWithIndexedDB(
+        "bibliographies",
+        bibliographiesReducer,
+        useLiveQuery(() => db.bibliographies?.get()) || []
+    );
+    const [settings, settingsDispatch] = useReducerWithIndexedDB(
+        "settings",
+        settingsReducer,
+        useLiveQuery(() => db.settings?.get()) || {}
+    );
+    const [savedCslFiles, updateSavedCslFiles] = useIndexedDB(
+        "savedCslFiles",
+        useLiveQuery(() => db.savedCslFiles?.get()) || {}
+    );
     const [acceptDialog, setAcceptDialog] = useState({});
     const [confirmDialog, setConfirmDialog] = useState({});
 
