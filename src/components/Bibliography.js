@@ -11,6 +11,7 @@ import {
     LaTeXDialog,
     RenameDialog,
     AddCitationMenu,
+    SmartGeneratorDialog,
 } from "./BibliographyTools";
 import { HotKeys } from "react-hotkeys";
 import { nanoid } from "nanoid";
@@ -44,6 +45,8 @@ export default function Bibliography(props) {
     const [LaTeXWindowVisible, setLaTeXWindowVisible] = useState(false);
     const [moveWindowVisible, setMoveWindowVisible] = useState(false);
     const [renameWindowVisible, setRenameWindowVisible] = useState(false);
+    const [smartGeneratorDialogVisible, setSmartGeneratorDialogVisible] = useState(false);
+    const [searchByIdentifiersInput, setSearchByIdentifiersInput] = useState("");
     const [firstTimeLoaded, setFirstTimeLoaded] = useState(true); // Needed because the bibliographies array doesn't load as soon as the component mounts because it's loaded from useReducerWithIndexedDB
 
     const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
@@ -92,56 +95,9 @@ export default function Bibliography(props) {
         setAddCitationMenuVisible(false);
     }
 
-    // TODO: It should mention what identifier couldnt be resolved
-    async function handleSearchByIdentifiers(input) {
-        const identifiers = input.split(/\n+/);
-
-        const citationsToAdd = [];
-
-        const citationPromises = identifiers.map(async (identifier) => {
-            let content;
-            switch (citationUtils.recognizeIdentifierType(identifier)) {
-                case "url":
-                    content = await citationUtils.retrieveContentFromURL(identifier);
-                    break;
-                case "doi":
-                    content = await citationUtils.retrieveContentFromDOI(identifier);
-                    break;
-                case "pmcid":
-                    content = await citationUtils.retrieveContentFromPMCID(identifier);
-                    break;
-                case "pmid":
-                    content = await citationUtils.retrieveContentFromPMID(identifier);
-                    break;
-                case "isbn":
-                    content = await citationUtils.retrieveContentFromISBN(identifier);
-                    break;
-                default:
-                    return null;
-            }
-
-            if (content !== null) {
-                const citId = nanoid();
-                const citationTemplate = {
-                    id: citId,
-                    content: {
-                        id: citId,
-                        author: [{ given: "", family: "", id: nanoid() }],
-                    },
-                    isChecked: false,
-                };
-                citationsToAdd.push({ ...citationTemplate, content: { ...citationTemplate.content, ...content } });
-            }
-
-            console.log(citationsToAdd); // TODO: These should show to the user as they get generated
-        });
-
-        await Promise.all(citationPromises);
-
-        dispatch({
-            type: ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY,
-            payload: { bibliographyId: bibliographyId, citations: citationsToAdd },
-        });
+    function handleSearchByIdentifiers(input) {
+        setSearchByIdentifiersInput(input);
+        setSmartGeneratorDialogVisible(true);
     }
 
     function handleImportCitation() {}
@@ -394,6 +350,18 @@ export default function Bibliography(props) {
                         title={bibliography?.title}
                         setRenameWindowVisible={setRenameWindowVisible}
                         handleRename={handleRename}
+                    />
+                )}
+
+                {smartGeneratorDialogVisible && searchByIdentifiersInput.length && (
+                    <SmartGeneratorDialog
+                        searchByIdentifiersInput={searchByIdentifiersInput}
+                        setSmartGeneratorDialogVisible={setSmartGeneratorDialogVisible}
+                        dispatch={dispatch}
+                        bibliographyId={bibliographyId}
+                        bibStyle={bibliography.style}
+                        savedCslFiles={savedCslFiles}
+                        updateSavedCslFiles={updateSavedCslFiles}
                     />
                 )}
 

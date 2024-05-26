@@ -81,9 +81,9 @@ export default function Webpage(props) {
             <input
                 type="text"
                 name="website"
-                value={content["container-title"]?.[0] ?? ""}
+                value={content["container-title"]}
                 placeholder="Website title"
-                onChange={(event) => updateContentField("container-title", [event.target.value])}
+                onChange={(event) => updateContentField("container-title", event.target.value)}
             />
 
             <label htmlFor="publication-date">Publication date</label>

@@ -102,16 +102,23 @@ export async function retrieveContentFromURL(url) {
         return createAuthorsArray(authors);
     }
 
-    if (url) {
+    if (!url) return;
+
+    try {
         const website = encodeURIComponent(url);
         const response = await axios.get(`${CORS_PROXY}${website}`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error status: ${response.status}`);
+        }
+
         const $ = cheerio.load(response.data);
 
         return {
             type: "webpage",
             title: $("title").text(), // TODO: Give option to prioritize h1 tag instead of title tag $("h1").text()
             author: extractAuthors($),
-            "container-title": [$("meta[property='og:site_name']").attr("content") || ""], // TODO: Should use the website link as a fallback
+            "container-title": $("meta[property='og:site_name']").attr("content") || "", // TODO: Should use the website link as a fallback
             publisher: $("meta[property='article:publisher']").attr("content"),
             accessed: createDateObject(new Date()),
             issued: createDateObject(
@@ -132,38 +139,67 @@ export async function retrieveContentFromURL(url) {
                 $("link[rel='canonical']").attr("href") ||
                 url,
         };
+    } catch (error) {
+        console.error(`Failed to retrieve content from ${url}: ${error}`);
+        return null;
     }
 }
 
-// TODO: Don't use the whole object from the API.
 // These are some examples of the needed fields for citeproc https://api.zotero.org/groups/459003/items?format=csljson&limit=8&itemType=journalArticle
 export async function retrieveContentFromDOI(doi) {
-    if (doi) {
-        const response = await fetch(`${CORS_PROXY}https://api.crossref.org/works/${doi.replace(/doi:\s*|s*/gi, "")}`);
-        const data = await response.json();
+    if (!doi) return;
 
-        if ("id" in data?.message) delete data.id;
+    try {
+        const cleanedDoi = doi.replace(/doi:\s*/gi, "");
+        const response = await fetch(`${CORS_PROXY}https://api.crossref.org/works/${cleanedDoi}`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const message = data?.message;
 
         return {
-            ...data?.message,
-            // date.message has all the neccessary naming system to work with citeproc, only the below fields are missing for other purposes.
+            DOI: message?.DOI,
+            URL: message?.URL || data?.DOI,
+            ISSN: message?.ISSN,
+            PMID: message?.PMID,
+            PMCID: message?.PMCID,
+            "container-title": message?.["container-title"]?.[0],
+            issue: message?.issue,
+            issued: message?.issued,
+            page: message?.page,
+            "publisher-place": message?.["publisher-place"],
+            source: message?.source,
+            title: message?.title,
+            volume: message?.volume,
             online: true,
             type: "article-journal", // This API returns the type as "journal-article", but for citeproc, it should be "article-journal"
             accessed: createDateObject(new Date()),
-            author: data?.message?.author?.map((author) => ({
+            author: message?.author?.map((author) => ({
                 ...author,
                 id: nanoid(),
             })),
         };
+    } catch (error) {
+        console.error(`Failed to retrieve content from ${doi}: ${error}`);
+        return null;
     }
 }
 
-// FIXME: The API naming system is not compatible with citeproc
 export async function retrieveContentFromISBN(isbn) {
-    if (isbn) {
+    if (!isbn) return;
+
+    try {
         const response = await fetch(
             `https://openlibrary.org/search.json?q=isbn:${isbn}&mode=everything&fields=*,editions`
         );
+
+        if (!response.ok) {
+            throw new Error(`HTTP error status: ${response.status}`);
+        }
+
         const data = await response.json();
         const docs = data?.docs[0];
         const edition = docs?.editions?.docs[0];
@@ -179,71 +215,94 @@ export async function retrieveContentFromISBN(isbn) {
             issued: createDateObject(edition?.publish_date?.[0]),
             accessed: createDateObject(new Date()),
         };
+    } catch (error) {
+        console.error(`Failed to retrieve content from ${isbn}: ${error}`);
+        return null;
     }
 }
 
 export async function retrieveContentFromPMCID(pmcid) {
     if (!pmcid) return;
 
-    const cleanedPmcid = pmcid.replace(/pmcid:\s*|PMC|\s*/gi, "");
-    const response = await fetch(
-        `${CORS_PROXY}https://api.ncbi.nlm.nih.gov/lit/ctxp/v1/pmc/?format=csl&id=${cleanedPmcid}`
-    );
-    const data = await response.json();
+    try {
+        const cleanedPmcid = pmcid.replace(/pmcid:\s*|PMC|\s*/gi, "");
+        const response = await fetch(
+            `${CORS_PROXY}https://api.ncbi.nlm.nih.gov/lit/ctxp/v1/pmc/?format=csl&id=${cleanedPmcid}`
+        );
 
-    return {
-        DOI: data?.DOI,
-        URL: data?.URL || data?.DOI,
-        ISSN: data?.ISSN,
-        PMID: data?.PMID,
-        PMCID: data?.PMCID,
-        "container-title": [data?.["container-title"]],
-        issue: data?.issue,
-        issued: data?.issued,
-        page: data?.page,
-        "publisher-place": data?.["publisher-place"],
-        source: data?.source,
-        title: data?.title,
-        type: data?.type,
-        volume: data?.volume,
-        online: true,
-        accessed: createDateObject(new Date()),
-        author: data?.author?.map((author) => ({
-            ...author,
-            id: nanoid(),
-        })),
-    };
+        if (!response.ok) {
+            throw new Error(`HTTP error status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        return {
+            DOI: data?.DOI,
+            URL: data?.URL || data?.DOI,
+            ISSN: data?.ISSN,
+            PMID: data?.PMID,
+            PMCID: data?.PMCID,
+            "container-title": data?.["container-title"],
+            issue: data?.issue,
+            issued: data?.issued,
+            page: data?.page,
+            "publisher-place": data?.["publisher-place"],
+            source: data?.source,
+            title: data?.title,
+            type: data?.type,
+            volume: data?.volume,
+            online: true,
+            accessed: createDateObject(new Date()),
+            author: data?.author?.map((author) => ({
+                ...author,
+                id: nanoid(),
+            })),
+        };
+    } catch (error) {
+        console.error(`Failed to retrieve content from ${pmcid}: ${error}`);
+        return null;
+    }
 }
 
 export async function retrieveContentFromPMID(pmid) {
     if (!pmid) return;
 
-    const cleanedPmid = pmid.replace(/pmid:\s*|\s*/gi, "");
-    const response = await fetch(
-        `${CORS_PROXY}https://api.ncbi.nlm.nih.gov/lit/ctxp/v1/pubmed/?format=csl&id=${cleanedPmid}`
-    );
-    const data = await response.json();
+    try {
+        const cleanedPmid = pmid.replace(/pmid:\s*|\s*/gi, "");
+        const response = await fetch(
+            `${CORS_PROXY}https://api.ncbi.nlm.nih.gov/lit/ctxp/v1/pubmed/?format=csl&id=${cleanedPmid}`
+        );
 
-    return {
-        DOI: data?.DOI,
-        URL: data?.URL || data?.DOI,
-        ISSN: data?.ISSN,
-        PMID: data?.PMID,
-        PMCID: data?.PMCID,
-        "container-title": [data?.["container-title"]],
-        issue: data?.issue,
-        issued: data?.issued,
-        page: data?.page,
-        "publisher-place": data?.["publisher-place"],
-        source: data?.source,
-        title: data?.title,
-        type: data?.type,
-        volume: data?.volume,
-        online: true,
-        accessed: createDateObject(new Date()),
-        author: data?.author?.map((author) => ({
-            ...author,
-            id: nanoid(),
-        })),
-    };
+        if (!response.ok) {
+            throw new Error(`HTTP error status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        return {
+            DOI: data?.DOI,
+            URL: data?.URL || data?.DOI,
+            ISSN: data?.ISSN,
+            PMID: data?.PMID,
+            PMCID: data?.PMCID,
+            "container-title": data?.["container-title"],
+            issue: data?.issue,
+            issued: data?.issued,
+            page: data?.page,
+            "publisher-place": data?.["publisher-place"],
+            source: data?.source,
+            title: data?.title,
+            type: data?.type,
+            volume: data?.volume,
+            online: true,
+            accessed: createDateObject(new Date()),
+            author: data?.author?.map((author) => ({
+                ...author,
+                id: nanoid(),
+            })),
+        };
+    } catch (error) {
+        console.error(`Failed to retrieve content from ${pmid}: ${error}`);
+        return null;
+    }
 }

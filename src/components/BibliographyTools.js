@@ -8,6 +8,7 @@ import ContextMenu from "./ui/ContextMenu";
 import DOMPurify from "dompurify";
 import HTMLReactParser from "html-react-parser/lib/index";
 import { FixedSizeList as List } from "react-window";
+import * as citationUtils from "./citationUtils";
 
 // Source types
 import ArticleJournal from "./sourceTypes/ArticleJournal";
@@ -497,6 +498,91 @@ export function CitationStylesMenu(props) {
                     </button>
                 )}
             </List>
+        </div>
+    );
+}
+
+// TODO: Handle errors. It should't cut the for loop when something returns an error
+export function SmartGeneratorDialog(props) {
+    const {
+        searchByIdentifiersInput: input,
+        setSmartGeneratorDialogVisible,
+        dispatch,
+        bibliographyId,
+        bibStyle,
+        savedCslFiles,
+        updateSavedCslFiles,
+    } = props;
+    const [contentsArray, setContentsArray] = useState([]);
+    const [progress, setProgress] = useState(0);
+    const [references, setReferences] = useState("");
+
+    useEffect(() => {
+        async function generateCitations() {
+            const identifiers = input.split(/\n+/); // TODO: Also allow using json objects or array of objects to generate citation
+
+            const newContentsArray = [];
+
+            identifiers.forEach(async (identifier) => {
+                let content;
+                switch (citationUtils.recognizeIdentifierType(identifier)) {
+                    case "url":
+                        content = await citationUtils.retrieveContentFromURL(identifier);
+                        break;
+                    case "doi":
+                        content = await citationUtils.retrieveContentFromDOI(identifier);
+                        break;
+                    case "pmcid":
+                        content = await citationUtils.retrieveContentFromPMCID(identifier);
+                        break;
+                    case "pmid":
+                        content = await citationUtils.retrieveContentFromPMID(identifier);
+                        break;
+                    case "isbn":
+                        content = await citationUtils.retrieveContentFromISBN(identifier);
+                        break;
+                    default:
+                        return null;
+                }
+
+                if (content) {
+                    newContentsArray.push(content);
+                    setProgress((prevProgress) => Math.min(prevProgress + 100 / identifiers.length, 100));
+                    setContentsArray(newContentsArray);
+                    dispatch({
+                        type: ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY,
+                        payload: { bibliographyId: bibliographyId, contentsArray: newContentsArray },
+                    });
+                } else {
+                    console.error("Couldn't find the content of the identifier " + identifier);
+                    setProgress((prevProgress) => Math.max(prevProgress - 100 / identifiers.length, 0));
+                }
+            });
+        }
+        generateCitations();
+    }, [input]);
+
+    useEffect(() => {
+        console.log(contentsArray);
+        async function formatCitations() {
+            const formattedCitation = await citationEngine.formatCitations(
+                contentsArray.map((content) => ({ content: content })),
+                bibStyle,
+                savedCslFiles,
+                updateSavedCslFiles
+            );
+            const sanitizedReference = DOMPurify.sanitize(formattedCitation);
+            setReferences(sanitizedReference);
+        }
+        formatCitations();
+    }, [contentsArray]);
+
+    return (
+        <div>
+            <button onClick={() => setSmartGeneratorDialogVisible(false)}>X</button>
+            <div>{progress}</div>
+            <div>{HTMLReactParser(references)}</div>
+            <button>Accept</button>
         </div>
     );
 }

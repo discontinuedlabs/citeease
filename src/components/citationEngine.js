@@ -11,6 +11,7 @@ export async function formatCitations(citations, bibStyle, savedCslFiles, update
     config.templates.add(bibStyle?.code, cslFile);
 
     if (!cslFile) return;
+
     let cite = await Cite.async(contentArray);
     let formattedCitations = cite.format("bibliography", {
         format: formateType,
