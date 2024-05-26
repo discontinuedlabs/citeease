@@ -2,6 +2,8 @@ import axios from "axios";
 import * as cheerio from "cheerio";
 import { nanoid } from "nanoid";
 
+const CORS_PROXY = "https://corsproxy.io/?";
+
 export function createDateObject(yearOrDate, month = undefined, day = undefined) {
     if (yearOrDate === undefined) return;
     let year, adjustedMonth, adjustedDay;
@@ -56,7 +58,7 @@ export function recognizeIdentifierType(string) {
         /\b10\.\d{4,9}[-.\w]+\b/i,
     ];
     const pmcidPattern = /^PMC\d+$/i;
-    const pmidPatern = /^pmid:\d+$/i;
+    const pmidPatern = /^pmid:\s*\d+$/i;
     const isbnPatterns = [
         /^(97[89])(?:-\d+){0,2}|\d{10}\s?|\d{13}\s?$|((97[89])?\d{9}\s?)(\d{5})$/,
         /^10\.(978|979)\.\d{2,8}\/\d{2,7}$/,
@@ -67,18 +69,19 @@ export function recognizeIdentifierType(string) {
     if (urlPattern.test(string)) return "url";
 
     for (let doiPattern of doiPatterns) {
-        if (doiPattern.test(string)) return "doi";
+        if (doiPattern.test(string.replace(/doi:\s*/gi, ""))) return "doi";
     }
 
-    if (pmcidPattern.test(string)) return "pmcid";
+    if (pmcidPattern.test(string.replace(/pmcid:\s*/g, ""))) return "pmcid";
 
-    if (pmidPatern.test(string)) return "pmid";
+    if (pmidPatern.test(string.replace(/\s+/g, ""))) return "pmid";
 
     for (let isbnPattern of isbnPatterns) {
-        if (isbnPattern.test(string.replace(/-/g, ""))) return "isbn";
+        if (isbnPattern.test(string.replace(/-|\s+/g, ""))) return "isbn";
     }
 }
 
+// FIXME: They all should only return something when response.ok === true
 export async function retrieveContentFromURL(url) {
     function extractAuthors($) {
         let authors = [];
@@ -101,7 +104,7 @@ export async function retrieveContentFromURL(url) {
 
     if (url) {
         const website = encodeURIComponent(url);
-        const response = await axios.get(`https://corsproxy.io/?${website}`);
+        const response = await axios.get(`${CORS_PROXY}${website}`);
         const $ = cheerio.load(response.data);
 
         return {
@@ -136,15 +139,18 @@ export async function retrieveContentFromURL(url) {
 // These are some examples of the needed fields for citeproc https://api.zotero.org/groups/459003/items?format=csljson&limit=8&itemType=journalArticle
 export async function retrieveContentFromDOI(doi) {
     if (doi) {
-        const response = await fetch(`https://corsproxy.io/?https://api.crossref.org/works/${doi}`);
+        const response = await fetch(`${CORS_PROXY}https://api.crossref.org/works/${doi.replace(/doi:\s*|s*/gi, "")}`);
         const data = await response.json();
+
+        if ("id" in data?.message) delete data.id;
+
         return {
-            ...data.message,
+            ...data?.message,
             // date.message has all the neccessary naming system to work with citeproc, only the below fields are missing for other purposes.
             online: true,
             type: "article-journal", // This API returns the type as "journal-article", but for citeproc, it should be "article-journal"
             accessed: createDateObject(new Date()),
-            author: data.message.author.map((author) => ({
+            author: data?.message?.author?.map((author) => ({
                 ...author,
                 id: nanoid(),
             })),
@@ -159,9 +165,9 @@ export async function retrieveContentFromISBN(isbn) {
             `https://openlibrary.org/search.json?q=isbn:${isbn}&mode=everything&fields=*,editions`
         );
         const data = await response.json();
-        const docs = data.docs[0];
-        const edition = docs.editions.docs[0];
-        console.log(docs);
+        const docs = data?.docs[0];
+        const edition = docs?.editions?.docs[0];
+
         return {
             type: "book",
             title: docs?.title,
@@ -176,6 +182,68 @@ export async function retrieveContentFromISBN(isbn) {
     }
 }
 
-export function retrieveContentFromPMCID(pmcid) {}
+export async function retrieveContentFromPMCID(pmcid) {
+    if (!pmcid) return;
 
-export function retrieveContentFromPMID(pmid) {}
+    const cleanedPmcid = pmcid.replace(/pmcid:\s*|PMC|\s*/gi, "");
+    const response = await fetch(
+        `${CORS_PROXY}https://api.ncbi.nlm.nih.gov/lit/ctxp/v1/pmc/?format=csl&id=${cleanedPmcid}`
+    );
+    const data = await response.json();
+
+    return {
+        DOI: data?.DOI,
+        URL: data?.URL || data?.DOI,
+        ISSN: data?.ISSN,
+        PMID: data?.PMID,
+        PMCID: data?.PMCID,
+        "container-title": [data?.["container-title"]],
+        issue: data?.issue,
+        issued: data?.issued,
+        page: data?.page,
+        "publisher-place": data?.["publisher-place"],
+        source: data?.source,
+        title: data?.title,
+        type: data?.type,
+        volume: data?.volume,
+        online: true,
+        accessed: createDateObject(new Date()),
+        author: data?.author?.map((author) => ({
+            ...author,
+            id: nanoid(),
+        })),
+    };
+}
+
+export async function retrieveContentFromPMID(pmid) {
+    if (!pmid) return;
+
+    const cleanedPmid = pmid.replace(/pmid:\s*|\s*/gi, "");
+    const response = await fetch(
+        `${CORS_PROXY}https://api.ncbi.nlm.nih.gov/lit/ctxp/v1/pubmed/?format=csl&id=${cleanedPmid}`
+    );
+    const data = await response.json();
+
+    return {
+        DOI: data?.DOI,
+        URL: data?.URL || data?.DOI,
+        ISSN: data?.ISSN,
+        PMID: data?.PMID,
+        PMCID: data?.PMCID,
+        "container-title": [data?.["container-title"]],
+        issue: data?.issue,
+        issued: data?.issued,
+        page: data?.page,
+        "publisher-place": data?.["publisher-place"],
+        source: data?.source,
+        title: data?.title,
+        type: data?.type,
+        volume: data?.volume,
+        online: true,
+        accessed: createDateObject(new Date()),
+        author: data?.author?.map((author) => ({
+            ...author,
+            id: nanoid(),
+        })),
+    };
+}

@@ -81,7 +81,7 @@ export default function ArticleJournal(props) {
             <input
                 type="text"
                 name="journal"
-                value={content["container-title"]?.[0] ?? ""}
+                value={content["container-title"]?.[0]}
                 placeholder="Journal title"
                 onChange={(event) => updateContentField("container-title", [event.target.value])}
             />

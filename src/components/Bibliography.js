@@ -39,7 +39,7 @@ export default function Bibliography(props) {
 
     const navigate = useNavigate();
     // const [collaborationOpened, setCollaborationOpened] = useState(false);
-    const [citationWindowVisible, setCitationWindowVisible] = useState(false);
+    const [citationFormVisible, setCitationFormVisible] = useState(false);
     const [addCitationMenuVisible, setAddCitationMenuVisible] = useState(false);
     const [LaTeXWindowVisible, setLaTeXWindowVisible] = useState(false);
     const [moveWindowVisible, setMoveWindowVisible] = useState(false);
@@ -71,7 +71,7 @@ export default function Bibliography(props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [bibliography]);
 
-    function openCitationWindow(sourceType, isNew = false, specificId = "") {
+    function openCitationForm(sourceType, isNew = false, specificId = "") {
         let checkedCitationsIds = [...(specificId ? [specificId] : [])];
         bibliography?.citations.forEach((cit) => {
             if (cit.isChecked) {
@@ -88,51 +88,55 @@ export default function Bibliography(props) {
                 type: ACTIONS.ADD_CITATION_TO_EDITED_CITATION,
                 payload: { bibliographyId: bibliographyId, citationId: checkedCitationsIds[0] },
             });
-        setCitationWindowVisible(true);
+        setCitationFormVisible(true);
         setAddCitationMenuVisible(false);
     }
 
     // TODO: It should mention what identifier couldnt be resolved
     async function handleSearchByIdentifiers(input) {
-        const identifiers = input.split(/\s+|\n+/);
+        const identifiers = input.split(/\n+/);
 
         const citationsToAdd = [];
-        const citId = nanoid();
-        const citationTemplate = {
-            id: citId,
-            content: {
-                id: citId,
-                author: [{ given: "", family: "", id: nanoid() }],
-            },
-            isChecked: false,
-        };
 
-        for (const identifier of identifiers) {
+        const citationPromises = identifiers.map(async (identifier) => {
+            let content;
             switch (citationUtils.recognizeIdentifierType(identifier)) {
                 case "url":
-                    const urlContent = await citationUtils.retrieveContentFromURL(identifier);
-                    citationsToAdd.push({ ...citationTemplate, content: urlContent });
+                    content = await citationUtils.retrieveContentFromURL(identifier);
                     break;
                 case "doi":
-                    const doiContent = await citationUtils.retrieveContentFromDOI(identifier);
-                    citationsToAdd.push({ ...citationTemplate, content: doiContent });
+                    content = await citationUtils.retrieveContentFromDOI(identifier);
                     break;
                 case "pmcid":
-                    const pmcidContent = await citationUtils.retrieveContentFromPMCID(identifier);
-                    citationsToAdd.push({ ...citationTemplate, content: pmcidContent });
+                    content = await citationUtils.retrieveContentFromPMCID(identifier);
                     break;
                 case "pmid":
-                    const pmidContent = await citationUtils.retrieveContentFromPMID(identifier);
-                    citationsToAdd.push({ ...citationTemplate, content: pmidContent });
+                    content = await citationUtils.retrieveContentFromPMID(identifier);
                     break;
                 case "isbn":
-                    const isbnContent = await citationUtils.retrieveContentFromISBN(identifier);
-                    citationsToAdd.push({ ...citationTemplate, content: isbnContent });
+                    content = await citationUtils.retrieveContentFromISBN(identifier);
                     break;
                 default:
-                    return;
+                    return null;
             }
-        }
+
+            if (content !== null) {
+                const citId = nanoid();
+                const citationTemplate = {
+                    id: citId,
+                    content: {
+                        id: citId,
+                        author: [{ given: "", family: "", id: nanoid() }],
+                    },
+                    isChecked: false,
+                };
+                citationsToAdd.push({ ...citationTemplate, content: { ...citationTemplate.content, ...content } });
+            }
+
+            console.log(citationsToAdd); // TODO: These should show to the user as they get generated
+        });
+
+        await Promise.all(citationPromises);
 
         dispatch({
             type: ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY,
@@ -256,16 +260,23 @@ export default function Bibliography(props) {
 
                                       "DEVIDER",
 
-                                      ...(checkedCitations?.length === 1 && checkedCitations[0].content.URL
+                                      ...(checkedCitations?.length === 1
                                           ? [
-                                                {
-                                                    label: "Visit website",
-                                                    method: () =>
-                                                        window.open(checkedCitations[0].content.URL, "_blank"),
-                                                },
+                                                ...(checkedCitations[0].content.URL
+                                                    ? [
+                                                          {
+                                                              label: "Visit website",
+                                                              method: () =>
+                                                                  window.open(
+                                                                      checkedCitations[0].content.URL,
+                                                                      "_blank"
+                                                                  ),
+                                                          },
+                                                      ]
+                                                    : []),
                                                 {
                                                     label: "Edit",
-                                                    method: () => openCitationWindow(checkedCitations[0].content.type),
+                                                    method: () => openCitationForm(checkedCitations[0].content.type),
                                                 },
                                                 "DEVIDER",
                                             ]
@@ -347,16 +358,16 @@ export default function Bibliography(props) {
                     ACTIONS={ACTIONS}
                     savedCslFiles={savedCslFiles}
                     updateSavedCslFiles={updateSavedCslFiles}
-                    openCitationWindow={openCitationWindow}
+                    openCitationForm={openCitationForm}
                 />
 
-                {citationWindowVisible && bibliography?.editedCitation && (
+                {citationFormVisible && bibliography?.editedCitation && (
                     <CitationForm
-                        bibliographies={bibliographies}
+                        bibliography={bibliography}
                         dispatch={dispatch}
                         ACTIONS={ACTIONS}
                         {...props}
-                        setCitationWindowVisible={setCitationWindowVisible}
+                        setCitationFormVisible={setCitationFormVisible}
                     />
                 )}
 
@@ -387,10 +398,10 @@ export default function Bibliography(props) {
                 )}
 
                 {addCitationMenuVisible && (
-                    // Since the openCitationWindow is passed to this component, make the handleSearchByIdentifiers and handleImportCitation inside it
+                    // Since the openCitationForm is passed to this component, make the handleSearchByIdentifiers and handleImportCitation inside it
                     <AddCitationMenu
                         setAddCitationMenuVisible={setAddCitationMenuVisible}
-                        openCitationWindow={openCitationWindow}
+                        openCitationForm={openCitationForm}
                         handleSearchByIdentifiers={handleSearchByIdentifiers}
                         handleImportCitation={handleImportCitation}
                     />

@@ -21,7 +21,7 @@ const MASTER_CHECKBOX_STATES = {
 };
 
 export function ReferenceEntries(props) {
-    const { bibliography, dispatch, ACTIONS, savedCslFiles, updateSavedCslFiles, openCitationWindow } = props;
+    const { bibliography, dispatch, ACTIONS, savedCslFiles, updateSavedCslFiles, openCitationForm } = props;
     const [references, setReferences] = useState([]);
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
 
@@ -77,6 +77,7 @@ export function ReferenceEntries(props) {
         });
     }
 
+    // TODO: This should only grab it as html when the user holds H
     async function handleDrag(event) {
         let sanitizedInnerHTML;
         const userAgent = navigator.userAgent || navigator.vendor || window.opera;
@@ -162,7 +163,7 @@ export function ReferenceEntries(props) {
                                         ? "hanging-indentation"
                                         : ""
                                 }`}
-                                onClick={() => openCitationWindow(citation?.content.type, false, citation?.id)}
+                                onClick={() => openCitationForm(citation?.content.type, false, citation?.id)}
                             >
                                 {HTMLReactParser(sanitizedReferences)}
                             </div>
@@ -177,7 +178,7 @@ export function ReferenceEntries(props) {
 export function AddCitationMenu(props) {
     const {
         setAddCitationMenuVisible,
-        openCitationWindow,
+        openCitationForm,
         handleSearchByIdentifiers,
         handleImportCitation,
         handleSearchByTitle,
@@ -216,7 +217,7 @@ export function AddCitationMenu(props) {
                 options={Object.values(SOURCE_TYPES).map((entry) => {
                     return {
                         label: entry.label,
-                        method: () => openCitationWindow(entry.code, true),
+                        method: () => openCitationForm(entry.code, true),
                     };
                 })}
                 menuStyle={{ position: "fixed", bottom: "100%", left: "50%", transform: "translateX(-50%)" }}
@@ -227,10 +228,12 @@ export function AddCitationMenu(props) {
 
 export function CitationForm(props) {
     const { bibId: bibliographyId } = useParams();
-    const { bibliographies, dispatch, ACTIONS, setCitationWindowVisible, showAcceptDialog } = props;
-    const bibliography = bibliographyId ? bibliographies.find((bib) => bib.id === bibliographyId) : undefined;
-    const editedCitation = bibliography?.editedCitation;
-    const [content, setContent] = useState(editedCitation ? editedCitation.content : {});
+    const { bibliography, dispatch, ACTIONS, setCitationFormVisible, showAcceptDialog } = props;
+    const [content, setContent] = useState(bibliography?.editedCitation?.content || {});
+
+    useEffect(() => {
+        setContent(bibliography?.editedCitation?.content || {});
+    }, [bibliography?.editedCitation?.content]);
 
     const citationControlProps = {
         content,
@@ -241,9 +244,9 @@ export function CitationForm(props) {
     };
 
     const CITATION_COMPONENTS = {
-        [SOURCE_TYPES.ARTICLE_JOURNAL.code]: ArticleJournal(citationControlProps),
-        [SOURCE_TYPES.BOOK.code]: Book(citationControlProps),
-        [SOURCE_TYPES.WEBPAGE.code]: Webpage(citationControlProps),
+        [SOURCE_TYPES.ARTICLE_JOURNAL.code]: <ArticleJournal {...citationControlProps} />,
+        [SOURCE_TYPES.BOOK.code]: <Book {...citationControlProps} />,
+        [SOURCE_TYPES.WEBPAGE.code]: <Webpage {...citationControlProps} />,
     };
 
     useEffect(() => {
@@ -260,13 +263,13 @@ export function CitationForm(props) {
         event.preventDefault();
         dispatch({
             type: ACTIONS.UPDATE_CITATION_IN_BIBLIOGRAPHY,
-            payload: { bibliographyId: bibliographyId, editedCitation: editedCitation },
+            payload: { bibliographyId: bibliographyId, editedCitation: bibliography?.editedCitationd },
         });
-        setCitationWindowVisible(false);
+        setCitationFormVisible(false);
     }
 
     function handleCancel() {
-        setCitationWindowVisible(false);
+        setCitationFormVisible(false);
     }
 
     return <div className="citation-window">{CITATION_COMPONENTS[content.type]}</div>;

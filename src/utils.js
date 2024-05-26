@@ -7,23 +7,6 @@ db.version(2).stores({
     items: "++id, name, value",
 });
 
-// export function useIndexedDB(key, defaultValue) {
-//     const [value, setValue] = useState(() => {
-//         async function fetchData() {
-//             const item = await db.items.get(key);
-//             if (item) setValue(item.value);
-//         }
-//         fetchData();
-//     });
-//     useEffect(() => {
-//         async function saveData() {
-//             await db.items.put({ id: key, value });
-//         }
-//         saveData();
-//     }, [key, value]);
-
-//     return [value || defaultValue, setValue];
-// }
 async function fetchData(key, initialValue) {
     const item = await db.items.get(key);
     return item.value || initialValue;
@@ -62,8 +45,7 @@ export function useReducerWithIndexedDB(key, reducer, initialValue = undefined) 
 
     const dispatch = useCallback(
         (action) => {
-            const newState = reducer(state, action);
-            console.log(reducer(state, action));
+            const newState = reducer(state, action); // FIXME: This reducer always shows old states
             updateState(newState);
         },
         [state, updateState, reducer]

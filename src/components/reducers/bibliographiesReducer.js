@@ -19,7 +19,7 @@ export const ACTIONS = {
 };
 
 export default function bibliographiesReducer(bibliographies, action) {
-    if (!bibliographies || typeof bibliographies === Array) return;
+    if (!bibliographies) return;
     switch (action.type) {
         case ACTIONS.ADD_NEW_BIBLIOGRAPHY:
             const newBibliography = {
@@ -42,7 +42,6 @@ export default function bibliographiesReducer(bibliographies, action) {
 
         case ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY:
             if (action.payload.citations) {
-                console.log(action.payload.citations);
                 return bibliographies?.map((bib) => {
                     if (bib.id === action.payload.bibliographyId) {
                         return {
@@ -81,10 +80,13 @@ export default function bibliographiesReducer(bibliographies, action) {
             return bibliographies?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const targetCitation = bib.citations.find((cit) => cit.id === action.payload.citationId);
+                    console.warn({
+                        ...bib,
+                        editedCitation: targetCitation,
+                    });
                     return {
                         ...bib,
-                        editedCitation: { ...targetCitation },
-                        dateModified: new Date(),
+                        editedCitation: targetCitation,
                     };
                 }
                 return bib;
