@@ -162,7 +162,7 @@ export async function retrieveContentFromDOI(doi) {
 
         return {
             DOI: message?.DOI,
-            URL: message?.URL || data?.DOI,
+            URL: message?.URL || message?.DOI ? "https://doi.org/" + message.DOI : undefined,
             ISSN: message?.ISSN,
             PMID: message?.PMID,
             PMCID: message?.PMCID,
@@ -238,7 +238,7 @@ export async function retrieveContentFromPMCID(pmcid) {
 
         return {
             DOI: data?.DOI,
-            URL: data?.URL || data?.DOI,
+            URL: data?.URL || data?.DOI ? "https://doi.org/" + data.DOI : undefined,
             ISSN: data?.ISSN,
             PMID: data?.PMID,
             PMCID: data?.PMCID,
@@ -281,7 +281,7 @@ export async function retrieveContentFromPMID(pmid) {
 
         return {
             DOI: data?.DOI,
-            URL: data?.URL || data?.DOI,
+            URL: data?.URL || data?.DOI ? "https://doi.org/" + data.DOI : undefined,
             ISSN: data?.ISSN,
             PMID: data?.PMID,
             PMCID: data?.PMCID,

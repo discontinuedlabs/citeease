@@ -18,8 +18,11 @@ export const ACTIONS = {
     ADD_NEW_BIBLIOGRAPHY_AND_MOVE_CITATIONS: "Add new bibliography and move citations",
 };
 
-export default function bibliographiesReducer(bibliographies, action) {
-    if (!bibliographies) return;
+const initialState = [];
+
+export default function bibliographiesReducer(bibliographies = initialState, action) {
+    console.log(action);
+
     switch (action.type) {
         case ACTIONS.ADD_NEW_BIBLIOGRAPHY:
             const newBibliography = {
@@ -41,46 +44,48 @@ export default function bibliographiesReducer(bibliographies, action) {
             });
 
         case ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY:
-            return bibliographies?.map((bib) => {
+            return bibliographies.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
-                    if (action.payload?.contentsArray) {
-                        // Add the new citation to citations array to get formatted directly
-                        return {
+                    let updatedBib;
+                    if (action.payload?.content) {
+                        // Create a deep copy of the citations array
+                        const updatedCitations = [
+                            ...bib.citations,
+                            {
+                                id: nanoid(),
+                                content: {
+                                    ...action.payload?.content,
+                                    id: nanoid(),
+                                },
+                                isChecked: false,
+                            },
+                        ];
+                        updatedBib = {
                             ...bib,
-                            citations: [
-                                ...bib.citations,
-                                ...action.payload?.contentsArray.map((content) => {
-                                    const citId = nanoid();
-                                    return {
-                                        id: citId,
-                                        content: {
-                                            id: citId,
-                                            ...content,
-                                        },
-                                        isChecked: false,
-                                    };
-                                }),
-                            ],
+                            citations: updatedCitations,
                             dateModified: new Date(),
                         };
                     } else if (action.payload.sourceType) {
-                        // Add the new citation to editedCitation field for user input
-                        const citId = nanoid();
-                        const newCitation = {
-                            id: citId,
-                            content: {
-                                id: citId,
-                                type: action.payload.sourceType,
-                                author: [{ given: "", family: "", id: nanoid() }],
+                        // Similar approach for adding a new citation to editedCitation
+                        const updatedCitations = [
+                            ...bib.citations,
+                            {
+                                id: nanoid(),
+                                content: {
+                                    id: nanoid(),
+                                    type: action.payload.sourceType,
+                                    author: [{ given: "", family: "", id: nanoid() }],
+                                },
+                                isChecked: false,
                             },
-                            isChecked: false,
-                        };
-                        return {
+                        ];
+                        updatedBib = {
                             ...bib,
-                            editedCitation: newCitation,
+                            citations: updatedCitations,
                             dateModified: new Date(),
                         };
                     }
+                    return updatedBib || bib;
                 }
                 return bib;
             });

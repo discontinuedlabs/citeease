@@ -5,7 +5,7 @@ import { SOURCE_TYPES } from "./Bibliography";
 import { ACTIONS } from "./reducers/bibliographiesReducer";
 import BibliographyCard from "./ui/BibliographyCard";
 import ContextMenu from "./ui/ContextMenu";
-import DOMPurify from "dompurify";
+import DOMPurify, { sanitize } from "dompurify";
 import HTMLReactParser from "html-react-parser/lib/index";
 import { FixedSizeList as List } from "react-window";
 import * as citationUtils from "./citationUtils";
@@ -14,6 +14,7 @@ import * as citationUtils from "./citationUtils";
 import ArticleJournal from "./sourceTypes/ArticleJournal";
 import Webpage from "./sourceTypes/Webpage";
 import Book from "./sourceTypes/Book";
+import store from "./reducers/store";
 
 const MASTER_CHECKBOX_STATES = {
     CHECKED: "checked", // All reference entries are checked
@@ -121,7 +122,7 @@ export function ReferenceEntries(props) {
 
     return (
         <div className="reference-entries-component">
-            <div className="reference-entries-header">
+            <div className="reference-entries-header" key={"header"}>
                 {bibliography?.citations.length !== 0 && (
                     <input
                         type="checkbox"
@@ -132,7 +133,7 @@ export function ReferenceEntries(props) {
                 )}
             </div>
 
-            <div className="max-w-[50rem] mx-auto p-4">
+            <div className="max-w-[50rem] mx-auto p-4" key={"entries-container"}>
                 {/* IMPORTANT: Entries need to be mapped by the references array because it gets sorted according to the CSL file rules, unlike the bibliography.citations array */}
                 {references?.map((ref) => {
                     const refId = () => {
@@ -502,87 +503,94 @@ export function CitationStylesMenu(props) {
     );
 }
 
-// TODO: Handle errors. It should't cut the for loop when something returns an error
+// FIXME: Handle errors. It should't cut the for loop when something returns an error
 export function SmartGeneratorDialog(props) {
     const {
         searchByIdentifiersInput: input,
         setSmartGeneratorDialogVisible,
-        dispatch,
         bibliographyId,
         bibStyle,
         savedCslFiles,
         updateSavedCslFiles,
     } = props;
-    const [contentsArray, setContentsArray] = useState([]);
-    const [progress, setProgress] = useState(0);
-    const [references, setReferences] = useState("");
-
-    useEffect(() => {
-        async function generateCitations() {
-            const identifiers = input.split(/\n+/); // TODO: Also allow using json objects or array of objects to generate citation
-
-            const newContentsArray = [];
-
-            identifiers.forEach(async (identifier) => {
-                let content;
-                switch (citationUtils.recognizeIdentifierType(identifier)) {
-                    case "url":
-                        content = await citationUtils.retrieveContentFromURL(identifier);
-                        break;
-                    case "doi":
-                        content = await citationUtils.retrieveContentFromDOI(identifier);
-                        break;
-                    case "pmcid":
-                        content = await citationUtils.retrieveContentFromPMCID(identifier);
-                        break;
-                    case "pmid":
-                        content = await citationUtils.retrieveContentFromPMID(identifier);
-                        break;
-                    case "isbn":
-                        content = await citationUtils.retrieveContentFromISBN(identifier);
-                        break;
-                    default:
-                        return null;
-                }
-
-                if (content) {
-                    newContentsArray.push(content);
-                    setProgress((prevProgress) => Math.min(prevProgress + 100 / identifiers.length, 100));
-                    setContentsArray(newContentsArray);
-                    dispatch({
-                        type: ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY,
-                        payload: { bibliographyId: bibliographyId, contentsArray: newContentsArray },
-                    });
-                } else {
-                    console.error("Couldn't find the content of the identifier " + identifier);
-                    setProgress((prevProgress) => Math.max(prevProgress - 100 / identifiers.length, 0));
-                }
-            });
-        }
-        generateCitations();
-    }, [input]);
-
-    useEffect(() => {
-        console.log(contentsArray);
-        async function formatCitations() {
-            const formattedCitation = await citationEngine.formatCitations(
-                contentsArray.map((content) => ({ content: content })),
-                bibStyle,
-                savedCslFiles,
-                updateSavedCslFiles
-            );
-            const sanitizedReference = DOMPurify.sanitize(formattedCitation);
-            setReferences(sanitizedReference);
-        }
-        formatCitations();
-    }, [contentsArray]);
+    const [identifiers, setIdentifiers] = useState(input.split(/\n+/)); // TODO: It should also accept JSON objects and array of objects
 
     return (
         <div>
             <button onClick={() => setSmartGeneratorDialogVisible(false)}>X</button>
-            <div>{progress}</div>
-            <div>{HTMLReactParser(references)}</div>
+            {identifiers.map((identifier, index) => {
+                return (
+                    <SmartGeneratorUnit
+                        key={index}
+                        identifier={identifier}
+                        bibliographyId={bibliographyId}
+                        bibStyle={bibStyle}
+                        savedCslFiles={savedCslFiles}
+                        updateSavedCslFiles={updateSavedCslFiles}
+                    />
+                );
+            })}
             <button>Accept</button>
         </div>
     );
+}
+
+function SmartGeneratorUnit(props) {
+    const { identifier, bibliographyId, bibStyle, savedCslFiles, updateSavedCslFiles } = props;
+    const [content, setContent] = useState({});
+    const [reference, setReference] = useState("");
+
+    useEffect(() => {
+        async function retreiveContent() {
+            let newContent;
+            switch (citationUtils.recognizeIdentifierType(identifier)) {
+                case "url":
+                    newContent = await citationUtils.retrieveContentFromURL(identifier);
+                    break;
+                case "doi":
+                    newContent = await citationUtils.retrieveContentFromDOI(identifier);
+                    break;
+                case "pmcid":
+                    newContent = await citationUtils.retrieveContentFromPMCID(identifier);
+                    break;
+                case "pmid":
+                    newContent = await citationUtils.retrieveContentFromPMID(identifier);
+                    break;
+                case "isbn":
+                    newContent = await citationUtils.retrieveContentFromISBN(identifier);
+                    break;
+                default:
+                    return null;
+            }
+            if (newContent) setContent(newContent);
+            else console.error("Couldn't find the content of the identifier " + identifier);
+        }
+        retreiveContent();
+    }, [identifier]);
+
+    // FIXME: There's something wrong with this dispatch
+    useEffect(() => {
+        const unsubscribe = store.subscribe(() => console.log("State after dispatch: ", store.getState()));
+
+        store.dispatch({
+            type: ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY,
+            payload: { bibliographyId: bibliographyId, content: content },
+        });
+
+        unsubscribe();
+
+        async function formatCitation() {
+            const formattedCitation = await citationEngine.formatCitations(
+                [{ content }],
+                bibStyle,
+                savedCslFiles,
+                updateSavedCslFiles,
+                "html"
+            );
+            setReference(sanitize(formattedCitation));
+        }
+        formatCitation();
+    }, [content]);
+
+    return <div className="font-cambo">{HTMLReactParser(reference)}</div>;
 }
