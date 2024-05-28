@@ -18,7 +18,7 @@ CiteEase is a powerful and user-friendly open-source citation management app des
     -   Enter multiple unique identifiers (URLs, DOIs, ISBNs, PMIDs, PMCIDs) at once. CiteEase will intelligently retrieve data and generate citations for each, minimizing manual entry.
 -   **Advanced Citation Management:**
     -   Over 10,000 citation styles supported, with the ability to add custom CSL files for even more flexibility.
-    -   Manage citations with ease: add, edit, move, copy, delete, and export them in various formats (CSL, BibTeX, BibLaTeX, Bibtxt, JSON, Word, PDF).
+    -   Manage citations with ease: add, edit, move, copy, delete, and export them in various formats (CSL, BibTeX, BibLaTeX, BibTXT, JSON, Word, PDF).
     -   Search, filter, group by, and sort your citations for effortless organization.
 -   **Collaboration Features:**
     -   Open collaboration on bibliographies using a unique identifier and password.
