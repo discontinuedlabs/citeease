@@ -8,21 +8,21 @@ CiteEase is a powerful and user-friendly open-source citation management app des
 
 ## 🛠️ Key Features
 
--   **Drag-and-Drop Everywhere**: Effortlessly interact with your citations using intuitive drag-and-drop actions. Add references to your Word doc, delete unwanted entries, import citations or bibliographies, and export your data with a simple drag-and-drop.
+-   **Unlimited Usage:** No sign-in required for most functionalities, unless you want to sync data across devices, restor passwords, and collaborate.
 -   **Offline Functionality:** Work on your bibliographies seamlessly, even without an internet connection.
--   **Unlimited Usage:** No sign-in required for basic functionalities. Enjoy the freedom to manage your citations without limitations.
+-   **Drag-and-Drop Everywhere**: Effortlessly interact with your citations using intuitive drag-and-drop actions. Add references to your Word doc, delete unwanted entries, import citations or bibliographies, and export your data with a simple drag-and-drop.
 -   **Open-Source Availability:** CiteEase is open-source, with code freely available for anyone to view, modify, and share. This allows for transparency and customization to your needs.
+-   **Advanced Citation Generation:**
+    -   Choose the reference type (book, article, webpage, etc.) from a dedicated menu for easier citation creation.
+    -   Import citations from various file formats (JSON, LaTeX) to seamlessly integrate existing bibliographies.
+    -   Enter multiple unique identifiers (URLs, DOIs, ISBNs, PMIDs, PMCIDs) at once. CiteEase will intelligently retrieve data and generate citations for each, minimizing manual entry.
 -   **Advanced Citation Management:**
     -   Over 10,000 citation styles supported, with the ability to add custom CSL files for even more flexibility.
-    -   Manage citations with ease: add, edit, move, copy, delete, and export them in various formats (CSL, BibTeX, BibLaTeX, Bibtxt, JSON, Word, PDF).
+    -   Manage citations with ease: add, edit, move, copy, delete, and export them in various formats (CSL, BibTeX, BibLaTeX, BibTXT, JSON, Word, PDF).
     -   Search, filter, group by, and sort your citations for effortless organization.
 -   **Collaboration Features:**
     -   Open collaboration on bibliographies using a unique identifier and password.
     -   Collaborate with others in real-time, allowing everyone to add, modify, or delete citations within a shared bibliography.
--   **Customization Options:**
-    -   Choose between a 12-hour or 24-hour clock format.
-    -   Select which information to display in the bibliography entry (date modified or date created).
-    -   Manage your account settings (optional: create an account for syncing data across devices, restoring passwords, and collaborating).
 
 ## 📋 Upcoming Features (to-do)
 
