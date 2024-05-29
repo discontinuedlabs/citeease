@@ -1,4 +1,4 @@
-import { ACTIONS as SETTINGS_ACTIONS } from "./reducers/settingsReducer";
+import { ACTIONS as SETTINGS_ACTIONS } from "./slices/settingsSlice";
 import { SettingsSection, SettingsNavigate, SettingsButton, SettingsCheckButton } from "./ui/SettingsComponents";
 
 export default function Settings(props) {

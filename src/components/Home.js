@@ -4,11 +4,14 @@ import { useNavigate } from "react-router-dom";
 import BibliographyCard from "./ui/BibliographyCard";
 import { useState } from "react";
 import { CitationStylesMenu } from "./BibliographyTools";
+import { useDispatch, useSelector } from "react-redux";
+import { loadFromIndexedDB } from "./slices/bibsSlice";
 
-export default function Home(props) {
-    const { bibliographies, dispatch, ACTIONS } = props;
+export default function Home() {
+    const bibliographies = useSelector((state) => state.bibliographies);
     const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     return (
         <div className="mx-auto max-w-[50rem]">
@@ -36,15 +39,14 @@ export default function Home(props) {
             </div>
 
             {citationStyleMenuVisible && (
-                <CitationStylesMenu
-                    dispatch={dispatch}
-                    action={ACTIONS.ADD_NEW_BIBLIOGRAPHY}
-                    setCitationStyleMenuVisible={setCitationStyleMenuVisible}
-                />
+                <CitationStylesMenu setCitationStyleMenuVisible={setCitationStyleMenuVisible} />
             )}
             <button
                 className="border-2 border-neutral-black fixed p-3 bottom-5 right-5 bg-primary-500"
-                onClick={() => setCitationStyleMenuVisible(true)}
+                onClick={() => {
+                    dispatch(loadFromIndexedDB());
+                    setCitationStyleMenuVisible(true);
+                }}
             >
                 Add bibliography
             </button>

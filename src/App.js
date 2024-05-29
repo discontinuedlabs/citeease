@@ -1,23 +1,22 @@
 import { useEffect, useState } from "react";
 import Bibliography from "./components/Bibliography";
 import { Route, Routes } from "react-router-dom";
+import db from "./db";
 import Home from "./components/Home";
-import { db, useIndexedDB, useReducerWithIndexedDB } from "./utils";
-import bibliographiesReducer, { ACTIONS } from "./components/reducers/bibliographiesReducer";
+import { useIndexedDB, useReducerWithIndexedDB } from "./utils";
+import { loadFromIndexedDB } from "./components/slices/bibsSlice";
 import Settings from "./components/Settings";
 import BibliographySettings from "./components/BibliographySettings";
-import settingsReducer from "./components/reducers/settingsReducer";
+import settingsReducer from "./components/slices/settingsSlice";
 import MarkdownPage from "./components/MarkdownPage";
 import { AcceptDialog, ConfirmDialog } from "./components/ui/Dialogs";
 import NotFoundPage from "./components/NotFoundPage";
 import { useLiveQuery } from "dexie-react-hooks";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function App() {
-    const [bibliographies, dispatch] = useReducerWithIndexedDB(
-        "bibliographies",
-        bibliographiesReducer,
-        useLiveQuery(() => db.bibliographies?.get()) || []
-    );
+    const dispatch = useDispatch();
+
     const [settings, settingsDispatch] = useReducerWithIndexedDB(
         "settings",
         settingsReducer,
@@ -29,6 +28,10 @@ export default function App() {
     );
     const [acceptDialog, setAcceptDialog] = useState({});
     const [confirmDialog, setConfirmDialog] = useState({});
+
+    useEffect(() => {
+        dispatch(loadFromIndexedDB());
+    }, [dispatch]);
 
     useEffect(() => {
         const h1 = document.querySelector("h1");
@@ -48,10 +51,7 @@ export default function App() {
     return (
         <div className="font-sans bg-neutral-white p-5 min-h-screen text-neutral-black">
             <Routes>
-                <Route
-                    path="/"
-                    element={<Home bibliographies={bibliographies} dispatch={dispatch} ACTIONS={ACTIONS} />}
-                />
+                <Route path="/" element={<Home />} />
                 <Route
                     path="/settings"
                     element={<Settings settings={settings} settingsDispatch={settingsDispatch} />}
@@ -60,9 +60,6 @@ export default function App() {
                     path="/:bibId"
                     element={
                         <Bibliography
-                            bibliographies={bibliographies}
-                            dispatch={dispatch}
-                            ACTIONS={ACTIONS}
                             settings={settings}
                             showAcceptDialog={showAcceptDialog}
                             showConfirmDialog={showConfirmDialog}
@@ -71,7 +68,7 @@ export default function App() {
                         />
                     }
                 />
-                <Route path="/:bibId/settings" element={<BibliographySettings bibliographies={bibliographies} />} />
+                <Route path="/:bibId/settings" element={<BibliographySettings />} />
 
                 <Route
                     path="/about"

@@ -105,12 +105,7 @@ export async function retrieveContentFromURL(url) {
     if (!url) return;
 
     try {
-        const website = encodeURIComponent(url);
-        const response = await axios.get(`${CORS_PROXY}${website}`);
-
-        if (!response.ok) {
-            throw new Error(`HTTP error status: ${response.status}`);
-        }
+        const response = await axios.get(`${CORS_PROXY}${url}`);
 
         const $ = cheerio.load(response.data);
 
@@ -140,7 +135,21 @@ export async function retrieveContentFromURL(url) {
                 url,
         };
     } catch (error) {
-        console.error(`Failed to retrieve content from ${url}: ${error}`);
+        console.error(`Failed to retrieve content from ${url}:`, error.message);
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            console.error("Response:", error.response.data);
+            console.error("Status Code:", error.response.status);
+            console.error("Headers:", error.response.headers);
+        } else if (error.request) {
+            // The request was made but no response was received
+            console.error("No response received:", error.request);
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            console.error("Request error:", error.message);
+        }
+        console.error("Config:", error.config);
         return null;
     }
 }
@@ -152,10 +161,6 @@ export async function retrieveContentFromDOI(doi) {
     try {
         const cleanedDoi = doi.replace(/doi:\s*/gi, "");
         const response = await fetch(`${CORS_PROXY}https://api.crossref.org/works/${cleanedDoi}`);
-
-        if (!response.ok) {
-            throw new Error(`HTTP error status: ${response.status}`);
-        }
 
         const data = await response.json();
         const message = data?.message;
@@ -196,10 +201,6 @@ export async function retrieveContentFromISBN(isbn) {
             `https://openlibrary.org/search.json?q=isbn:${isbn}&mode=everything&fields=*,editions`
         );
 
-        if (!response.ok) {
-            throw new Error(`HTTP error status: ${response.status}`);
-        }
-
         const data = await response.json();
         const docs = data?.docs[0];
         const edition = docs?.editions?.docs[0];
@@ -229,10 +230,6 @@ export async function retrieveContentFromPMCID(pmcid) {
         const response = await fetch(
             `${CORS_PROXY}https://api.ncbi.nlm.nih.gov/lit/ctxp/v1/pmc/?format=csl&id=${cleanedPmcid}`
         );
-
-        if (!response.ok) {
-            throw new Error(`HTTP error status: ${response.status}`);
-        }
 
         const data = await response.json();
 
@@ -272,10 +269,6 @@ export async function retrieveContentFromPMID(pmid) {
         const response = await fetch(
             `${CORS_PROXY}https://api.ncbi.nlm.nih.gov/lit/ctxp/v1/pubmed/?format=csl&id=${cleanedPmid}`
         );
-
-        if (!response.ok) {
-            throw new Error(`HTTP error status: ${response.status}`);
-        }
 
         const data = await response.json();
 

@@ -1,10 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import Dexie from "dexie";
-
-export const db = new Dexie("CiteEaseDB");
-db.version(2).stores({
-    items: "++id, name, value",
-});
+import db from "./db";
 
 // IMPORTANT: updateValue function does not accept the syntax "updateValue(prevValue => prevValue + 1)" like the setValue function from useState does
 // export function useIndexedDB(key, initialValue = undefined) {
@@ -62,7 +57,7 @@ export function useReducerWithIndexedDB(key, reducer, initialValue = undefined) 
 
     const dispatch = useCallback(
         (action) => {
-            updateState(reducer(state, action)); // FIXME: This reducer always shows old states
+            updateState(reducer(state, action));
         },
         [state, updateState, reducer]
     );

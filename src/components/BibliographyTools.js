@@ -1,20 +1,28 @@
 import { useEffect, useRef, useState } from "react";
 import * as citationEngine from "./citationEngine";
-import { useParams } from "react-router-dom";
 import { SOURCE_TYPES } from "./Bibliography";
-import { ACTIONS } from "./reducers/bibliographiesReducer";
+import {
+    addNewBib,
+    addNewCitation,
+    copySelectedCitations,
+    handleMasterEntriesCheckbox,
+    moveSelectedCitations,
+    toggleEntryCheckbox,
+    updateCitation,
+    updateContentInEditedCitation,
+} from "./slices/bibsSlice";
 import BibliographyCard from "./ui/BibliographyCard";
 import ContextMenu from "./ui/ContextMenu";
-import DOMPurify, { sanitize } from "dompurify";
+import DOMPurify from "dompurify";
 import HTMLReactParser from "html-react-parser/lib/index";
 import { FixedSizeList as List } from "react-window";
 import * as citationUtils from "./citationUtils";
+import { useDispatch, useSelector } from "react-redux";
 
 // Source types
 import ArticleJournal from "./sourceTypes/ArticleJournal";
 import Webpage from "./sourceTypes/Webpage";
 import Book from "./sourceTypes/Book";
-import store from "./reducers/store";
 
 const MASTER_CHECKBOX_STATES = {
     CHECKED: "checked", // All reference entries are checked
@@ -23,9 +31,10 @@ const MASTER_CHECKBOX_STATES = {
 };
 
 export function ReferenceEntries(props) {
-    const { bibliography, dispatch, ACTIONS, savedCslFiles, updateSavedCslFiles, openCitationForm } = props;
+    const { bibliography, savedCslFiles, updateSavedCslFiles, openCitationForm } = props;
     const [references, setReferences] = useState([]);
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
+    const dispatch = useDispatch();
 
     const checkedCitations = bibliography?.citations.filter((cit) => cit?.isChecked === true);
 
@@ -66,17 +75,11 @@ export function ReferenceEntries(props) {
     }, [bibliography?.citations, bibliography?.style, savedCslFiles]); // Adding setSavedCslFiles to the dependency array will cause the component to rerender infinitely
 
     function handleMasterCheck() {
-        dispatch({
-            type: ACTIONS.HANDLE_MASTER_REFERENCE_ENTRY_CHECKBOX,
-            payload: { bibliographyId: bibliography?.id },
-        });
+        dispatch(handleMasterEntriesCheckbox({ bibliographyId: bibliography?.id }));
     }
 
     function handleEntryCheck(citationId) {
-        dispatch({
-            type: ACTIONS.TOGGLE_REFERENCE_ENTRY_CHECKBOX,
-            payload: { bibliographyId: bibliography.id, citationId: citationId.id },
-        });
+        dispatch(toggleEntryCheckbox({ bibliographyId: bibliography.id, citationId: citationId.id }));
     }
 
     // TODO: This should only grab it as html when the user holds H
@@ -195,6 +198,7 @@ export function AddCitationMenu(props) {
             </div>
 
             <div>
+                <small>Experimental</small>
                 <label>Search by URL, DOI, ISBN, or PubMed and PMC identifiers:</label>
                 <textarea
                     ref={identifierRef}
@@ -229,9 +233,9 @@ export function AddCitationMenu(props) {
 }
 
 export function CitationForm(props) {
-    const { bibId: bibliographyId } = useParams();
-    const { bibliography, dispatch, ACTIONS, setCitationFormVisible, showAcceptDialog } = props;
+    const { bibliography, showAcceptDialog, setCitationFormVisible } = props;
     const [content, setContent] = useState(bibliography?.editedCitation?.content || {});
+    const dispatch = useDispatch();
 
     useEffect(() => {
         setContent(bibliography?.editedCitation?.content || {});
@@ -252,21 +256,13 @@ export function CitationForm(props) {
     };
 
     useEffect(() => {
-        function updateContentInEditedCitation() {
-            dispatch({
-                type: ACTIONS.UPDATE_CONTENT_IN_EDITED_CITATION,
-                payload: { bibliographyId: bibliographyId, content: content },
-            });
-        }
-        updateContentInEditedCitation();
+        dispatch(updateContentInEditedCitation({ bibliographyId: bibliography.id, content: content }));
     }, [content]);
 
     function handleAddReference(event) {
         event.preventDefault();
-        dispatch({
-            type: ACTIONS.UPDATE_CITATION_IN_BIBLIOGRAPHY,
-            payload: { bibliographyId: bibliographyId, editedCitation: bibliography?.editedCitationd },
-        });
+        console.log({ bibliographyId: bibliography.id, editedCitation: bibliography?.editedCitation });
+        dispatch(updateCitation({ bibliographyId: bibliography.id, editedCitation: bibliography?.editedCitation }));
         setCitationFormVisible(false);
     }
 
@@ -278,7 +274,7 @@ export function CitationForm(props) {
 }
 
 export function LaTeXDialog(props) {
-    const { citations, checkedCitations, setLaTeXWindowVisible } = props;
+    const { checkedCitations, setLaTeXWindowVisible } = props;
     const [bibtexString, setBibtexString] = useState("");
     const [biblatexString, setBiblatexString] = useState("");
     const [bibTxtString, setBibTxtString] = useState("");
@@ -314,8 +310,10 @@ export function LaTeXDialog(props) {
 }
 
 export function MoveDialog(props) {
-    const { bibliographies, bibliographyId, checkedCitations, setMoveWindowVisible, dispatch } = props;
+    const { bibliographyId, checkedCitations, setMoveWindowVisible } = props;
+    const bibliographies = useSelector((state) => state.bibliographies);
     const [selectedBibliographyIds, setSelectedBibliographyIds] = useState([]);
+    const dispatch = useDispatch();
 
     function handleSelect(bibId) {
         const index = selectedBibliographyIds.indexOf(bibId);
@@ -329,26 +327,24 @@ export function MoveDialog(props) {
     }
 
     function handleMove(toId) {
-        dispatch({
-            type: ACTIONS.MOVE_SELECTED_CITATIONS,
-            payload: {
+        dispatch(
+            moveSelectedCitations({
                 fromId: bibliographyId,
                 toId: toId,
                 checkedCitations: checkedCitations,
-            },
-        });
+            })
+        );
         setMoveWindowVisible(false);
         setSelectedBibliographyIds([]);
     }
 
     function handleCopy() {
-        dispatch({
-            type: ACTIONS.COPY_SELECTED_CITATIONS,
-            payload: {
+        dispatch(
+            copySelectedCitations({
                 toIds: selectedBibliographyIds,
                 checkedCitations: checkedCitations,
-            },
-        });
+            })
+        );
         setMoveWindowVisible(false);
         setSelectedBibliographyIds([]);
     }
@@ -408,9 +404,10 @@ export function RenameDialog(props) {
 }
 
 export function CitationStylesMenu(props) {
-    const { dispatch, action, setCitationStyleMenuVisible } = props;
+    const { setCitationStyleMenuVisible } = props;
     const [styles, setStyles] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
+    const dispatch = useDispatch();
 
     useEffect(() => {
         async function fetchStyles() {
@@ -441,10 +438,7 @@ export function CitationStylesMenu(props) {
                     // eg. "cms17e" || "c m s 1 7 e" => Chicago Manual of Style 17th edition
                     stringsArray[i]
                         ?.toLowerCase()
-                        .replace(
-                            /\b(of|and|in|on|at|the|from|to|with|about|against|between|into|through|during|before|after|above|below|by|for|over|under|\(|\))\b/gi,
-                            ""
-                        )
+                        .replace(/\b(of|and|in|on|at|the|from|to|with|by|for|\(|\))\b/gi, "")
                         .split(/\s+|-/)
                         .map((sect) => {
                             if (/\d/.test(sect)) return sect.replace(/\D/g, "");
@@ -492,7 +486,7 @@ export function CitationStylesMenu(props) {
                         style={style}
                         onClick={() => {
                             setCitationStyleMenuVisible(false);
-                            dispatch({ type: action, payload: { bibliographyStyle: filteredStyles[index] } });
+                            dispatch(addNewBib({ bibliographyStyle: filteredStyles[index] }));
                         }}
                     >
                         {filteredStyles[index].name.long}
@@ -513,84 +507,71 @@ export function SmartGeneratorDialog(props) {
         savedCslFiles,
         updateSavedCslFiles,
     } = props;
-    const [identifiers, setIdentifiers] = useState(input.split(/\n+/)); // TODO: It should also accept JSON objects and array of objects
+
+    const [contentsArray, setContentsArray] = useState([]);
+    const [references, setReferences] = useState("");
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        async function generateCitations() {
+            const identifiers = input.split(/\n+/);
+
+            let newContentsArray = [];
+            identifiers.forEach(async (identifier) => {
+                let content;
+                switch (citationUtils.recognizeIdentifierType(identifier)) {
+                    case "url":
+                        content = await citationUtils.retrieveContentFromURL(identifier);
+                        break;
+                    case "doi":
+                        content = await citationUtils.retrieveContentFromDOI(identifier);
+                        break;
+                    case "pmcid":
+                        content = await citationUtils.retrieveContentFromPMCID(identifier);
+                        break;
+                    case "pmid":
+                        content = await citationUtils.retrieveContentFromPMID(identifier);
+                        break;
+                    case "isbn":
+                        content = await citationUtils.retrieveContentFromISBN(identifier);
+                        break;
+                    default:
+                        return null;
+                }
+
+                console.warn(content);
+
+                if (content) {
+                    newContentsArray.push(content);
+                    dispatch(addNewCitation({ bibliographyId: bibliographyId, content }));
+                } else {
+                    console.error("Couldn't find the content of the identifier " + identifier);
+                }
+            });
+            setContentsArray(newContentsArray);
+        }
+        generateCitations();
+    }, [input, bibliographyId, dispatch]);
+
+    useEffect(() => {
+        async function formatCitations() {
+            const formattedCitation = await citationEngine.formatCitations(
+                contentsArray.map((content) => ({ content: content })),
+                bibStyle,
+                savedCslFiles,
+                updateSavedCslFiles
+            );
+            const sanitizedReference = DOMPurify.sanitize(formattedCitation);
+            setReferences(sanitizedReference);
+        }
+        formatCitations();
+    }, [contentsArray]);
 
     return (
         <div>
             <button onClick={() => setSmartGeneratorDialogVisible(false)}>X</button>
-            {identifiers.map((identifier, index) => {
-                return (
-                    <SmartGeneratorUnit
-                        key={index}
-                        identifier={identifier}
-                        bibliographyId={bibliographyId}
-                        bibStyle={bibStyle}
-                        savedCslFiles={savedCslFiles}
-                        updateSavedCslFiles={updateSavedCslFiles}
-                    />
-                );
-            })}
+            <div>{HTMLReactParser(references)}</div>
             <button>Accept</button>
         </div>
     );
-}
-
-function SmartGeneratorUnit(props) {
-    const { identifier, bibliographyId, bibStyle, savedCslFiles, updateSavedCslFiles } = props;
-    const [content, setContent] = useState({});
-    const [reference, setReference] = useState("");
-
-    useEffect(() => {
-        async function retreiveContent() {
-            let newContent;
-            switch (citationUtils.recognizeIdentifierType(identifier)) {
-                case "url":
-                    newContent = await citationUtils.retrieveContentFromURL(identifier);
-                    break;
-                case "doi":
-                    newContent = await citationUtils.retrieveContentFromDOI(identifier);
-                    break;
-                case "pmcid":
-                    newContent = await citationUtils.retrieveContentFromPMCID(identifier);
-                    break;
-                case "pmid":
-                    newContent = await citationUtils.retrieveContentFromPMID(identifier);
-                    break;
-                case "isbn":
-                    newContent = await citationUtils.retrieveContentFromISBN(identifier);
-                    break;
-                default:
-                    return null;
-            }
-            if (newContent) setContent(newContent);
-            else console.error("Couldn't find the content of the identifier " + identifier);
-        }
-        retreiveContent();
-    }, [identifier]);
-
-    // FIXME: There's something wrong with this dispatch
-    useEffect(() => {
-        const unsubscribe = store.subscribe(() => console.log("State after dispatch: ", store.getState()));
-
-        store.dispatch({
-            type: ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY,
-            payload: { bibliographyId: bibliographyId, content: content },
-        });
-
-        unsubscribe();
-
-        async function formatCitation() {
-            const formattedCitation = await citationEngine.formatCitations(
-                [{ content }],
-                bibStyle,
-                savedCslFiles,
-                updateSavedCslFiles,
-                "html"
-            );
-            setReference(sanitize(formattedCitation));
-        }
-        formatCitation();
-    }, [content]);
-
-    return <div className="font-cambo">{HTMLReactParser(reference)}</div>;
 }

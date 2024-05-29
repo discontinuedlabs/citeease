@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import ContextMenu from "./ui/ContextMenu";
 import { useEffect, useState } from "react";
 import * as citationEngine from "./citationEngine";
-import * as citationUtils from "./citationUtils";
 import {
     ReferenceEntries,
     MoveDialog,
@@ -14,7 +13,17 @@ import {
     SmartGeneratorDialog,
 } from "./BibliographyTools";
 import { HotKeys } from "react-hotkeys";
-import { nanoid } from "nanoid";
+import { useDispatch, useSelector } from "react-redux";
+import {
+    addNewBibAndMoveSelectedCitations,
+    addNewCitation,
+    deleteBib,
+    deleteSelectedCitations,
+    duplicateSelectedCitations,
+    editCitation,
+    loadFromIndexedDB,
+    updateBibField,
+} from "./slices/bibsSlice";
 
 export const SOURCE_TYPES = {
     ARTICLE_JOURNAL: {
@@ -27,18 +36,11 @@ export const SOURCE_TYPES = {
 
 export default function Bibliography(props) {
     const { bibId: bibliographyId } = useParams();
-    const {
-        bibliographies,
-        dispatch,
-        ACTIONS,
-        savedCslFiles,
-        updateSavedCslFiles,
-        showConfirmDialog,
-        showAcceptDialog,
-    } = props;
+    const { savedCslFiles, updateSavedCslFiles, showConfirmDialog, showAcceptDialog } = props;
+    const bibliographies = useSelector((state) => state.bibliographies);
     const bibliography = bibliographies?.find((bib) => bib.id === bibliographyId);
+    const checkedCitations = bibliography?.citations.filter((cit) => cit?.isChecked);
 
-    const navigate = useNavigate();
     // const [collaborationOpened, setCollaborationOpened] = useState(false);
     const [citationFormVisible, setCitationFormVisible] = useState(false);
     const [addCitationMenuVisible, setAddCitationMenuVisible] = useState(false);
@@ -47,9 +49,9 @@ export default function Bibliography(props) {
     const [renameWindowVisible, setRenameWindowVisible] = useState(false);
     const [smartGeneratorDialogVisible, setSmartGeneratorDialogVisible] = useState(false);
     const [searchByIdentifiersInput, setSearchByIdentifiersInput] = useState("");
-    const [firstTimeLoaded, setFirstTimeLoaded] = useState(true); // Needed because the bibliographies array doesn't load as soon as the component mounts because it's loaded from useReducerWithIndexedDB
 
-    const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const keyMap = {
         // "ctrl+a": selectAll,
@@ -66,13 +68,8 @@ export default function Bibliography(props) {
     };
 
     useEffect(() => {
-        if (bibliography && firstTimeLoaded) {
-            // isChecked should not get saved, but since it's in an object that gets saved and loaded, it should be set to false when opening the bibliography page
-            dispatch({ type: ACTIONS.UNCHECK_ALL_CITATIONS, payload: { bibliographyId: bibliographyId } });
-            setFirstTimeLoaded(false);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [bibliography]);
+        dispatch(loadFromIndexedDB());
+    }, [dispatch]);
 
     function openCitationForm(sourceType, isNew = false, specificId = "") {
         let checkedCitationsIds = [...(specificId ? [specificId] : [])];
@@ -81,16 +78,9 @@ export default function Bibliography(props) {
                 checkedCitationsIds.push(cit.id);
             }
         });
-        if (isNew)
-            dispatch({
-                type: ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY,
-                payload: { bibliographyId: bibliographyId, sourceType: sourceType },
-            });
+        if (isNew) dispatch(addNewCitation({ bibliographyId: bibliographyId, sourceType: sourceType }));
         else if (checkedCitationsIds.length === 1)
-            dispatch({
-                type: ACTIONS.ADD_CITATION_TO_EDITED_CITATION,
-                payload: { bibliographyId: bibliographyId, citationId: checkedCitationsIds[0] },
-            });
+            dispatch(editCitation({ bibliographyId: bibliographyId, citationId: checkedCitationsIds[0] }));
         setCitationFormVisible(true);
         setAddCitationMenuVisible(false);
     }
@@ -129,37 +119,30 @@ export default function Bibliography(props) {
                 "No bibliographies to move",
                 "You have no other bibliography to move citations to. Would you like to create a new bibliography and move the selected citations to it?",
                 () =>
-                    dispatch({
-                        type: ACTIONS.ADD_NEW_BIBLIOGRAPHY_AND_MOVE_CITATIONS,
-                        payload: { checkedCitations: checkedCitations, bibliographyStyle: bibliography?.style },
-                    }),
+                    dispatch(
+                        addNewBibAndMoveSelectedCitations({
+                            checkedCitations: checkedCitations,
+                            bibliographyStyle: bibliography?.style,
+                        })
+                    ),
                 "Create new bibliography",
                 "Cancel"
             );
     }
 
     function handleDuplicate() {
-        dispatch({
-            type: ACTIONS.DUPLICATE_SELECTED_CITATIONS,
-            payload: { bibliographyId: bibliography?.id, checkedCitations: checkedCitations },
-        });
+        dispatch(duplicateSelectedCitations({ bibliographyId: bibliography?.id, checkedCitations: checkedCitations }));
     }
 
     function handleDelete() {
-        dispatch({
-            type: ACTIONS.DELETE_SELECTED_CITATIONS,
-            payload: { bibliographyId: bibliography?.id, checkedCitations: checkedCitations },
-        });
+        dispatch(deleteSelectedCitations({ bibliographyId: bibliography?.id, checkedCitations: checkedCitations }));
     }
 
     function handleRename(value) {
         if (/^\s*$/.test(value)) {
             showAcceptDialog("Title is empty", "You cant't set the title to an emdpty value.");
         } else {
-            dispatch({
-                type: ACTIONS.UPDATE_BIBLIOGRAPHY_FIELDS,
-                payload: { bibliographyId: bibliographyId, key: "title", value: value },
-            });
+            dispatch(updateBibField({ bibliographyId: bibliographyId, key: "title", value: value }));
         }
     }
 
@@ -183,7 +166,7 @@ export default function Bibliography(props) {
 
     function handleDeleteBibliography() {
         navigate("/");
-        dispatch({ type: ACTIONS.DELETE_BIBLIOGRAPHY, payload: { bibliographyId: bibliographyId } });
+        dispatch(deleteBib({ bibliographyId: bibliographyId }));
     }
 
     return (
@@ -308,70 +291,42 @@ export default function Bibliography(props) {
                     />
                 </div>
 
-                <ReferenceEntries
-                    bibliography={bibliography}
-                    dispatch={dispatch}
-                    ACTIONS={ACTIONS}
-                    savedCslFiles={savedCslFiles}
-                    updateSavedCslFiles={updateSavedCslFiles}
-                    openCitationForm={openCitationForm}
-                />
+                <ReferenceEntries {...{ bibliography, savedCslFiles, updateSavedCslFiles, openCitationForm }} />
 
                 {citationFormVisible && bibliography?.editedCitation && (
-                    <CitationForm
-                        bibliography={bibliography}
-                        dispatch={dispatch}
-                        ACTIONS={ACTIONS}
-                        {...props}
-                        setCitationFormVisible={setCitationFormVisible}
-                    />
+                    <CitationForm {...{ bibliography, showAcceptDialog, setCitationFormVisible }} />
                 )}
 
-                {LaTeXWindowVisible && (
-                    <LaTeXDialog
-                        citations={bibliography?.citations}
-                        checkedCitations={checkedCitations}
-                        setLaTeXWindowVisible={setLaTeXWindowVisible}
-                    />
-                )}
+                {LaTeXWindowVisible && <LaTeXDialog {...{ checkedCitations, setLaTeXWindowVisible }} />}
 
-                {moveWindowVisible && (
-                    <MoveDialog
-                        bibliographies={bibliographies}
-                        bibliographyId={bibliographyId}
-                        checkedCitations={checkedCitations}
-                        setMoveWindowVisible={setMoveWindowVisible}
-                        dispatch={dispatch}
-                    />
-                )}
+                {moveWindowVisible && <MoveDialog {...{ bibliographyId, checkedCitations, setMoveWindowVisible }} />}
 
                 {renameWindowVisible && (
-                    <RenameDialog
-                        title={bibliography?.title}
-                        setRenameWindowVisible={setRenameWindowVisible}
-                        handleRename={handleRename}
-                    />
+                    <RenameDialog {...{ title: bibliography?.title, setRenameWindowVisible, handleRename }} />
                 )}
 
                 {smartGeneratorDialogVisible && searchByIdentifiersInput.length && (
                     <SmartGeneratorDialog
-                        searchByIdentifiersInput={searchByIdentifiersInput}
-                        setSmartGeneratorDialogVisible={setSmartGeneratorDialogVisible}
-                        dispatch={dispatch}
-                        bibliographyId={bibliographyId}
-                        bibStyle={bibliography.style}
-                        savedCslFiles={savedCslFiles}
-                        updateSavedCslFiles={updateSavedCslFiles}
+                        {...{
+                            searchByIdentifiersInput,
+                            setSmartGeneratorDialogVisible,
+                            bibliographyId,
+                            bibStyle: bibliography.style,
+                            savedCslFiles,
+                            updateSavedCslFiles,
+                        }}
                     />
                 )}
 
                 {addCitationMenuVisible && (
                     // Since the openCitationForm is passed to this component, make the handleSearchByIdentifiers and handleImportCitation inside it
                     <AddCitationMenu
-                        setAddCitationMenuVisible={setAddCitationMenuVisible}
-                        openCitationForm={openCitationForm}
-                        handleSearchByIdentifiers={handleSearchByIdentifiers}
-                        handleImportCitation={handleImportCitation}
+                        {...{
+                            setAddCitationMenuVisible,
+                            openCitationForm,
+                            handleSearchByIdentifiers,
+                            handleImportCitation,
+                        }}
                     />
                 )}
 

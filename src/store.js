@@ -1,8 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
-import bibliographiesReducer from "./bibliographiesReducer";
+import bibsReducer from "./components/slices/bibsSlice";
 
 const store = configureStore({
-    reducer: bibliographiesReducer,
+    reducer: { bibliographies: bibsReducer },
 });
 
 export default store;

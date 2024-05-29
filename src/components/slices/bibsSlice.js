@@ -1,31 +1,20 @@
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { nanoid } from "nanoid";
-
-export const ACTIONS = {
-    ADD_NEW_BIBLIOGRAPHY: "Add new bibliography",
-    UPDATE_BIBLIOGRAPHY_FIELDS: "Update bibliography fields",
-    ADD_NEW_CITATION_TO_BIBLIOGRAPHY: "Add new citation to bibliography",
-    ADD_CITATION_TO_EDITED_CITATION: "Add citation to edited citation",
-    UPDATE_CONTENT_IN_EDITED_CITATION: "Update content in edited citation",
-    UPDATE_CITATION_IN_BIBLIOGRAPHY: "Update citation in bibliography",
-    TOGGLE_REFERENCE_ENTRY_CHECKBOX: "Toggle reference entry checkbox",
-    HANDLE_MASTER_REFERENCE_ENTRY_CHECKBOX: "Handle manster reference entry checkbox",
-    UNCHECK_ALL_CITATIONS: "Uncheck all citations",
-    DELETE_BIBLIOGRAPHY: "Delete bibliography",
-    DELETE_SELECTED_CITATIONS: "Delete selected citations",
-    MOVE_SELECTED_CITATIONS: "Move selected citations",
-    COPY_SELECTED_CITATIONS: "Copy selected citations",
-    DUPLICATE_SELECTED_CITATIONS: "Duplicate selected citations",
-    ADD_NEW_BIBLIOGRAPHY_AND_MOVE_CITATIONS: "Add new bibliography and move citations",
-};
+import db from "../../db";
 
 const initialState = [];
 
-export default function bibliographiesReducer(bibliographies = initialState, action) {
-    console.log(action);
+function saveToIndexedDB(newState) {
+    const serializedState = JSON.stringify(newState);
+    db.items.put({ id: "bibliographies", value: serializedState });
+}
 
-    switch (action.type) {
-        case ACTIONS.ADD_NEW_BIBLIOGRAPHY:
-            const newBibliography = {
+const bibsSlice = createSlice({
+    name: "bibliographies",
+    initialState,
+    reducers: {
+        addNewBib: (bibs, action) => {
+            const newBib = {
                 title: "Untitled Bibliography",
                 style: action.payload.bibliographyStyle,
                 dateCreated: new Date(),
@@ -33,77 +22,84 @@ export default function bibliographiesReducer(bibliographies = initialState, act
                 id: "bib=" + nanoid(10),
                 citations: [],
             };
-            return [...bibliographies, newBibliography];
-
-        case ACTIONS.UPDATE_BIBLIOGRAPHY_FIELDS:
-            return bibliographies?.map((bib) => {
+            const newState = [...bibs, newBib];
+            saveToIndexedDB(newState);
+            return newState;
+        },
+        deleteBib: (bibs, action) => {
+            const newState = bibs?.filter((bib) => bib.id !== action.payload.bibliographyId);
+            saveToIndexedDB(newState);
+            return newState;
+        },
+        updateBibField: (bibs, action) => {
+            const newState = bibs?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     return { ...bib, [action.payload.key]: action.payload.value, dateModified: new Date() };
                 }
                 return bib;
             });
-
-        case ACTIONS.ADD_NEW_CITATION_TO_BIBLIOGRAPHY:
-            return bibliographies.map((bib) => {
+            saveToIndexedDB(newState);
+            return newState;
+        },
+        addNewCitation: (bibs, action) => {
+            const newState = bibs.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
-                    let updatedBib;
+                    const citId = nanoid();
                     if (action.payload?.content) {
-                        // Create a deep copy of the citations array
-                        const updatedCitations = [
-                            ...bib.citations,
-                            {
-                                id: nanoid(),
-                                content: {
-                                    ...action.payload?.content,
-                                    id: nanoid(),
-                                },
-                                isChecked: false,
-                            },
-                        ];
-                        updatedBib = {
+                        // If passed ready content, it gets added directly to the citations array
+                        return {
                             ...bib,
-                            citations: updatedCitations,
+                            citations: [
+                                ...bib.citations,
+                                {
+                                    id: citId,
+                                    content: {
+                                        ...action.payload?.content,
+                                        id: citId,
+                                    },
+                                    isChecked: false,
+                                },
+                            ],
                             dateModified: new Date(),
                         };
                     } else if (action.payload.sourceType) {
-                        // Similar approach for adding a new citation to editedCitation
-                        const updatedCitations = [
-                            ...bib.citations,
-                            {
-                                id: nanoid(),
+                        // If passed a sourceType, it means it doesn't have content, so it gets added to the editedCitation field to get filled with the source's data
+                        return {
+                            ...bib,
+                            editedCitation: {
+                                id: citId,
                                 content: {
-                                    id: nanoid(),
+                                    id: citId,
                                     type: action.payload.sourceType,
                                     author: [{ given: "", family: "", id: nanoid() }],
                                 },
                                 isChecked: false,
                             },
-                        ];
-                        updatedBib = {
-                            ...bib,
-                            citations: updatedCitations,
                             dateModified: new Date(),
                         };
                     }
-                    return updatedBib || bib;
                 }
                 return bib;
             });
-
-        case ACTIONS.ADD_CITATION_TO_EDITED_CITATION:
-            return bibliographies?.map((bib) => {
+            saveToIndexedDB(newState);
+            return newState;
+        },
+        editCitation: (bibs, action) => {
+            const newState = bibs?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const targetCitation = bib.citations.find((cit) => cit.id === action.payload.citationId);
                     return {
                         ...bib,
-                        editedCitation: targetCitation,
+                        editedCitation: { ...targetCitation },
                     };
                 }
                 return bib;
             });
-
-        case ACTIONS.UPDATE_CONTENT_IN_EDITED_CITATION:
-            return bibliographies?.map((bib) => {
+            saveToIndexedDB(newState);
+            return newState;
+        },
+        updateContentInEditedCitation: (bibs, action) => {
+            const newState = bibs?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     return {
                         ...bib,
@@ -113,9 +109,11 @@ export default function bibliographiesReducer(bibliographies = initialState, act
                 }
                 return bib;
             });
-
-        case ACTIONS.UPDATE_CITATION_IN_BIBLIOGRAPHY:
-            return bibliographies?.map((bib) => {
+            saveToIndexedDB(newState);
+            return newState;
+        },
+        updateCitation: (bibs, action) => {
+            const newState = bibs.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const citationIndex = bib.citations.findIndex((cit) => cit.id === action.payload.editedCitation.id);
                     let updatedCitations;
@@ -141,9 +139,11 @@ export default function bibliographiesReducer(bibliographies = initialState, act
                 }
                 return bib;
             });
-
-        case ACTIONS.TOGGLE_REFERENCE_ENTRY_CHECKBOX:
-            return bibliographies?.map((bib) => {
+            saveToIndexedDB(newState);
+            return newState;
+        },
+        toggleEntryCheckbox: (bibs, action) => {
+            const newState = bibs?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const citationIndex = bib.citations.findIndex((cit) => cit.id === action.payload.citationId);
                     let updatedCitations;
@@ -162,9 +162,10 @@ export default function bibliographiesReducer(bibliographies = initialState, act
                 }
                 return bib;
             });
-
-        case ACTIONS.HANDLE_MASTER_REFERENCE_ENTRY_CHECKBOX:
-            return bibliographies?.map((bib) => {
+            return newState;
+        },
+        handleMasterEntriesCheckbox: (bibs, action) => {
+            const newState = bibs?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const allChecked = bib.citations.every((cit) => cit.isChecked);
                     const allUnchecked = bib.citations.every((cit) => !cit.isChecked);
@@ -193,23 +194,10 @@ export default function bibliographiesReducer(bibliographies = initialState, act
                 }
                 return bib;
             });
-
-        case ACTIONS.UNCHECK_ALL_CITATIONS:
-            return bibliographies?.map((bib) => {
-                if (bib.id === action.payload.bibliographyId) {
-                    return {
-                        ...bib,
-                        citations: bib.citations.map((cit) => ({ ...cit, isChecked: false })),
-                    };
-                }
-                return bib;
-            });
-
-        case ACTIONS.DELETE_BIBLIOGRAPHY:
-            return bibliographies?.filter((bib) => bib.id !== action.payload.bibliographyId);
-
-        case ACTIONS.MOVE_SELECTED_CITATIONS:
-            return bibliographies?.map((bib) => {
+            return newState;
+        },
+        moveSelectedCitations: (bibs, action) => {
+            const newState = bibs?.map((bib) => {
                 if (bib.id === action.payload.toId) {
                     return {
                         ...bib,
@@ -226,9 +214,11 @@ export default function bibliographiesReducer(bibliographies = initialState, act
                 }
                 return bib;
             });
-
-        case ACTIONS.COPY_SELECTED_CITATIONS:
-            return bibliographies?.map((bib) => {
+            saveToIndexedDB(newState);
+            return newState;
+        },
+        copySelectedCitations: (bibs, action) => {
+            const newState = bibs?.map((bib) => {
                 const filteredCitations = bib.citations.filter(
                     (cit) => !action.payload.checkedCitations.some((checkedCit) => checkedCit.id === cit.id)
                 );
@@ -243,9 +233,11 @@ export default function bibliographiesReducer(bibliographies = initialState, act
                     dateModified: new Date(),
                 };
             });
-
-        case ACTIONS.DUPLICATE_SELECTED_CITATIONS:
-            return bibliographies?.map((bib) => {
+            saveToIndexedDB(newState);
+            return newState;
+        },
+        duplicateSelectedCitations: (bibs, action) => {
+            const newState = bibs?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const newIds = action.payload.checkedCitations.map(() => nanoid());
                     const duplicatedCitations = action.payload.checkedCitations.map((cit, index) => ({
@@ -265,9 +257,11 @@ export default function bibliographiesReducer(bibliographies = initialState, act
                 }
                 return bib;
             });
-
-        case ACTIONS.DELETE_SELECTED_CITATIONS:
-            return bibliographies?.map((bib) => {
+            saveToIndexedDB(newState);
+            return newState;
+        },
+        deleteSelectedCitations: (bibs, action) => {
+            const newState = bibs?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const targetIds = action.payload.checkedCitations.map((cit) => cit.id);
                     return {
@@ -278,9 +272,11 @@ export default function bibliographiesReducer(bibliographies = initialState, act
                 }
                 return bib;
             });
-
-        case ACTIONS.ADD_NEW_BIBLIOGRAPHY_AND_MOVE_CITATIONS:
-            const newQuickBibliography = {
+            saveToIndexedDB(newState);
+            return newState;
+        },
+        addNewBibAndMoveSelectedCitations: (bibs, action) => {
+            const newBib = {
                 title: "Untitled Bibliography",
                 style: action.payload.bibliographyStyle,
                 dateCreated: new Date(),
@@ -288,9 +284,46 @@ export default function bibliographiesReducer(bibliographies = initialState, act
                 id: "bib=" + nanoid(10),
                 citations: [...action.payload.checkedCitations],
             };
-            return [...bibliographies, newQuickBibliography];
+            const newState = [...bibs, newBib];
+            saveToIndexedDB(newState);
+            return newState;
+        },
+    },
+    extraReducers: (builder) => {
+        builder.addCase(loadFromIndexedDB.fulfilled, (state, action) => {
+            return action?.payload || state;
+        });
+    },
+});
 
-        default:
-            return bibliographies;
-    }
-}
+export const loadFromIndexedDB = createAsyncThunk("bibliographies/loadFromIndexedDB", async () => {
+    const loadedBibs = await db.items.get("bibliographies");
+    const parsedBibs = await JSON.parse(loadedBibs.value);
+    const cleanedBibs = parsedBibs?.map((bib) => {
+        return {
+            ...bib,
+            citations: bib.citations.map((cit) => ({ ...cit, isChecked: false })),
+        };
+    });
+
+    return cleanedBibs;
+});
+
+export const {
+    addNewBib,
+    deleteBib,
+    updateBibField,
+    addNewCitation,
+    editCitation,
+    updateContentInEditedCitation,
+    updateCitation,
+    toggleEntryCheckbox,
+    handleMasterEntriesCheckbox,
+    moveSelectedCitations,
+    copySelectedCitations,
+    duplicateSelectedCitations,
+    deleteSelectedCitations,
+    addNewBibAndMoveSelectedCitations,
+} = bibsSlice.actions;
+
+export default bibsSlice.reducer;
