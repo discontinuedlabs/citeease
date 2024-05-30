@@ -12,7 +12,7 @@ import MarkdownPage from "./components/MarkdownPage";
 import { AcceptDialog, ConfirmDialog } from "./components/ui/Dialogs";
 import NotFoundPage from "./components/NotFoundPage";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 export default function App() {
     const dispatch = useDispatch();

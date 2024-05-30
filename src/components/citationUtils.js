@@ -81,7 +81,6 @@ export function recognizeIdentifierType(string) {
     }
 }
 
-// FIXME: They all should only return something when response.ok === true
 export async function retrieveContentFromURL(url) {
     function extractAuthors($) {
         let authors = [];
@@ -136,25 +135,10 @@ export async function retrieveContentFromURL(url) {
         };
     } catch (error) {
         console.error(`Failed to retrieve content from ${url}:`, error.message);
-        if (error.response) {
-            // The request was made and the server responded with a status code
-            // that falls out of the range of 2xx
-            console.error("Response:", error.response.data);
-            console.error("Status Code:", error.response.status);
-            console.error("Headers:", error.response.headers);
-        } else if (error.request) {
-            // The request was made but no response was received
-            console.error("No response received:", error.request);
-        } else {
-            // Something happened in setting up the request that triggered an Error
-            console.error("Request error:", error.message);
-        }
-        console.error("Config:", error.config);
         return null;
     }
 }
 
-// These are some examples of the needed fields for citeproc https://api.zotero.org/groups/459003/items?format=csljson&limit=8&itemType=journalArticle
 export async function retrieveContentFromDOI(doi) {
     if (!doi) return;
 

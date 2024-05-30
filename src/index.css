@@ -29,12 +29,12 @@ a {
 }
 
 .hanging-indentation {
-    @apply pl-5; 
-    @apply -indent-5; 
+    @apply pl-5;
+    @apply -indent-5;
 }
 
 .csl-entry:has(.csl-left-margin) {
-    @apply flex items-start space-x-2
+    @apply flex items-start space-x-2;
 }
 
 .csl-entry > .csl-left-margin {

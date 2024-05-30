@@ -182,7 +182,7 @@ export function ReferenceEntries(props) {
 
 export function AddCitationMenu(props) {
     const {
-        setAddCitationMenuVisible,
+        setAddCitationMenuVisible: setIsVisible,
         openCitationForm,
         handleSearchByIdentifiers,
         handleImportCitation,
@@ -194,7 +194,7 @@ export function AddCitationMenu(props) {
         <div className="fixed bottom-[1rem] left-1/2 transform -translate-x-1/2">
             <div>
                 <h3>Add citation</h3>
-                <button onClick={() => setAddCitationMenuVisible(false)}>X</button>
+                <button onClick={() => setIsVisible(false)}>X</button>
             </div>
 
             <div>
@@ -233,7 +233,7 @@ export function AddCitationMenu(props) {
 }
 
 export function CitationForm(props) {
-    const { bibliography, showAcceptDialog, setCitationFormVisible } = props;
+    const { bibliography, showAcceptDialog, setCitationFormVisible: setIsVisible } = props;
     const [content, setContent] = useState(bibliography?.editedCitation?.content || {});
     const dispatch = useDispatch();
 
@@ -250,9 +250,9 @@ export function CitationForm(props) {
     };
 
     const CITATION_COMPONENTS = {
-        [SOURCE_TYPES.ARTICLE_JOURNAL.code]: <ArticleJournal {...citationControlProps} />,
-        [SOURCE_TYPES.BOOK.code]: <Book {...citationControlProps} />,
-        [SOURCE_TYPES.WEBPAGE.code]: <Webpage {...citationControlProps} />,
+        [SOURCE_TYPES.ARTICLE_JOURNAL.code]: ArticleJournal(citationControlProps),
+        [SOURCE_TYPES.BOOK.code]: Book(citationControlProps),
+        [SOURCE_TYPES.WEBPAGE.code]: Webpage(citationControlProps),
     };
 
     useEffect(() => {
@@ -263,18 +263,18 @@ export function CitationForm(props) {
         event.preventDefault();
         console.log({ bibliographyId: bibliography.id, editedCitation: bibliography?.editedCitation });
         dispatch(updateCitation({ bibliographyId: bibliography.id, editedCitation: bibliography?.editedCitation }));
-        setCitationFormVisible(false);
+        setIsVisible(false);
     }
 
     function handleCancel() {
-        setCitationFormVisible(false);
+        setIsVisible(false);
     }
 
     return <div className="citation-window">{CITATION_COMPONENTS[content.type]}</div>;
 }
 
 export function LaTeXDialog(props) {
-    const { checkedCitations, setLaTeXWindowVisible } = props;
+    const { checkedCitations, setLaTeXWindowVisible: setIsVisible } = props;
     const [bibtexString, setBibtexString] = useState("");
     const [biblatexString, setBiblatexString] = useState("");
     const [bibTxtString, setBibTxtString] = useState("");
@@ -300,7 +300,7 @@ export function LaTeXDialog(props) {
                         <button onClick={() => setDisplayedLatex(biblatexString)}>BibLaTeX</button>
                         <button onClick={() => setDisplayedLatex(bibTxtString)}>BibTXT</button>
                     </div>
-                    <button onClick={() => setLaTeXWindowVisible(false)}>X</button>
+                    <button onClick={() => setIsVisible(false)}>X</button>
                 </div>
 
                 <div className="whitespace-pre-wrap">{displayedLatex || bibtexString}</div>
@@ -310,7 +310,7 @@ export function LaTeXDialog(props) {
 }
 
 export function MoveDialog(props) {
-    const { bibliographyId, checkedCitations, setMoveWindowVisible } = props;
+    const { bibliographyId, checkedCitations, setMoveWindowVisible: setIsVisible } = props;
     const bibliographies = useSelector((state) => state.bibliographies);
     const [selectedBibliographyIds, setSelectedBibliographyIds] = useState([]);
     const dispatch = useDispatch();
@@ -334,7 +334,7 @@ export function MoveDialog(props) {
                 checkedCitations: checkedCitations,
             })
         );
-        setMoveWindowVisible(false);
+        setIsVisible(false);
         setSelectedBibliographyIds([]);
     }
 
@@ -345,13 +345,13 @@ export function MoveDialog(props) {
                 checkedCitations: checkedCitations,
             })
         );
-        setMoveWindowVisible(false);
+        setIsVisible(false);
         setSelectedBibliographyIds([]);
     }
 
     return (
         <div className="move-window">
-            <button onClick={() => setMoveWindowVisible(false)}>X</button>
+            <button onClick={() => setIsVisible(false)}>X</button>
             {bibliographies.map((bib) => {
                 if (bib.id !== bibliographyId)
                     return (
@@ -378,11 +378,11 @@ export function MoveDialog(props) {
 }
 
 export function RenameDialog(props) {
-    const { handleRename, setRenameWindowVisible } = props;
+    const { handleRename, setRenameWindowVisible: setIsVisible } = props;
     const [title, setTitle] = useState(props.title);
 
     function handleSubmit() {
-        setRenameWindowVisible(false);
+        setIsVisible(false);
         handleRename(title);
     }
 
@@ -397,14 +397,14 @@ export function RenameDialog(props) {
                     name="title-input"
                 />
                 <button type="submit">Rename</button>
-                <button onClick={() => setRenameWindowVisible(false)}>Cancel</button>
+                <button onClick={() => setIsVisible(false)}>Cancel</button>
             </form>
         </div>
     );
 }
 
 export function CitationStylesMenu(props) {
-    const { setCitationStyleMenuVisible } = props;
+    const { setCitationStyleMenuVisible: setIsVisible } = props;
     const [styles, setStyles] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const dispatch = useDispatch();
@@ -485,7 +485,7 @@ export function CitationStylesMenu(props) {
                     <button
                         style={style}
                         onClick={() => {
-                            setCitationStyleMenuVisible(false);
+                            setIsVisible(false);
                             dispatch(addNewBib({ bibliographyStyle: filteredStyles[index] }));
                         }}
                     >
@@ -501,7 +501,7 @@ export function CitationStylesMenu(props) {
 export function SmartGeneratorDialog(props) {
     const {
         searchByIdentifiersInput: input,
-        setSmartGeneratorDialogVisible,
+        setSmartGeneratorDialogVisible: setIsVisible,
         bibliographyId,
         bibStyle,
         savedCslFiles,
@@ -569,7 +569,7 @@ export function SmartGeneratorDialog(props) {
 
     return (
         <div>
-            <button onClick={() => setSmartGeneratorDialogVisible(false)}>X</button>
+            <button onClick={() => setIsVisible(false)}>X</button>
             <div>{HTMLReactParser(references)}</div>
             <button>Accept</button>
         </div>
