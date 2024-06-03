@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import * as citationUtils from "../citationUtils";
+import * as citationUtils from "../../utils/citationUtils";
 import DateInput from "../formElements/DateInput";
 import AuthorsInput from "../formElements/AuthorsInput";
 

@@ -2,8 +2,9 @@ import { Cite, plugins } from "@citation-js/core";
 import "@citation-js/plugin-csl";
 import "@citation-js/plugin-bibtex";
 import DOMPurify from "dompurify";
+import CSL from "citeproc";
 
-export async function formatCitations(citations, bibStyle, savedCslFiles, updateSavedCslFiles, formateType = "html") {
+export async function formatBibliography(citations, bibStyle, savedCslFiles, updateSavedCslFiles, format = "html") {
     const cslFile = await getCslFile(bibStyle, savedCslFiles, updateSavedCslFiles);
     const contentArray = createContentArray(citations);
 
@@ -14,11 +15,11 @@ export async function formatCitations(citations, bibStyle, savedCslFiles, update
 
     let cite = await Cite.async(contentArray);
     let formattedCitations = cite.format("bibliography", {
-        format: formateType,
+        format,
         template: bibStyle?.code,
         lang: "en-US",
     });
-    return formateType === "html" ? splitContentArray(formattedCitations) : formattedCitations;
+    return format === "html" ? splitContentArray(formattedCitations) : formattedCitations;
 }
 
 export async function formatLaTeX(citations, latexFormat = "bibtex") {
@@ -31,6 +32,35 @@ export async function formatLaTeX(citations, latexFormat = "bibtex") {
     let cite = await Cite.async(contentArray);
 
     return cite.format(latexFormat);
+}
+
+export async function formatIntextCitation(citationsArray, options, savedCslFiles, updateSavedCslFiles) {
+    if (!citationsArray) return;
+    const citations = citationsArray.map((cit) => cit.content);
+    const citIds = citations.map((cit) => cit.id);
+
+    const citeprocSys = {
+        retrieveLocale: function (lang) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", `${process.env.PUBLIC_URL}/locales/${lang}.xml`, false);
+            xhr.send(null);
+            return xhr.responseText;
+        },
+        retrieveItem: (id) => {
+            return citations.find((cit) => id === cit.id);
+        },
+    };
+
+    const cslFile = await getCslFile(options.bibStyle, savedCslFiles, updateSavedCslFiles);
+    const citeproc = new CSL.Engine(citeprocSys, cslFile);
+    citeproc.updateItems(citIds);
+    const citation = {
+        properties: {
+            noteIndex: 0,
+        },
+        citationItems: citIds.map((id) => ({ id, locator: undefined, label: undefined })),
+    };
+    return citeproc.previewCitationCluster(citation, [], [], "html");
 }
 
 // TODO: It's better to also check if the cslFile is saved when the user adds a new bibliography and download if it doesn't exist

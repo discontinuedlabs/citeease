@@ -1,7 +1,7 @@
 import DateInput from "../formElements/DateInput";
 import AuthorsInput from "../formElements/AuthorsInput";
 import { useRef, useState } from "react";
-import * as citationUtils from "../citationUtils";
+import * as citationUtils from "../../utils/citationUtils";
 
 export default function Book(props) {
     const { content, setContent, showAcceptDialog, handleAddReference, handleCancel } = props;

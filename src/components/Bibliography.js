@@ -1,9 +1,9 @@
-import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import ContextMenu from "./ui/ContextMenu";
 import { useEffect, useState } from "react";
-import * as citationEngine from "./citationEngine";
+import * as citationEngine from "../utils/citationEngine";
 import {
+    IntextCitationDialog,
     ReferenceEntries,
     MoveDialog,
     CitationForm,
@@ -23,7 +23,8 @@ import {
     editCitation,
     loadFromIndexedDB,
     updateBibField,
-} from "./slices/bibsSlice";
+} from "../store/slices/bibsSlice";
+import { useFindBib } from "../hooks/hooks";
 
 export const SOURCE_TYPES = {
     ARTICLE_JOURNAL: {
@@ -35,13 +36,13 @@ export const SOURCE_TYPES = {
 };
 
 export default function Bibliography(props) {
-    const { bibId: bibliographyId } = useParams();
     const { savedCslFiles, updateSavedCslFiles, showConfirmDialog, showAcceptDialog } = props;
     const bibliographies = useSelector((state) => state.bibliographies);
-    const bibliography = bibliographies?.find((bib) => bib.id === bibliographyId);
+    const bibliography = useFindBib();
     const checkedCitations = bibliography?.citations.filter((cit) => cit?.isChecked);
 
     // const [collaborationOpened, setCollaborationOpened] = useState(false);
+    const [intextCitationDialogVisible, setIntextCitationDialogVisible] = useState(false);
     const [citationFormVisible, setCitationFormVisible] = useState(false);
     const [addCitationMenuVisible, setAddCitationMenuVisible] = useState(false);
     const [LaTeXWindowVisible, setLaTeXWindowVisible] = useState(false);
@@ -71,6 +72,10 @@ export default function Bibliography(props) {
         dispatch(loadFromIndexedDB());
     }, [dispatch]);
 
+    function openIntextCitationDialog() {
+        setIntextCitationDialogVisible(true);
+    }
+
     function openCitationForm(sourceType, isNew = false, specificId = "") {
         let checkedCitationsIds = [...(specificId ? [specificId] : [])];
         bibliography?.citations.forEach((cit) => {
@@ -78,9 +83,9 @@ export default function Bibliography(props) {
                 checkedCitationsIds.push(cit.id);
             }
         });
-        if (isNew) dispatch(addNewCitation({ bibliographyId: bibliographyId, sourceType: sourceType }));
+        if (isNew) dispatch(addNewCitation({ bibliographyId: bibliography.id, sourceType: sourceType }));
         else if (checkedCitationsIds.length === 1)
-            dispatch(editCitation({ bibliographyId: bibliographyId, citationId: checkedCitationsIds[0] }));
+            dispatch(editCitation({ bibliographyId: bibliography.id, citationId: checkedCitationsIds[0] }));
         setCitationFormVisible(true);
         setAddCitationMenuVisible(false);
     }
@@ -93,7 +98,7 @@ export default function Bibliography(props) {
     function handleImportCitation() {}
 
     async function handleCopy() {
-        const formattedCitations = await citationEngine.formatCitations(
+        const formattedCitations = await citationEngine.formatBibliography(
             checkedCitations,
             bibliography?.style,
             savedCslFiles,
@@ -142,7 +147,7 @@ export default function Bibliography(props) {
         if (/^\s*$/.test(value)) {
             showAcceptDialog("Title is empty", "You cant't set the title to an emdpty value.");
         } else {
-            dispatch(updateBibField({ bibliographyId: bibliographyId, key: "title", value: value }));
+            dispatch(updateBibField({ bibliographyId: bibliography.id, key: "title", value: value }));
         }
     }
 
@@ -166,7 +171,7 @@ export default function Bibliography(props) {
 
     function handleDeleteBibliography() {
         navigate("/");
-        dispatch(deleteBib({ bibliographyId: bibliographyId }));
+        dispatch(deleteBib({ bibliographyId: bibliography.id }));
     }
 
     return (
@@ -291,7 +296,19 @@ export default function Bibliography(props) {
                     />
                 </div>
 
-                <ReferenceEntries {...{ bibliography, savedCslFiles, updateSavedCslFiles, openCitationForm }} />
+                <ReferenceEntries
+                    {...{
+                        bibliography,
+                        savedCslFiles,
+                        updateSavedCslFiles,
+                        openCitationForm,
+                        openIntextCitationDialog,
+                    }}
+                />
+
+                {intextCitationDialogVisible && checkedCitations.length !== 0 && (
+                    <IntextCitationDialog {...{ checkedCitations, savedCslFiles, updateSavedCslFiles }} />
+                )}
 
                 {citationFormVisible && bibliography?.editedCitation && (
                     <CitationForm {...{ bibliography, showAcceptDialog, setCitationFormVisible }} />
@@ -299,7 +316,9 @@ export default function Bibliography(props) {
 
                 {LaTeXWindowVisible && <LaTeXDialog {...{ checkedCitations, setLaTeXWindowVisible }} />}
 
-                {moveWindowVisible && <MoveDialog {...{ bibliographyId, checkedCitations, setMoveWindowVisible }} />}
+                {moveWindowVisible && (
+                    <MoveDialog {...{ bibliographyId: bibliography.id, checkedCitations, setMoveWindowVisible }} />
+                )}
 
                 {renameWindowVisible && (
                     <RenameDialog {...{ title: bibliography?.title, setRenameWindowVisible, handleRename }} />
@@ -310,7 +329,7 @@ export default function Bibliography(props) {
                         {...{
                             searchByIdentifiersInput,
                             setSmartGeneratorDialogVisible,
-                            bibliographyId,
+                            bibliographyId: bibliography.id,
                             bibStyle: bibliography.style,
                             savedCslFiles,
                             updateSavedCslFiles,

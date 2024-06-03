@@ -1,4 +1,4 @@
-import { timeAgo } from "../../utils";
+import { timeAgo } from "../../utils/utils";
 
 export default function BibliographyCard(props) {
     const { bibliography } = props;

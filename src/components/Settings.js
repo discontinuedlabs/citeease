@@ -1,8 +1,9 @@
-import { ACTIONS as SETTINGS_ACTIONS } from "./slices/settingsSlice";
+import { useDispatch, useSelector } from "react-redux";
 import { SettingsSection, SettingsNavigate, SettingsButton, SettingsCheckButton } from "./ui/SettingsComponents";
 
 export default function Settings(props) {
-    const { settings, settingsDispatch } = props;
+    const settings = useSelector((state) => state.settings);
+    const dispatch = useDispatch();
 
     return (
         <div className="settings-page">

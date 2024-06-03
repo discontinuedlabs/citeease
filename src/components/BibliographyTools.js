@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import * as citationEngine from "./citationEngine";
+import * as citationEngine from "../utils/citationEngine";
 import { SOURCE_TYPES } from "./Bibliography";
 import {
     addNewBib,
@@ -10,19 +10,21 @@ import {
     toggleEntryCheckbox,
     updateCitation,
     updateContentInEditedCitation,
-} from "./slices/bibsSlice";
+} from "../store/slices/bibsSlice";
 import BibliographyCard from "./ui/BibliographyCard";
 import ContextMenu from "./ui/ContextMenu";
 import DOMPurify from "dompurify";
 import HTMLReactParser from "html-react-parser/lib/index";
 import { FixedSizeList as List } from "react-window";
-import * as citationUtils from "./citationUtils";
+import * as citationUtils from "../utils/citationUtils";
 import { useDispatch, useSelector } from "react-redux";
 
 // Source types
 import ArticleJournal from "./sourceTypes/ArticleJournal";
 import Webpage from "./sourceTypes/Webpage";
 import Book from "./sourceTypes/Book";
+import { useParams } from "react-router-dom";
+import { useFindBib } from "../hooks/hooks";
 
 const MASTER_CHECKBOX_STATES = {
     CHECKED: "checked", // All reference entries are checked
@@ -31,7 +33,7 @@ const MASTER_CHECKBOX_STATES = {
 };
 
 export function ReferenceEntries(props) {
-    const { bibliography, savedCslFiles, updateSavedCslFiles, openCitationForm } = props;
+    const { bibliography, savedCslFiles, updateSavedCslFiles, openCitationForm, openIntextCitationDialog } = props;
     const [references, setReferences] = useState([]);
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
     const dispatch = useDispatch();
@@ -59,8 +61,8 @@ export function ReferenceEntries(props) {
     }, [bibliography?.citations]);
 
     useEffect(() => {
-        async function formatCitations() {
-            const formattedCitations = await citationEngine.formatCitations(
+        async function formatBibliography() {
+            const formattedCitations = await citationEngine.formatBibliography(
                 bibliography?.citations,
                 bibliography?.style,
                 savedCslFiles,
@@ -69,7 +71,7 @@ export function ReferenceEntries(props) {
             );
             setReferences(formattedCitations);
         }
-        formatCitations();
+        formatBibliography();
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [bibliography?.citations, bibliography?.style, savedCslFiles]); // Adding setSavedCslFiles to the dependency array will cause the component to rerender infinitely
@@ -98,7 +100,7 @@ export function ReferenceEntries(props) {
                 sanitizedInnerHTML = DOMPurify.sanitize(event.target.innerHTML);
                 event.dataTransfer.setData("text/html", sanitizedInnerHTML);
             } else {
-                const formattedCitations = await citationEngine.formatCitations(
+                const formattedCitations = await citationEngine.formatBibliography(
                     checkedCitations,
                     bibliography?.style,
                     savedCslFiles,
@@ -134,6 +136,8 @@ export function ReferenceEntries(props) {
                         onChange={handleMasterCheck}
                     />
                 )}
+
+                {checkedCitations?.length !== 0 && <button onClick={openIntextCitationDialog}>In-text citation</button>}
             </div>
 
             <div className="max-w-[50rem] mx-auto p-4" key={"entries-container"}>
@@ -178,6 +182,27 @@ export function ReferenceEntries(props) {
             </div>
         </div>
     );
+}
+
+export function IntextCitationDialog(props) {
+    const { checkedCitations, savedCslFiles, updateSavedCslFiles } = props;
+    const bibliography = useFindBib();
+    const [IntextCitation, setIntextCitation] = useState("");
+
+    useEffect(() => {
+        async function formatIntextCitation() {
+            const formattedIntextCitation = await citationEngine.formatIntextCitation(
+                checkedCitations,
+                { bibStyle: bibliography?.style, label: undefined, locator: undefined, format: "html" },
+                savedCslFiles,
+                updateSavedCslFiles
+            );
+            setIntextCitation(formattedIntextCitation);
+        }
+        formatIntextCitation();
+    }, [checkedCitations]);
+
+    return <div>{IntextCitation}</div>;
 }
 
 export function AddCitationMenu(props) {
@@ -261,7 +286,6 @@ export function CitationForm(props) {
 
     function handleAddReference(event) {
         event.preventDefault();
-        console.log({ bibliographyId: bibliography.id, editedCitation: bibliography?.editedCitation });
         dispatch(updateCitation({ bibliographyId: bibliography.id, editedCitation: bibliography?.editedCitation }));
         setIsVisible(false);
     }
@@ -554,8 +578,8 @@ export function SmartGeneratorDialog(props) {
     }, [input, bibliographyId, dispatch]);
 
     useEffect(() => {
-        async function formatCitations() {
-            const formattedCitation = await citationEngine.formatCitations(
+        async function formatBibliography() {
+            const formattedCitation = await citationEngine.formatBibliography(
                 contentsArray.map((content) => ({ content: content })),
                 bibStyle,
                 savedCslFiles,
@@ -564,7 +588,7 @@ export function SmartGeneratorDialog(props) {
             const sanitizedReference = DOMPurify.sanitize(formattedCitation);
             setReferences(sanitizedReference);
         }
-        formatCitations();
+        formatBibliography();
     }, [contentsArray]);
 
     return (

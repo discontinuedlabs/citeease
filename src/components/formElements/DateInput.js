@@ -1,4 +1,4 @@
-import * as sourceTypeUtils from "../citationUtils";
+import * as sourceTypeUtils from "../../utils/citationUtils";
 
 export default function DateInput(props) {
     const { content, setContent, dateKey } = props;

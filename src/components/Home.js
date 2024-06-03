@@ -5,7 +5,7 @@ import BibliographyCard from "./ui/BibliographyCard";
 import { useState } from "react";
 import { CitationStylesMenu } from "./BibliographyTools";
 import { useDispatch, useSelector } from "react-redux";
-import { loadFromIndexedDB } from "./slices/bibsSlice";
+import { loadFromIndexedDB } from "../store/slices/bibsSlice";
 
 export default function Home() {
     const bibliographies = useSelector((state) => state.bibliographies);

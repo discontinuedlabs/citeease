@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import Bibliography from "./components/Bibliography";
 import { Route, Routes } from "react-router-dom";
-import db from "./db";
+import db from "./db/dexie";
 import Home from "./components/Home";
-import { useIndexedDB, useReducerWithIndexedDB } from "./utils";
-import { loadFromIndexedDB } from "./components/slices/bibsSlice";
+import { useIndexedDB, useReducerWithIndexedDB } from "./hooks/hooks";
+import { loadFromIndexedDB } from "./store/slices/bibsSlice";
 import Settings from "./components/Settings";
 import BibliographySettings from "./components/BibliographySettings";
-import settingsReducer from "./components/slices/settingsSlice";
 import MarkdownPage from "./components/MarkdownPage";
 import { AcceptDialog, ConfirmDialog } from "./components/ui/Dialogs";
 import NotFoundPage from "./components/NotFoundPage";
@@ -15,19 +14,14 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useDispatch } from "react-redux";
 
 export default function App() {
-    const dispatch = useDispatch();
-
-    const [settings, settingsDispatch] = useReducerWithIndexedDB(
-        "settings",
-        settingsReducer,
-        useLiveQuery(() => db.settings?.get()) || {}
-    );
     const [savedCslFiles, updateSavedCslFiles] = useIndexedDB(
         "savedCslFiles",
         useLiveQuery(() => db.savedCslFiles?.get()) || {}
     );
     const [acceptDialog, setAcceptDialog] = useState({});
     const [confirmDialog, setConfirmDialog] = useState({});
+
+    const dispatch = useDispatch();
 
     useEffect(() => {
         dispatch(loadFromIndexedDB());
@@ -52,15 +46,11 @@ export default function App() {
         <div className="font-sans bg-neutral-white p-5 min-h-screen text-neutral-black">
             <Routes>
                 <Route path="/" element={<Home />} />
-                <Route
-                    path="/settings"
-                    element={<Settings settings={settings} settingsDispatch={settingsDispatch} />}
-                />
+                <Route path="/settings" element={<Settings />} />
                 <Route
                     path="/:bibId"
                     element={
                         <Bibliography
-                            settings={settings}
                             showAcceptDialog={showAcceptDialog}
                             showConfirmDialog={showConfirmDialog}
                             savedCslFiles={savedCslFiles}
