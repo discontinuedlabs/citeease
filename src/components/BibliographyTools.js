@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import * as citationEngine from "../utils/citationEngine";
 import { SOURCE_TYPES } from "./Bibliography";
 import {
-    addNewBib,
     addNewCitation,
     copySelectedCitations,
     handleMasterEntriesCheckbox,
@@ -635,10 +634,9 @@ export function RenameDialog(props) {
 }
 
 export function CitationStylesMenu(props) {
-    const { setCitationStyleMenuVisible: setIsVisible } = props;
+    const { setCitationStyleMenuVisible: setIsVisible, onStyleSelected } = props;
     const [styles, setStyles] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
-    const dispatch = useDispatch();
 
     useEffect(() => {
         async function fetchStyles() {
@@ -654,9 +652,9 @@ export function CitationStylesMenu(props) {
             let found = false;
             for (let i = 0; i < stringsArray.length; i++) {
                 if (
-                    // eg. "chicago manual of style 17th edition" => Chicago Manual of Style 17th edition
+                    // eg., "chicago manual of style 17th edition" => Chicago Manual of Style 17th edition
                     stringsArray[i]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    // eg. "cmos17e" || "c m o s 1 7 e" => Chicago Manual of Style 17th edition
+                    // eg., "cmos17e" || "c m o s 1 7 e" => Chicago Manual of Style 17th edition
                     stringsArray[i]
                         ?.toLowerCase()
                         .split(/\s+|-/)
@@ -666,7 +664,7 @@ export function CitationStylesMenu(props) {
                         })
                         .join("")
                         .includes(searchTerm.toLowerCase().replace(/\s+/g, "")) ||
-                    // eg. "cms17e" || "c m s 1 7 e" => Chicago Manual of Style 17th edition
+                    // eg., "cms17e" || "c m s 1 7 e" => Chicago Manual of Style 17th edition
                     stringsArray[i]
                         ?.toLowerCase()
                         .replace(/\b(of|and|in|on|at|the|from|to|with|by|for|\(|\))\b/gi, "")
@@ -694,6 +692,8 @@ export function CitationStylesMenu(props) {
 
     return (
         <div className="citation-styles-menu">
+            <button onClick={() => setIsVisible(false)}>X</button>
+
             <search>
                 <form>
                     <input
@@ -713,9 +713,8 @@ export function CitationStylesMenu(props) {
                         <button
                             style={style}
                             onClick={() => {
+                                onStyleSelected(targetStyle);
                                 setIsVisible(false);
-                                dispatch(addNewBib({ bibliographyStyle: targetStyle }));
-                                citationEngine.updateCslFiles(targetStyle);
                             }}
                         >
                             {targetStyle.name.long}

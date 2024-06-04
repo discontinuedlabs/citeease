@@ -11,6 +11,7 @@ import {
     RenameDialog,
     AddCitationMenu,
     SmartGeneratorDialog,
+    CitationStylesMenu,
 } from "./BibliographyTools";
 import { HotKeys } from "react-hotkeys";
 import { useDispatch, useSelector } from "react-redux";
@@ -49,6 +50,7 @@ export default function Bibliography(props) {
     const [moveWindowVisible, setMoveWindowVisible] = useState(false);
     const [renameWindowVisible, setRenameWindowVisible] = useState(false);
     const [smartGeneratorDialogVisible, setSmartGeneratorDialogVisible] = useState(false);
+    const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
     const [searchByIdentifiersInput, setSearchByIdentifiersInput] = useState("");
 
     const navigate = useNavigate();
@@ -149,8 +151,6 @@ export default function Bibliography(props) {
         }
     }
 
-    function handleChangeStyle() {}
-
     // function handleOpenCollaboration() {
     //     // If it's the first time, prompts the user with a dialog explaining the benefits of collaboration.
     //     // Checks whether the user owns any collaborative bibliographies to determine if it's the first time.
@@ -249,7 +249,7 @@ export default function Bibliography(props) {
                                       { label: "Rename", method: () => setRenameWindowVisible(true) },
                                       {
                                           label: "Change style",
-                                          method: handleChangeStyle,
+                                          method: () => setCitationStyleMenuVisible(true),
                                       },
 
                                       "DEVIDER",
@@ -307,6 +307,18 @@ export default function Bibliography(props) {
 
                 {citationFormVisible && bibliography?.editedCitation && (
                     <CitationForm {...{ showAcceptDialog, setCitationFormVisible }} />
+                )}
+
+                {citationStyleMenuVisible && (
+                    <CitationStylesMenu
+                        {...{
+                            setCitationStyleMenuVisible,
+                            onStyleSelected: (style) =>
+                                dispatch(
+                                    updateBibField({ bibliographyId: bibliography.id, key: "style", value: style })
+                                ),
+                        }}
+                    />
                 )}
 
                 {LaTeXWindowVisible && <LaTeXDialog {...{ setLaTeXWindowVisible }} />}

@@ -5,13 +5,20 @@ import BibliographyCard from "./ui/BibliographyCard";
 import { useState } from "react";
 import { CitationStylesMenu } from "./BibliographyTools";
 import { useDispatch, useSelector } from "react-redux";
-import { loadFromIndexedDB } from "../store/slices/bibsSlice";
+import * as citationEngine from "../utils/citationEngine";
+import { addNewBib } from "../store/slices/bibsSlice";
 
 export default function Home() {
     const bibliographies = useSelector((state) => state.bibliographies);
     const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
     const navigate = useNavigate();
     const dispatch = useDispatch();
+
+    function addNewBibWithStyle(style) {
+        setCitationStyleMenuVisible(false);
+        dispatch(addNewBib({ bibliographyStyle: style }));
+        citationEngine.updateCslFiles(style);
+    }
 
     return (
         <div className="mx-auto max-w-[50rem]">
@@ -39,12 +46,11 @@ export default function Home() {
             </div>
 
             {citationStyleMenuVisible && (
-                <CitationStylesMenu setCitationStyleMenuVisible={setCitationStyleMenuVisible} />
+                <CitationStylesMenu {...{ setCitationStyleMenuVisible, onStyleSelected: addNewBibWithStyle }} />
             )}
             <button
                 className="border-2 border-neutral-black fixed p-3 bottom-5 right-5 bg-primary-500"
                 onClick={() => {
-                    dispatch(loadFromIndexedDB());
                     setCitationStyleMenuVisible(true);
                 }}
             >

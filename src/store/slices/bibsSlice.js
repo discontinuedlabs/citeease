@@ -9,6 +9,7 @@ function saveToIndexedDB(newState) {
     db.items.put({ id: "bibliographies", value: serializedState });
 }
 
+// IMPORTANT: Date() objects should get converted toString() because they need to be serialized when saved to indexedDB
 const bibsSlice = createSlice({
     name: "bibliographies",
     initialState,
@@ -17,8 +18,8 @@ const bibsSlice = createSlice({
             const newBib = {
                 title: "Untitled Bibliography",
                 style: action.payload.bibliographyStyle,
-                dateCreated: new Date(),
-                dateModified: new Date(),
+                dateCreated: new Date().toString(),
+                dateModified: new Date().toString(),
                 id: "bib=" + nanoid(10),
                 citations: [],
             };
@@ -34,7 +35,7 @@ const bibsSlice = createSlice({
         updateBibField: (bibs, action) => {
             const newState = bibs?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
-                    return { ...bib, [action.payload.key]: action.payload.value, dateModified: new Date() };
+                    return { ...bib, [action.payload.key]: action.payload.value, dateModified: new Date().toString() };
                 }
                 return bib;
             });
@@ -60,7 +61,7 @@ const bibsSlice = createSlice({
                                     isChecked: false,
                                 },
                             ],
-                            dateModified: new Date(),
+                            dateModified: new Date().toString(),
                         };
                     } else if (action.payload.sourceType) {
                         // If passed a sourceType, it means it doesn't have content, so it gets added to the editedCitation field to get filled with the source's data
@@ -75,7 +76,7 @@ const bibsSlice = createSlice({
                                 },
                                 isChecked: false,
                             },
-                            dateModified: new Date(),
+                            dateModified: new Date().toString(),
                         };
                     }
                 }
@@ -104,7 +105,7 @@ const bibsSlice = createSlice({
                     return {
                         ...bib,
                         editedCitation: { ...bib.editedCitation, content: action.payload.content },
-                        dateModified: new Date(),
+                        dateModified: new Date().toString(),
                     };
                 }
                 return bib;
@@ -134,7 +135,7 @@ const bibsSlice = createSlice({
                     return {
                         ...bib,
                         citations: updatedCitations,
-                        dateModified: new Date(),
+                        dateModified: new Date().toString(),
                     };
                 }
                 return bib;
@@ -202,14 +203,14 @@ const bibsSlice = createSlice({
                     return {
                         ...bib,
                         citations: [...bib.citations, ...action.payload.checkedCitations],
-                        dateModified: new Date(),
+                        dateModified: new Date().toString(),
                     };
                 } else if (bib.id === action.payload.fromId) {
                     const idsForDelete = action.payload.checkedCitations.map((cit) => cit.id);
                     return {
                         ...bib,
                         citations: bib.citations.filter((cit) => !idsForDelete.includes(cit.id)),
-                        dateModified: new Date(),
+                        dateModified: new Date().toString(),
                     };
                 }
                 return bib;
@@ -230,7 +231,7 @@ const bibsSlice = createSlice({
                 return {
                     ...bib,
                     citations: [...updatedCitations, ...copiedCitations],
-                    dateModified: new Date(),
+                    dateModified: new Date().toString(),
                 };
             });
             saveToIndexedDB(newState);
@@ -252,7 +253,7 @@ const bibsSlice = createSlice({
                             ...bib.citations.map((cit) => ({ ...cit, isChecked: false })),
                             ...duplicatedCitations,
                         ],
-                        dateModified: new Date(),
+                        dateModified: new Date().toString(),
                     };
                 }
                 return bib;
@@ -267,7 +268,7 @@ const bibsSlice = createSlice({
                     return {
                         ...bib,
                         citations: bib.citations.filter((cit) => !targetIds.includes(cit.id)),
-                        dateModified: new Date(),
+                        dateModified: new Date().toString(),
                     };
                 }
                 return bib;
@@ -279,8 +280,8 @@ const bibsSlice = createSlice({
             const newBib = {
                 title: "Untitled Bibliography",
                 style: action.payload.bibliographyStyle,
-                dateCreated: new Date(),
-                dateModified: new Date(),
+                dateCreated: new Date().toString(),
+                dateModified: new Date().toString(),
                 id: "bib=" + nanoid(10),
                 citations: [...action.payload.checkedCitations],
             };
