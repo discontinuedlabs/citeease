@@ -36,7 +36,6 @@ export async function formatLaTeX(citations, latexFormat = "bibtex") {
 }
 
 export async function formatIntextCitation(citations, bibStyle, format = "html") {
-    console.log(citations);
     if (!citations) return;
     const citIds = citations.map((cit) => cit.id);
 

@@ -301,7 +301,9 @@ export default function Bibliography(props) {
                     }}
                 />
 
-                {intextCitationDialogVisible && checkedCitations.length !== 0 && <IntextCitationDialog />}
+                {intextCitationDialogVisible && checkedCitations.length !== 0 && (
+                    <IntextCitationDialog {...{ setIntextCitationDialogVisible }} />
+                )}
 
                 {citationFormVisible && bibliography?.editedCitation && (
                     <CitationForm {...{ showAcceptDialog, setCitationFormVisible }} />

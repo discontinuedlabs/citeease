@@ -179,13 +179,14 @@ export function ReferenceEntries(props) {
     );
 }
 
-export function IntextCitationDialog() {
+export function IntextCitationDialog(props) {
+    const { setIntextCitationDialogVisible: setIsVisible } = props;
     const bibliography = useFindBib();
     const checkedCitations = useFindCheckedCitations();
     const [IntextCitation, setIntextCitation] = useState("");
     const [citationsForIntext, setCitationsForIntext] = useState(checkedCitations.map((cit) => cit.content));
-    const locatorSelectRef = useRef(null);
 
+    // ATTENTION: Needs review
     const LOCATOR_OPTIONS = {
         appendix: {
             def: "A supplementary section at the end of a document.",
@@ -201,7 +202,7 @@ export function IntextCitationDialog() {
         },
         book: {
             def: "A specific book or volume within a series or collection.",
-            placeholder: "eg., 2 or 2-3",
+            placeholder: "eg., Book Title or Book Collection",
             name: "Book",
             code: "book",
         },
@@ -273,7 +274,7 @@ export function IntextCitationDialog() {
         },
         page: {
             def: "A specific page or range of pages in a document.",
-            placeholder: "eg., 3 or 3-5",
+            placeholder: "eg., 3 or 9-22",
             name: "Page",
             code: "page",
         },
@@ -297,13 +298,13 @@ export function IntextCitationDialog() {
         },
         section: {
             def: "A specific section of a document.",
-            placeholder: "eg., About Us",
+            placeholder: "eg., Introduction",
             name: "Section",
             code: "section",
         },
         "sub-verbo": {
             def: "An entry under a specific word or heading in a reference work.",
-            placeholder: "eg., sub verbo 'Equity'",
+            placeholder: "eg., Equity",
             name: "Sub-Verbo",
             code: "sub-verbo",
         },
@@ -327,13 +328,13 @@ export function IntextCitationDialog() {
         },
         title: {
             def: "A specific title of a work or section within a larger work.",
-            placeholder: "eg., Introduction",
+            placeholder: "eg., Title",
             name: "Title",
             code: "title",
         },
         verse: {
             def: "A specific verse in a poem, song, or scripture.",
-            placeholder: "eg., 10",
+            placeholder: "eg., 7 or 2-16",
             name: "Verse",
             code: "verse",
         },
@@ -344,10 +345,10 @@ export function IntextCitationDialog() {
             code: "volume",
         },
     };
+    const DEFAULT_LOCATOR = LOCATOR_OPTIONS.page;
 
     useEffect(() => {
         async function formatIntextCitation() {
-            console.log(citationsForIntext);
             const formattedIntextCitation = await citationEngine.formatIntextCitation(
                 citationsForIntext,
                 bibliography?.style,
@@ -356,31 +357,35 @@ export function IntextCitationDialog() {
             setIntextCitation(formattedIntextCitation);
         }
         formatIntextCitation();
-    }, [checkedCitations, citationsForIntext, bibliography?.style]);
+    }, [citationsForIntext, bibliography?.style]);
+
+    function updateContentField(citId, key, value) {
+        setCitationsForIntext((prevCitationsForIntext) => {
+            return prevCitationsForIntext.map((content) => {
+                if (content.id === citId) {
+                    return {
+                        ...content,
+                        [key]: value,
+                    };
+                }
+                return content;
+            });
+        });
+    }
 
     return (
         <div>
             <div className="font-cambo">{IntextCitation}</div>
-            {citationsForIntext.map((cit) => {
+            <button onClick={() => setIsVisible(false)}>X</button>
+            {citationsForIntext.map((cit, index) => {
                 return (
-                    <div>
+                    <div key={index}>
                         <div>{cit.title || `${cit.author[0].family} ${cit.issued["date-parts"].join(" ")}`}</div>
 
                         <select
-                            ref={locatorSelectRef}
-                            value={cit?.label}
+                            value={cit?.label || DEFAULT_LOCATOR.code}
                             onChange={(event) =>
-                                setCitationsForIntext((prevCitationsForIntext) => {
-                                    return prevCitationsForIntext.map((content) => {
-                                        if (content.id === cit.id) {
-                                            return {
-                                                ...content,
-                                                label: LOCATOR_OPTIONS[event.target.value].code,
-                                            };
-                                        }
-                                        return content;
-                                    });
-                                })
+                                updateContentField(cit.id, "label", LOCATOR_OPTIONS[event.target.value].code)
                             }
                         >
                             {Object.values(LOCATOR_OPTIONS).map((option, index) => (
@@ -393,22 +398,11 @@ export function IntextCitationDialog() {
                         <input
                             name="intext-locator"
                             type="text"
-                            placeholder="so"
+                            placeholder={LOCATOR_OPTIONS[cit.label]?.placeholder || DEFAULT_LOCATOR.placeholder}
                             value={citationsForIntext?.locator}
-                            onChange={(event) =>
-                                setCitationsForIntext((prevCitationsForIntext) => {
-                                    return prevCitationsForIntext.map((content) => {
-                                        if (content.id === cit.id) {
-                                            return {
-                                                ...content,
-                                                locator: event.target.value,
-                                            };
-                                        }
-                                        return content;
-                                    });
-                                })
-                            }
+                            onChange={(event) => updateContentField(cit.id, "locator", event.target.value)}
                         />
+                        <small>{LOCATOR_OPTIONS[cit.label]?.def || DEFAULT_LOCATOR.def}</small>
                     </div>
                 );
             })}
