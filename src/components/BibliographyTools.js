@@ -18,13 +18,12 @@ import HTMLReactParser from "html-react-parser/lib/index";
 import { FixedSizeList as List } from "react-window";
 import * as citationUtils from "../utils/citationUtils";
 import { useDispatch, useSelector } from "react-redux";
+import { useFindBib, useFindCheckedCitations } from "../hooks/hooks";
 
 // Source types
 import ArticleJournal from "./sourceTypes/ArticleJournal";
 import Webpage from "./sourceTypes/Webpage";
 import Book from "./sourceTypes/Book";
-import { useParams } from "react-router-dom";
-import { useFindBib } from "../hooks/hooks";
 
 const MASTER_CHECKBOX_STATES = {
     CHECKED: "checked", // All reference entries are checked
@@ -33,12 +32,12 @@ const MASTER_CHECKBOX_STATES = {
 };
 
 export function ReferenceEntries(props) {
-    const { bibliography, savedCslFiles, updateSavedCslFiles, openCitationForm, openIntextCitationDialog } = props;
+    const { openCitationForm, openIntextCitationDialog } = props;
+    const bibliography = useFindBib();
+    const checkedCitations = useFindCheckedCitations();
     const [references, setReferences] = useState([]);
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
     const dispatch = useDispatch();
-
-    const checkedCitations = bibliography?.citations.filter((cit) => cit?.isChecked === true);
 
     useEffect(() => {
         function updateMasterCheckboxState() {
@@ -65,8 +64,6 @@ export function ReferenceEntries(props) {
             const formattedCitations = await citationEngine.formatBibliography(
                 bibliography?.citations,
                 bibliography?.style,
-                savedCslFiles,
-                updateSavedCslFiles,
                 "html"
             );
             setReferences(formattedCitations);
@@ -74,7 +71,7 @@ export function ReferenceEntries(props) {
         formatBibliography();
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [bibliography?.citations, bibliography?.style, savedCslFiles]); // Adding setSavedCslFiles to the dependency array will cause the component to rerender infinitely
+    }, [bibliography?.citations, bibliography?.style]); // Adding setSavedCslFiles to the dependency array will cause the component to rerender infinitely
 
     function handleMasterCheck() {
         dispatch(handleMasterEntriesCheckbox({ bibliographyId: bibliography?.id }));
@@ -103,8 +100,6 @@ export function ReferenceEntries(props) {
                 const formattedCitations = await citationEngine.formatBibliography(
                     checkedCitations,
                     bibliography?.style,
-                    savedCslFiles,
-                    updateSavedCslFiles,
                     "html"
                 );
 
@@ -184,25 +179,241 @@ export function ReferenceEntries(props) {
     );
 }
 
-export function IntextCitationDialog(props) {
-    const { checkedCitations, savedCslFiles, updateSavedCslFiles } = props;
+export function IntextCitationDialog() {
     const bibliography = useFindBib();
+    const checkedCitations = useFindCheckedCitations();
     const [IntextCitation, setIntextCitation] = useState("");
+    const [citationsForIntext, setCitationsForIntext] = useState(checkedCitations.map((cit) => cit.content));
+    const locatorSelectRef = useRef(null);
+
+    const LOCATOR_OPTIONS = {
+        appendix: {
+            def: "A supplementary section at the end of a document.",
+            placeholder: "eg., Appendix A or Appendix B",
+            name: "Appendix",
+            code: "appendix",
+        },
+        "article-locator": {
+            def: "A unique identifier for an article, often used in digital or online publications.",
+            placeholder: "eg., 12345",
+            name: "Article Locator",
+            code: "article-locator",
+        },
+        book: {
+            def: "A specific book or volume within a series or collection.",
+            placeholder: "eg., 2 or 2-3",
+            name: "Book",
+            code: "book",
+        },
+        canon: {
+            def: "A standard or rule, often used in legal or religious contexts.",
+            placeholder: "eg., 15 or 15-20",
+            name: "Canon",
+            code: "canon",
+        },
+        chapter: {
+            def: "A specific chapter within a book.",
+            placeholder: "eg., 5 or 5-7",
+            name: "Chapter",
+            code: "chapter",
+        },
+        column: {
+            def: "A vertical division of text in a document, often in newspapers or magazines.",
+            placeholder: "eg., 3 or 3-4",
+            name: "Column",
+            code: "column",
+        },
+        elocation: {
+            def: "An electronic location identifier for digital content.",
+            placeholder: "eg., e12345",
+            name: "Elocation",
+            code: "elocation",
+        },
+        equation: {
+            def: "A specific equation within a text.",
+            placeholder: "eg., 7",
+            name: "Equation",
+            code: "equation",
+        },
+        figure: {
+            def: "A specific figure or illustration in a document.",
+            placeholder: "eg., 2",
+            name: "Figure",
+            code: "figure",
+        },
+        folio: {
+            def: "A leaf of a manuscript or book, numbered on the front side only.",
+            placeholder: "eg., 10",
+            name: "Folio",
+            code: "folio",
+        },
+        issue: {
+            def: "A specific issue of a journal or magazine.",
+            placeholder: "eg., 4",
+            name: "Issue",
+            code: "issue",
+        },
+        line: {
+            def: "A specific line in a poem, play, or other text.",
+            placeholder: "eg., 23",
+            name: "Line",
+            code: "line",
+        },
+        note: {
+            def: "A specific footnote or endnote in a text.",
+            placeholder: "eg., 7",
+            name: "Note",
+            code: "note",
+        },
+        opus: {
+            def: "A specific work or composition, often used in music.",
+            placeholder: "eg., 22",
+            name: "Opus",
+            code: "opus",
+        },
+        page: {
+            def: "A specific page or range of pages in a document.",
+            placeholder: "eg., 3 or 3-5",
+            name: "Page",
+            code: "page",
+        },
+        paragraph: {
+            def: "A specific paragraph in a document.",
+            placeholder: "eg., 4 or 4-6",
+            name: "Paragraph",
+            code: "paragraph",
+        },
+        part: {
+            def: "A specific part or section of a larger work.",
+            placeholder: "eg., 2 or 2-3",
+            name: "Part",
+            code: "part",
+        },
+        rule: {
+            def: "A specific rule or regulation, often used in legal or procedural contexts.",
+            placeholder: "eg., 5 or 5-8",
+            name: "Rule",
+            code: "rule",
+        },
+        section: {
+            def: "A specific section of a document.",
+            placeholder: "eg., About Us",
+            name: "Section",
+            code: "section",
+        },
+        "sub-verbo": {
+            def: "An entry under a specific word or heading in a reference work.",
+            placeholder: "eg., sub verbo 'Equity'",
+            name: "Sub-Verbo",
+            code: "sub-verbo",
+        },
+        supplement: {
+            def: "A supplementary issue or addition to a publication.",
+            placeholder: "eg., 1",
+            name: "Supplement",
+            code: "supplement",
+        },
+        table: {
+            def: "A specific table within a document.",
+            placeholder: "eg., 4",
+            name: "Table",
+            code: "table",
+        },
+        timestamp: {
+            def: "A specific time marker, often used in audiovisual materials.",
+            placeholder: "eg., 00:15:30",
+            name: "Timestamp",
+            code: "timestamp",
+        },
+        title: {
+            def: "A specific title of a work or section within a larger work.",
+            placeholder: "eg., Introduction",
+            name: "Title",
+            code: "title",
+        },
+        verse: {
+            def: "A specific verse in a poem, song, or scripture.",
+            placeholder: "eg., 10",
+            name: "Verse",
+            code: "verse",
+        },
+        volume: {
+            def: "A specific volume within a series or set.",
+            placeholder: "eg., 3 or 3-4",
+            name: "Volume",
+            code: "volume",
+        },
+    };
 
     useEffect(() => {
         async function formatIntextCitation() {
+            console.log(citationsForIntext);
             const formattedIntextCitation = await citationEngine.formatIntextCitation(
-                checkedCitations,
-                { bibStyle: bibliography?.style, label: undefined, locator: undefined, format: "html" },
-                savedCslFiles,
-                updateSavedCslFiles
+                citationsForIntext,
+                bibliography?.style,
+                "html"
             );
             setIntextCitation(formattedIntextCitation);
         }
         formatIntextCitation();
-    }, [checkedCitations]);
+    }, [checkedCitations, citationsForIntext, bibliography?.style]);
 
-    return <div>{IntextCitation}</div>;
+    return (
+        <div>
+            <div className="font-cambo">{IntextCitation}</div>
+            {citationsForIntext.map((cit) => {
+                return (
+                    <div>
+                        <div>{cit.title || `${cit.author[0].family} ${cit.issued["date-parts"].join(" ")}`}</div>
+
+                        <select
+                            ref={locatorSelectRef}
+                            value={cit?.label}
+                            onChange={(event) =>
+                                setCitationsForIntext((prevCitationsForIntext) => {
+                                    return prevCitationsForIntext.map((content) => {
+                                        if (content.id === cit.id) {
+                                            return {
+                                                ...content,
+                                                label: LOCATOR_OPTIONS[event.target.value].code,
+                                            };
+                                        }
+                                        return content;
+                                    });
+                                })
+                            }
+                        >
+                            {Object.values(LOCATOR_OPTIONS).map((option, index) => (
+                                <option key={index} value={option.code}>
+                                    {option.name}
+                                </option>
+                            ))}
+                        </select>
+
+                        <input
+                            name="intext-locator"
+                            type="text"
+                            placeholder="so"
+                            value={citationsForIntext?.locator}
+                            onChange={(event) =>
+                                setCitationsForIntext((prevCitationsForIntext) => {
+                                    return prevCitationsForIntext.map((content) => {
+                                        if (content.id === cit.id) {
+                                            return {
+                                                ...content,
+                                                locator: event.target.value,
+                                            };
+                                        }
+                                        return content;
+                                    });
+                                })
+                            }
+                        />
+                    </div>
+                );
+            })}
+        </div>
+    );
 }
 
 export function AddCitationMenu(props) {
@@ -258,7 +469,8 @@ export function AddCitationMenu(props) {
 }
 
 export function CitationForm(props) {
-    const { bibliography, showAcceptDialog, setCitationFormVisible: setIsVisible } = props;
+    const { showAcceptDialog, setCitationFormVisible: setIsVisible } = props;
+    const bibliography = useFindBib();
     const [content, setContent] = useState(bibliography?.editedCitation?.content || {});
     const dispatch = useDispatch();
 
@@ -298,11 +510,12 @@ export function CitationForm(props) {
 }
 
 export function LaTeXDialog(props) {
-    const { checkedCitations, setLaTeXWindowVisible: setIsVisible } = props;
+    const { setLaTeXWindowVisible: setIsVisible } = props;
     const [bibtexString, setBibtexString] = useState("");
     const [biblatexString, setBiblatexString] = useState("");
     const [bibTxtString, setBibTxtString] = useState("");
     const [displayedLatex, setDisplayedLatex] = useState(bibtexString);
+    const checkedCitations = useFindCheckedCitations();
 
     useEffect(() => {
         async function formatLaTeX() {
@@ -312,8 +525,6 @@ export function LaTeXDialog(props) {
         }
         formatLaTeX();
     }, [checkedCitations]);
-
-    console.log("run");
 
     return (
         <div className="fixed top-0 left-0 w-screen h-screen bg-transparent bg-overlay-500">
@@ -334,8 +545,10 @@ export function LaTeXDialog(props) {
 }
 
 export function MoveDialog(props) {
-    const { bibliographyId, checkedCitations, setMoveWindowVisible: setIsVisible } = props;
+    const { setMoveWindowVisible: setIsVisible } = props;
     const bibliographies = useSelector((state) => state.bibliographies);
+    const bibliography = useFindBib();
+    const checkedCitations = useFindCheckedCitations();
     const [selectedBibliographyIds, setSelectedBibliographyIds] = useState([]);
     const dispatch = useDispatch();
 
@@ -353,9 +566,9 @@ export function MoveDialog(props) {
     function handleMove(toId) {
         dispatch(
             moveSelectedCitations({
-                fromId: bibliographyId,
-                toId: toId,
-                checkedCitations: checkedCitations,
+                fromId: bibliography.id,
+                toId,
+                checkedCitations,
             })
         );
         setIsVisible(false);
@@ -366,7 +579,7 @@ export function MoveDialog(props) {
         dispatch(
             copySelectedCitations({
                 toIds: selectedBibliographyIds,
-                checkedCitations: checkedCitations,
+                checkedCitations,
             })
         );
         setIsVisible(false);
@@ -377,7 +590,7 @@ export function MoveDialog(props) {
         <div className="move-window">
             <button onClick={() => setIsVisible(false)}>X</button>
             {bibliographies.map((bib) => {
-                if (bib.id !== bibliographyId)
+                if (bib.id !== bibliography.id)
                     return (
                         <div onClick={() => handleSelect(bib.id)}>
                             <BibliographyCard
@@ -499,23 +712,22 @@ export function CitationStylesMenu(props) {
                 </form>
             </search>
 
-            <List
-                height={500} // Adjust based on your needs
-                itemCount={filteredStyles.length}
-                itemSize={35} // Adjust based on the height of your items
-                width={300} // Adjust based on your needs
-            >
-                {({ index, style }) => (
-                    <button
-                        style={style}
-                        onClick={() => {
-                            setIsVisible(false);
-                            dispatch(addNewBib({ bibliographyStyle: filteredStyles[index] }));
-                        }}
-                    >
-                        {filteredStyles[index].name.long}
-                    </button>
-                )}
+            <List height={500} itemCount={filteredStyles.length} itemSize={35} width={300}>
+                {({ index, style }) => {
+                    const targetStyle = filteredStyles[index];
+                    return (
+                        <button
+                            style={style}
+                            onClick={() => {
+                                setIsVisible(false);
+                                dispatch(addNewBib({ bibliographyStyle: targetStyle }));
+                                citationEngine.updateCslFiles(targetStyle);
+                            }}
+                        >
+                            {targetStyle.name.long}
+                        </button>
+                    );
+                }}
             </List>
         </div>
     );
@@ -523,15 +735,8 @@ export function CitationStylesMenu(props) {
 
 // FIXME: Handle errors. It should't cut the for loop when something returns an error
 export function SmartGeneratorDialog(props) {
-    const {
-        searchByIdentifiersInput: input,
-        setSmartGeneratorDialogVisible: setIsVisible,
-        bibliographyId,
-        bibStyle,
-        savedCslFiles,
-        updateSavedCslFiles,
-    } = props;
-
+    const { searchByIdentifiersInput: input, setSmartGeneratorDialogVisible: setIsVisible } = props;
+    const bibliography = useFindBib();
     const [contentsArray, setContentsArray] = useState([]);
     const [references, setReferences] = useState("");
     const dispatch = useDispatch();
@@ -563,11 +768,9 @@ export function SmartGeneratorDialog(props) {
                         return null;
                 }
 
-                console.warn(content);
-
                 if (content) {
                     newContentsArray.push(content);
-                    dispatch(addNewCitation({ bibliographyId: bibliographyId, content }));
+                    dispatch(addNewCitation({ bibliographyId: bibliography.id, content }));
                 } else {
                     console.error("Couldn't find the content of the identifier " + identifier);
                 }
@@ -575,15 +778,13 @@ export function SmartGeneratorDialog(props) {
             setContentsArray(newContentsArray);
         }
         generateCitations();
-    }, [input, bibliographyId, dispatch]);
+    }, [input, bibliography.id, dispatch]);
 
     useEffect(() => {
         async function formatBibliography() {
             const formattedCitation = await citationEngine.formatBibliography(
                 contentsArray.map((content) => ({ content: content })),
-                bibStyle,
-                savedCslFiles,
-                updateSavedCslFiles
+                bibliography.style
             );
             const sanitizedReference = DOMPurify.sanitize(formattedCitation);
             setReferences(sanitizedReference);

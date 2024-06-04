@@ -3,9 +3,10 @@ import "@citation-js/plugin-csl";
 import "@citation-js/plugin-bibtex";
 import DOMPurify from "dompurify";
 import CSL from "citeproc";
+import db from "../db/dexie";
 
-export async function formatBibliography(citations, bibStyle, savedCslFiles, updateSavedCslFiles, format = "html") {
-    const cslFile = await getCslFile(bibStyle, savedCslFiles, updateSavedCslFiles);
+export async function formatBibliography(citations, bibStyle, format = "html") {
+    const cslFile = await getCslFile(bibStyle);
     const contentArray = createContentArray(citations);
 
     let config = plugins.config.get("@csl");
@@ -34,9 +35,9 @@ export async function formatLaTeX(citations, latexFormat = "bibtex") {
     return cite.format(latexFormat);
 }
 
-export async function formatIntextCitation(citationsArray, options, savedCslFiles, updateSavedCslFiles) {
-    if (!citationsArray) return;
-    const citations = citationsArray.map((cit) => cit.content);
+export async function formatIntextCitation(citations, bibStyle, format = "html") {
+    console.log(citations);
+    if (!citations) return;
     const citIds = citations.map((cit) => cit.id);
 
     const citeprocSys = {
@@ -51,32 +52,39 @@ export async function formatIntextCitation(citationsArray, options, savedCslFile
         },
     };
 
-    const cslFile = await getCslFile(options.bibStyle, savedCslFiles, updateSavedCslFiles);
+    const cslFile = await getCslFile(bibStyle);
     const citeproc = new CSL.Engine(citeprocSys, cslFile);
     citeproc.updateItems(citIds);
     const citation = {
         properties: {
             noteIndex: 0,
         },
-        citationItems: citIds.map((id) => ({ id, locator: undefined, label: undefined })),
+        citationItems: citIds.map((id) => {
+            const targetCitation = citations.find((cit) => cit.id === id);
+            return {
+                id,
+                locator: targetCitation.locator,
+                label: targetCitation.label,
+            };
+        }),
     };
-    return citeproc.previewCitationCluster(citation, [], [], "html");
+    return citeproc.previewCitationCluster(citation, [], [], format);
 }
 
-// TODO: It's better to also check if the cslFile is saved when the user adds a new bibliography and download if it doesn't exist
-async function getCslFile(bibStyle, savedCslFiles, updateSavedCslFiles) {
+async function getCslFile(bibStyle) {
     if (!bibStyle) return;
-    if (savedCslFiles && typeof savedCslFiles === "object" && bibStyle?.code in savedCslFiles) {
-        // Get CSL from the savedCslFiles object
-        return savedCslFiles?.[bibStyle?.code];
+    const savedCSLFiles = await loadLocalSCLFiles();
+    if (savedCSLFiles && bibStyle?.code in savedCSLFiles) {
+        // Get CSL from the savedCSLFiles object
+        return savedCSLFiles?.[bibStyle?.code];
     } else {
         if (navigator.onLine && bibStyle?.code) {
-            // Get CSL file from citation-style-language/styles repository and save it to the savedCslFiles object
+            // Get CSL file from citation-style-language/styles repository and save it to the savedCSLFiles object
             const response = await fetch(
                 `https://raw.githubusercontent.com/citation-style-language/styles/master/${bibStyle?.code}.csl`
             );
             const data = await response.text();
-            updateSavedCslFiles({ ...savedCslFiles, [bibStyle?.code]: data });
+            saveLocalSCLFiles({ ...savedCSLFiles, [bibStyle?.code]: data });
             return data;
         } else {
             console.error(
@@ -84,6 +92,33 @@ async function getCslFile(bibStyle, savedCslFiles, updateSavedCslFiles) {
             );
         }
     }
+}
+
+// Downloads the CSL file immediately when a new bibliography is added with a style that hasn't been used before
+export async function updateCslFiles(bibStyle) {
+    if (!bibStyle) return;
+    const savedCslFiles = await loadLocalSCLFiles();
+    if (!savedCslFiles || !(bibStyle?.code in savedCslFiles)) {
+        const response = await fetch(
+            `https://raw.githubusercontent.com/citation-style-language/styles/master/${bibStyle?.code}.csl`
+        );
+        const data = await response.text();
+        saveLocalSCLFiles({ ...savedCslFiles, [bibStyle?.code]: data });
+    }
+}
+
+async function loadLocalSCLFiles() {
+    const loadedLocalCSLFiles = await db.items.get("savedCSLFiles");
+    if (loadedLocalCSLFiles) {
+        const parsedLocalCSLFiles = await JSON.parse(loadedLocalCSLFiles.value);
+        return parsedLocalCSLFiles;
+    }
+    return null;
+}
+
+function saveLocalSCLFiles(CSLFiles) {
+    const serializedFiles = JSON.stringify(CSLFiles);
+    db.items.put({ id: "savedCSLFiles", value: serializedFiles });
 }
 
 function createContentArray(citationsArray) {

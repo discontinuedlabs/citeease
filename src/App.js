@@ -1,26 +1,18 @@
 import { useEffect, useState } from "react";
 import Bibliography from "./components/Bibliography";
 import { Route, Routes } from "react-router-dom";
-import db from "./db/dexie";
 import Home from "./components/Home";
-import { useIndexedDB, useReducerWithIndexedDB } from "./hooks/hooks";
 import { loadFromIndexedDB } from "./store/slices/bibsSlice";
 import Settings from "./components/Settings";
 import BibliographySettings from "./components/BibliographySettings";
 import MarkdownPage from "./components/MarkdownPage";
 import { AcceptDialog, ConfirmDialog } from "./components/ui/Dialogs";
 import NotFoundPage from "./components/NotFoundPage";
-import { useLiveQuery } from "dexie-react-hooks";
 import { useDispatch } from "react-redux";
 
 export default function App() {
-    const [savedCslFiles, updateSavedCslFiles] = useIndexedDB(
-        "savedCslFiles",
-        useLiveQuery(() => db.savedCslFiles?.get()) || {}
-    );
     const [acceptDialog, setAcceptDialog] = useState({});
     const [confirmDialog, setConfirmDialog] = useState({});
-
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -49,14 +41,7 @@ export default function App() {
                 <Route path="/settings" element={<Settings />} />
                 <Route
                     path="/:bibId"
-                    element={
-                        <Bibliography
-                            showAcceptDialog={showAcceptDialog}
-                            showConfirmDialog={showConfirmDialog}
-                            savedCslFiles={savedCslFiles}
-                            updateSavedCslFiles={updateSavedCslFiles}
-                        />
-                    }
+                    element={<Bibliography showAcceptDialog={showAcceptDialog} showConfirmDialog={showConfirmDialog} />}
                 />
                 <Route path="/:bibId/settings" element={<BibliographySettings />} />
 

@@ -122,7 +122,7 @@ const bibsSlice = createSlice({
                         // If the citation exists, update it
                         updatedCitations = bib.citations.map((cit, index) => {
                             if (index === citationIndex) {
-                                return { ...cit, ...action.payload.editedCitation, isChecked: false }; // Update the existing citation
+                                return { ...cit, ...action.payload.editedCitation, isChecked: false };
                             }
                             return cit;
                         });

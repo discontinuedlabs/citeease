@@ -73,3 +73,8 @@ export function useFindBib() {
     const bibliography = bibliographies?.find((bib) => bib.id === bibliographyId);
     return bibliography;
 }
+
+export function useFindCheckedCitations() {
+    const bibliography = useFindBib();
+    return bibliography?.citations.filter((cit) => cit?.isChecked);
+}

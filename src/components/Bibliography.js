@@ -24,7 +24,7 @@ import {
     loadFromIndexedDB,
     updateBibField,
 } from "../store/slices/bibsSlice";
-import { useFindBib } from "../hooks/hooks";
+import { useFindBib, useFindCheckedCitations } from "../hooks/hooks";
 
 export const SOURCE_TYPES = {
     ARTICLE_JOURNAL: {
@@ -36,10 +36,10 @@ export const SOURCE_TYPES = {
 };
 
 export default function Bibliography(props) {
-    const { savedCslFiles, updateSavedCslFiles, showConfirmDialog, showAcceptDialog } = props;
+    const { showConfirmDialog, showAcceptDialog } = props;
     const bibliographies = useSelector((state) => state.bibliographies);
     const bibliography = useFindBib();
-    const checkedCitations = bibliography?.citations.filter((cit) => cit?.isChecked);
+    const checkedCitations = useFindCheckedCitations();
 
     // const [collaborationOpened, setCollaborationOpened] = useState(false);
     const [intextCitationDialogVisible, setIntextCitationDialogVisible] = useState(false);
@@ -101,8 +101,6 @@ export default function Bibliography(props) {
         const formattedCitations = await citationEngine.formatBibliography(
             checkedCitations,
             bibliography?.style,
-            savedCslFiles,
-            updateSavedCslFiles,
             "text"
         );
 
@@ -126,7 +124,7 @@ export default function Bibliography(props) {
                 () =>
                     dispatch(
                         addNewBibAndMoveSelectedCitations({
-                            checkedCitations: checkedCitations,
+                            checkedCitations,
                             bibliographyStyle: bibliography?.style,
                         })
                     ),
@@ -136,11 +134,11 @@ export default function Bibliography(props) {
     }
 
     function handleDuplicate() {
-        dispatch(duplicateSelectedCitations({ bibliographyId: bibliography?.id, checkedCitations: checkedCitations }));
+        dispatch(duplicateSelectedCitations({ bibliographyId: bibliography?.id, checkedCitations }));
     }
 
     function handleDelete() {
-        dispatch(deleteSelectedCitations({ bibliographyId: bibliography?.id, checkedCitations: checkedCitations }));
+        dispatch(deleteSelectedCitations({ bibliographyId: bibliography?.id, checkedCitations }));
     }
 
     function handleRename(value) {
@@ -298,27 +296,20 @@ export default function Bibliography(props) {
 
                 <ReferenceEntries
                     {...{
-                        bibliography,
-                        savedCslFiles,
-                        updateSavedCslFiles,
                         openCitationForm,
                         openIntextCitationDialog,
                     }}
                 />
 
-                {intextCitationDialogVisible && checkedCitations.length !== 0 && (
-                    <IntextCitationDialog {...{ checkedCitations, savedCslFiles, updateSavedCslFiles }} />
-                )}
+                {intextCitationDialogVisible && checkedCitations.length !== 0 && <IntextCitationDialog />}
 
                 {citationFormVisible && bibliography?.editedCitation && (
-                    <CitationForm {...{ bibliography, showAcceptDialog, setCitationFormVisible }} />
+                    <CitationForm {...{ showAcceptDialog, setCitationFormVisible }} />
                 )}
 
-                {LaTeXWindowVisible && <LaTeXDialog {...{ checkedCitations, setLaTeXWindowVisible }} />}
+                {LaTeXWindowVisible && <LaTeXDialog {...{ setLaTeXWindowVisible }} />}
 
-                {moveWindowVisible && (
-                    <MoveDialog {...{ bibliographyId: bibliography.id, checkedCitations, setMoveWindowVisible }} />
-                )}
+                {moveWindowVisible && <MoveDialog {...{ setMoveWindowVisible }} />}
 
                 {renameWindowVisible && (
                     <RenameDialog {...{ title: bibliography?.title, setRenameWindowVisible, handleRename }} />
@@ -329,10 +320,6 @@ export default function Bibliography(props) {
                         {...{
                             searchByIdentifiersInput,
                             setSmartGeneratorDialogVisible,
-                            bibliographyId: bibliography.id,
-                            bibStyle: bibliography.style,
-                            savedCslFiles,
-                            updateSavedCslFiles,
                         }}
                     />
                 )}
