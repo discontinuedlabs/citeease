@@ -23,6 +23,7 @@ import { useFindBib, useFindCheckedCitations } from "../hooks/hooks";
 import ArticleJournal from "./sourceTypes/ArticleJournal";
 import Webpage from "./sourceTypes/Webpage";
 import Book from "./sourceTypes/Book";
+import Tag from "./ui/Tag";
 
 const MASTER_CHECKBOX_STATES = {
     CHECKED: "checked", // All reference entries are checked
@@ -189,6 +190,7 @@ const LOCATOR_OPTIONS = {
         code: "volume",
     },
 };
+
 const DEFAULT_LOCATOR = LOCATOR_OPTIONS.page;
 
 const MOST_POPULAR_STYLES = [
@@ -198,6 +200,34 @@ const MOST_POPULAR_STYLES = [
     "chicago-author-date",
     "ieee",
     "council-of-science-editors",
+];
+
+const TAGS_COLORS = {
+    blue: "rgb(79,91,213)",
+    orange: "rgb(250,126,30)",
+    pink: "rgb(214,41,118)",
+    purple: "rgb(150,47,191)",
+    yellow: "rgb(170,150,0)",
+    green: "rgb(0,128,0)",
+    red: "rgb(255,0,0)",
+    gray: "rgb(128,128,128)",
+    teal: "rgb(0,128,128)",
+    cyan: "rgb(0,170,190)",
+    Bluishgray: "rgb(128,128,170)",
+};
+
+const PREBUILT_TAGS = [
+    { label: "Completed", color: TAGS_COLORS.green, id: "builtin-completed" },
+    { label: "In progress", color: TAGS_COLORS.yellow, id: "builtin-inProgress" },
+    { label: "Pending Review", color: TAGS_COLORS.orange, id: "builtin-pendingReview" },
+    { label: "High priority", color: TAGS_COLORS.red, id: "builtin-highPriority" },
+    { label: "Low priority", color: TAGS_COLORS.blue, id: "builtin-lowPriority" },
+    { label: "Research topic", color: TAGS_COLORS.purple, id: "builtin-researchTopic" },
+    { label: "Course project", color: TAGS_COLORS.cyan, id: "builtin-courseProject" },
+    { label: "Personal project", color: TAGS_COLORS.pink, id: "builtin-personalProject" },
+    { label: "Collaborative", color: TAGS_COLORS.teal, id: "builtin-collaborative" },
+    { label: "Archived", color: TAGS_COLORS.gray, id: "builtin-archived" },
+    { label: "Discontinued", color: TAGS_COLORS.Bluishgray, id: "builtin-discontinued" },
 ];
 
 export function ReferenceEntries(props) {
@@ -818,6 +848,32 @@ export function SmartGeneratorDialog(props) {
             <button onClick={() => setIsVisible(false)}>X</button>
             <div>{HTMLReactParser(references)}</div>
             <button>Accept</button>
+        </div>
+    );
+}
+
+export function TagsDialog(props) {
+    const { setTagsDialogVisible: setIsVisible, onTagAdded, onTagRemoved } = props;
+    const bibliography = useFindBib();
+    const settings = useSelector((state) => state.settings);
+    const tags = settings?.tags || PREBUILT_TAGS;
+
+    return (
+        <div>
+            <button onClick={() => setIsVisible(false)}>X</button>
+            <h3>Tags</h3>
+            <div className="flex gap-1 flex-wrap">
+                {bibliography?.tags?.map((tag, index) => (
+                    <Tag key={index} tagProps={tag} onClick={onTagRemoved} showX={true} />
+                ))}
+            </div>
+            <div className="flex gap-1 flex-wrap">
+                {tags
+                    .filter((tag) => !bibliography?.tags?.some((bibTag) => bibTag.id === tag.id))
+                    .map((tag, index) => {
+                        return <Tag key={index} tagProps={tag} onClick={onTagAdded} />;
+                    })}
+            </div>
         </div>
     );
 }

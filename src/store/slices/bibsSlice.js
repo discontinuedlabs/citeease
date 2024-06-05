@@ -22,6 +22,7 @@ const bibsSlice = createSlice({
                 dateModified: new Date().toString(),
                 id: "bib=" + nanoid(10),
                 citations: [],
+                tags: [],
             };
             const newState = [...bibs, newBib];
             saveToIndexedDB(newState);

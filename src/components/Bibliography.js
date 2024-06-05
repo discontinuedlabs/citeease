@@ -12,6 +12,7 @@ import {
     AddCitationMenu,
     SmartGeneratorDialog,
     CitationStylesMenu,
+    TagsDialog,
 } from "./BibliographyTools";
 import { HotKeys } from "react-hotkeys";
 import { useDispatch, useSelector } from "react-redux";
@@ -26,6 +27,7 @@ import {
     updateBibField,
 } from "../store/slices/bibsSlice";
 import { useFindBib, useFindCheckedCitations } from "../hooks/hooks";
+import Tag from "./ui/Tag";
 
 export const SOURCE_TYPES = {
     ARTICLE_JOURNAL: {
@@ -51,6 +53,7 @@ export default function Bibliography(props) {
     const [renameWindowVisible, setRenameWindowVisible] = useState(false);
     const [smartGeneratorDialogVisible, setSmartGeneratorDialogVisible] = useState(false);
     const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
+    const [tagsDialogVisible, setTagsDialogVisible] = useState(false);
     const [searchByIdentifiersInput, setSearchByIdentifiersInput] = useState("");
 
     const navigate = useNavigate();
@@ -95,6 +98,26 @@ export default function Bibliography(props) {
     function handleSearchByIdentifiers(input) {
         setSearchByIdentifiersInput(input);
         setSmartGeneratorDialogVisible(true);
+    }
+
+    function addTagToBib(tag) {
+        dispatch(
+            updateBibField({
+                bibliographyId: bibliography.id,
+                key: "tags",
+                value: [...bibliography.tags, tag],
+            })
+        );
+    }
+
+    function removeTagFromBib(tag) {
+        dispatch(
+            updateBibField({
+                bibliographyId: bibliography.id,
+                key: "tags",
+                value: bibliography.tags.filter((prevTag) => prevTag.id !== tag.id),
+            })
+        );
     }
 
     function handleImportCitation() {}
@@ -178,6 +201,11 @@ export default function Bibliography(props) {
                 <div className="flex justify-between items-center">
                     <h1>{bibliography?.title}</h1>
                     <h3>{bibliography?.style.name.long}</h3>
+                    <div className="flex gap-1 flex-wrap">
+                        {bibliography?.tags?.map((tag, index) => (
+                            <Tag key={index} tagProps={tag} onClick={() => setTagsDialogVisible(true)} />
+                        ))}
+                    </div>
                     <ContextMenu
                         icon="more_vert"
                         menuStyle={{
@@ -247,6 +275,7 @@ export default function Bibliography(props) {
                                 : // When nothing is selected, only options that target the bibliography itself show to the user
                                   [
                                       { label: "Rename", method: () => setRenameWindowVisible(true) },
+                                      { label: "Tags", method: () => setTagsDialogVisible(true) },
                                       {
                                           label: "Change style",
                                           method: () => setCitationStyleMenuVisible(true),
@@ -339,7 +368,7 @@ export default function Bibliography(props) {
                 )}
 
                 {addCitationMenuVisible && (
-                    // Since the openCitationForm is passed to this component, make the handleSearchByIdentifiers and handleImportCitation inside it
+                    // TODO: Since the openCitationForm is passed to this component, make the handleSearchByIdentifiers and handleImportCitation inside it
                     <AddCitationMenu
                         {...{
                             setAddCitationMenuVisible,
@@ -347,6 +376,12 @@ export default function Bibliography(props) {
                             handleSearchByIdentifiers,
                             handleImportCitation,
                         }}
+                    />
+                )}
+
+                {tagsDialogVisible && (
+                    <TagsDialog
+                        {...{ setTagsDialogVisible, onTagAdded: addTagToBib, onTagRemoved: removeTagFromBib }}
                     />
                 )}
 
