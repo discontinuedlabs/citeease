@@ -11,7 +11,7 @@ export default function Tag(props) {
 
     return (
         <button
-            className="flex gap-1 font-bold p-1 rounded-md"
+            className="flex gap-1 font-bold p-1 rounded-md transition duration-150 ease-in-out"
             style={{
                 border: `${tagProps.color} solid 2px`,
                 color: tagProps.color,

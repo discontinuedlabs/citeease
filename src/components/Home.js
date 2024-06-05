@@ -7,6 +7,7 @@ import { CitationStylesMenu } from "./BibliographyTools";
 import { useDispatch, useSelector } from "react-redux";
 import * as citationEngine from "../utils/citationEngine";
 import { addNewBib } from "../store/slices/bibsSlice";
+import Logo from "./ui/Logo";
 
 export default function Home() {
     const bibliographies = useSelector((state) => state.bibliographies);
@@ -22,7 +23,8 @@ export default function Home() {
 
     return (
         <div className="mx-auto max-w-[50rem]">
-            <h1>Home</h1>
+            <Logo />
+
             <ContextMenu
                 icon="more_vert"
                 menuStyle={{}}
