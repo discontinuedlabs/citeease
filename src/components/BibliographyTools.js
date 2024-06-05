@@ -30,6 +30,176 @@ const MASTER_CHECKBOX_STATES = {
     INDETERMINATE: "indeterminate", // Some reference entries are checked
 };
 
+// ATTENTION: Needs review
+const LOCATOR_OPTIONS = {
+    appendix: {
+        def: "A supplementary section at the end of a document.",
+        placeholder: "eg., Appendix A or Appendix B",
+        name: "Appendix",
+        code: "appendix",
+    },
+    "article-locator": {
+        def: "A unique identifier for an article, often used in digital or online publications.",
+        placeholder: "eg., 12345",
+        name: "Article Locator",
+        code: "article-locator",
+    },
+    book: {
+        def: "A specific book or volume within a series or collection.",
+        placeholder: "eg., Book Title or Book Collection",
+        name: "Book",
+        code: "book",
+    },
+    canon: {
+        def: "A standard or rule, often used in legal or religious contexts.",
+        placeholder: "eg., 15 or 15-20",
+        name: "Canon",
+        code: "canon",
+    },
+    chapter: {
+        def: "A specific chapter within a book.",
+        placeholder: "eg., 5 or 5-7",
+        name: "Chapter",
+        code: "chapter",
+    },
+    column: {
+        def: "A vertical division of text in a document, often in newspapers or magazines.",
+        placeholder: "eg., 3 or 3-4",
+        name: "Column",
+        code: "column",
+    },
+    elocation: {
+        def: "An electronic location identifier for digital content.",
+        placeholder: "eg., e12345",
+        name: "Elocation",
+        code: "elocation",
+    },
+    equation: {
+        def: "A specific equation within a text.",
+        placeholder: "eg., 7",
+        name: "Equation",
+        code: "equation",
+    },
+    figure: {
+        def: "A specific figure or illustration in a document.",
+        placeholder: "eg., 2",
+        name: "Figure",
+        code: "figure",
+    },
+    folio: {
+        def: "A leaf of a manuscript or book, numbered on the front side only.",
+        placeholder: "eg., 10",
+        name: "Folio",
+        code: "folio",
+    },
+    issue: {
+        def: "A specific issue of a journal or magazine.",
+        placeholder: "eg., 4",
+        name: "Issue",
+        code: "issue",
+    },
+    line: {
+        def: "A specific line in a poem, play, or other text.",
+        placeholder: "eg., 23",
+        name: "Line",
+        code: "line",
+    },
+    note: {
+        def: "A specific footnote or endnote in a text.",
+        placeholder: "eg., 7",
+        name: "Note",
+        code: "note",
+    },
+    opus: {
+        def: "A specific work or composition, often used in music.",
+        placeholder: "eg., 22",
+        name: "Opus",
+        code: "opus",
+    },
+    page: {
+        def: "A specific page or range of pages in a document.",
+        placeholder: "eg., 3 or 9-22",
+        name: "Page",
+        code: "page",
+    },
+    paragraph: {
+        def: "A specific paragraph in a document.",
+        placeholder: "eg., 4 or 4-6",
+        name: "Paragraph",
+        code: "paragraph",
+    },
+    part: {
+        def: "A specific part or section of a larger work.",
+        placeholder: "eg., 2 or 2-3",
+        name: "Part",
+        code: "part",
+    },
+    rule: {
+        def: "A specific rule or regulation, often used in legal or procedural contexts.",
+        placeholder: "eg., 5 or 5-8",
+        name: "Rule",
+        code: "rule",
+    },
+    section: {
+        def: "A specific section of a document.",
+        placeholder: "eg., Introduction",
+        name: "Section",
+        code: "section",
+    },
+    "sub-verbo": {
+        def: "An entry under a specific word or heading in a reference work.",
+        placeholder: "eg., Equity",
+        name: "Sub-Verbo",
+        code: "sub-verbo",
+    },
+    supplement: {
+        def: "A supplementary issue or addition to a publication.",
+        placeholder: "eg., 1",
+        name: "Supplement",
+        code: "supplement",
+    },
+    table: {
+        def: "A specific table within a document.",
+        placeholder: "eg., 4",
+        name: "Table",
+        code: "table",
+    },
+    timestamp: {
+        def: "A specific time marker, often used in audiovisual materials.",
+        placeholder: "eg., 00:15:30",
+        name: "Timestamp",
+        code: "timestamp",
+    },
+    title: {
+        def: "A specific title of a work or section within a larger work.",
+        placeholder: "eg., Title",
+        name: "Title",
+        code: "title",
+    },
+    verse: {
+        def: "A specific verse in a poem, song, or scripture.",
+        placeholder: "eg., 7 or 2-16",
+        name: "Verse",
+        code: "verse",
+    },
+    volume: {
+        def: "A specific volume within a series or set.",
+        placeholder: "eg., 3 or 3-4",
+        name: "Volume",
+        code: "volume",
+    },
+};
+const DEFAULT_LOCATOR = LOCATOR_OPTIONS.page;
+
+const MOST_POPULAR_STYLES = [
+    "apa",
+    "apa-6th-edition",
+    "modern-language-association",
+    "chicago-author-date",
+    "ieee",
+    "council-of-science-editors",
+];
+
 export function ReferenceEntries(props) {
     const { openCitationForm, openIntextCitationDialog } = props;
     const bibliography = useFindBib();
@@ -184,167 +354,6 @@ export function IntextCitationDialog(props) {
     const checkedCitations = useFindCheckedCitations();
     const [IntextCitation, setIntextCitation] = useState("");
     const [citationsForIntext, setCitationsForIntext] = useState(checkedCitations.map((cit) => cit.content));
-
-    // ATTENTION: Needs review
-    const LOCATOR_OPTIONS = {
-        appendix: {
-            def: "A supplementary section at the end of a document.",
-            placeholder: "eg., Appendix A or Appendix B",
-            name: "Appendix",
-            code: "appendix",
-        },
-        "article-locator": {
-            def: "A unique identifier for an article, often used in digital or online publications.",
-            placeholder: "eg., 12345",
-            name: "Article Locator",
-            code: "article-locator",
-        },
-        book: {
-            def: "A specific book or volume within a series or collection.",
-            placeholder: "eg., Book Title or Book Collection",
-            name: "Book",
-            code: "book",
-        },
-        canon: {
-            def: "A standard or rule, often used in legal or religious contexts.",
-            placeholder: "eg., 15 or 15-20",
-            name: "Canon",
-            code: "canon",
-        },
-        chapter: {
-            def: "A specific chapter within a book.",
-            placeholder: "eg., 5 or 5-7",
-            name: "Chapter",
-            code: "chapter",
-        },
-        column: {
-            def: "A vertical division of text in a document, often in newspapers or magazines.",
-            placeholder: "eg., 3 or 3-4",
-            name: "Column",
-            code: "column",
-        },
-        elocation: {
-            def: "An electronic location identifier for digital content.",
-            placeholder: "eg., e12345",
-            name: "Elocation",
-            code: "elocation",
-        },
-        equation: {
-            def: "A specific equation within a text.",
-            placeholder: "eg., 7",
-            name: "Equation",
-            code: "equation",
-        },
-        figure: {
-            def: "A specific figure or illustration in a document.",
-            placeholder: "eg., 2",
-            name: "Figure",
-            code: "figure",
-        },
-        folio: {
-            def: "A leaf of a manuscript or book, numbered on the front side only.",
-            placeholder: "eg., 10",
-            name: "Folio",
-            code: "folio",
-        },
-        issue: {
-            def: "A specific issue of a journal or magazine.",
-            placeholder: "eg., 4",
-            name: "Issue",
-            code: "issue",
-        },
-        line: {
-            def: "A specific line in a poem, play, or other text.",
-            placeholder: "eg., 23",
-            name: "Line",
-            code: "line",
-        },
-        note: {
-            def: "A specific footnote or endnote in a text.",
-            placeholder: "eg., 7",
-            name: "Note",
-            code: "note",
-        },
-        opus: {
-            def: "A specific work or composition, often used in music.",
-            placeholder: "eg., 22",
-            name: "Opus",
-            code: "opus",
-        },
-        page: {
-            def: "A specific page or range of pages in a document.",
-            placeholder: "eg., 3 or 9-22",
-            name: "Page",
-            code: "page",
-        },
-        paragraph: {
-            def: "A specific paragraph in a document.",
-            placeholder: "eg., 4 or 4-6",
-            name: "Paragraph",
-            code: "paragraph",
-        },
-        part: {
-            def: "A specific part or section of a larger work.",
-            placeholder: "eg., 2 or 2-3",
-            name: "Part",
-            code: "part",
-        },
-        rule: {
-            def: "A specific rule or regulation, often used in legal or procedural contexts.",
-            placeholder: "eg., 5 or 5-8",
-            name: "Rule",
-            code: "rule",
-        },
-        section: {
-            def: "A specific section of a document.",
-            placeholder: "eg., Introduction",
-            name: "Section",
-            code: "section",
-        },
-        "sub-verbo": {
-            def: "An entry under a specific word or heading in a reference work.",
-            placeholder: "eg., Equity",
-            name: "Sub-Verbo",
-            code: "sub-verbo",
-        },
-        supplement: {
-            def: "A supplementary issue or addition to a publication.",
-            placeholder: "eg., 1",
-            name: "Supplement",
-            code: "supplement",
-        },
-        table: {
-            def: "A specific table within a document.",
-            placeholder: "eg., 4",
-            name: "Table",
-            code: "table",
-        },
-        timestamp: {
-            def: "A specific time marker, often used in audiovisual materials.",
-            placeholder: "eg., 00:15:30",
-            name: "Timestamp",
-            code: "timestamp",
-        },
-        title: {
-            def: "A specific title of a work or section within a larger work.",
-            placeholder: "eg., Title",
-            name: "Title",
-            code: "title",
-        },
-        verse: {
-            def: "A specific verse in a poem, song, or scripture.",
-            placeholder: "eg., 7 or 2-16",
-            name: "Verse",
-            code: "verse",
-        },
-        volume: {
-            def: "A specific volume within a series or set.",
-            placeholder: "eg., 3 or 3-4",
-            name: "Volume",
-            code: "volume",
-        },
-    };
-    const DEFAULT_LOCATOR = LOCATOR_OPTIONS.page;
 
     useEffect(() => {
         async function formatIntextCitation() {
@@ -638,11 +647,23 @@ export function CitationStylesMenu(props) {
     const [styles, setStyles] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
 
+    const MOST_POPULAR_STYLES_LABEL = "Most popular styles";
+    const OTHER_STYLES_LABEL = "Other styles";
+
     useEffect(() => {
         async function fetchStyles() {
             const response = await fetch(`${process.env.PUBLIC_URL}/styles.json`);
             const data = await response.json();
-            setStyles(data);
+
+            data.unshift(OTHER_STYLES_LABEL);
+            const sortedData = data.sort((a, b) => {
+                if (MOST_POPULAR_STYLES.includes(a?.code)) return -1;
+                if (MOST_POPULAR_STYLES.includes(b?.code)) return 1;
+                return 0;
+            });
+            sortedData.unshift(MOST_POPULAR_STYLES_LABEL);
+
+            setStyles(sortedData);
         }
         fetchStyles();
     }, []);
@@ -683,11 +704,9 @@ export function CitationStylesMenu(props) {
             return found;
         }
 
-        if (searchTerm) {
-            return testStrings([style.name.long, style.name.short, style.code]);
-        } else {
-            return true;
-        }
+        if (style === MOST_POPULAR_STYLES_LABEL || style === OTHER_STYLES_LABEL) return true;
+        else if (searchTerm) return testStrings([style?.name?.long, style?.name?.short, style?.code]);
+        else return true;
     });
 
     return (
@@ -709,6 +728,9 @@ export function CitationStylesMenu(props) {
             <List height={500} itemCount={filteredStyles.length} itemSize={35} width={300}>
                 {({ index, style }) => {
                     const targetStyle = filteredStyles[index];
+                    if (/other styles|most popular/i.test(targetStyle)) {
+                        return <h3 style={style}>{targetStyle}</h3>;
+                    }
                     return (
                         <button
                             style={style}
@@ -722,6 +744,12 @@ export function CitationStylesMenu(props) {
                     );
                 }}
             </List>
+            <small>
+                <b>Note:</b> Some less common citation styles may have formatting issues. If you encounter any problems,
+                please report them by opening an issue on the{" "}
+                <a href="https://github.com/citation-style-language/styles/issues">CSL GitHub repository</a> or contact
+                us at <a href="mailto:discontinuedlabs@gmail.com">discontinuedlabs@gmail.com</a>.
+            </small>
         </div>
     );
 }
