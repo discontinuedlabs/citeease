@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/citeease/static/css/main.dea50124.css",
-    "main.js": "/citeease/static/js/main.296d070d.js",
+    "main.js": "/citeease/static/js/main.40fb9cff.js",
     "service-worker.js": "/citeease/service-worker.js",
     "index.html": "/citeease/index.html",
     "main.dea50124.css.map": "/citeease/static/css/main.dea50124.css.map",
-    "main.296d070d.js.map": "/citeease/static/js/main.296d070d.js.map"
+    "main.40fb9cff.js.map": "/citeease/static/js/main.40fb9cff.js.map"
   },
   "entrypoints": [
     "static/css/main.dea50124.css",
-    "static/js/main.296d070d.js"
+    "static/js/main.40fb9cff.js"
   ]
 }
