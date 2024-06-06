@@ -17,7 +17,7 @@ import HTMLReactParser from "html-react-parser/lib/index";
 import { FixedSizeList as List } from "react-window";
 import * as citationUtils from "../utils/citationUtils";
 import { useDispatch, useSelector } from "react-redux";
-import { useFindBib, useFindCheckedCitations } from "../hooks/hooks";
+import { useFindBib, useFindCheckedCitations } from "../hooks/hooks.ts";
 import Tag from "./ui/Tag";
 
 // Source types

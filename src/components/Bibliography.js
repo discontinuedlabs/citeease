@@ -26,7 +26,7 @@ import {
     loadFromIndexedDB,
     updateBibField,
 } from "../store/slices/bibsSlice";
-import { useFindBib, useFindCheckedCitations } from "../hooks/hooks";
+import { useFindBib, useFindCheckedCitations } from "../hooks/hooks.ts";
 import Tag from "./ui/Tag";
 
 export const SOURCE_TYPES = {

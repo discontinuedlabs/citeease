@@ -3,7 +3,7 @@ import { TAG_COLORS, TAG_COLOR_VALUES, addTag, deleteTag, restoreDefaultTags } f
 import Tag from "./ui/Tag";
 import { useState } from "react";
 import { nanoid } from "nanoid";
-import { useTagBgColor } from "../hooks/hooks";
+import { useTagBgColor } from "../hooks/hooks.ts";
 
 export function TagsManager(props) {
     const { setTagsManagerVisible: setIsVisible } = props;
@@ -52,7 +52,7 @@ export function TagsManager(props) {
                             type="button"
                             key={index}
                             style={{ backgroundColor: TAG_COLOR_VALUES[color] }}
-                            onClick={() => setTagColor(color)} // Why does this triggers submit?
+                            onClick={() => setTagColor(color)}
                         ></button>
                     ))}
                 </div>

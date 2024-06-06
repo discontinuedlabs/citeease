@@ -1,4 +1,4 @@
-import { useTagBgColor } from "../../hooks/hooks";
+import { useTagBgColor } from "../../hooks/hooks.ts";
 import { TAG_COLOR_VALUES } from "../../store/slices/settingsSlice";
 
 export default function Tag(props) {

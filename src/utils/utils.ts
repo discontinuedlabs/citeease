@@ -1,10 +1,10 @@
-export function timeAgo(dateString) {
+export function timeAgo(dateString: string): string {
     const now = new Date();
     const then = new Date(dateString);
 
-    const diffInSeconds = Math.floor((now - then) / 1000);
+    const diffInSeconds = Math.floor((now.getTime() - then.getTime()) / 1000);
 
-    let formattedTime;
+    let formattedTime: string;
 
     if (diffInSeconds < 60) {
         // Less than a minute
@@ -12,7 +12,7 @@ export function timeAgo(dateString) {
     } else if (diffInSeconds < 3600) {
         // Less than an hour
         formattedTime = `${Math.floor(diffInSeconds / 60)} ${
-            Math.floor(diffInSeconds / 60) === 1 ? "mintute" : "minutes"
+            Math.floor(diffInSeconds / 60) === 1 ? "minute" : "minutes"
         } ago`;
     } else if (diffInSeconds < 86400) {
         // Less than 24 hours
@@ -34,7 +34,11 @@ export function timeAgo(dateString) {
         formattedTime = `${then.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
     } else {
         // More than a year
-        formattedTime = `${then.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
+        formattedTime = `${then.toLocaleDateString(undefined, {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+        })}`;
     }
 
     return formattedTime;
