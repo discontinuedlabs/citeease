@@ -1,6 +1,5 @@
 import { nanoid } from "nanoid";
 import { useNavigate } from "react-router-dom";
-import "../../css/SettingsComponents.css";
 
 export function SettingsSection(props) {
     const { title, children } = props;
@@ -25,22 +24,33 @@ export function SettingsInput(props) {
 }
 
 export function SettingsButton(props) {
-    const { label, color, width = "fit-content", maxWidth = "unset", onClick } = props;
+    const { children, style = {}, onClick } = props;
 
     return (
-        <button className="settings-button" style={{ backgroundColor: color, width, maxWidth }} onClick={onClick}>
-            {label}
+        <button
+            style={style}
+            onClick={(event) => {
+                if (onClick) onclick(event);
+            }}
+        >
+            {children}
         </button>
     );
 }
 
 export function SettingsNavigate(props) {
-    const { label, to } = props;
+    const { children, to, onClick } = props;
     const navigate = useNavigate();
 
     return (
-        <button className="settings-navigate" onClick={() => navigate(to)}>
-            {label}
+        <button
+            className="w-full p-2 bg-transparent border-transparent rounded-md mb-2 text-start transition duration-150 ease-in-out transform hover:bg-neutral-transparentGray"
+            onClick={(event) => {
+                if (to) navigate(to);
+                if (onClick) onClick(event);
+            }}
+        >
+            {children}
         </button>
     );
 }

@@ -57,9 +57,10 @@ module.exports = {
                 neutral: {
                     black: "#000813",
                     yellow: "#ffd60a",
-                    lightGray: "#cce6ff",
+                    lightGray: "hsla(211, 100%, 12%, 0.5)",
                     white: "#f6f8f9",
-                    transparentBlue: "hsla(211, 100%, 12%, 0.5)",
+                    transparentBlue: "#cce6ff",
+                    transparentGray: "hsla(211, 100%, 12%, 0.1)",
                 },
             },
             boxShadow: {

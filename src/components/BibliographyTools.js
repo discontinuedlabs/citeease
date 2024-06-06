@@ -18,12 +18,12 @@ import { FixedSizeList as List } from "react-window";
 import * as citationUtils from "../utils/citationUtils";
 import { useDispatch, useSelector } from "react-redux";
 import { useFindBib, useFindCheckedCitations } from "../hooks/hooks";
+import Tag from "./ui/Tag";
 
 // Source types
 import ArticleJournal from "./sourceTypes/ArticleJournal";
 import Webpage from "./sourceTypes/Webpage";
 import Book from "./sourceTypes/Book";
-import Tag from "./ui/Tag";
 
 const MASTER_CHECKBOX_STATES = {
     CHECKED: "checked", // All reference entries are checked
@@ -202,34 +202,6 @@ const MOST_POPULAR_STYLES = [
     "council-of-science-editors",
 ];
 
-const TAGS_COLORS = {
-    blue: "rgb(79,91,213)",
-    orange: "rgb(250,126,30)",
-    pink: "rgb(214,41,118)",
-    purple: "rgb(150,47,191)",
-    yellow: "rgb(170,150,0)",
-    green: "rgb(0,128,0)",
-    red: "rgb(255,0,0)",
-    gray: "rgb(128,128,128)",
-    teal: "rgb(0,128,128)",
-    cyan: "rgb(0,170,190)",
-    Bluishgray: "rgb(128,128,170)",
-};
-
-const PREBUILT_TAGS = [
-    { label: "Completed", color: TAGS_COLORS.green, id: "builtin-completed" },
-    { label: "In progress", color: TAGS_COLORS.yellow, id: "builtin-inProgress" },
-    { label: "Pending Review", color: TAGS_COLORS.orange, id: "builtin-pendingReview" },
-    { label: "High priority", color: TAGS_COLORS.red, id: "builtin-highPriority" },
-    { label: "Low priority", color: TAGS_COLORS.blue, id: "builtin-lowPriority" },
-    { label: "Research topic", color: TAGS_COLORS.purple, id: "builtin-researchTopic" },
-    { label: "Course project", color: TAGS_COLORS.cyan, id: "builtin-courseProject" },
-    { label: "Personal project", color: TAGS_COLORS.pink, id: "builtin-personalProject" },
-    { label: "Collaborative", color: TAGS_COLORS.teal, id: "builtin-collaborative" },
-    { label: "Archived", color: TAGS_COLORS.gray, id: "builtin-archived" },
-    { label: "Discontinued", color: TAGS_COLORS.Bluishgray, id: "builtin-discontinued" },
-];
-
 export function ReferenceEntries(props) {
     const { openCitationForm, openIntextCitationDialog } = props;
     const bibliography = useFindBib();
@@ -319,8 +291,8 @@ export function ReferenceEntries(props) {
     }
 
     return (
-        <div className="reference-entries-component">
-            <div className="reference-entries-header" key={"header"}>
+        <div>
+            <div key={"header"}>
                 {bibliography?.citations.length !== 0 && (
                     <input
                         type="checkbox"
@@ -345,7 +317,7 @@ export function ReferenceEntries(props) {
                     const sanitizedReferences = DOMPurify.sanitize(ref);
                     return (
                         <div
-                            className={`flex items-start justify-between py-2 px-2 space-y-2 space-x-2 rounded-md mb-1 transition-all duration-200 hover:bg-overlay-100 ${
+                            className={`flex items-start justify-between py-2 px-2 space-y-2 space-x-2 rounded-md mb-1 transition-all duration-200 hover:bg-neutral-transparentGray ${
                                 citation?.isChecked ? "bg-secondary-100 hover:bg-secondary-200" : ""
                             }`}
                             key={citation?.id}
@@ -855,7 +827,8 @@ export function TagsDialog(props) {
     const { setTagsDialogVisible: setIsVisible, onTagAdded, onTagRemoved } = props;
     const bibliography = useFindBib();
     const settings = useSelector((state) => state.settings);
-    const tags = settings?.tags || PREBUILT_TAGS;
+    const tags = settings?.tags;
+    console.log(settings);
 
     return (
         <div>
