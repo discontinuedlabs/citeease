@@ -23,14 +23,16 @@ export default function Home() {
 
     return (
         <div className="mx-auto max-w-[50rem]">
-            <Logo />
-
-            <ContextMenu
-                icon="more_vert"
-                menuStyle={{}}
-                buttonType={"Small Button"}
-                options={[{ label: "Settings", method: () => navigate("/settings") }]}
-            />
+            <div className="flex justify-between mb-5">
+                <h1 className="hidden">Home</h1>
+                <Logo />
+                <ContextMenu
+                    icon="more_vert"
+                    menuStyle={{}}
+                    buttonType={"Small Button"}
+                    options={[{ label: "Settings", method: () => navigate("/settings") }]}
+                />
+            </div>
 
             <div className="grid place-items-start gap-y-2">
                 {bibliographies && bibliographies.length > 0 ? (

@@ -1,7 +1,7 @@
 export default function Logo() {
     return (
         <div className="relative h-min w-fit">
-            <h1 className="font-cambo text-neutral-black inline" style={{ marginTrim: "block" }}>
+            <div className="text-3xl font-cambo text-neutral-black inline" style={{ marginTrim: "block" }}>
                 C<small>ITE</small>
                 <span className="relative bg-primary-200">
                     <div className="absolute bg-primary-500 w-0.5 h-full top-0 start-0">
@@ -12,7 +12,7 @@ export default function Logo() {
                         <div className="absolute start-1/2 rounded-full bottom-0 w-3 h-3 bg-primary-500 -translate-x-1/2 translate-y-full"></div>
                     </div>
                 </span>
-            </h1>
+            </div>
         </div>
     );
 }

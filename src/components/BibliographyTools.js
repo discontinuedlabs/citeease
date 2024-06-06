@@ -280,42 +280,41 @@ export function ReferenceEntries(props) {
         dispatch(toggleEntryCheckbox({ bibliographyId: bibliography.id, citationId: citationId.id }));
     }
 
-    // TODO: This should only grab it as html when the user holds H
     async function handleDrag(event) {
-        let sanitizedInnerHTML;
-        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        const isCtrlKeyDown = event.ctrlKey;
 
-        if (/Android/i.test(userAgent)) {
-            sanitizedInnerHTML = event.target.textContent;
-            event.dataTransfer.setData("text/plain", sanitizedInnerHTML);
-        } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-            sanitizedInnerHTML = event.target.textContent;
-            event.dataTransfer.setData("text/plain", sanitizedInnerHTML);
-        } else {
-            if (checkedCitations.length !== 0) {
-                sanitizedInnerHTML = DOMPurify.sanitize(event.target.innerHTML);
+        if (checkedCitations.length === 0) {
+            if (isCtrlKeyDown) {
+                const sanitizedInnerHTML = DOMPurify.sanitize(event.target.innerHTML);
                 event.dataTransfer.setData("text/html", sanitizedInnerHTML);
             } else {
-                const formattedCitations = await citationEngine.formatBibliography(
-                    checkedCitations,
-                    bibliography?.style,
-                    "html"
-                );
-
-                const div = document.createElement("div");
-                for (const cit of formattedCitations) {
-                    const parser = new DOMParser();
-                    const docFragment = parser.parseFromString(cit, "text/html");
-                    const element = docFragment.body.firstChild;
-                    div.appendChild(element);
-                    div.appendChild(document.createElement("br"));
-                }
-
-                sanitizedInnerHTML = DOMPurify.sanitize(div.innerHTML);
-                event.dataTransfer.setData("text/html", sanitizedInnerHTML);
-
-                div.remove();
+                event.dataTransfer.setData("text/plain", event.target.innerText);
             }
+        } else {
+            // FIXME: This doesn' work
+            const formattedCitations = await citationEngine.formatBibliography(
+                checkedCitations,
+                bibliography?.style,
+                "html"
+            );
+
+            const div = document.createElement("div");
+            for (const cit of formattedCitations) {
+                const parser = new DOMParser();
+                const docFragment = parser.parseFromString(cit, "text/html");
+                const element = docFragment.body.firstChild;
+                div.appendChild(element);
+                div.appendChild(document.createElement("br"));
+            }
+
+            if (isCtrlKeyDown) {
+                const sanitizedInnerHTML = DOMPurify.sanitize(div.innerHTML);
+                event.dataTransfer.setData("text/html", sanitizedInnerHTML);
+            } else {
+                event.dataTransfer.setData("text/plain", div.innerText);
+            }
+
+            div.remove();
         }
     }
 
