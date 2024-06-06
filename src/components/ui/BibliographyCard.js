@@ -32,7 +32,7 @@ export default function BibliographyCard(props) {
     // };
 
     return (
-        <div className="shadow-hardTransparent border-2 border-solid border-neutral-lightGray rounded-lg items-center p-4 bg-white transition duration-150 ease-in-out hover:bg-secondary-100">
+        <div className="shadow-hardTransparent border-2 border-solid border-neutral-lightGray rounded-lg items-center p-4 bg-white transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
             <div className="w-full text-neutral-black sm:flex sm:justify-between sm:gap-2">
                 <h3 className="mb-0 sm:mb-4">{bibliography.title}</h3>
                 <p>{`${bibliography.style.name.short || bibliography.style.name.long.replace(/\((.*?)\)/g, "")} • ${

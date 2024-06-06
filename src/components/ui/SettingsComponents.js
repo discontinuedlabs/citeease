@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 export function SettingsSection(props) {
     const { title, children } = props;
     return (
-        <div className="settings-section">
+        <div>
             <h3>{title}</h3>
             {children}
         </div>
@@ -15,7 +15,7 @@ export function SettingsInput(props) {
     const { value, placeholder, label, name = nanoid(), onChange } = props;
 
     return (
-        <div className="settings-input">
+        <div>
             <label htmlFor={name} value={label}>
                 <input type="text" value={value} placeholder={placeholder} id={name} name={name} onChange={onChange} />
             </label>
@@ -59,7 +59,7 @@ export function SettingsCheckButton(props) {
     const { label, subLabel, learnMoreLink, onChange } = props;
 
     return (
-        <div className="settings-check-button">
+        <div>
             <label>{label}</label>
             <small>
                 {subLabel}

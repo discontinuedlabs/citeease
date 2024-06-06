@@ -24,7 +24,7 @@ export default function Home() {
     return (
         <div className="mx-auto max-w-[50rem]">
             <div className="flex justify-between mb-5">
-                <h1 className="hidden">Home</h1>
+                <h1 className="hidden">Home</h1> {/* For the screen readers and tab title */}
                 <Logo />
                 <ContextMenu
                     icon="more_vert"

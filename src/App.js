@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import Bibliography from "./components/Bibliography";
 import { Route, Routes } from "react-router-dom";
 import Home from "./components/Home";
-import { loadFromIndexedDB } from "./store/slices/bibsSlice";
+import { loadFromIndexedDB as loadBibs } from "./store/slices/bibsSlice";
+import { loadFromIndexedDB as loadSettings } from "./store/slices/settingsSlice";
 import Settings from "./components/Settings";
 import BibliographySettings from "./components/BibliographySettings";
 import MarkdownPage from "./components/MarkdownPage";
@@ -16,7 +17,8 @@ export default function App() {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(loadFromIndexedDB());
+        dispatch(loadBibs());
+        dispatch(loadSettings());
     }, [dispatch]);
 
     useEffect(() => {

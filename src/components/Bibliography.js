@@ -196,7 +196,7 @@ export default function Bibliography(props) {
     }
 
     return (
-        <div className="bibliography">
+        <div>
             <HotKeys keyMap={keyMap}>
                 <div>
                     <div className="flex justify-between items-center">

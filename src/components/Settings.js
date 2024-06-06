@@ -9,16 +9,12 @@ export default function Settings() {
     const [tagsManagerVisible, setTagsManagerVisible] = useState(false);
     const dispatch = useDispatch();
 
-    useEffect(() => {
-        dispatch(loadFromIndexedDB());
-    }, [dispatch]);
-
     function openTagsManager() {
         setTagsManagerVisible(true);
     }
 
     return (
-        <div className="settings-page">
+        <div>
             <h1>Settings</h1>
 
             <SettingsNavigate onClick={openTagsManager}>Manage tags</SettingsNavigate>

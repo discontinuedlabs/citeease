@@ -55,16 +55,24 @@ const settingsSlice = createSlice({
     initialState,
     reducers: {
         restoreDefaultTags: (settings) => {
-            const missingTags = PREBUILT_TAGS.filter((tag) => !settings.tags.some((sTag) => sTag.id === tag.id));
-
-            if (missingTags.length > 0) {
-                const newState = settings.tags.push(...missingTags);
-                saveToIndexedDB(newState);
-                return newState;
-            }
+            const sTagIds = settings.tags.map((tag) => tag.id);
+            const newState = {
+                ...settings,
+                tags: [
+                    ...(settings.tags ? settings.tags : []),
+                    ...PREBUILT_TAGS.filter((pTag) => !sTagIds.includes(pTag.id)),
+                ],
+            };
+            saveToIndexedDB(newState);
+            return newState;
+        },
+        addTag: (settings, action) => {
+            const newState = { ...settings, tags: [...(settings.tags ? settings.tags : []), action.payload.tag] };
+            saveToIndexedDB(newState);
+            return newState;
         },
         deleteTag: (settings, action) => {
-            const newState = settings.tags?.filter((tag) => tag.id !== action.payload.tagId);
+            const newState = { ...settings, tags: settings.tags?.filter((tag) => tag.id !== action.payload.tagId) };
             saveToIndexedDB(newState);
             return newState;
         },
@@ -79,12 +87,9 @@ const settingsSlice = createSlice({
 export const loadFromIndexedDB = createAsyncThunk("settings/loadFromIndexedDB", async () => {
     const loadedSettings = await db.items.get("settings");
     const parsedSettings = await JSON.parse(loadedSettings.value);
-
-    console.log(loadedSettings);
-
     return parsedSettings;
 });
 
-export const { restoreDefaultTags, deleteTag } = settingsSlice.actions;
+export const { restoreDefaultTags, addTag, deleteTag } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

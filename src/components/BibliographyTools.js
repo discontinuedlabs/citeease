@@ -827,8 +827,6 @@ export function TagsDialog(props) {
     const { setTagsDialogVisible: setIsVisible, onTagAdded, onTagRemoved } = props;
     const bibliography = useFindBib();
     const settings = useSelector((state) => state.settings);
-    const tags = settings?.tags;
-    console.log(settings);
 
     return (
         <div>
@@ -839,9 +837,10 @@ export function TagsDialog(props) {
                     <Tag key={index} tagProps={tag} onClick={onTagRemoved} showX={true} />
                 ))}
             </div>
+            {console.log(settings)}
             <div className="flex gap-1 flex-wrap">
-                {tags
-                    .filter((tag) => !bibliography?.tags?.some((bibTag) => bibTag.id === tag.id))
+                {settings.tags
+                    ?.filter((tag) => !bibliography?.tags?.some((bibTag) => bibTag.id === tag.id))
                     .map((tag, index) => {
                         return <Tag key={index} tagProps={tag} onClick={onTagAdded} />;
                     })}
