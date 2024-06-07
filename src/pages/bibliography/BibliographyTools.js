@@ -10,20 +10,20 @@ import {
     updateCitation,
     updateContentInEditedCitation,
 } from "../../data/store/slices/bibsSlice";
-import BibliographyCard from "../../components/ui/BibliographyCard.js";
-import ContextMenu from "../../components/ui/ContextMenu.js";
+import BibliographyCard from "../../components/ui/BibliographyCard";
+import ContextMenu from "../../components/ui/ContextMenu";
 import DOMPurify from "dompurify";
 import HTMLReactParser from "html-react-parser/lib/index";
 import { FixedSizeList as List } from "react-window";
-import * as citationUtils from "../../utils/citationUtils.js";
+import * as citationUtils from "../../utils/citationUtils.ts";
 import { useDispatch, useSelector } from "react-redux";
 import { useFindBib, useFindCheckedCitations } from "../../hooks/hooks.ts";
 import Tag from "../../components/ui/Tag.js";
 
 // Source types
-import ArticleJournal from "../../components/sourceTypes/ArticleJournal.js";
-import Webpage from "../../components/sourceTypes/Webpage.js";
-import Book from "../../components/sourceTypes/Book.js";
+import ArticleJournal from "../../components/sourceTypes/ArticleJournal";
+import Webpage from "../../components/sourceTypes/Webpage";
+import Book from "../../components/sourceTypes/Book";
 
 const MASTER_CHECKBOX_STATES = {
     CHECKED: "checked", // All reference entries are checked
@@ -837,7 +837,7 @@ export function TagsDialog(props) {
                     <Tag key={index} tagProps={tag} onClick={onTagRemoved} showX={true} />
                 ))}
             </div>
-            {console.log(settings)}
+
             <div className="flex gap-1 flex-wrap">
                 {settings.tags
                     ?.filter((tag) => !bibliography?.tags?.some((bibTag) => bibTag.id === tag.id))

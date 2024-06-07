@@ -1,12 +1,13 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import * as cheerio from "cheerio";
 import { nanoid } from "nanoid";
+import { DateObject, Author, Content } from "../types/types";
 
-const CORS_PROXY = "https://corsproxy.io/?";
+const CORS_PROXY: string = "https://corsproxy.io/?";
 
-export function createDateObject(yearOrDate, month = undefined, day = undefined) {
-    if (yearOrDate === undefined) return;
-    let year, adjustedMonth, adjustedDay;
+export function createDateObject(yearOrDate: Date | number, month?: number, day?: number): DateObject | undefined {
+    if (yearOrDate === undefined) return undefined;
+    let year: number, adjustedMonth: number, adjustedDay: number;
 
     if (yearOrDate instanceof Date) {
         year = yearOrDate.getFullYear();
@@ -14,11 +15,11 @@ export function createDateObject(yearOrDate, month = undefined, day = undefined)
         adjustedDay = yearOrDate.getDate();
     } else {
         year = yearOrDate;
-        adjustedMonth = month !== undefined ? month : 1;
-        adjustedDay = day !== undefined ? day : 1;
+        adjustedMonth = month ?? 1;
+        adjustedDay = day ?? 1;
     }
 
-    let dateParts = [year];
+    let dateParts: number[] = [year];
     if (adjustedMonth !== undefined) {
         dateParts.push(adjustedMonth);
         if (adjustedDay !== undefined) {
@@ -31,14 +32,14 @@ export function createDateObject(yearOrDate, month = undefined, day = undefined)
     return {
         "date-parts": [dateParts],
         raw: `${newDate.getFullYear()}-${newDate.getMonth()}-${newDate.getDate()}`,
-        // "date-time": newDate.toISOString() || undefined,
-        // timestamp: newDate.getTime() || undefined,
+        // date_time: newDate.toISOString(),
+        // timestamp: newDate.getTime(),
     };
 }
 
-export function createAuthorsArray(authors) {
-    if (!authors) return;
-    const result = authors.map((author) => {
+export function createAuthorsArray(authors: string[]): Author[] {
+    if (!authors) return [];
+    const result: Author[] = authors.map((author) => {
         const names = author.split(/\s+/);
         const given = names.shift() || "";
         const family = names.join(" ");
@@ -48,7 +49,7 @@ export function createAuthorsArray(authors) {
     return result;
 }
 
-export function recognizeIdentifierType(string) {
+export function recognizeIdentifierType(string: string): string | undefined {
     const urlPattern = /(https?:\/\/[^\s]+)/g;
     const doiPatterns = [
         /^\s*(https?:\/\/(?:dx\.)?doi\.org\/(10.\d{4,9}\/[-._;()/:A-Z0-9[\]<>]+))\s*$/i,
@@ -81,16 +82,16 @@ export function recognizeIdentifierType(string) {
     }
 }
 
-export async function retrieveContentFromURL(url) {
-    function extractAuthors($) {
-        let authors = [];
+export async function retrieveContentFromURL(url: string): Promise<Content | null> {
+    function extractAuthors($: any): Author[] {
+        let authors: string[] = [];
 
-        authors.push($(".author[rel='author']").text());
-        $('meta[name="author"], meta[name="article:author"]').each((index, element) => {
-            authors.push($(element).attr("content"));
+        authors.push($('.author[rel="author"]').text());
+        $('meta[name="author"], meta[name="article:author"]').each((index: number, element: any) => {
+            authors.push($(element).attr("content") || "");
         });
 
-        $('span.css-1baulvz.last-byline[itemprop="name"]').each((index, element) => {
+        $('span.css-1baulvz.last-byline[itemprop="name"]').each((index: number, element: any) => {
             authors.push($(element).text().trim());
         });
 
@@ -101,72 +102,71 @@ export async function retrieveContentFromURL(url) {
         return createAuthorsArray(authors);
     }
 
-    if (!url) return;
+    if (!url) return null;
 
     try {
-        const response = await axios.get(`${CORS_PROXY}${url}`);
-
+        const response: AxiosResponse = await axios.get(`${CORS_PROXY}${url}`);
         const $ = cheerio.load(response.data);
 
         return {
             type: "webpage",
-            title: $("title").text(), // TODO: Give option to prioritize h1 tag instead of title tag $("h1").text()
+            title: $("title").text(),
             author: extractAuthors($),
-            "container-title": $("meta[property='og:site_name']").attr("content") || "", // TODO: Should use the website link as a fallback
-            publisher: $("meta[property='article:publisher']").attr("content"),
+            "container-title": $('meta[property="og:site_name"]').attr("content") || "",
+            publisher: $('meta[property="article:publisher"]').attr("content"),
             accessed: createDateObject(new Date()),
             issued: createDateObject(
                 new Date(
-                    $("meta[name='date']").attr("content") ||
-                        $("meta[name='article:published_time']").attr("content") ||
-                        $("meta[property='article:published_time']").attr("content") ||
-                        $("meta[name='article:modified_time']").attr("content") ||
-                        $("meta[property='article:modified_time']").attr("content") ||
-                        $("meta[name='og:updated_time']").attr("content") ||
-                        $("meta[property='og:updated_time']").attr("content") ||
+                    $('meta[name="date"]').attr("content") ||
+                        $('meta[name="article:published_time"]').attr("content") ||
+                        $('meta[property="article:published_time"]').attr("content") ||
+                        $('meta[name="article:modified_time"]').attr("content") ||
+                        $('meta[property="article:modified_time"]').attr("content") ||
+                        $('meta[name="og:updated_time"]').attr("content") ||
+                        $('meta[name="og:updated_time"]').attr("content") ||
                         $(".publication-date").text()
                 )
             ),
             URL:
-                $("meta[property='og:url']").attr("content") ||
-                $("meta[name='url']").attr("content") ||
-                $("link[rel='canonical']").attr("href") ||
+                $('meta[property="og:url"]').attr("content") ||
+                $('meta[name="url"]').attr("content") ||
+                $('link[rel="canonical"]').attr("href") ||
                 url,
         };
     } catch (error) {
-        console.error(`Failed to retrieve content from ${url}:`, error.message);
+        console.error(`Failed to retrieve content from ${url}:`, error);
         return null;
     }
 }
 
-export async function retrieveContentFromDOI(doi) {
-    if (!doi) return;
+export async function retrieveContentFromDOI(doi: string): Promise<Content | null> {
+    if (!doi) return null;
 
     try {
         const cleanedDoi = doi.replace(/doi:\s*/gi, "");
         const response = await fetch(`${CORS_PROXY}https://api.crossref.org/works/${cleanedDoi}`);
 
-        const data = await response.json();
-        const message = data?.message;
+        const data: { message: any } = await response.json();
+        const message = data.message;
 
         return {
-            DOI: message?.DOI,
-            URL: message?.URL || message?.DOI ? "https://doi.org/" + message.DOI : undefined,
-            ISSN: message?.ISSN,
-            PMID: message?.PMID,
-            PMCID: message?.PMCID,
-            "container-title": message?.["container-title"]?.[0],
-            issue: message?.issue,
-            issued: message?.issued,
-            page: message?.page,
-            "publisher-place": message?.["publisher-place"],
-            source: message?.source,
-            title: message?.title,
-            volume: message?.volume,
+            DOI: message.DOI,
+            URL: message.URL || message.DOI ? "https://doi.org/" + message.DOI : undefined,
+            ISSN: message.ISSN,
+            PMID: message.PMID,
+            PMCID: message.PMCI,
+            "container-title": message["container-title"][0],
+            issue: message.issue,
+            issued: message.issued,
+            page: message.page,
+            "publisher-place": message["publisher-place"],
+            source: message.source,
+            title: message.title,
+            volume: message.volume,
             online: true,
-            type: "article-journal", // This API returns the type as "journal-article", but for citeproc, it should be "article-journal"
+            type: message.type === "journal-article" ? "article-journal" : message.type,
             accessed: createDateObject(new Date()),
-            author: message?.author?.map((author) => ({
+            author: message.author.map((author: Author[]) => ({
                 ...author,
                 id: nanoid(),
             })),
@@ -177,15 +177,15 @@ export async function retrieveContentFromDOI(doi) {
     }
 }
 
-export async function retrieveContentFromISBN(isbn) {
-    if (!isbn) return;
+export async function retrieveContentFromISBN(isbn: string): Promise<Content | null> {
+    if (!isbn) return null;
 
     try {
         const response = await fetch(
             `https://openlibrary.org/search.json?q=isbn:${isbn}&mode=everything&fields=*,editions`
         );
 
-        const data = await response.json();
+        const data: { docs: any } = await response.json();
         const docs = data?.docs[0];
         const edition = docs?.editions?.docs[0];
 
@@ -197,7 +197,7 @@ export async function retrieveContentFromISBN(isbn) {
             publisher: edition?.publisher?.[0],
             "publisher-place": edition?.publish_place?.[0],
             ISBN: edition?.isbn?.[0] || isbn,
-            issued: createDateObject(edition?.publish_date?.[0]),
+            issued: createDateObject(new Date(edition?.publish_date?.[0])),
             accessed: createDateObject(new Date()),
         };
     } catch (error) {
@@ -206,8 +206,8 @@ export async function retrieveContentFromISBN(isbn) {
     }
 }
 
-export async function retrieveContentFromPMCID(pmcid) {
-    if (!pmcid) return;
+export async function retrieveContentFromPMCID(pmcid: string): Promise<Content | null> {
+    if (!pmcid) return null;
 
     try {
         const cleanedPmcid = pmcid.replace(/pmcid:\s*|PMC|\s*/gi, "");
@@ -215,7 +215,7 @@ export async function retrieveContentFromPMCID(pmcid) {
             `${CORS_PROXY}https://api.ncbi.nlm.nih.gov/lit/ctxp/v1/pmc/?format=csl&id=${cleanedPmcid}`
         );
 
-        const data = await response.json();
+        const data: any = await response.json();
 
         return {
             DOI: data?.DOI,
@@ -234,7 +234,7 @@ export async function retrieveContentFromPMCID(pmcid) {
             volume: data?.volume,
             online: true,
             accessed: createDateObject(new Date()),
-            author: data?.author?.map((author) => ({
+            author: data?.author?.map((author: Author[]) => ({
                 ...author,
                 id: nanoid(),
             })),
@@ -245,8 +245,8 @@ export async function retrieveContentFromPMCID(pmcid) {
     }
 }
 
-export async function retrieveContentFromPMID(pmid) {
-    if (!pmid) return;
+export async function retrieveContentFromPMID(pmid: string): Promise<Content | null> {
+    if (!pmid) return null;
 
     try {
         const cleanedPmid = pmid.replace(/pmid:\s*|\s*/gi, "");
@@ -254,7 +254,7 @@ export async function retrieveContentFromPMID(pmid) {
             `${CORS_PROXY}https://api.ncbi.nlm.nih.gov/lit/ctxp/v1/pubmed/?format=csl&id=${cleanedPmid}`
         );
 
-        const data = await response.json();
+        const data: any = await response.json();
 
         return {
             DOI: data?.DOI,
@@ -273,7 +273,7 @@ export async function retrieveContentFromPMID(pmid) {
             volume: data?.volume,
             online: true,
             accessed: createDateObject(new Date()),
-            author: data?.author?.map((author) => ({
+            author: data?.author?.map((author: Author[]) => ({
                 ...author,
                 id: nanoid(),
             })),
