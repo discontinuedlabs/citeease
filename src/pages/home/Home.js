@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
-import ContextMenu from "./ui/ContextMenu";
+import ContextMenu from "../../components/ui/ContextMenu";
 import { useNavigate } from "react-router-dom";
-import BibliographyCard from "./ui/BibliographyCard";
+import BibliographyCard from "../../components/ui/BibliographyCard";
 import { useState } from "react";
-import { CitationStylesMenu } from "./BibliographyTools";
+import { CitationStylesMenu } from "../bibliography/BibliographyTools";
 import { useDispatch, useSelector } from "react-redux";
-import * as citationEngine from "../utils/citationEngine";
-import { addNewBib } from "../store/slices/bibsSlice";
-import Logo from "./ui/Logo";
+import * as citationEngine from "../../utils/citationEngine";
+import { addNewBib } from "../../data/store/slices/bibsSlice";
+import Logo from "../../components/ui/Logo";
 
 export default function Home() {
     const bibliographies = useSelector((state) => state.bibliographies);

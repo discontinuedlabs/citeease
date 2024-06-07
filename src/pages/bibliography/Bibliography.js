@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import ContextMenu from "./ui/ContextMenu";
+import ContextMenu from "../../components/ui/ContextMenu.js";
 import { useEffect, useState } from "react";
-import * as citationEngine from "../utils/citationEngine";
+import * as citationEngine from "../../utils/citationEngine.js";
 import {
     IntextCitationDialog,
     ReferenceEntries,
@@ -25,9 +25,9 @@ import {
     editCitation,
     loadFromIndexedDB,
     updateBibField,
-} from "../store/slices/bibsSlice";
-import { useFindBib, useFindCheckedCitations } from "../hooks/hooks.ts";
-import Tag from "./ui/Tag";
+} from "../../data/store/slices/bibsSlice";
+import { useFindBib, useFindCheckedCitations } from "../../hooks/hooks.ts";
+import Tag from "../../components/ui/Tag.js";
 
 export const SOURCE_TYPES = {
     ARTICLE_JOURNAL: {
@@ -196,7 +196,7 @@ export default function Bibliography(props) {
     }
 
     return (
-        <div>
+        <div className="mx-auto max-w-[50rem]">
             <HotKeys keyMap={keyMap}>
                 <div>
                     <div className="flex justify-between items-center">

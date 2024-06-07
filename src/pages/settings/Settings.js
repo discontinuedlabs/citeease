@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
-import { SettingsSection, SettingsNavigate } from "./ui/SettingsComponents";
+import { SettingsSection, SettingsNavigate } from "./SettingsComponents";
 import { useEffect, useState } from "react";
-import { loadFromIndexedDB } from "../store/slices/settingsSlice";
+import { loadFromIndexedDB } from "../../data/store/slices/settingsSlice";
 import { TagsManager } from "./SettingTools";
 
 export default function Settings() {
@@ -14,7 +14,7 @@ export default function Settings() {
     }
 
     return (
-        <div>
+        <div className="mx-auto max-w-[50rem]">
             <h1>Settings</h1>
 
             <SettingsNavigate onClick={openTagsManager}>Manage tags</SettingsNavigate>

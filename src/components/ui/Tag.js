@@ -1,5 +1,5 @@
 import { useTagBgColor } from "../../hooks/hooks.ts";
-import { TAG_COLOR_VALUES } from "../../store/slices/settingsSlice";
+import { TAG_COLOR_VALUES } from "../../data/store/slices/settingsSlice";
 
 export default function Tag(props) {
     const { tagProps, onClick, showX } = props;

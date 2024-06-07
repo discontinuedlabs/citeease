@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import Bibliography from "./components/Bibliography";
+import Bibliography from "./pages/bibliography/Bibliography";
 import { Route, Routes } from "react-router-dom";
-import Home from "./components/Home";
-import { loadFromIndexedDB as loadBibs } from "./store/slices/bibsSlice";
-import { loadFromIndexedDB as loadSettings } from "./store/slices/settingsSlice";
-import Settings from "./components/Settings";
-import BibliographySettings from "./components/BibliographySettings";
-import MarkdownPage from "./components/MarkdownPage";
+import Home from "./pages/home/Home";
+import { loadFromIndexedDB as loadBibs } from "./data/store/slices/bibsSlice";
+import { loadFromIndexedDB as loadSettings } from "./data/store/slices/settingsSlice";
+import Settings from "./pages/settings/Settings";
+import BibliographySettings from "./pages/bibliography/BibliographySettings";
+import MarkdownPage from "./pages/MarkdownPage";
 import { AcceptDialog, ConfirmDialog } from "./components/ui/Dialogs";
-import NotFoundPage from "./components/NotFoundPage";
+import NotFoundPage from "./pages/NotFoundPage";
 import { useDispatch } from "react-redux";
 
 export default function App() {

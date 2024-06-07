@@ -3,7 +3,7 @@ import "@citation-js/plugin-csl";
 import "@citation-js/plugin-bibtex";
 import DOMPurify from "dompurify";
 import CSL from "citeproc";
-import db from "../db/dexie";
+import db from "../data/db/dexie";
 
 export async function formatBibliography(citations, bibStyle, format = "html") {
     const cslFile = await getCslFile(bibStyle);

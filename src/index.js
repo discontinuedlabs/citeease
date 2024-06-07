@@ -5,7 +5,7 @@ import App from "./App";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 import { HashRouter } from "react-router-dom";
 import { Provider as ReduxeProvider } from "react-redux";
-import store from "./store/store";
+import store from "./data/store/store";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(

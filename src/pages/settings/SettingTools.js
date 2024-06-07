@@ -1,9 +1,15 @@
 import { useDispatch, useSelector } from "react-redux";
-import { TAG_COLORS, TAG_COLOR_VALUES, addTag, deleteTag, restoreDefaultTags } from "../store/slices/settingsSlice";
-import Tag from "./ui/Tag";
+import {
+    TAG_COLORS,
+    TAG_COLOR_VALUES,
+    addTag,
+    deleteTag,
+    restoreDefaultTags,
+} from "../../data/store/slices/settingsSlice";
+import Tag from "../../components/ui/Tag.js";
 import { useState } from "react";
 import { nanoid } from "nanoid";
-import { useTagBgColor } from "../hooks/hooks.ts";
+import { useTagBgColor } from "../../hooks/hooks.ts";
 
 export function TagsManager(props) {
     const { setTagsManagerVisible: setIsVisible } = props;

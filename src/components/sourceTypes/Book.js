@@ -1,5 +1,5 @@
-import DateInput from "../formElements/DateInput";
-import AuthorsInput from "../formElements/AuthorsInput";
+import DateInput from "../form/DateInput";
+import AuthorsInput from "../form/AuthorsInput";
 import { useRef, useState } from "react";
 import * as citationUtils from "../../utils/citationUtils";
 

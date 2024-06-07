@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import * as citationEngine from "../utils/citationEngine";
-import { SOURCE_TYPES } from "./Bibliography";
+import * as citationEngine from "../../utils/citationEngine.js";
+import { SOURCE_TYPES } from "./Bibliography.js";
 import {
     addNewCitation,
     copySelectedCitations,
@@ -9,21 +9,21 @@ import {
     toggleEntryCheckbox,
     updateCitation,
     updateContentInEditedCitation,
-} from "../store/slices/bibsSlice";
-import BibliographyCard from "./ui/BibliographyCard";
-import ContextMenu from "./ui/ContextMenu";
+} from "../../data/store/slices/bibsSlice";
+import BibliographyCard from "../../components/ui/BibliographyCard.js";
+import ContextMenu from "../../components/ui/ContextMenu.js";
 import DOMPurify from "dompurify";
 import HTMLReactParser from "html-react-parser/lib/index";
 import { FixedSizeList as List } from "react-window";
-import * as citationUtils from "../utils/citationUtils";
+import * as citationUtils from "../../utils/citationUtils.js";
 import { useDispatch, useSelector } from "react-redux";
-import { useFindBib, useFindCheckedCitations } from "../hooks/hooks.ts";
-import Tag from "./ui/Tag";
+import { useFindBib, useFindCheckedCitations } from "../../hooks/hooks.ts";
+import Tag from "../../components/ui/Tag.js";
 
 // Source types
-import ArticleJournal from "./sourceTypes/ArticleJournal";
-import Webpage from "./sourceTypes/Webpage";
-import Book from "./sourceTypes/Book";
+import ArticleJournal from "../../components/sourceTypes/ArticleJournal.js";
+import Webpage from "../../components/sourceTypes/Webpage.js";
+import Book from "../../components/sourceTypes/Book.js";
 
 const MASTER_CHECKBOX_STATES = {
     CHECKED: "checked", // All reference entries are checked

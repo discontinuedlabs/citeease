@@ -28,6 +28,14 @@ a {
     @apply text-secondary-800;
 }
 
+ul {
+    @apply ms-10;
+}
+
+button {
+    @apply font-sans;
+}
+
 .hanging-indentation {
     @apply pl-5;
     @apply -indent-5;
