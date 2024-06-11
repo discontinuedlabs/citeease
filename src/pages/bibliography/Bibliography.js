@@ -305,7 +305,7 @@ export default function Bibliography(props) {
                                           //   "DEVIDER",
 
                                           {
-                                              label: "Delete bibliography?",
+                                              label: "Delete bibliography",
                                               method: () =>
                                                   showConfirmDialog(
                                                       "Delete bibliography",

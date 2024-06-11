@@ -206,6 +206,8 @@ export function ReferenceEntries(props) {
     const { openCitationForm, openIntextCitationDialog } = props;
     const bibliography = useFindBib();
     const checkedCitations = useFindCheckedCitations();
+    const [formattedSelectedCitations, setFormattedSelectedCitations] = useState();
+    console.log(formattedSelectedCitations);
     const [references, setReferences] = useState([]);
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
     const dispatch = useDispatch();
@@ -244,6 +246,19 @@ export function ReferenceEntries(props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [bibliography?.citations, bibliography?.style]); // Adding setSavedCslFiles to the dependency array will cause the component to rerender infinitely
 
+    useEffect(() => {
+        // Used for the handleDrag function because event.dataTransfer.setData("text/html", sanitizedInnerHTML); doesn't wait
+        async function formatSelectedCitations() {
+            const formattedCitations = await citationEngine.formatBibliography(
+                checkedCitations,
+                bibliography?.style,
+                "html"
+            );
+            setFormattedSelectedCitations(formattedCitations);
+        }
+        formatSelectedCitations();
+    }, [checkedCitations, bibliography?.style]);
+
     function handleMasterCheck() {
         dispatch(handleMasterEntriesCheckbox({ bibliographyId: bibliography?.id }));
     }
@@ -263,15 +278,8 @@ export function ReferenceEntries(props) {
                 event.dataTransfer.setData("text/plain", event.target.innerText);
             }
         } else {
-            // FIXME: This doesn' work
-            const formattedCitations = await citationEngine.formatBibliography(
-                checkedCitations,
-                bibliography?.style,
-                "html"
-            );
-
             const div = document.createElement("div");
-            for (const cit of formattedCitations) {
+            for (const cit of formattedSelectedCitations) {
                 const parser = new DOMParser();
                 const docFragment = parser.parseFromString(cit, "text/html");
                 const element = docFragment.body.firstChild;
@@ -332,7 +340,7 @@ export function ReferenceEntries(props) {
                             />
 
                             <div
-                                className={`font-cambo break-words ${
+                                className={`font-cambo ${
                                     /^(apa|modern-language-association|chicago)$/i.test(bibliography?.style.code) // Include any other style that needs hanging indentation
                                         ? "hanging-indentation"
                                         : ""

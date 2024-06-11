@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { nanoid } from "nanoid";
-import db from "../../db/dexie";
+import db from "../../db/dexie/dexie";
 
 const initialState = [];
 

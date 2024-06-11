@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import db from "../../db/dexie";
+import db from "../../db/dexie/dexie";
 
 export const TAG_COLORS = {
     YELLOW: "yellow",

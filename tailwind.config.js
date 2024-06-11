@@ -57,6 +57,7 @@ module.exports = {
                 neutral: {
                     black: "#000813",
                     yellow: "#ffd60a",
+                    red: "rgb(223,49,48)",
                     lightGray: "hsla(211, 100%, 12%, 0.5)",
                     white: "#f6f8f9",
                     transparentBlue: "#cce6ff",

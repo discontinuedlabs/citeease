@@ -4,6 +4,7 @@
 
 /* Custom global styles */
 * {
+    overflow-wrap: break-word;
     box-sizing: border-box;
     margin: 0;
     padding: 0;

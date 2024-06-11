@@ -5,6 +5,7 @@ import { DateObject, Author, Content } from "../types/types";
 
 const CORS_PROXY: string = "https://corsproxy.io/?";
 
+// TODO: Needs review
 export function createDateObject(yearOrDate: Date | number, month?: number, day?: number): DateObject | undefined {
     if (yearOrDate === undefined) return undefined;
     let year: number, adjustedMonth: number, adjustedDay: number;

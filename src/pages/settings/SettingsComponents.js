@@ -24,18 +24,9 @@ export function SettingsInput(props) {
 }
 
 export function SettingsButton(props) {
-    const { children, style = {}, onClick } = props;
+    const { children } = props;
 
-    return (
-        <button
-            style={style}
-            onClick={(event) => {
-                if (onClick) onclick(event);
-            }}
-        >
-            {children}
-        </button>
-    );
+    return <button {...props}>{children}</button>;
 }
 
 export function SettingsNavigate(props) {

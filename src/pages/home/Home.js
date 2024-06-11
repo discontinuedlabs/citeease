@@ -8,10 +8,12 @@ import { useDispatch, useSelector } from "react-redux";
 import * as citationEngine from "../../utils/citationEngine";
 import { addNewBib } from "../../data/store/slices/bibsSlice";
 import Logo from "../../components/ui/Logo";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Home() {
     const bibliographies = useSelector((state) => state.bibliographies);
     const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
+    const { currentUser } = useAuth();
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
@@ -30,7 +32,12 @@ export default function Home() {
                     icon="more_vert"
                     menuStyle={{}}
                     buttonType={"Small Button"}
-                    options={[{ label: "Settings", method: () => navigate("/settings") }]}
+                    options={[
+                        { label: "Settings", method: () => navigate("/settings") },
+                        ...(currentUser
+                            ? [{ label: "Account", method: () => navigate("/account") }]
+                            : [{ label: "Log in", method: () => navigate("/login") }]),
+                    ]}
                 />
             </div>
 

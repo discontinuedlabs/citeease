@@ -32,10 +32,12 @@ export default function BibliographyCard(props) {
     // };
 
     return (
-        <div className="shadow-hardTransparent border-2 border-solid border-neutral-lightGray rounded-lg items-center p-4 bg-white transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
-            <div className="w-full text-neutral-black sm:flex sm:justify-between sm:gap-2">
-                <h3 className="mb-0 sm:mb-4">{bibliography.title}</h3>
-                <p>{`${bibliography.style.name.short || bibliography.style.name.long.replace(/\((.*?)\)/g, "")} • ${
+        <div className="grid shadow-hardTransparent border-2 border-solid border-neutral-lightGray rounded-lg items-center p-4 bg-white transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
+            <div className="w-full text-neutral-black sm:flex sm:justify-between gap-2">
+                <h3 className="mb-0">{bibliography.title}</h3>
+                <p className="mb-0">{`${
+                    bibliography.style.name.short || bibliography.style.name.long.replace(/\((.*?)\)/g, "")
+                } • ${
                     bibliography.citations.length === 0
                         ? "No sources added"
                         : bibliography.citations.length === 1
@@ -43,9 +45,12 @@ export default function BibliographyCard(props) {
                         : `${bibliography.citations.length} sources`
                 } • ${timeAgo(bibliography.dateModified)}`}</p>
             </div>
-            <div className="flex gap-1 flex-wrap">
+            <div
+                className="flex gap-1 flex-wrap"
+                style={{ marginTop: bibliography?.tags?.length === 0 ? "0" : "0.5rem" }}
+            >
                 {bibliography?.tags?.map((tag, index) => (
-                    <Tag key={index} tagProps={tag} />
+                    <Tag className="m-2" key={index} tagProps={tag} />
                 ))}
             </div>
         </div>
