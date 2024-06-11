@@ -10,9 +10,10 @@ export default function Account() {
     const [updateEmailDialogVisible, setUpdateEmailDialogVisible] = useState(false);
     const [changePasswordDialogVisible, setChangePasswordDialogVisible] = useState(false);
     const [deleteAccountDialogVisible, setDeleteAccountDialogVisible] = useState(false);
-    const [isEmailVerificationDisabled, setEmailVerificationDisabled] = useState(
-        localStorage.getItem("isEmailVerificationDisabled") === "true"
-    );
+    const [isEmailVerificationDisabled, setEmailVerificationDisabled] = useState(() => {
+        const disableTimestamp = localStorage.getItem("emailVerificationDisableTimestamp");
+        if (disableTimestamp) return Number(disableTimestamp) > Date.now();
+    });
 
     useEffect(() => {
         if (!currentUser) navigate("/login");
@@ -24,22 +25,19 @@ export default function Account() {
             await logout();
             navigate("/");
         } catch (error) {
-            // Show taost message for error
+            // TODO: Show taost message for error
         }
     }
 
     async function handleVerifyEmail() {
         try {
             await verifyEmail();
-            setEmailVerificationDisabled(true);
-            localStorage.setItem("isEmailVerificationDisabled", true);
-            setTimeout(() => {
-                setEmailVerificationDisabled(false);
-                localStorage.setItem("isEmailVerificationDisabled", false);
-            }, 60000);
+            const disableUntil = Date.now() + 60000;
+            localStorage.setItem("emailVerificationDisableTimestamp", disableUntil.toString());
+            setEmailVerificationDisabled(disableUntil > Date.now());
             // TODO: show toast to notify user to check email
         } catch (error) {
-            // show toast message for error
+            // TODO: show toast message for error
         }
     }
 

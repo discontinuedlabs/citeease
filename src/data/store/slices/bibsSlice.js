@@ -14,6 +14,10 @@ const bibsSlice = createSlice({
     name: "bibliographies",
     initialState,
     reducers: {
+        mergeWithCurrent: (bibs, action) => {
+            console.log(action);
+            return bibs;
+        },
         addNewBib: (bibs, action) => {
             const newBib = {
                 title: "Untitled Bibliography",
@@ -312,6 +316,7 @@ export const loadFromIndexedDB = createAsyncThunk("bibliographies/loadFromIndexe
 });
 
 export const {
+    mergeWithCurrent,
     addNewBib,
     deleteBib,
     updateBibField,

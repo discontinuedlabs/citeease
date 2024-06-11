@@ -24,7 +24,7 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
-    const [currentUser, setCurrentUser] = useState();
+    const [currentUser, setCurrentUser] = useState(undefined);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
 

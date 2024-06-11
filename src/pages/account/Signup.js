@@ -36,6 +36,7 @@ export default function Signup() {
         <div>
             <div>
                 <h1>Sign Up</h1>
+                <pre>{error}</pre>
                 <form onSubmit={handleSubmit}>
                     <label htmlFor={`${id}-email`}>Email</label>
                     <input id={`${id}-email`} type="email" ref={emailRef} required />

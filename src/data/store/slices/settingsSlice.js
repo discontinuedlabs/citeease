@@ -54,6 +54,10 @@ const settingsSlice = createSlice({
     name: "settings",
     initialState,
     reducers: {
+        mergeWithCurrent: (settings, action) => {
+            console.log(action);
+            return settings;
+        },
         restoreDefaultTags: (settings) => {
             const sTagIds = settings.tags.map((tag) => tag.id);
             const newState = {
@@ -90,6 +94,6 @@ export const loadFromIndexedDB = createAsyncThunk("settings/loadFromIndexedDB", 
     return parsedSettings;
 });
 
-export const { restoreDefaultTags, addTag, deleteTag } = settingsSlice.actions;
+export const { mergeWithCurrent, restoreDefaultTags, addTag, deleteTag } = settingsSlice.actions;
 
 export default settingsSlice.reducer;
