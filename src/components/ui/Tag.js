@@ -10,7 +10,7 @@ export default function Tag(props) {
             <button
                 className="flex gap-1 font-bold p-1 rounded-md transition duration-150 ease-in-out"
                 style={{
-                    border: `${TAG_COLOR_VALUES[tagProps?.color]} solid 2px`,
+                     border: `${TAG_COLOR_VALUES[tagProps?.color]} solid 2px`,
                     color: TAG_COLOR_VALUES[tagProps?.color],
                     backgroundColor: bgIdleColor,
                 }}

@@ -730,7 +730,7 @@ export function CitationStylesMenu(props) {
                 </form>
             </search>
 
-            <List height={500} itemCount={filteredStyles.length} itemSize={35} width={300}>
+            <List height={500} itemCount={filteredStyles.length} itemSize={45} width={window.innerWidth - 50}>
                 {({ index, style }) => {
                     const targetStyle = filteredStyles[index];
                     if (/other styles|most popular/i.test(targetStyle)) {
