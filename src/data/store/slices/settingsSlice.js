@@ -45,9 +45,9 @@ const PREBUILT_TAGS = [
 
 const initialState = { tags: PREBUILT_TAGS };
 
-function saveToIndexedDB(newState) {
+async function saveToIndexedDB(newState) {
     const serializedState = JSON.stringify(newState);
-    db.items.put({ id: "settings", value: serializedState });
+    await db.items.put({ id: "settings", value: serializedState });
 }
 
 const settingsSlice = createSlice({
@@ -55,8 +55,10 @@ const settingsSlice = createSlice({
     initialState,
     reducers: {
         mergeWithCurrent: (settings, action) => {
-            console.log(action);
-            return settings;
+            if (!action.payload.settings) return settings;
+            const newState = action.payload.settings;
+            saveToIndexedDB(newState);
+            return newState;
         },
         restoreDefaultTags: (settings) => {
             const sTagIds = settings.tags.map((tag) => tag.id);
@@ -80,6 +82,10 @@ const settingsSlice = createSlice({
             saveToIndexedDB(newState);
             return newState;
         },
+        resetAllSettings: () => {
+            saveToIndexedDB(initialState);
+            return initialState;
+        },
     },
     extraReducers: (builder) => {
         builder.addCase(loadFromIndexedDB.fulfilled, (state, action) => {
@@ -94,6 +100,6 @@ export const loadFromIndexedDB = createAsyncThunk("settings/loadFromIndexedDB", 
     return parsedSettings;
 });
 
-export const { mergeWithCurrent, restoreDefaultTags, addTag, deleteTag } = settingsSlice.actions;
+export const { mergeWithCurrent, restoreDefaultTags, addTag, deleteTag, resetAllSettings } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

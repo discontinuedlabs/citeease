@@ -4,6 +4,7 @@ import {
     TAG_COLOR_VALUES,
     addTag,
     deleteTag,
+    resetAllSettings,
     restoreDefaultTags,
 } from "../../data/store/slices/settingsSlice";
 import Tag from "../../components/ui/Tag.js";
@@ -12,6 +13,7 @@ import { nanoid } from "nanoid";
 import { useTagBgColor } from "../../hooks/hooks.ts";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
 
 export function TagsManager(props) {
     const { setTagsManagerVisible: setIsVisible } = props;
@@ -168,7 +170,9 @@ export function DeleteAccountDialog(props) {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const passwordRef = useRef();
+    const checkboxRef = useRef();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     async function handleSUbmit(event) {
         event.preventDefault();
@@ -177,6 +181,10 @@ export function DeleteAccountDialog(props) {
             setError("");
             setIsLoading(true);
             await deleteAccount(passwordRef.current.value);
+            if (!checkboxRef.current.checked) {
+                dispatch(deleteAllBibs());
+                dispatch(resetAllSettings());
+            }
             navigate("/");
             // TODO: Show success toast message
         } catch (error) {
@@ -194,6 +202,9 @@ export function DeleteAccountDialog(props) {
             <form onSubmit={handleSUbmit}>
                 <label htmlFor={`${id}-password`}>Type your password to delete your account.</label>
                 <input id={`${id}-password`} type="password" ref={passwordRef} required />
+                <input id={`${id}-checkbox`} type="checkbox" ref={checkboxRef} />
+                <label htmlFor={`${id}-checkbox`}>Keep a copy of the associated data locally</label>
+                <strong>Warning: This action can't be undone</strong>
                 <button type="submite" disabled={isLoading}>
                     Delete account
                 </button>

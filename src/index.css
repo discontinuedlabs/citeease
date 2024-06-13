@@ -22,7 +22,7 @@ h3,
 h4,
 p,
 ul {
-    @apply mb-4;
+    margin-bottom: 1rem;
 }
 
 a {
@@ -30,22 +30,25 @@ a {
 }
 
 ul {
-    @apply ms-10;
+    margin-inline-start: 2.5rem;
 }
 
 button {
     @apply font-sans;
+    user-select: none;
 }
 
 .hanging-indentation {
-    @apply pl-5;
-    @apply -indent-5;
+    padding-left: 1.25rem;
+    text-indent: -1.25rem;
 }
 
 .csl-entry:has(.csl-left-margin) {
-    @apply flex items-start space-x-2;
+    display: flex;
+    align-items: flex-start;
+    margin-right: 0.5rem;
 }
 
 .csl-entry > .csl-left-margin {
-    @apply min-w-fit;
+    min-width: fit-content;
 }

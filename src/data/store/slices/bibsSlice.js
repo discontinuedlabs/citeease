@@ -15,8 +15,13 @@ const bibsSlice = createSlice({
     initialState,
     reducers: {
         mergeWithCurrent: (bibs, action) => {
-            console.log(action);
-            return bibs;
+            if (!action.payload.bibliographies) return bibs;
+            const newBibs = action.payload.bibliographies;
+            const newBibsIds = newBibs.map((bib) => bib.id);
+            const filteredOldBibs = bibs.filter((bib) => !newBibsIds.includes(bib.id));
+            const newState = [...filteredOldBibs, ...newBibs];
+            saveToIndexedDB(newState);
+            return newState;
         },
         addNewBib: (bibs, action) => {
             const newBib = {
@@ -294,6 +299,10 @@ const bibsSlice = createSlice({
             saveToIndexedDB(newState);
             return newState;
         },
+        deleteAllBibs: () => {
+            saveToIndexedDB(initialState);
+            return initialState;
+        },
     },
     extraReducers: (builder) => {
         builder.addCase(loadFromIndexedDB.fulfilled, (state, action) => {
@@ -331,6 +340,7 @@ export const {
     duplicateSelectedCitations,
     deleteSelectedCitations,
     addNewBibAndMoveSelectedCitations,
+    deleteAllBibs,
 } = bibsSlice.actions;
 
 export default bibsSlice.reducer;

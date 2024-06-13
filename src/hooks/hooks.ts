@@ -4,12 +4,12 @@ import { TAG_COLOR_VALUES } from "../data/store/slices/settingsSlice";
 import { Bibliography, Citation } from "../types/types";
 import { RootState } from "../data/store/store";
 
-interface RouteParams {
+type RouteParams = {
     bibId?: string;
-}
+};
 
 export function useFindBib(): Bibliography | undefined {
-    const params: RouteParams = useParams<{ bibId?: string }>();
+    const params: RouteParams = useParams<RouteParams>();
     const bibliographies = useSelector((state: RootState) => state.bibliographies);
     const bibliography = bibliographies?.find((bib) => bib.id === params.bibId);
     return bibliography;

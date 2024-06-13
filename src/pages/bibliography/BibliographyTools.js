@@ -206,8 +206,7 @@ export function ReferenceEntries(props) {
     const { openCitationForm, openIntextCitationDialog } = props;
     const bibliography = useFindBib();
     const checkedCitations = useFindCheckedCitations();
-    const [formattedSelectedCitations, setFormattedSelectedCitations] = useState();
-    console.log(formattedSelectedCitations);
+    const [formattedSelectedCitations, setFormattedSelectedCitations] = useState([]);
     const [references, setReferences] = useState([]);
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
     const dispatch = useDispatch();
@@ -236,8 +235,7 @@ export function ReferenceEntries(props) {
         async function formatBibliography() {
             const formattedCitations = await citationEngine.formatBibliography(
                 bibliography?.citations,
-                bibliography?.style,
-                "html"
+                bibliography?.style
             );
             setReferences(formattedCitations);
         }
@@ -246,14 +244,12 @@ export function ReferenceEntries(props) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [bibliography?.citations, bibliography?.style]); // Adding setSavedCslFiles to the dependency array will cause the component to rerender infinitely
 
+    // FIXME: This useEffect causes infinte rerenders
     useEffect(() => {
+        console.log(checkedCitations, bibliography?.style);
         // Used for the handleDrag function because event.dataTransfer.setData("text/html", sanitizedInnerHTML); doesn't wait
         async function formatSelectedCitations() {
-            const formattedCitations = await citationEngine.formatBibliography(
-                checkedCitations,
-                bibliography?.style,
-                "html"
-            );
+            const formattedCitations = await citationEngine.formatBibliography(checkedCitations, bibliography?.style);
             setFormattedSelectedCitations(formattedCitations);
         }
         formatSelectedCitations();
@@ -835,6 +831,7 @@ export function TagsDialog(props) {
     const { setTagsDialogVisible: setIsVisible, onTagAdded, onTagRemoved } = props;
     const bibliography = useFindBib();
     const settings = useSelector((state) => state.settings);
+    // TODO: The bibliography.tags array should only store tag IDs
 
     return (
         <div>

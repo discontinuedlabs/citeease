@@ -31,7 +31,7 @@ export default function App() {
 
     useEffect(() => {
         const h1 = document.querySelector("h1");
-        if (h1) document.title = `${h1.textContent} - CiteEase` || "CiteEase";
+        document.title = h1 ? `${h1.textContent} - CiteEase` : "CiteEase";
 
         return () => (document.title = "CiteEase");
     });
@@ -46,11 +46,9 @@ export default function App() {
             const subscribe = onSnapshot(collection(firestoreDB, "users"), async (snapshot) => {
                 const userData = snapshot.docs.find((doc) => doc.id === currentUser.uid)?.data();
                 if (userData) {
-                    dispatch(
-                        mergeWithCurrentBibs({ payload: { bibliographies: JSON.parse(userData?.bibliographies) } })
-                    );
-                    dispatch(mergeWithCurrentSettings({ payload: { settings: JSON.parse(userData?.settings) } }));
-                } else if (!userData && currentUser) {
+                    dispatch(mergeWithCurrentBibs({ bibliographies: JSON.parse(userData?.bibliographies) }));
+                    dispatch(mergeWithCurrentSettings({ settings: JSON.parse(userData?.settings) }));
+                } else {
                     try {
                         await setDoc(doc(firestoreDB, "users", currentUser.uid), {
                             bibliographies: JSON.stringify(bibliographies),
@@ -63,7 +61,14 @@ export default function App() {
             });
             return subscribe;
         }
-    }, [currentUser, dispatch, bibliographies, settings]);
+    }, [currentUser]);
+
+    useEffect(() => {
+        if (currentUser) {
+            const userRef = doc(firestoreDB, "users", currentUser.uid);
+            setDoc(userRef, { bibliographies: JSON.stringify(bibliographies), settings: JSON.stringify(settings) });
+        }
+    }, [bibliographies, settings]);
 
     function showAcceptDialog(title, body = "") {
         setAcceptDialog({ message: { title, body } });
@@ -80,7 +85,7 @@ export default function App() {
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/account" element={<Account />} />
+                <Route path="/account" element={<Account />} /> {/* redirect to "/login" when !currentUser */}
                 <Route path="/settings" element={<Settings />} />
                 <Route
                     path="/:bibId"

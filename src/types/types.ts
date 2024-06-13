@@ -1,17 +1,17 @@
-export interface DateObject {
+export type DateObject = {
     "date-parts"?: Array<Array<number>>;
     raw?: string;
     "date-time"?: string;
     timestamp?: number;
-}
+};
 
-export interface Author {
+export type Author = {
     family?: string;
     given?: string;
     id?: string;
-}
+};
 
-export interface Content {
+export type Content = {
     id?: string;
     type?: string;
     title?: string;
@@ -33,15 +33,15 @@ export interface Content {
     volume?: string | number;
     online?: boolean;
     "number-of-pages"?: number;
-}
+};
 
-export interface Citation {
+export type Citation = {
     id: string;
     content: Content;
     isChecked?: boolean;
-}
+};
 
-export interface Bibliography {
+export type Bibliography = {
     title: string;
     style: Object;
     dateCreated: string;
@@ -49,4 +49,4 @@ export interface Bibliography {
     id: string;
     citations: Citation[];
     tags?: Object[];
-}
+};

@@ -1,19 +1,16 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "../data/db/firebase/firebase";
 import {
-    confirmPasswordReset,
     createUserWithEmailAndPassword,
     deleteUser,
     EmailAuthProvider,
     onAuthStateChanged,
     reauthenticateWithCredential,
-    reauthenticateWithPopup,
     sendEmailVerification,
     sendPasswordResetEmail,
     signInWithEmailAndPassword,
     signOut,
     updatePassword,
-    validatePassword,
     verifyBeforeUpdateEmail,
 } from "firebase/auth";
 
@@ -26,7 +23,7 @@ export function useAuth() {
 export function AuthProvider({ children }) {
     const [currentUser, setCurrentUser] = useState(undefined);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState("");
+    // const [error, setError] = useState("");
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -36,27 +33,27 @@ export function AuthProvider({ children }) {
         return unsubscribe;
     }, []);
 
-    function signup(email, password) {
+    async function signup(email, password) {
         return createUserWithEmailAndPassword(auth, email, password);
     }
 
-    function login(email, password) {
+    async function login(email, password) {
         return signInWithEmailAndPassword(auth, email, password);
     }
 
-    function logout() {
-        return signOut(auth);
+    async function logout() {
+        return await signOut(auth);
     }
 
-    function verifyEmail() {
+    async function verifyEmail() {
         return sendEmailVerification(currentUser);
     }
 
-    function resetPassword(email) {
+    async function resetPassword(email) {
         return sendPasswordResetEmail(auth, email);
     }
 
-    function updateEmail(email) {
+    async function updateEmail(email) {
         return verifyBeforeUpdateEmail(currentUser, email);
     }
 
