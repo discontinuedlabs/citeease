@@ -14,11 +14,11 @@ import BibliographyCard from "../../components/ui/BibliographyCard";
 import ContextMenu from "../../components/ui/ContextMenu";
 import DOMPurify from "dompurify";
 import HTMLReactParser from "html-react-parser/lib/index";
-import { FixedSizeList as List } from "react-window";
 import * as citationUtils from "../../utils/citationUtils.ts";
 import { useDispatch, useSelector } from "react-redux";
 import { useFindBib, useFindCheckedCitations } from "../../hooks/hooks.ts";
 import Tag from "../../components/ui/Tag.js";
+import { ViewportList } from "react-viewport-list";
 
 // Source types
 import ArticleJournal from "../../components/sourceTypes/ArticleJournal";
@@ -651,6 +651,7 @@ export function CitationStylesMenu(props) {
     const { setCitationStyleMenuVisible: setIsVisible, onStyleSelected } = props;
     const [styles, setStyles] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
+    const scrollContainerRef = useRef();
 
     const MOST_POPULAR_STYLES_LABEL = "Most popular styles";
     const OTHER_STYLES_LABEL = "Other styles";
@@ -730,25 +731,27 @@ export function CitationStylesMenu(props) {
                 </form>
             </search>
 
-            <List height={500} itemCount={filteredStyles.length} itemSize={45} width={window.innerWidth - 50}>
-                {({ index, style }) => {
-                    const targetStyle = filteredStyles[index];
-                    if (/other styles|most popular/i.test(targetStyle)) {
-                        return <h3 style={style}>{targetStyle}</h3>;
-                    }
-                    return (
-                        <button
-                            style={style}
-                            onClick={() => {
-                                onStyleSelected(targetStyle);
-                                setIsVisible(false);
-                            }}
-                        >
-                            {targetStyle.name.long}
-                        </button>
-                    );
-                }}
-            </List>
+            <div ref={scrollContainerRef}>
+                <ViewportList viewportRef={scrollContainerRef} items={filteredStyles}>
+                    {(item, index) => {
+                        if (/other styles|most popular/i.test(item)) {
+                            return <h3 key={index}>{item}</h3>;
+                        }
+                        return (
+                            <button
+                                key={index}
+                                onClick={() => {
+                                    onStyleSelected(item);
+                                    setIsVisible(false);
+                                }}
+                            >
+                                {item.name.long}
+                            </button>
+                        );
+                    }}
+                </ViewportList>
+            </div>
+
             <small>
                 <b>Note:</b> Some less common citation styles may have formatting issues. If you encounter any problems,
                 please report them by opening an issue on the{" "}
