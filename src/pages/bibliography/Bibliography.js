@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import ContextMenu from "../../components/ui/ContextMenu.js";
 import { useEffect, useState } from "react";
 import * as citationEngine from "../../utils/citationEngine.js";
@@ -13,6 +13,7 @@ import {
     SmartGeneratorDialog,
     CitationStylesMenu,
     TagsDialog,
+    IdAndPasswordDialogVisible,
 } from "./BibliographyTools";
 import { HotKeys } from "react-hotkeys";
 import { useDispatch, useSelector } from "react-redux";
@@ -23,11 +24,18 @@ import {
     deleteSelectedCitations,
     duplicateSelectedCitations,
     editCitation,
-    loadFromIndexedDB,
     updateBibField,
+    enableCollabInBib,
+    reEnableCollabInBib,
+    disableCollabInBib,
+    mergeWithCurrent,
 } from "../../data/store/slices/bibsSlice";
 import { useFindBib, useFindCheckedCitations } from "../../hooks/hooks.ts";
 import Tag from "../../components/ui/Tag.js";
+import { useAuth } from "../../context/AuthContext.js";
+import Icon from "../../components/ui/Icon.js";
+import { collection, deleteDoc, doc, getDoc, onSnapshot, setDoc } from "firebase/firestore";
+import firestoreDB from "../../data/db/firebase/firebase.js";
 
 export const SOURCE_TYPES = {
     ARTICLE_JOURNAL: {
@@ -38,13 +46,17 @@ export const SOURCE_TYPES = {
     WEBPAGE: { label: "Webpage", code: "webpage" },
 };
 
+// TODO: The user cannot do any actions in collaborative bibliographies when they are offline
 export default function Bibliography(props) {
     const { showConfirmDialog, showAcceptDialog } = props;
     const bibliographies = useSelector((state) => state.bibliographies);
     const bibliography = useFindBib();
     const checkedCitations = useFindCheckedCitations();
+    const { currentUser } = useAuth();
+    const { bibId } = useParams();
 
-    // const [collaborationOpened, setCollaborationOpened] = useState(false);
+    const [collaborationOpened, setCollaborationOpened] = useState(bibliography?.collab?.open);
+    const [idAndPasswordDialogVisible, setIdAndPasswordDialogVisible] = useState(false);
     const [intextCitationDialogVisible, setIntextCitationDialogVisible] = useState(false);
     const [citationFormVisible, setCitationFormVisible] = useState(false);
     const [addCitationMenuVisible, setAddCitationMenuVisible] = useState(false);
@@ -74,8 +86,37 @@ export default function Bibliography(props) {
     };
 
     useEffect(() => {
-        dispatch(loadFromIndexedDB());
-    }, [dispatch]);
+        // Prioritizes showing collab.id in the URL instead of the regular id
+        if (!bibliography) return;
+        if (bibliography?.collab?.open && bibId !== bibliography?.collab?.id) {
+            navigate("/" + bibliography.collab.id, { replace: true });
+        } else if (!bibliography?.collab?.open && bibId !== bibliography.id) {
+            navigate("/" + bibliography.id, { replace: true });
+        }
+    }, [bibId, bibliography?.collab?.open]);
+
+    useEffect(() => {
+        if (currentUser && bibliography?.collab?.open) {
+            const subscribe = onSnapshot(collection(firestoreDB, "coBibs"), async (snapshot) => {
+                const coBibData = snapshot.docs.find((doc) => doc.id === bibliography.collab.id)?.data();
+                if (coBibData) {
+                    dispatch(mergeWithCurrent({ bibliographies: [JSON.parse(coBibData.bibliography)] }));
+                }
+            });
+            return subscribe;
+        }
+    }, [currentUser]);
+
+    useEffect(() => {
+        async function updateCoBibInFirestore() {
+            if (currentUser && bibliography?.collab?.open) {
+                const docRef = doc(firestoreDB, "coBibs", bibliography.collab.id);
+                await setDoc(docRef, { bibliography: JSON.stringify(bibliography) });
+                console.log("saved bib to db");
+            }
+        }
+        updateCoBibInFirestore();
+    }, [bibliography, currentUser]);
 
     function openIntextCitationDialog() {
         setIntextCitationDialogVisible(true);
@@ -136,10 +177,6 @@ export default function Bibliography(props) {
         }
     }
 
-    function handleExportToLatex() {
-        setLaTeXWindowVisible(true);
-    }
-
     function handleMove() {
         if (bibliographies.length > 1) setMoveWindowVisible(true);
         else
@@ -174,21 +211,106 @@ export default function Bibliography(props) {
         }
     }
 
-    // function handleOpenCollaboration() {
-    //     // If it's the first time, prompts the user with a dialog explaining the benefits of collaboration.
-    //     // Checks whether the user owns any collaborative bibliographies to determine if it's the first time.
-    //     // If the user is not signed in, prompts them to sign in to access this feature. Once signed in, they proceed to create a unique identifier and password for the collaborative bibliography.
-    //     // If the user attempts to open a bibliography that was previously set up for collaboration, they are presented with a confirmation message: "Are you sure you want to open this bibliography for collaboration?"
-    //     setCollaborationOpened(true);
-    // }
+    async function openCollaboration(data) {
+        const newCoBib = {
+            ...bibliography,
+            collab: {
+                open: true,
+                id: data.id,
+                adminId: currentUser.uid,
+                collaborators: [{ name: currentUser.adminName, id: currentUser.uid }],
+                preferences: {},
+                changelog: [],
+                password: data.password,
+            },
+        };
+        const coBibsRef = doc(firestoreDB, "coBibs", data.id);
+        await setDoc(coBibsRef, { bibliography: JSON.stringify(newCoBib) });
 
-    // function handleCloseCollaboration() {
-    //     showConfirmDialog(
-    //         "Close collaboration?",
-    //         "This will remove all collaborators, permanently delete the collaboration history, and revoke access foe all contributors. The bibliography will be removed from their list of accessible bibliographies. Are you sure you want to proceed? Collaboration can be opened anytime if needed.",
-    //         () => setCollaborationOpened(false)
-    //     );
-    // }
+        dispatch(
+            enableCollabInBib({
+                bibId: bibliography.id,
+                adminId: currentUser.uid,
+                adminName: currentUser.displayName,
+                coId: data.id,
+                password: data.password,
+            })
+        );
+        setCollaborationOpened(true);
+    }
+
+    async function reopenCollaboration() {
+        const reopenedCoBib = {
+            ...bibliography,
+            collab: {
+                ...bibliography.collab,
+                open: true,
+            },
+        };
+        const coBibsRef = doc(firestoreDB, "coBibs", bibliography.collab.id);
+        await setDoc(coBibsRef, { bibliography: JSON.stringify(reopenedCoBib) });
+        dispatch(reEnableCollabInBib({ bibId: bibliography.id }));
+        setCollaborationOpened(true);
+    }
+
+    async function closeCollaboration() {
+        await deleteDoc(doc(firestoreDB, "coBibs", bibliography.collab.id));
+        dispatch(disableCollabInBib({ bibId: bibliography.id }));
+        setCollaborationOpened(false);
+    }
+
+    function handleOpenCollaboration() {
+        if (!currentUser) {
+            // If not logged in
+            showConfirmDialog(
+                "Login required",
+                "You need to log in first to use this feature.",
+                () => navigate("/login"),
+                "Log In",
+                "Cancel"
+            );
+        } else if (bibliography?.collab) {
+            // When attempting to open a bibliography that was previously set up for collaboration
+            showConfirmDialog(
+                "Open collaboration?",
+                "Are you sure you want to open this bibliography for collaboration?",
+                reopenCollaboration,
+                "Open",
+                "Cancel"
+            );
+        } else {
+            const firstTimeEver = bibliographies.some((bib) => bib?.collab);
+            if (firstTimeEver) {
+                // First time to open collaboration in any bibliography
+                showConfirmDialog(
+                    "Open collaboration?",
+                    "Are you sure you want to open this bibliography for collaboration?",
+                    () => setIdAndPasswordDialogVisible(true),
+                    "Open",
+                    "Cancel"
+                );
+            } else {
+                // First time to open collaboration for the current bibliography only
+                showConfirmDialog(
+                    "Open collaboration?",
+                    "Are you sure you want to open this bibliography for collaboration?",
+                    () => setIdAndPasswordDialogVisible(true),
+                    "Open",
+                    "Cancel"
+                );
+            }
+        }
+    }
+
+    function handleCloseCollaboration() {
+        showConfirmDialog(
+            "Close collaboration?",
+            "This will remove all collaborators, permanently delete the collaboration history, and revoke access foe all contributors. The bibliography will be removed from their list of accessible bibliographies. Are you sure you want to proceed? Collaboration can be opened anytime if needed.",
+            closeCollaboration,
+            "Close collaboration",
+            "Cancel"
+        );
+    }
 
     function handleDeleteBibliography() {
         navigate("/");
@@ -200,9 +322,20 @@ export default function Bibliography(props) {
             <HotKeys keyMap={keyMap}>
                 <div>
                     <div className="flex justify-between items-center">
-                        <h1 className="m-0" onClick={() => setRenameWindowVisible(true)}>
-                            {bibliography?.title}
-                        </h1>
+                        <div>
+                            {bibliography?.collab?.open && (
+                                <div className="text-md font-bold w-fit rounded-md transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
+                                    {<Icon name="group" />} {bibliography?.collab?.id}
+                                </div>
+                            )}
+                            <h1
+                                className="m-0 rounded-md transition duration-150 ease-in-out hover:bg-neutral-transparentGray"
+                                onClick={() => setRenameWindowVisible(true)}
+                            >
+                                {bibliography?.title}
+                            </h1>
+                        </div>
+
                         <ContextMenu
                             className="self-start"
                             icon="more_vert"
@@ -218,7 +351,7 @@ export default function Bibliography(props) {
                                           { label: "Copy to clipboard", method: handleCopy }, // TODO: This should give options to choose the type of copied text: Text, HTML, or Markdown.
                                           {
                                               label: "Export to LaTeX",
-                                              method: handleExportToLatex, // TODO: This should be "Export" only, and gives you more options to export to: LaTeX, HTML, Markdown, PDF, Word, or JSON.
+                                              method: () => setLaTeXWindowVisible(true), // TODO: This should be "Export" only, and gives you more options to export to: LaTeX, HTML, Markdown, PDF, Word, or JSON.
                                           },
 
                                           "DEVIDER",
@@ -282,27 +415,31 @@ export default function Bibliography(props) {
 
                                           "DEVIDER",
 
-                                          //   ...(collaborationOpened
-                                          //       ? [
-                                          //             {
-                                          //                 label: "bibliography settings",
-                                          //                 method: () => navigate(`/${bibliographyId}/settings`),
-                                          //             },
+                                          {
+                                              label: "Preferences",
+                                              method: () => navigate(`/${bibliography.id}/preferences`),
+                                          },
 
-                                          //             {
-                                          //                 label: "Close collaboration",
-                                          //                 method: handleCloseCollaboration,
-                                          //             },
-                                          //         ]
-                                          //       : [
-                                          //             {
-                                          //                 label: "Open collaboration",
-                                          //                 method: handleOpenCollaboration,
-                                          //                 badge: { label: "test", color: "white", backgroundColor: "blue" },
-                                          //             },
-                                          //         ]),
+                                          ...(collaborationOpened
+                                              ? [
+                                                    {
+                                                        label: "Close collaboration",
+                                                        method: handleCloseCollaboration,
+                                                    },
+                                                ]
+                                              : [
+                                                    {
+                                                        label: "Open collaboration",
+                                                        method: handleOpenCollaboration,
+                                                        badge: {
+                                                            label: "test",
+                                                            color: "white",
+                                                            backgroundColor: "blue",
+                                                        },
+                                                    },
+                                                ]),
 
-                                          //   "DEVIDER",
+                                          "DEVIDER",
 
                                           {
                                               label: "Delete bibliography",
@@ -321,7 +458,12 @@ export default function Bibliography(props) {
                             ]}
                         />
                     </div>
-                    <h3 onClick={() => setCitationStyleMenuVisible(true)}>{bibliography?.style.name.long}</h3>
+                    <h3
+                        className="w-fit rounded-md transition duration-150 ease-in-out hover:bg-neutral-transparentGray"
+                        onClick={() => setCitationStyleMenuVisible(true)}
+                    >
+                        {bibliography?.style.name.long}
+                    </h3>
                     <div className="flex gap-1 flex-wrap">
                         {bibliography?.tags?.map((tag, index) => (
                             <Tag key={index} tagProps={tag} onClick={() => setTagsDialogVisible(true)} />
@@ -388,6 +530,13 @@ export default function Bibliography(props) {
                 {tagsDialogVisible && (
                     <TagsDialog
                         {...{ setTagsDialogVisible, onTagAdded: addTagToBib, onTagRemoved: removeTagFromBib }}
+                    />
+                )}
+
+                {idAndPasswordDialogVisible && (
+                    <IdAndPasswordDialogVisible
+                        setIsVisible={setIdAndPasswordDialogVisible}
+                        onSubmit={openCollaboration}
                     />
                 )}
 

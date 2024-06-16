@@ -12,7 +12,7 @@ export default function Logo() {
                         <div className="absolute start-1/2 rounded-full bottom-0 w-3 h-3 bg-primary-500 -translate-x-1/2 translate-y-full"></div>
                     </div>
                 </span>
-                <sup className="font-sans text-sm font-bold"> beta</sup>
+                <sup className="font-sans text-sm font-bold"> EXPERIMENTAL</sup>
             </div>
         </div>
     );

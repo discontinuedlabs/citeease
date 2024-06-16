@@ -23,7 +23,6 @@ export default function Account() {
     const [loggedOut, setLoggedOut] = useState(!currentUser);
 
     useEffect(() => {
-        console.log(currentUser, loggedOut);
         // WATCH: This effect should execute only when there's a change in the 'currentUser' state.
         // If the 'loggedOut' state is true (which depends on the 'currentUser' state being falsy),
         // then it proceeds with its task. This is because the 'useAuth().signOut()' function

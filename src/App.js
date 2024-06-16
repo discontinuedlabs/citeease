@@ -19,7 +19,7 @@ import Login from "./pages/account/Login";
 import Account from "./pages/account/Account";
 import ForgotPassword from "./pages/account/ForgotPassword";
 import firestoreDB from "./data/db/firebase/firebase";
-import { collection, doc, onSnapshot, setDoc } from "firebase/firestore";
+import { collection, doc, getAll, getDoc, getDocs, onSnapshot, setDoc } from "firebase/firestore";
 
 export default function App() {
     const [acceptDialog, setAcceptDialog] = useState({});
@@ -41,6 +41,7 @@ export default function App() {
         dispatch(loadSettings());
     }, [dispatch]);
 
+    // TODO: Clean this code
     useEffect(() => {
         if (currentUser) {
             const subscribe = onSnapshot(collection(firestoreDB, "users"), async (snapshot) => {
@@ -48,6 +49,23 @@ export default function App() {
                 if (userData) {
                     dispatch(mergeWithCurrentBibs({ bibliographies: JSON.parse(userData?.bibliographies) }));
                     dispatch(mergeWithCurrentSettings({ settings: JSON.parse(userData?.settings) }));
+
+                    const parsedBibs = JSON.parse(userData?.bibliographies);
+                    let coBibsIds = [];
+                    parsedBibs.forEach((bib) => {
+                        if (bib?.collab?.open) {
+                            coBibsIds.push(bib.collab.id);
+                        }
+                    });
+
+                    coBibsIds.forEach(async (id) => {
+                        const result = await getDoc(doc(firestoreDB, "coBibs", id));
+                        if (result.data()) {
+                            dispatch(
+                                mergeWithCurrentBibs({ bibliographies: [JSON.parse(result.data().bibliography)] })
+                            );
+                        }
+                    });
                 } else {
                     try {
                         await setDoc(doc(firestoreDB, "users", currentUser.uid), {

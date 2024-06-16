@@ -15,11 +15,67 @@ const bibsSlice = createSlice({
     initialState,
     reducers: {
         mergeWithCurrent: (bibs, action) => {
+            // Prompt the user if they want to merge them first
             if (!action.payload.bibliographies) return bibs;
             const newBibs = action.payload.bibliographies;
             const newBibsIds = newBibs.map((bib) => bib.id);
             const filteredOldBibs = bibs.filter((bib) => !newBibsIds.includes(bib.id));
             const newState = [...filteredOldBibs, ...newBibs];
+            saveToIndexedDB(newState);
+            return newState;
+        },
+        enableCollabInBib: (bibs, action) => {
+            const newState = bibs.map((bib) => {
+                if (bib.id === action.payload.bibId) {
+                    return {
+                        ...bib,
+                        collab: {
+                            open: true,
+                            id: action.payload.coId,
+                            adminId: action.payload.adminId,
+                            collaborators: [{ name: action.payload.adminName, id: action.payload.adminId }],
+                            preferences: {},
+                            changelog: [],
+                            password: action.payload.password,
+                        },
+                    };
+                }
+                return bib;
+            });
+            saveToIndexedDB(newState);
+            return newState;
+        },
+        reEnableCollabInBib: (bibs, action) => {
+            const newState = bibs.map((bib) => {
+                if (bib.id === action.payload.bibId) {
+                    return {
+                        ...bib,
+                        collab: {
+                            ...bib.collab,
+                            open: true,
+                        },
+                    };
+                }
+                return bib;
+            });
+            saveToIndexedDB(newState);
+            return newState;
+        },
+        disableCollabInBib: (bibs, action) => {
+            const newState = bibs.map((bib) => {
+                if (bib.id === action.payload.bibId) {
+                    return {
+                        ...bib,
+                        collab: {
+                            ...bib.collab,
+                            open: false,
+                            collaborators: [bib.collab.collaborators.find((co) => co.id === bib.collab.adminId)],
+                            changelog: [],
+                        },
+                    };
+                }
+                return bib;
+            });
             saveToIndexedDB(newState);
             return newState;
         },
@@ -138,7 +194,7 @@ const bibsSlice = createSlice({
                             return cit;
                         });
                     } else {
-                        // If the citation doesn't exist, add it
+                        // If the citation doesn't exist, add it to the rest of bibliography.citations array
                         updatedCitations = [...bib.citations, action.payload.editedCitation];
                     }
 
@@ -326,6 +382,9 @@ export const loadFromIndexedDB = createAsyncThunk("bibliographies/loadFromIndexe
 
 export const {
     mergeWithCurrent,
+    enableCollabInBib,
+    reEnableCollabInBib,
+    disableCollabInBib,
     addNewBib,
     deleteBib,
     updateBibField,

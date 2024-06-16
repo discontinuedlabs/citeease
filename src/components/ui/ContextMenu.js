@@ -3,6 +3,8 @@ import { MechanicButton, SmallButton, ContextMenuOption } from "./StyledButtons"
 import "../../css/ContextMenu.css";
 import { nanoid } from "nanoid";
 
+// TODO: Needs refactor
+
 export default function ContextMenu(props) {
     const { label, icon, options, buttonType, menuStyle, buttonStyle } = props;
     const [visible, setVisible] = useState(false);

@@ -1,5 +1,6 @@
 import { timeAgo } from "../../utils/utils";
 import Tag from "./Tag";
+import Icon from "./Icon";
 
 export default function BibliographyCard(props) {
     const { bibliography } = props;
@@ -34,16 +35,21 @@ export default function BibliographyCard(props) {
     return (
         <div className="grid shadow-hardTransparent border-2 border-solid border-neutral-lightGray rounded-lg items-center p-4 bg-white transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
             <div className="w-full text-neutral-black sm:flex sm:justify-between gap-2">
-                <h3 className="mb-0">{bibliography.title}</h3>
+                <div className="flex gap-1">
+                    <h3 className="mb-0">
+                        {bibliography?.collab?.open && <Icon className="text-neutral-lightGray" name="group" />}{" "}
+                        {bibliography?.title}
+                    </h3>
+                </div>
                 <p className="mb-0">{`${
-                    bibliography.style.name.short || bibliography.style.name.long.replace(/\((.*?)\)/g, "")
+                    bibliography?.style?.name?.short || bibliography?.style?.name?.long.replace(/\((.*?)\)/g, "")
                 } • ${
-                    bibliography.citations.length === 0
+                    bibliography?.citations?.length === 0
                         ? "No sources added"
-                        : bibliography.citations.length === 1
+                        : bibliography?.citations?.length === 1
                         ? "1 source"
-                        : `${bibliography.citations.length} sources`
-                } • ${timeAgo(bibliography.dateModified)}`}</p>
+                        : `${bibliography?.citations?.length} sources`
+                } • ${timeAgo(bibliography?.dateModified)}`}</p>
             </div>
             <div
                 className="flex gap-1 flex-wrap"

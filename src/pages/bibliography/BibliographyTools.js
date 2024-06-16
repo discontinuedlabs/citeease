@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import * as citationEngine from "../../utils/citationEngine.js";
 import { SOURCE_TYPES } from "./Bibliography.js";
 import {
@@ -14,11 +14,11 @@ import BibliographyCard from "../../components/ui/BibliographyCard";
 import ContextMenu from "../../components/ui/ContextMenu";
 import DOMPurify from "dompurify";
 import HTMLReactParser from "html-react-parser/lib/index";
+import { FixedSizeList as List } from "react-window";
 import * as citationUtils from "../../utils/citationUtils.ts";
 import { useDispatch, useSelector } from "react-redux";
 import { useFindBib, useFindCheckedCitations } from "../../hooks/hooks.ts";
 import Tag from "../../components/ui/Tag.js";
-import { ViewportList } from "react-viewport-list";
 
 // Source types
 import ArticleJournal from "../../components/sourceTypes/ArticleJournal";
@@ -246,7 +246,7 @@ export function ReferenceEntries(props) {
 
     // FIXME: This useEffect causes infinte rerenders
     useEffect(() => {
-        console.log(checkedCitations, bibliography?.style);
+        // console.log(checkedCitations, bibliography?.style);
         // Used for the handleDrag function because event.dataTransfer.setData("text/html", sanitizedInnerHTML); doesn't wait
         async function formatSelectedCitations() {
             const formattedCitations = await citationEngine.formatBibliography(checkedCitations, bibliography?.style);
@@ -651,7 +651,6 @@ export function CitationStylesMenu(props) {
     const { setCitationStyleMenuVisible: setIsVisible, onStyleSelected } = props;
     const [styles, setStyles] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
-    const scrollContainerRef = useRef();
 
     const MOST_POPULAR_STYLES_LABEL = "Most popular styles";
     const OTHER_STYLES_LABEL = "Other styles";
@@ -722,7 +721,7 @@ export function CitationStylesMenu(props) {
             <search>
                 <form>
                     <input
-                        type="text"
+                        type="search"
                         name="citation-style-search-input"
                         placeholder="Find style by name..."
                         value={searchTerm}
@@ -731,27 +730,25 @@ export function CitationStylesMenu(props) {
                 </form>
             </search>
 
-            <div ref={scrollContainerRef}>
-                <ViewportList viewportRef={scrollContainerRef} items={filteredStyles}>
-                    {(item, index) => {
-                        if (/other styles|most popular/i.test(item)) {
-                            return <h3 key={index}>{item}</h3>;
-                        }
-                        return (
-                            <button
-                                key={index}
-                                onClick={() => {
-                                    onStyleSelected(item);
-                                    setIsVisible(false);
-                                }}
-                            >
-                                {item.name.long}
-                            </button>
-                        );
-                    }}
-                </ViewportList>
-            </div>
-
+            <List height={500} itemCount={filteredStyles.length} itemSize={45} width={300}>
+                {({ index, style }) => {
+                    const targetStyle = filteredStyles[index];
+                    if (/other styles|most popular/i.test(targetStyle)) {
+                        return <h3 style={style}>{targetStyle}</h3>;
+                    }
+                    return (
+                        <button
+                            style={style}
+                            onClick={() => {
+                                onStyleSelected(targetStyle);
+                                setIsVisible(false);
+                            }}
+                        >
+                            {targetStyle.name.long}
+                        </button>
+                    );
+                }}
+            </List>
             <small>
                 <b>Note:</b> Some less common citation styles may have formatting issues. If you encounter any problems,
                 please report them by opening an issue on the{" "}
@@ -853,6 +850,51 @@ export function TagsDialog(props) {
                         return <Tag key={index} tagProps={tag} onClick={onTagAdded} />;
                     })}
             </div>
+        </div>
+    );
+}
+
+export function IdAndPasswordDialogVisible(props) {
+    const { setIsVisible, onSubmit } = props;
+    const [error, setError] = useState(null);
+    const idRef = useRef();
+    const passwordRef = useRef();
+    const confirmPasswordRef = useRef();
+    const id = useId();
+
+    function handleSubmit(event) {
+        event.preventDefault();
+
+        if (passwordRef.current.value !== confirmPasswordRef.current.value) {
+            setError("Password do not match");
+        } else {
+            const data = new FormData(event.target);
+            onSubmit(Object.fromEntries(data.entries()));
+            setIsVisible(false);
+        }
+    }
+
+    return (
+        <div>
+            <h3>Open collaboration</h3>
+            <button onClick={() => setIsVisible(false)}>X</button>
+            <p>Choose a unique identifer and a password for you collaborative bibliography.</p>
+            <pre>{error}</pre>
+            <form onSubmit={handleSubmit}>
+                <label htmlFor={`${id}-id`}>Unique identifer</label>
+                <input ref={idRef} type="text" id={`${id}-id`} name="id" required />
+                <label htmlFor={`${id}-password`}>Password</label>
+                <input ref={passwordRef} type="password" id={`${id}-password`} name="password" required />
+                <label htmlFor={`${id}-confirmPassword`}>Confirm password</label>
+                <input
+                    ref={confirmPasswordRef}
+                    type="password"
+                    id={`${id}-confirmPassword`}
+                    name="confirmPassword"
+                    required
+                />
+                <button type="submit">Open collaboration</button>
+            </form>
         </div>
     );
 }
