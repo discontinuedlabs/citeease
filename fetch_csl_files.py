@@ -41,31 +41,69 @@ This script can be integrated into a scheduled task to ensure "styles.json" rema
 latest CSL styles.
 """
 
+
 import os
 import re
 import json
-from tqdm import tqdm
-from colorist import red, green, blue
+
+
+class Colors:
+    PURPLE = "\033[95m"
+    GREEN = "\033[92m"
+    BLUE = "\033[94m"
+    RED = "\033[91m"
+    BG_GREEN = "\033[6;30;42;1m"
+    BG_RED = "\033[6;30;41;1m"
+    ENDC = "\033[0m"
+
+class Result:
+    SUCCESS = f"{Colors.BG_GREEN} SUCCESS {Colors.ENDC}"
+    ERROR = f"{Colors.BG_RED} ERROR {Colors.ENDC}"
+
+
+def get_progress_bar(current_index, total_files):
+    bar_length = 25
+    percent = float(current_index + 1) / total_files
+    arrow = "\u2588" * int(round(percent * bar_length))
+    spaces = "\u2591" * (bar_length - len(arrow))
+    percentage = int(percent * 100)
+    
+    percentage_str = f"%{percentage:<3d}"
+    
+    progress_bar = f"{arrow}{spaces} {percentage_str}"
+
+    return progress_bar
 
 
 def fetch_local_csl_files(directory):
-    """
-    Fetches all CSL files from the specified directory and processes them.
+    # Fetches all CSL files from the specified directory and processes them.
 
-    Parameters:
-    - directory: The path to the directory containing the CSL files.
+    # Parameters:
+    # - directory: The path to the directory containing the CSL files.
 
-    Returns:
-    - A list of dictionaries, each representing a CSL file with its details.
-    """
+    # Returns:
+    # - A list of dictionaries, each representing a CSL file with its details.
 
     if not os.path.exists(directory):
-        raise FileNotFoundError(red(f"The directory {directory} does not exist."))
+        raise FileNotFoundError(f"\n{Result.ERROR}\n{Colors.RED}The directory {directory} does not exist.{Colors.ENDC}")
 
     all_files = []
-    for root, dirs, files in tqdm(os.walk(directory), desc="Fetching CSL files"):
+
+    print(f"\n{Colors.PURPLE}Fetching CSL files...{Colors.ENDC}")
+
+    for root, dirs, files in os.walk(directory):
         for file in files:
             if file.endswith(".csl"):
+                total_files = len(files)
+                index = files.index(file)
+                max_length = len(files[index-1][0:20]) + 1
+                progress = f"{index + 1}/{total_files}"
+                end_char = "" if index + 1 != total_files else "\n"
+                progress_bar = get_progress_bar(index, total_files)
+
+                print(f"\r{progress_bar} | {index}/{total_files} | {" " * max_length}", end="") 
+                print(f"\r{progress_bar} | {index}/{total_files} | {file[0:20] if index + 1 != total_files else "DONE"}", end=end_char)
+
                 file_path = os.path.join(root, file)
 
                 with open(file_path, "r", encoding="utf-8") as file:
@@ -102,30 +140,42 @@ def fetch_local_csl_files(directory):
                 }
 
                 all_files.append(item)
-
+    
     return all_files
 
 
 def process_csl_files(all_files):
-    """
-    Processes the list of CSL files, appending each file's information to a new list.
+    # Processes the list of CSL files, appending each file"s information to a new list.
 
-    Parameters:
-    - all_files: A list of dictionaries, each representing a CSL file.
+    # Parameters:
+    # - all_files: A list of dictionaries, each representing a CSL file.
 
-    Returns:
-    - A list of dictionaries, each representing a processed CSL file.
-    """
+    # Returns:
+    # - A list of dictionaries, each representing a processed CSL file.
+
     data = []
-    for file_info in tqdm(all_files, colour="green", desc="Processing CSL files: "):
+
+    print(f"\n{Colors.PURPLE}Processing CSL files...{Colors.ENDC}")
+
+    for file_info in all_files:
+        total_files = len(all_files)
+        index = all_files.index(file_info)
+        max_length = len(all_files[index-1]["code"][0:20]) + 1
+        progress = f"{index + 1}/{total_files}"
+        end_char = "" if index + 1 != total_files else "\n"
+        progress_bar = get_progress_bar(index, total_files)
+
+        print(f"\r{progress_bar} | {index}/{total_files} | {" " * max_length}", end="") 
+        print(f"\r{progress_bar} | {index}/{total_files} | {file_info["code"][0:20] if index + 1 != total_files else "DONE"}", end=end_char)
+
         data.append(file_info)
 
     return data
 
 
 def main():
-    directory = r"C:\Users\USERNAME\styles"  # Make sure to change this to the specified 'styles' directory
-    print(blue(f"Starting to fetch CSL files from {directory}..."))
+    directory = r"C:\Users\yu981\styles"  # Make sure to change this to the specified "styles" directory
+    print(f"{Colors.BLUE}Starting to fetch CSL files from {directory}...{Colors.ENDC}")
 
     all_files = fetch_local_csl_files(directory)
     data = process_csl_files(all_files)
@@ -136,9 +186,9 @@ def main():
     try:
         with open(output_file_path, "w", encoding="utf-8") as file:
             file.write(json_data)
-        print(green("Citation styles data saved to " + output_file_path))
+        print(f"\n{Result.SUCCESS}\n{Colors.GREEN}Citation styles data saved to {output_file_path}\nTotal files: {len(all_files)}{Colors.ENDC}")
     except IOError as error:
-        print(red("Error writing to file: " + str(error)))
+        print(f"\n{Result.ERROR}\n{Colors.RED}Error writing to file: {str(error)}{Colors.ENDC}")
 
 
 if __name__ == "__main__":
