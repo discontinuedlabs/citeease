@@ -29,11 +29,10 @@ restricts file retrieval to 1,000 per request.
 
 1. Clone the official CSL styles repository:
     `git clone https://github.com/citation-style-language/styles.git`
-2. Update the `directory` variable within the script to point to the location of your cloned repository.
-3. Install required Python packages:
-    `pip install tqdm colorist`
-4. Run the script to process the CSL files and generate an updated "styles.json" file:
-    `python fetch-csl-files.py`
+2. Move to the script directory:
+    `cd public`
+3. Run the script to process the CSL files and specify the location of the local "styles" repository:
+    `python fetch_csl_files.py "C:\\Users\\USERNAME\\styles"`
 
 **Scheduled Execution:**
 
@@ -42,9 +41,11 @@ latest CSL styles.
 """
 
 
+import sys
 import os
 import re
 import json
+import time
 
 
 class Colors:
@@ -85,7 +86,7 @@ def fetch_local_csl_files(directory):
     # - A list of dictionaries, each representing a CSL file with its details.
 
     if not os.path.exists(directory):
-        raise FileNotFoundError(f"\n{Result.ERROR}\n{Colors.RED}The directory {directory} does not exist.{Colors.ENDC}")
+        raise FileNotFoundError(f"\n{Result.ERROR}\n{Colors.RED}The specified directory '{directory}' does not exist. Please check the path and try again.{Colors.ENDC}")
 
     all_files = []
 
@@ -173,8 +174,9 @@ def process_csl_files(all_files):
     return data
 
 
-def main():
-    directory = r"C:\Users\yu981\styles"  # Make sure to change this to the specified "styles" directory
+def main(directory):
+    start = time.time()
+
     print(f"{Colors.BLUE}Starting to fetch CSL files from {directory}...{Colors.ENDC}")
 
     all_files = fetch_local_csl_files(directory)
@@ -183,13 +185,20 @@ def main():
     json_data = json.dumps(data, indent=4)
     output_file_path = "./styles.json"
 
+    end = time.time()
+    total_time = int(end - start)
+
     try:
         with open(output_file_path, "w", encoding="utf-8") as file:
             file.write(json_data)
-        print(f"\n{Result.SUCCESS}\n{Colors.GREEN}Citation styles data saved to {output_file_path}\nTotal files: {len(all_files)}{Colors.ENDC}")
+        print(f"\n{Result.SUCCESS}\n{Colors.GREEN}Successfully saved citation styles data to {output_file_path}.\nTotal files processed: {len(all_files)} file\nProcessing time: {total_time}s{Colors.ENDC}")
     except IOError as error:
-        print(f"\n{Result.ERROR}\n{Colors.RED}Error writing to file: {str(error)}{Colors.ENDC}")
+        print(f"\n{Result.ERROR}\n{Colors.RED}Error writing to file: {str(error)}.{Colors.ENDC}")
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1:
+        directory = sys.argv[1]
+        main(directory)
+    else: 
+        print(f"{Result.ERROR}\n{Colors.RED}Please provide the path to the local 'styles' repository as a command-line argument.{Colors.ENDC}")
