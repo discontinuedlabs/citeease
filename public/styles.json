@@ -3554,6 +3554,17 @@
     },
     {
         "name": {
+            "long": "Biofuel Research Journal",
+            "short": null
+        },
+        "code": "biofuel-research-journal",
+        "license": {
+            "text": ">This work is licensed under a Creative Commons Attribution-ShareAlike 3.0 License",
+            "url": "http://creativecommons.org/licenses/by-sa/3.0/"
+        }
+    },
+    {
+        "name": {
             "long": "Bioinformatics",
             "short": null
         },
@@ -8010,7 +8021,7 @@
     {
         "name": {
             "long": "European Journal of Human Genetics",
-            "short": null
+            "short": "EJHG"
         },
         "code": "european-journal-of-human-genetics",
         "license": {
@@ -8186,7 +8197,7 @@
     {
         "name": {
             "long": "European Respiratory Journal",
-            "short": null
+            "short": "ERS"
         },
         "code": "european-respiratory-journal",
         "license": {
@@ -8431,6 +8442,17 @@
             "short": null
         },
         "code": "eye",
+        "license": {
+            "text": ">This work is licensed under a Creative Commons Attribution-ShareAlike 3.0 License",
+            "url": "http://creativecommons.org/licenses/by-sa/3.0/"
+        }
+    },
+    {
+        "name": {
+            "long": "FACETS",
+            "short": null
+        },
+        "code": "facets",
         "license": {
             "text": ">This work is licensed under a Creative Commons Attribution-ShareAlike 3.0 License",
             "url": "http://creativecommons.org/licenses/by-sa/3.0/"
@@ -17722,6 +17744,17 @@
     },
     {
         "name": {
+            "long": "Modern Humanities Research Association 3rd edition (note with bibliography)",
+            "short": "MHRA"
+        },
+        "code": "modern-humanities-research-association-3rd-edition",
+        "license": {
+            "text": ">This work is licensed under a Creative Commons Attribution-ShareAlike 3.0 License",
+            "url": "http://creativecommons.org/licenses/by-sa/3.0/"
+        }
+    },
+    {
+        "name": {
             "long": "Modern Humanities Research Association 3rd edition (author-date)",
             "short": "MHRA"
         },
@@ -17733,7 +17766,7 @@
     },
     {
         "name": {
-            "long": "Modern Humanities Research Association 3rd edition (note with bibliography)",
+            "long": "Modern Humanities Research Association 4th edition (note with bibliography)",
             "short": "MHRA"
         },
         "code": "modern-humanities-research-association",
@@ -21946,6 +21979,17 @@
     },
     {
         "name": {
+            "long": "Schweizerische Zeitschrift f\u00fcr Geschichte",
+            "short": "SZG"
+        },
+        "code": "schweizerische-zeitschrift-fur-geschichte",
+        "license": {
+            "text": ">This work is licensed under a Creative Commons Attribution-ShareAlike 3.0 License",
+            "url": "http://creativecommons.org/licenses/by-sa/3.0/"
+        }
+    },
+    {
+        "name": {
             "long": "Science and Technology for the Built Environment",
             "short": "STBE"
         },
@@ -22412,6 +22456,17 @@
             "short": "SCAN"
         },
         "code": "social-cognitive-and-affective-neuroscience",
+        "license": {
+            "text": ">This work is licensed under a Creative Commons Attribution-ShareAlike 3.0 License",
+            "url": "http://creativecommons.org/licenses/by-sa/3.0/"
+        }
+    },
+    {
+        "name": {
+            "long": "Social History of Medicine",
+            "short": "SHM"
+        },
+        "code": "social-history-of-medicine",
         "license": {
             "text": ">This work is licensed under a Creative Commons Attribution-ShareAlike 3.0 License",
             "url": "http://creativecommons.org/licenses/by-sa/3.0/"
@@ -27909,7 +27964,7 @@
     {
         "name": {
             "long": "West European Politics",
-            "short": null
+            "short": "WEP"
         },
         "code": "west-european-politics",
         "license": {
