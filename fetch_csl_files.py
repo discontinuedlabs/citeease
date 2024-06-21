@@ -49,14 +49,12 @@ import time
 
 
 class Colors:
-    WHITE = "\033[97m"
-    GRAY = "\033[90m"
-    YELLOW = "\033[93m"
     GREEN = "\033[92m"
     BLUE = "\033[94m"
     RED = "\033[91m"
     BG_GREEN = "\033[6;30;42;1m"
     BG_RED = "\033[6;30;41;1m"
+    BG_DARK_BLUE = "\033[34;2m"
     ENDC = "\033[0m"
 
 
@@ -65,12 +63,15 @@ class Result:
     ERROR = f"{Colors.BG_RED} ERROR {Colors.ENDC}"
 
 
+MAX_FILENAME_LENGTH = 40
+
+
 def get_progress_bar(current_index, total_files, bar_length=25):
     percent = float(current_index + 1) / total_files
     arrow = f"\u2588" * int(round(percent * bar_length))
     spaces = f"\u2588" * (bar_length - len(arrow))
     percentage_str = f"%{int(percent * 100):<3d}"
-    return f"{Colors.WHITE}{arrow}{Colors.ENDC}{Colors.GRAY}{spaces}{Colors.ENDC} {percentage_str}"
+    return f"{Colors.BLUE}{arrow}{Colors.ENDC}{Colors.BG_DARK_BLUE}{spaces}{Colors.ENDC} {percentage_str}"
 
 
 def fetch_local_csl_files(directory):
@@ -81,7 +82,7 @@ def fetch_local_csl_files(directory):
 
     all_files = []
 
-    print(f"\n{Colors.YELLOW}Fetching CSL files...{Colors.ENDC}")
+    print(f"\nFetching CSL files...")
 
     for root, _, files in os.walk(directory):
         csl_files = [file for file in files if file.endswith(".csl")]
@@ -90,7 +91,7 @@ def fetch_local_csl_files(directory):
         for index, file in enumerate(csl_files):
             progress_bar = get_progress_bar(index, total_files)
             end_char = "" if index + 1 != total_files else "\n"
-            file_name_display = file[:20] if index + 1 != total_files else "DONE"
+            file_name_display = file[:MAX_FILENAME_LENGTH] if index + 1 != total_files else "DONE"
 
             print(f"\r{progress_bar} | {index + 1}/{total_files} | {file_name_display}", end=end_char)
 
@@ -134,13 +135,13 @@ def extract_license_info(content):
 def process_csl_files(all_files):
     data = []
 
-    print(f"\n{Colors.YELLOW}Processing CSL files...{Colors.ENDC}")
+    print(f"\nProcessing CSL files...")
 
     total_files = len(all_files)
     for index, file_info in enumerate(all_files):
         progress_bar = get_progress_bar(index, total_files)
         end_char = "" if index + 1 != total_files else "\n"
-        file_code_display = file_info["code"][:20] if index + 1 != total_files else "DONE"
+        file_code_display = file_info["code"][:MAX_FILENAME_LENGTH] if index + 1 != total_files else "DONE"
 
         print(f"\r{progress_bar} | {index + 1}/{total_files} | {file_code_display}", end=end_char)
 
@@ -152,7 +153,7 @@ def process_csl_files(all_files):
 def main(directory):
     start_time = time.time()
 
-    print(f"{Colors.BLUE}Starting to fetch CSL files from {directory}...{Colors.ENDC}")
+    print(f"Starting to fetch CSL files from {directory}...")
 
     all_files = fetch_local_csl_files(directory)
     data = process_csl_files(all_files)
