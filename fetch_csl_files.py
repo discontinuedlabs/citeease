@@ -63,7 +63,7 @@ class Result:
     ERROR = f"{Colors.BG_RED} ERROR {Colors.ENDC}"
 
 
-MAX_FILENAME_LENGTH = 40
+MAX_FILENAME_LENGTH = 45
 
 
 def get_progress_bar(current_index, total_files, bar_length=25):
@@ -92,7 +92,9 @@ def fetch_local_csl_files(directory):
             progress_bar = get_progress_bar(index, total_files)
             end_char = "" if index + 1 != total_files else "\n"
             file_name_display = file[:MAX_FILENAME_LENGTH] if index + 1 != total_files else "DONE"
+            max_length = len(files[index-1][:MAX_FILENAME_LENGTH]) + 5
 
+            print(f"\r{progress_bar} | {index + 1}/{total_files} | {" " * max_length}", end="") 
             print(f"\r{progress_bar} | {index + 1}/{total_files} | {file_name_display}", end=end_char)
 
             file_path = os.path.join(root, file)
@@ -142,7 +144,9 @@ def process_csl_files(all_files):
         progress_bar = get_progress_bar(index, total_files)
         end_char = "" if index + 1 != total_files else "\n"
         file_code_display = file_info["code"][:MAX_FILENAME_LENGTH] if index + 1 != total_files else "DONE"
+        max_length = len(all_files[index-1]["code"][:MAX_FILENAME_LENGTH]) + 5
 
+        print(f"\r{progress_bar} | {index + 1}/{total_files} | {" " * max_length}", end="")
         print(f"\r{progress_bar} | {index + 1}/{total_files} | {file_code_display}", end=end_char)
 
         data.append(file_info)
