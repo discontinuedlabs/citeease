@@ -68,8 +68,8 @@ MAX_FILENAME_LENGTH = 45
 
 def get_progress_bar(current_index, total_files, bar_length=25):
     percent = float(current_index + 1) / total_files
-    arrow = f"\u2588" * int(round(percent * bar_length))
-    spaces = f"\u2588" * (bar_length - len(arrow))
+    arrow = "\u2588" * int(round(percent * bar_length))
+    spaces = "\u2588" * (bar_length - len(arrow))
     percentage_str = f"%{int(percent * 100):<3d}"
     return f"{Colors.BLUE}{arrow}{Colors.ENDC}{Colors.BG_DARK_BLUE}{spaces}{Colors.ENDC} {percentage_str}"
 
@@ -82,7 +82,7 @@ def fetch_local_csl_files(directory):
 
     all_files = []
 
-    print(f"\nFetching CSL files...")
+    print("\nFetching CSL files...")
 
     for root, _, files in os.walk(directory):
         csl_files = [file for file in files if file.endswith(".csl")]
@@ -126,7 +126,7 @@ def extract_tag_content(content, tag):
 
 
 def extract_license_info(content):
-    license_match = re.search(r'<rights license="(.*?)"(.*?)</rights>', content, re.DOTALL)
+    license_match = re.search(r'<rights license="(.*?)">(.*?)</rights>', content, re.DOTALL)
     if license_match:
         license_url = license_match.group(1)
         license_text = license_match.group(2).strip() if license_match.group(2) else None
@@ -137,7 +137,7 @@ def extract_license_info(content):
 def process_csl_files(all_files):
     data = []
 
-    print(f"\nProcessing CSL files...")
+    print("\nProcessing CSL files...")
 
     total_files = len(all_files)
     for index, file_info in enumerate(all_files):
