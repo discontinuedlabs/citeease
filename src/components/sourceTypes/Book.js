@@ -1,7 +1,7 @@
+import { useRef, useState } from "react";
 import DateInput from "../form/DateInput";
 import AuthorsInput from "../form/AuthorsInput";
-import { useRef, useState } from "react";
-import * as citationUtils from "../../utils/citationUtils";
+import * as citationUtils from "../../utils/citationUtils.ts";
 
 export default function Book(props) {
     const { content, setContent, showAcceptDialog, handleAddReference, handleCancel } = props;
@@ -10,11 +10,11 @@ export default function Book(props) {
 
     async function retrieveContent(source) {
         try {
-            const content = await citationUtils.retrieveContentFromISBN(source);
+            const retreivedContent = await citationUtils.retrieveContentFromISBN(source);
             setContent((prevContent) => {
                 return {
                     ...prevContent,
-                    ...content,
+                    ...retreivedContent,
                 };
             });
         } catch (error) {
@@ -197,7 +197,7 @@ export default function Book(props) {
                 </>
             )}
 
-            <button type="sumbit">Add reference</button>
+            <button type="submit">Add reference</button>
             <button type="button" onClick={handleCancel}>
                 Cancel
             </button>

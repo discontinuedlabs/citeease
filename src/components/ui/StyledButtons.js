@@ -7,6 +7,7 @@ export function Button(props) {
 
     return (
         <button
+            type="button"
             className={`${className} styled-button`}
             style={{ ...originalStyle, ...buttonStyle }}
             onClick={onClick}
@@ -38,6 +39,7 @@ export function MechanicButton(props) {
             boxShadow: "0 0.4rem 0 var(--dark-blue)",
         },
     };
+    // eslint-disable-next-line react/jsx-props-no-spreading
     return <Button {...props} className="mechanic-button" styles={styles} />;
 }
 
@@ -50,6 +52,7 @@ export function SmallButton(props) {
             backgroundColor: "",
         },
     };
+    // eslint-disable-next-line react/jsx-props-no-spreading
     return <Button {...props} className="small-button" styles={styles} />;
 }
 
@@ -68,6 +71,7 @@ export function ContextMenuOption(props) {
 
     return (
         <button
+            type="button"
             className="styled-button context-menu-option"
             onClick={onClick}
             style={{ ...originalStyle, ...buttonStyle }}

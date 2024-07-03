@@ -1,7 +1,11 @@
 import { useNavigate, useParams } from "react-router-dom";
-import ContextMenu from "../../components/ui/ContextMenu.js";
 import { useEffect, useState } from "react";
-import * as citationEngine from "../../utils/citationEngine.js";
+import { nanoid } from "nanoid";
+import { HotKeys } from "react-hotkeys";
+import { useDispatch, useSelector } from "react-redux";
+import { collection, deleteDoc, doc, onSnapshot, setDoc } from "firebase/firestore";
+import ContextMenu from "../../components/ui/ContextMenu";
+import * as citationEngine from "../../utils/citationEngine";
 import {
     IntextCitationDialog,
     ReferenceEntries,
@@ -15,8 +19,6 @@ import {
     TagsDialog,
     IdAndPasswordDialogVisible,
 } from "./BibliographyTools";
-import { HotKeys } from "react-hotkeys";
-import { useDispatch, useSelector } from "react-redux";
 import {
     addNewBibAndMoveSelectedCitations,
     addNewCitation,
@@ -31,20 +33,10 @@ import {
     mergeWithCurrent,
 } from "../../data/store/slices/bibsSlice";
 import { useFindBib, useFindCheckedCitations } from "../../hooks/hooks.ts";
-import Tag from "../../components/ui/Tag.js";
-import { useAuth } from "../../context/AuthContext.js";
-import Icon from "../../components/ui/Icon.js";
-import { collection, deleteDoc, doc, getDoc, onSnapshot, setDoc } from "firebase/firestore";
-import firestoreDB from "../../data/db/firebase/firebase.js";
-
-export const SOURCE_TYPES = {
-    ARTICLE_JOURNAL: {
-        label: "Journal article",
-        code: "article-journal",
-    },
-    BOOK: { label: "Book", code: "book" },
-    WEBPAGE: { label: "Webpage", code: "webpage" },
-};
+import Tag from "../../components/ui/Tag";
+import { useAuth } from "../../context/AuthContext";
+import Icon from "../../components/ui/Icon";
+import firestoreDB from "../../data/db/firebase/firebase";
 
 // TODO: The user cannot do any actions in collaborative bibliographies when they are offline
 export default function Bibliography(props) {
@@ -89,22 +81,23 @@ export default function Bibliography(props) {
         // Prioritizes showing collab.id in the URL instead of the regular id
         if (!bibliography) return;
         if (bibliography?.collab?.open && bibId !== bibliography?.collab?.id) {
-            navigate("/" + bibliography.collab.id, { replace: true });
+            navigate(`/${bibliography.collab.id}`, { replace: true });
         } else if (!bibliography?.collab?.open && bibId !== bibliography.id) {
-            navigate("/" + bibliography.id, { replace: true });
+            navigate(`/${bibliography.id}`, { replace: true });
         }
     }, [bibId, bibliography?.collab?.open]);
 
     useEffect(() => {
         if (currentUser && bibliography?.collab?.open) {
             const subscribe = onSnapshot(collection(firestoreDB, "coBibs"), async (snapshot) => {
-                const coBibData = snapshot.docs.find((doc) => doc.id === bibliography.collab.id)?.data();
+                const coBibData = snapshot.docs.find((sDoc) => sDoc.id === bibliography.collab.id)?.data();
                 if (coBibData) {
                     dispatch(mergeWithCurrent({ bibliographies: [JSON.parse(coBibData.bibliography)] }));
                 }
             });
             return subscribe;
         }
+        return undefined;
     }, [currentUser]);
 
     useEffect(() => {
@@ -123,13 +116,13 @@ export default function Bibliography(props) {
     }
 
     function openCitationForm(sourceType, isNew = false, specificId = "") {
-        let checkedCitationsIds = [...(specificId ? [specificId] : [])];
+        const checkedCitationsIds = [...(specificId ? [specificId] : [])];
         bibliography?.citations.forEach((cit) => {
             if (cit.isChecked) {
                 checkedCitationsIds.push(cit.id);
             }
         });
-        if (isNew) dispatch(addNewCitation({ bibliographyId: bibliography.id, sourceType: sourceType }));
+        if (isNew) dispatch(addNewCitation({ bibliographyId: bibliography.id, sourceType }));
         else if (checkedCitationsIds.length === 1)
             dispatch(editCitation({ bibliographyId: bibliography.id, citationId: checkedCitationsIds[0] }));
         setCitationFormVisible(true);
@@ -207,7 +200,7 @@ export default function Bibliography(props) {
         if (/^\s*$/.test(value)) {
             showAcceptDialog("Title is empty", "You cant't set the title to an emdpty value.");
         } else {
-            dispatch(updateBibField({ bibliographyId: bibliography.id, key: "title", value: value }));
+            dispatch(updateBibField({ bibliographyId: bibliography.id, key: "title", value }));
         }
     }
 
@@ -325,17 +318,17 @@ export default function Bibliography(props) {
                         <div>
                             {bibliography?.collab?.open && (
                                 <div className="text-md font-bold w-fit rounded-md transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
-                                    {<Icon name="group" />} {bibliography?.collab?.id}
+                                    <Icon name="group" /> {bibliography?.collab?.id}
                                 </div>
                             )}
-                            <h1
-                                className="m-0 rounded-md transition duration-150 ease-in-out hover:bg-neutral-transparentGray"
-                                onClick={() => setRenameWindowVisible(true)}
-                            >
-                                {bibliography?.title}
-                            </h1>
+                            <button type="button" style={{ all: "unset" }} onClick={() => setRenameWindowVisible(true)}>
+                                <h1 className="m-0 rounded-md transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
+                                    {bibliography?.title}
+                                </h1>
+                            </button>
                         </div>
 
+                        {/* eslint-disable indent */}
                         <ContextMenu
                             className="self-start"
                             icon="more_vert"
@@ -343,7 +336,7 @@ export default function Bibliography(props) {
                                 position: "absolute",
                                 right: "0",
                             }}
-                            buttonType={"Small Button"}
+                            buttonType="Small Button"
                             options={[
                                 ...(checkedCitations?.length !== 0
                                     ? // When there are selected ciattions, only options that target citations show to the user
@@ -458,15 +451,15 @@ export default function Bibliography(props) {
                             ]}
                         />
                     </div>
-                    <h3
-                        className="w-fit rounded-md transition duration-150 ease-in-out hover:bg-neutral-transparentGray"
-                        onClick={() => setCitationStyleMenuVisible(true)}
-                    >
-                        {bibliography?.style.name.long}
-                    </h3>
+                    <button type="button" style={{ all: "unset" }} onClick={() => setCitationStyleMenuVisible(true)}>
+                        <h3 className="w-fit rounded-md transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
+                            {bibliography?.style.name.long}
+                        </h3>
+                    </button>
+
                     <div className="flex gap-1 flex-wrap">
-                        {bibliography?.tags?.map((tag, index) => (
-                            <Tag key={index} tagProps={tag} onClick={() => setTagsDialogVisible(true)} />
+                        {bibliography?.tags?.map((tag) => (
+                            <Tag key={nanoid} tagProps={tag} onClick={() => setTagsDialogVisible(true)} />
                         ))}
                     </div>
                 </div>
@@ -536,11 +529,13 @@ export default function Bibliography(props) {
                 {idAndPasswordDialogVisible && (
                     <IdAndPasswordDialogVisible
                         setIsVisible={setIdAndPasswordDialogVisible}
-                        onSubmit={openCollaboration}
+                        onSubmit={() => openCollaboration()}
                     />
                 )}
 
-                <button onClick={() => setAddCitationMenuVisible(true)}>Add citation</button>
+                <button type="button" onClick={() => setAddCitationMenuVisible(true)}>
+                    Add citation
+                </button>
             </HotKeys>
         </div>
     );

@@ -17,7 +17,7 @@ export default function MarkdownPage(props) {
     return (
         <div className="mx-auto max-w-[50rem]">
             <h1 className="hidden">{title}</h1> {/* For screen readers and tab title */}
-            <ReactMarkdown children={content} />
+            <ReactMarkdown>{content}</ReactMarkdown>
         </div>
     );
 }

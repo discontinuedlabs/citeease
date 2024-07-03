@@ -9,6 +9,19 @@ function saveToIndexedDB(newState) {
     db.items.put({ id: "bibliographies", value: serializedState });
 }
 
+export const loadFromIndexedDB = createAsyncThunk("bibliographies/loadFromIndexedDB", async () => {
+    const loadedBibs = await db.items.get("bibliographies");
+    const parsedBibs = await JSON.parse(loadedBibs.value);
+    const cleanedBibs = parsedBibs?.map((bib) => {
+        return {
+            ...bib,
+            citations: bib.citations.map((cit) => ({ ...cit, isChecked: false })),
+        };
+    });
+
+    return cleanedBibs;
+});
+
 // IMPORTANT: Date() objects should get converted toString() because they need to be serialized when saved to indexedDB
 const bibsSlice = createSlice({
     name: "bibliographies",
@@ -85,7 +98,7 @@ const bibsSlice = createSlice({
                 style: action.payload.bibliographyStyle,
                 dateCreated: new Date().toString(),
                 dateModified: new Date().toString(),
-                id: "bib=" + nanoid(10),
+                id: `bib=${nanoid(10)}`,
                 citations: [],
                 tags: [],
             };
@@ -129,7 +142,8 @@ const bibsSlice = createSlice({
                             ],
                             dateModified: new Date().toString(),
                         };
-                    } else if (action.payload.sourceType) {
+                    }
+                    if (action.payload.sourceType) {
                         // If passed a sourceType, it means it doesn't have content, so it gets added to the editedCitation field to get filled with the source's data
                         return {
                             ...bib,
@@ -213,9 +227,8 @@ const bibsSlice = createSlice({
             const newState = bibs?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const citationIndex = bib.citations.findIndex((cit) => cit.id === action.payload.citationId);
-                    let updatedCitations;
 
-                    updatedCitations = bib.citations.map((cit, index) => {
+                    const updatedCitations = bib.citations.map((cit, index) => {
                         if (index === citationIndex) {
                             return { ...cit, isChecked: !cit.isChecked };
                         }
@@ -245,19 +258,18 @@ const bibsSlice = createSlice({
                         };
                     }
                     // If all citations are unchecked, check all of them
-                    else if (allUnchecked) {
+                    if (allUnchecked) {
                         return {
                             ...bib,
                             citations: bib.citations.map((cit) => ({ ...cit, isChecked: true })),
                         };
                     }
                     // If some citations are checked, check the rest
-                    else {
-                        return {
-                            ...bib,
-                            citations: bib.citations.map((cit) => ({ ...cit, isChecked: true })),
-                        };
-                    }
+
+                    return {
+                        ...bib,
+                        citations: bib.citations.map((cit) => ({ ...cit, isChecked: true })),
+                    };
                 }
                 return bib;
             });
@@ -271,7 +283,8 @@ const bibsSlice = createSlice({
                         citations: [...bib.citations, ...action.payload.checkedCitations],
                         dateModified: new Date().toString(),
                     };
-                } else if (bib.id === action.payload.fromId) {
+                }
+                if (bib.id === action.payload.fromId) {
                     const idsForDelete = action.payload.checkedCitations.map((cit) => cit.id);
                     return {
                         ...bib,
@@ -348,7 +361,7 @@ const bibsSlice = createSlice({
                 style: action.payload.bibliographyStyle,
                 dateCreated: new Date().toString(),
                 dateModified: new Date().toString(),
-                id: "bib=" + nanoid(10),
+                id: `bib=${nanoid(10)}`,
                 citations: [...action.payload.checkedCitations],
             };
             const newState = [...bibs, newBib];
@@ -365,19 +378,6 @@ const bibsSlice = createSlice({
             return action?.payload || state;
         });
     },
-});
-
-export const loadFromIndexedDB = createAsyncThunk("bibliographies/loadFromIndexedDB", async () => {
-    const loadedBibs = await db.items.get("bibliographies");
-    const parsedBibs = await JSON.parse(loadedBibs.value);
-    const cleanedBibs = parsedBibs?.map((bib) => {
-        return {
-            ...bib,
-            citations: bib.citations.map((cit) => ({ ...cit, isChecked: false })),
-        };
-    });
-
-    return cleanedBibs;
 });
 
 export const {

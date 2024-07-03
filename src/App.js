@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import Bibliography from "./pages/bibliography/Bibliography";
 import { Route, Routes } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { collection, doc, getDoc, onSnapshot, setDoc } from "firebase/firestore";
+import Bibliography from "./pages/bibliography/Bibliography";
 import Home from "./pages/home/Home";
 import { loadFromIndexedDB as loadBibs, mergeWithCurrent as mergeWithCurrentBibs } from "./data/store/slices/bibsSlice";
 import {
@@ -12,14 +14,12 @@ import BibliographySettings from "./pages/bibliography/BibliographySettings";
 import MarkdownPage from "./pages/MarkdownPage";
 import { AcceptDialog, ConfirmDialog } from "./components/ui/Dialogs";
 import NotFoundPage from "./pages/NotFoundPage";
-import { useDispatch, useSelector } from "react-redux";
 import Signup from "./pages/account/Signup";
 import { useAuth } from "./context/AuthContext";
 import Login from "./pages/account/Login";
 import Account from "./pages/account/Account";
 import ForgotPassword from "./pages/account/ForgotPassword";
 import firestoreDB from "./data/db/firebase/firebase";
-import { collection, doc, getAll, getDoc, getDocs, onSnapshot, setDoc } from "firebase/firestore";
 
 export default function App() {
     const [acceptDialog, setAcceptDialog] = useState({});
@@ -33,7 +33,9 @@ export default function App() {
         const h1 = document.querySelector("h1");
         document.title = h1 ? `${h1.textContent} - CiteEase` : "CiteEase";
 
-        return () => (document.title = "CiteEase");
+        return () => {
+            document.title = "CiteEase";
+        };
     });
 
     useEffect(() => {
@@ -45,13 +47,13 @@ export default function App() {
     useEffect(() => {
         if (currentUser) {
             const subscribe = onSnapshot(collection(firestoreDB, "users"), async (snapshot) => {
-                const userData = snapshot.docs.find((doc) => doc.id === currentUser.uid)?.data();
+                const userData = snapshot.docs.find((sDoc) => sDoc.id === currentUser.uid)?.data();
                 if (userData) {
                     dispatch(mergeWithCurrentBibs({ bibliographies: JSON.parse(userData?.bibliographies) }));
                     dispatch(mergeWithCurrentSettings({ settings: JSON.parse(userData?.settings) }));
 
                     const parsedBibs = JSON.parse(userData?.bibliographies);
-                    let coBibsIds = [];
+                    const coBibsIds = [];
                     parsedBibs.forEach((bib) => {
                         if (bib?.collab?.open) {
                             coBibsIds.push(bib.collab.id);
@@ -79,6 +81,7 @@ export default function App() {
             });
             return subscribe;
         }
+        return null;
     }, [currentUser]);
 
     useEffect(() => {
@@ -93,6 +96,7 @@ export default function App() {
     }
 
     function showConfirmDialog(title, body, onConfirmMethod, yesLabel = "Yes", noLabel = "No") {
+        console.log(onConfirmMethod);
         setConfirmDialog({ message: { title, body }, onConfirmMethod, yesLabel, noLabel });
     }
 
@@ -112,15 +116,15 @@ export default function App() {
                 <Route path="/:bibId/settings" element={<BibliographySettings />} />
                 <Route
                     path="/about"
-                    element={<MarkdownPage title={"About CiteEase"} filePath={"/citeease/markdown/about.md"} />}
+                    element={<MarkdownPage title="About CiteEase" filePath="/citeease/markdown/about.md" />}
                 />
                 <Route
                     path="/terms"
-                    element={<MarkdownPage title={"Terms of Use"} filePath={"/citeease/markdown/terms.md"} />}
+                    element={<MarkdownPage title="Terms of Use" filePath="/citeease/markdown/terms.md" />}
                 />
                 <Route
                     path="/privacy"
-                    element={<MarkdownPage title={"Privacy Policy"} filePath={"/citeease/markdown/privacy.md"} />}
+                    element={<MarkdownPage title="Privacy Policy" filePath="/citeease/markdown/privacy.md" />}
                 />
                 <Route path="*" element={<NotFoundPage />} />
             </Routes>
@@ -128,6 +132,8 @@ export default function App() {
             {acceptDialog.message && (
                 <AcceptDialog message={acceptDialog.message} closeDialog={() => setAcceptDialog({})} />
             )}
+
+            {/* eslint-disable-next-line react/jsx-props-no-spreading */}
             {confirmDialog.message && <ConfirmDialog {...confirmDialog} closeDialog={() => setConfirmDialog({})} />}
         </div>
     );

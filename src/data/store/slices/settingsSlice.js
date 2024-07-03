@@ -50,6 +50,12 @@ async function saveToIndexedDB(newState) {
     await db.items.put({ id: "settings", value: serializedState });
 }
 
+export const loadFromIndexedDB = createAsyncThunk("settings/loadFromIndexedDB", async () => {
+    const loadedSettings = await db.items.get("settings");
+    const parsedSettings = await JSON.parse(loadedSettings.value);
+    return parsedSettings;
+});
+
 const settingsSlice = createSlice({
     name: "settings",
     initialState,
@@ -92,12 +98,6 @@ const settingsSlice = createSlice({
             return action?.payload || state;
         });
     },
-});
-
-export const loadFromIndexedDB = createAsyncThunk("settings/loadFromIndexedDB", async () => {
-    const loadedSettings = await db.items.get("settings");
-    const parsedSettings = await JSON.parse(loadedSettings.value);
-    return parsedSettings;
 });
 
 export const { mergeWithCurrent, restoreDefaultTags, addTag, deleteTag, resetAllSettings } = settingsSlice.actions;

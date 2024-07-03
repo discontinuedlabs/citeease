@@ -1,0 +1,8 @@
+{
+    "articleJournal": {
+        "label": "Journal article",
+        "code": "article-journal"
+    },
+    "book": { "label": "Book", "code": "book" },
+    "webpage": { "label": "Webpage", "code": "webpage" }
+}

@@ -1,4 +1,4 @@
-import { nanoid } from "nanoid";
+import { useId } from "react";
 import { useNavigate } from "react-router-dom";
 
 export function SettingsSection(props) {
@@ -12,13 +12,13 @@ export function SettingsSection(props) {
 }
 
 export function SettingsInput(props) {
-    const { value, placeholder, label, name = nanoid(), onChange } = props;
+    const { value, placeholder, label, onChange } = props;
+    const id = useId();
 
     return (
         <div>
-            <label htmlFor={name} value={label}>
-                <input type="text" value={value} placeholder={placeholder} id={name} name={name} onChange={onChange} />
-            </label>
+            <label htmlFor={id}>{label}</label>
+            <input type="text" value={value} placeholder={placeholder} id={id} onChange={onChange} />
         </div>
     );
 }
@@ -26,7 +26,14 @@ export function SettingsInput(props) {
 export function SettingsButton(props) {
     const { children } = props;
 
-    return <button {...props}>{children}</button>;
+    return (
+        <>
+            {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+            <button {...props} type="button">
+                {children}
+            </button>
+        </>
+    );
 }
 
 export function SettingsNavigate(props) {
@@ -40,6 +47,7 @@ export function SettingsNavigate(props) {
                 if (to) navigate(to);
                 if (onClick) onClick(event);
             }}
+            type="button"
         >
             {children}
         </button>
@@ -48,10 +56,11 @@ export function SettingsNavigate(props) {
 
 export function SettingsCheckButton(props) {
     const { label, subLabel, learnMoreLink, onChange } = props;
+    const id = useId();
 
     return (
         <div>
-            <label>{label}</label>
+            <label htmlFor={id}>{label}</label>
             <small>
                 {subLabel}
                 {learnMoreLink && (
@@ -60,7 +69,7 @@ export function SettingsCheckButton(props) {
                     </a>
                 )}
             </small>
-            <input type="checkbox" onChange={onChange} />
+            <input id={id} type="checkbox" onChange={onChange} />
         </div>
     );
 }

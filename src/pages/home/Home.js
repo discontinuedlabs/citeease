@@ -1,10 +1,9 @@
-import { Link } from "react-router-dom";
-import ContextMenu from "../../components/ui/ContextMenu";
-import { useNavigate } from "react-router-dom";
-import BibliographyCard from "../../components/ui/BibliographyCard";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { CitationStylesMenu } from "../bibliography/BibliographyTools";
 import { useDispatch, useSelector } from "react-redux";
+import ContextMenu from "../../components/ui/ContextMenu";
+import BibliographyCard from "../../components/ui/BibliographyCard";
+import { CitationStylesMenu } from "../bibliography/BibliographyTools";
 import * as citationEngine from "../../utils/citationEngine";
 import { addNewBib } from "../../data/store/slices/bibsSlice";
 import Logo from "../../components/ui/Logo";
@@ -34,7 +33,7 @@ export default function Home() {
                 <ContextMenu
                     icon="more_vert"
                     menuStyle={{}}
-                    buttonType={"Small Button"}
+                    buttonType="Small Button"
                     options={[
                         { label: "Settings", method: () => navigate("/settings") },
                         ...(currentUser
@@ -67,6 +66,7 @@ export default function Home() {
             <button
                 className="border-2 border-neutral-black fixed p-3 bottom-5 right-5 bg-primary-500"
                 onClick={() => setAddBibOptionsMenuVisible(true)}
+                type="button"
             >
                 Add bibliography
             </button>
@@ -74,11 +74,15 @@ export default function Home() {
             {addBibOptionsMenuVisible && (
                 <div>
                     <h3>Add bibliography</h3>
-                    <button onClick={() => setAddBibOptionsMenuVisible(false)}>X</button>
+                    <button type="button" onClick={() => setAddBibOptionsMenuVisible(false)}>
+                        X
+                    </button>
                     <div>
-                        <button onClick={() => setCitationStyleMenuVisible(true)}>Choose by citation style</button>
-                        <button>Import</button>
-                        <button onClick={() => setCoBibsSearchDialogVisible(true)}>
+                        <button type="button" onClick={() => setCitationStyleMenuVisible(true)}>
+                            Choose by citation style
+                        </button>
+                        <button type="button">Import</button>
+                        <button type="button" onClick={() => setCoBibsSearchDialogVisible(true)}>
                             Search for collaborative bibliograpies
                         </button>
                     </div>

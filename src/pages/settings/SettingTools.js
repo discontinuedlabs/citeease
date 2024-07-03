@@ -1,4 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
+import { useId, useRef, useState } from "react";
+import { nanoid } from "nanoid";
+import { useNavigate } from "react-router-dom";
 import {
     TAG_COLORS,
     TAG_COLOR_VALUES,
@@ -7,12 +10,9 @@ import {
     resetAllSettings,
     restoreDefaultTags,
 } from "../../data/store/slices/settingsSlice";
-import Tag from "../../components/ui/Tag.js";
-import { useId, useRef, useState } from "react";
-import { nanoid } from "nanoid";
+import Tag from "../../components/ui/Tag";
 import { useTagBgColor } from "../../hooks/hooks.ts";
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
 import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
 
 export function TagsManager(props) {
@@ -33,11 +33,13 @@ export function TagsManager(props) {
 
     return (
         <div>
-            <button onClick={() => setIsVisible(false)}>X</button>
+            <button type="button" onClick={() => setIsVisible(false)}>
+                X
+            </button>
             <div className="flex gap-1 flex-wrap">
-                {settings.tags?.map((tag, index) => {
+                {settings.tags?.map((tag) => {
                     return (
-                        <Tag key={index} tagProps={tag} showX onClick={() => dispatch(deleteTag({ tagId: tag.id }))} />
+                        <Tag key={nanoid} tagProps={tag} showX onClick={() => dispatch(deleteTag({ tagId: tag.id }))} />
                     );
                 })}
             </div>
@@ -56,18 +58,20 @@ export function TagsManager(props) {
                 />
                 <button type="submit">Add tag</button>
                 <div className="flex gap-1 flex-wrap">
-                    {Object.values(TAG_COLORS)?.map((color, index) => (
+                    {Object.values(TAG_COLORS)?.map((color) => (
                         <button
                             className="rounded-full w-5 h-5"
                             type="button"
-                            key={index}
+                            key={nanoid}
                             style={{ backgroundColor: TAG_COLOR_VALUES[color] }}
                             onClick={() => setTagColor(color)}
-                        ></button>
+                        />
                     ))}
                 </div>
             </form>
-            <button onClick={() => dispatch(restoreDefaultTags())}>Restore default tags</button>
+            <button type="button" onClick={() => dispatch(restoreDefaultTags())}>
+                Restore default tags
+            </button>
         </div>
     );
 }
@@ -90,8 +94,8 @@ export function UpdateEmailDialog(props) {
             await updateEmail(newEmailRef.current.value);
             navigate("/");
             // TODO: Show success toast message
-        } catch (error) {
-            setError("Failed to update email: " + error);
+        } catch (tError) {
+            setError(`Failed to update email: ${tError}`);
         }
 
         setIsLoading(false);
@@ -99,13 +103,15 @@ export function UpdateEmailDialog(props) {
 
     return (
         <div>
-            <button onClick={() => setIsVisible(false)}>X</button>
+            <button type="button" onClick={() => setIsVisible(false)}>
+                X
+            </button>
             <h3>Update email</h3>
             <pre>{error}</pre>
             <form onSubmit={handleSUbmit}>
                 <label htmlFor={`${id}-newEmail`}>Type your new email.</label>
                 <input id={`${id}-newEmail`} type="email" ref={newEmailRef} required />
-                <button type="submite" disabled={isLoading}>
+                <button type="submit" disabled={isLoading}>
                     Update email
                 </button>
             </form>
@@ -135,8 +141,8 @@ export function ChangePasswordDialog(props) {
                 await changePassword(prevPasswordRef.current.value, newPasswordRef.current.value);
                 setIsVisible(false);
                 // TODO: Show success toast message
-            } catch (error) {
-                setError("Failed to update password: " + error);
+            } catch (tError) {
+                setError(`Failed to update password: ${tError}`);
             }
 
             setIsLoading(false);
@@ -145,7 +151,9 @@ export function ChangePasswordDialog(props) {
 
     return (
         <div>
-            <button onClick={() => setIsVisible(false)}>X</button>
+            <button type="button" onClick={() => setIsVisible(false)}>
+                X
+            </button>
             <h3>Change password</h3>
             <pre>{error}</pre>
             <form onSubmit={handleSUbmit}>
@@ -187,8 +195,8 @@ export function DeleteAccountDialog(props) {
             }
             navigate("/");
             // TODO: Show success toast message
-        } catch (error) {
-            setError("Failed to delete account: " + error);
+        } catch (tError) {
+            setError(`Failed to delete account: ${tError}`);
         }
 
         setIsLoading(false);
@@ -196,7 +204,9 @@ export function DeleteAccountDialog(props) {
 
     return (
         <div>
-            <button onClick={() => setIsVisible(false)}>X</button>
+            <button type="button" onClick={() => setIsVisible(false)}>
+                X
+            </button>
             <h3>Delete account?</h3>
             <pre>{error}</pre>
             <form onSubmit={handleSUbmit}>
@@ -204,8 +214,8 @@ export function DeleteAccountDialog(props) {
                 <input id={`${id}-password`} type="password" ref={passwordRef} required />
                 <input id={`${id}-checkbox`} type="checkbox" ref={checkboxRef} />
                 <label htmlFor={`${id}-checkbox`}>Keep a copy of the associated data locally</label>
-                <strong>Warning: This action can't be undone</strong>
-                <button type="submite" disabled={isLoading}>
+                <strong>Warning: This action can&apos;t be undone</strong>
+                <button type="submit" disabled={isLoading}>
                     Delete account
                 </button>
             </form>

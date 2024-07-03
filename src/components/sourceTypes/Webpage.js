@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import * as citationUtils from "../../utils/citationUtils";
+import * as citationUtils from "../../utils/citationUtils.ts";
 import DateInput from "../form/DateInput";
 import AuthorsInput from "../form/AuthorsInput";
 
@@ -10,11 +10,11 @@ export default function Webpage(props) {
 
     async function retrieveContent(source) {
         try {
-            const content = await citationUtils.retrieveContentFromURL(source);
+            const retreivedContent = await citationUtils.retrieveContentFromURL(source);
             setContent((prevContent) => {
                 return {
                     ...prevContent,
-                    ...content,
+                    ...retreivedContent,
                 };
             });
         } catch (error) {

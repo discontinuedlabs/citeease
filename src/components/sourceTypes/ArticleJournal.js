@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import * as citationUtils from "../../utils/citationUtils";
+import * as citationUtils from "../../utils/citationUtils.ts";
 import DateInput from "../form/DateInput";
 import AuthorsInput from "../form/AuthorsInput";
 
@@ -10,11 +10,11 @@ export default function ArticleJournal(props) {
 
     async function retrieveContent(source) {
         try {
-            const content = await citationUtils.retrieveContentFromDOI(source);
+            const retreivedContent = await citationUtils.retrieveContentFromDOI(source);
             setContent((prevContent) => {
                 return {
                     ...prevContent,
-                    ...content,
+                    ...retreivedContent,
                 };
             });
         } catch (error) {
@@ -149,7 +149,7 @@ export default function ArticleJournal(props) {
                 </>
             )}
 
-            <button type="sumbit">Add reference</button>
+            <button type="submit">Add reference</button>
             <button type="button" onClick={handleCancel}>
                 Cancel
             </button>

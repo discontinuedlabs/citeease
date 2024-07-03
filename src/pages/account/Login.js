@@ -1,6 +1,6 @@
 import { useId, useRef, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
     const [isLoading, setIsLoading] = useState(false);
@@ -20,8 +20,8 @@ export default function Login() {
             await login(emailRef.current.value, passwordRef.current.value);
             navigate("/");
             // TODO: Show success toast message
-        } catch (error) {
-            setError("Failed to sign in: " + error);
+        } catch (tError) {
+            setError(`Failed to sign in: ${tError}`);
         }
 
         setIsLoading(false);
@@ -44,7 +44,7 @@ export default function Login() {
                 </form>
             </div>
             <p>
-                Don't have an account? <Link to="/signup">Sign up</Link>.
+                Don&apos;t have an account? <Link to="/signup">Sign up</Link>.
             </p>
         </div>
     );

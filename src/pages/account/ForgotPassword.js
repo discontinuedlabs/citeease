@@ -1,6 +1,6 @@
 import { useId, useRef, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function ForgotPassword() {
     const id = useId();
@@ -19,8 +19,8 @@ export default function ForgotPassword() {
             await resetPassword(emailRef.current.value);
             navigate("/");
             // TODO: Show success toast message
-        } catch (error) {
-            setError("Failed to reset password: " + error);
+        } catch (tError) {
+            setError(`Failed to reset password: ${tError}`);
         }
 
         setIsLoading(false);

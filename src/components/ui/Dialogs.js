@@ -10,12 +10,17 @@ export function ConfirmDialog(props) {
 
     return (
         <div className="dialog">
-            <div className="dialog-background" onClick={closeDialog}></div>
+            {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+            <div className="dialog-background" onClick={closeDialog} />
             <div className="dialog-box">
                 <h3>{message.title}</h3>
                 <p>{message.body}</p>
-                <button onClick={handleConfirm}>{yesLabel || "Yes"}</button>
-                <button onClick={closeDialog}>{noLabel || "No"}</button>
+                <button type="button" onClick={handleConfirm}>
+                    {yesLabel || "Yes"}
+                </button>
+                <button type="button" onClick={closeDialog}>
+                    {noLabel || "No"}
+                </button>
             </div>
         </div>
     );
@@ -26,12 +31,17 @@ export function AcceptDialog(props) {
 
     return (
         <div className="dialog">
-            <div className="dialog-background" onClick={closeDialog}></div>
+            {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+            <div className="dialog-background" onClick={closeDialog} />
             <div className="dialog-box">
                 <h3>{message.title}</h3>
-                <button onClick={closeDialog}>X</button>
+                <button type="button" onClick={closeDialog}>
+                    X
+                </button>
                 {message.body && <p>{message.body}</p>}
-                <button onClick={closeDialog}>Accept</button>
+                <button type="button" onClick={closeDialog}>
+                    Accept
+                </button>
             </div>
         </div>
     );

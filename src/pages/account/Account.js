@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useAuth } from "../../context/AuthContext";
 import { ChangePasswordDialog, DeleteAccountDialog, UpdateEmailDialog } from "../settings/SettingTools";
 import { SettingsButton, SettingsNavigate } from "../settings/SettingsComponents";
-import { useDispatch } from "react-redux";
 import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
 import { resetAllSettings } from "../../data/store/slices/settingsSlice";
 
@@ -18,6 +18,7 @@ export default function Account() {
     const [isEmailVerificationDisabled, setEmailVerificationDisabled] = useState(() => {
         const disableTimestamp = localStorage.getItem("emailVerificationDisableTimestamp");
         if (disableTimestamp) return Number(disableTimestamp) > Date.now();
+        return false;
     });
     const dispatch = useDispatch();
     const [loggedOut, setLoggedOut] = useState(!currentUser);
@@ -73,14 +74,17 @@ export default function Account() {
                 </p>
             </div>
             {!currentUser?.emailVerified && (
-                <SettingsButton disabled={isEmailVerificationDisabled || verifyLoading} onClick={handleVerifyEmail}>
+                <SettingsButton
+                    disabled={isEmailVerificationDisabled || verifyLoading}
+                    onClick={() => handleVerifyEmail()}
+                >
                     Verify email
                 </SettingsButton>
             )}
             <SettingsNavigate onClick={() => setUpdateEmailDialogVisible(true)}>Update email</SettingsNavigate>
             <SettingsNavigate onClick={() => setChangePasswordDialogVisible(true)}>Change password</SettingsNavigate>
             <SettingsNavigate onClick={() => navigate("/login")}>Switch account</SettingsNavigate>
-            <SettingsNavigate onClick={handleLogout} disabled={logoutLoading}>
+            <SettingsNavigate onClick={() => handleLogout()} disabled={logoutLoading}>
                 Log out
             </SettingsNavigate>
             <SettingsNavigate onClick={() => setDeleteAccountDialogVisible(true)}>Delete account</SettingsNavigate>

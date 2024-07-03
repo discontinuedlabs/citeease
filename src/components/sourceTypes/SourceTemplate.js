@@ -1,6 +1,5 @@
-import { nanoid } from "nanoid";
-import DateInput from "../DateInput";
-import AuthorsInput from "../AuthorsInput";
+import DateInput from "../form/DateInput";
+import AuthorsInput from "../form/AuthorsInput";
 
 export default function SourceTemplate(props) {
     const { content, setContent, toggleEditMode, showAcceptDialog } = props;
@@ -30,16 +29,6 @@ export default function SourceTemplate(props) {
     }
 
     // This must recieve authors as an array with the full names ["Michael Connelly", ...]
-    function createAuthorsArray(authors) {
-        const result = authors.map((author) => {
-            const names = author.split(/\s+/);
-            const firstName = names.shift() || "";
-            const lastName = names.join(" ");
-            return { firstName, lastName, id: nanoid() };
-        });
-
-        return result;
-    }
 
     function handleFillIn(event) {
         event.preventDefault();
@@ -48,57 +37,55 @@ export default function SourceTemplate(props) {
     }
 
     return (
-        <>
-            <form className="citation-form" onSubmit={handleFillIn}>
-                <p>Insert the DOI here to fill the fields automatically:</p>
-                <label htmlFor="doi">DOI</label>
-                <input type="text" name="doi" placeholder="Insert a DOI" />
-                <button type="submit">Fill in</button>
+        <form className="citation-form" onSubmit={handleFillIn}>
+            <p>Insert the DOI here to fill the fields automatically:</p>
+            <label htmlFor="doi">DOI</label>
+            <input type="text" name="doi" placeholder="Insert a DOI" />
+            <button type="submit">Fill in</button>
 
-                <p>Or enter the article details manually:</p>
-                <AuthorsInput content={content} setContent={setContent} />
+            <p>Or enter the article details manually:</p>
+            <AuthorsInput content={content} setContent={setContent} />
 
-                <label htmlFor="title">Title</label>
-                <input
-                    type="text"
-                    name="title"
-                    value={content.title}
-                    placeholder="Page title"
-                    onChange={(event) =>
-                        setContent((prevContent) => ({
-                            ...prevContent,
-                            title: event.target.value,
-                        }))
-                    }
-                />
+            <label htmlFor="title">Title</label>
+            <input
+                type="text"
+                name="title"
+                value={content.title}
+                placeholder="Page title"
+                onChange={(event) =>
+                    setContent((prevContent) => ({
+                        ...prevContent,
+                        title: event.target.value,
+                    }))
+                }
+            />
 
-                <label htmlFor="publication-date">Publication date</label>
-                <DateInput name="publication-date" content={content} setContent={setContent} dateKey="publication" />
+            <label htmlFor="publication-date">Publication date</label>
+            <DateInput name="publication-date" content={content} setContent={setContent} dateKey="publication" />
 
-                <label htmlFor="doi">DOI</label>
-                <input
-                    type="text"
-                    name="doi"
-                    value={content.doi}
-                    placeholder="DOI"
-                    onChange={(event) =>
-                        setContent((prevContent) => ({
-                            ...prevContent,
-                            url: event.target.value,
-                        }))
-                    }
-                />
+            <label htmlFor="doi">DOI</label>
+            <input
+                type="text"
+                name="doi"
+                value={content.doi}
+                placeholder="DOI"
+                onChange={(event) =>
+                    setContent((prevContent) => ({
+                        ...prevContent,
+                        url: event.target.value,
+                    }))
+                }
+            />
 
-                <label htmlFor="access-date">Access date</label>
-                <DateInput name="access-date" content={content} setContent={setContent} dateKey="accessDate" />
+            <label htmlFor="access-date">Access date</label>
+            <DateInput name="access-date" content={content} setContent={setContent} dateKey="accessDate" />
 
-                <button type="button" onClick={toggleEditMode}>
-                    Add reference
-                </button>
-                <button type="button" onClick={toggleEditMode}>
-                    Cancel
-                </button>
-            </form>
-        </>
+            <button type="button" onClick={toggleEditMode}>
+                Add reference
+            </button>
+            <button type="button" onClick={toggleEditMode}>
+                Cancel
+            </button>
+        </form>
     );
 }

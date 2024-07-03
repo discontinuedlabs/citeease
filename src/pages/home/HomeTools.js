@@ -1,7 +1,7 @@
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useId, useRef, useState } from "react";
-import db from "../../data/db/firebase/firebase";
 import { useDispatch, useSelector } from "react-redux";
+import db from "../../data/db/firebase/firebase";
 import { mergeWithCurrent } from "../../data/store/slices/bibsSlice";
 import { useAuth } from "../../context/AuthContext";
 
@@ -78,7 +78,9 @@ export function CoBibsSearchDialog({ setIsVisible }) {
     return (
         <div>
             <h3>Search for collaborative bibliographies</h3>
-            <button onClick={() => setIsVisible(false)}>X</button>
+            <button type="button" onClick={() => setIsVisible(false)}>
+                X
+            </button>
 
             <search>
                 <pre>{searchError}</pre>
@@ -98,6 +100,7 @@ export function CoBibsSearchDialog({ setIsVisible }) {
                     </div>
                     <pre>{passwordError}</pre>
                     <form onSubmit={handleJoin}>
+                        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
                         <label htmlFor={`${id}-password`}>Enter the password to join</label>
                         <input ref={passwordRef} type="password" name="password" id={`${id}-password`} />
                         <button type="submit" disabled={passwordLoading}>
@@ -108,4 +111,8 @@ export function CoBibsSearchDialog({ setIsVisible }) {
             )}
         </div>
     );
+}
+
+export function Input() {
+    return <div />;
 }

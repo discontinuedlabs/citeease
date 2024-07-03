@@ -1,5 +1,5 @@
 // HandlesAroundText component
-const HandlesAroundText = (props) => {
+function HandlesAroundText(props) {
     const { children } = props;
     return (
         <div style={{ position: "relative", display: "inline-block" }}>
@@ -32,6 +32,6 @@ const HandlesAroundText = (props) => {
             </div>
         </div>
     );
-};
+}
 
 export default HandlesAroundText;

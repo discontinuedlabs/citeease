@@ -1,5 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { auth } from "../data/db/firebase/firebase";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import {
     createUserWithEmailAndPassword,
     deleteUser,
@@ -13,6 +12,7 @@ import {
     updatePassword,
     verifyBeforeUpdateEmail,
 } from "firebase/auth";
+import { auth } from "../data/db/firebase/firebase";
 
 const AuthContext = createContext();
 
@@ -42,7 +42,7 @@ export function AuthProvider({ children }) {
     }
 
     async function logout() {
-        return await signOut(auth);
+        return signOut(auth);
     }
 
     async function verifyEmail() {
@@ -69,17 +69,20 @@ export function AuthProvider({ children }) {
         return deleteUser(currentUser);
     }
 
-    const value = {
-        currentUser,
-        signup,
-        login,
-        logout,
-        verifyEmail,
-        resetPassword,
-        updateEmail,
-        changePassword,
-        deleteAccount,
-    };
+    const value = useMemo(
+        () => ({
+            currentUser,
+            signup,
+            login,
+            logout,
+            verifyEmail,
+            resetPassword,
+            updateEmail,
+            changePassword,
+            deleteAccount,
+        }),
+        [currentUser, signup, login, logout, verifyEmail, resetPassword, updateEmail, changePassword, deleteAccount]
+    );
 
     return <AuthContext.Provider value={value}>{!isLoading && children}</AuthContext.Provider>;
 }

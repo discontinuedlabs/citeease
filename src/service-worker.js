@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-globals */
+/* eslint-disable no-underscore-dangle */
 
 import { clientsClaim } from "workbox-core";
 import { ExpirationPlugin } from "workbox-expiration";
@@ -10,15 +11,16 @@ clientsClaim();
 
 precacheAndRoute([
     ...self.__WB_MANIFEST,
-    process.env.PUBLIC_URL + "/styles.json",
-    process.env.PUBLIC_URL + "/markdown/about.md",
-    process.env.PUBLIC_URL + "/markdown/privacy.md",
-    process.env.PUBLIC_URL + "/markdown/terms.md",
+    `${process.env.PUBLIC_URL}/styles.json`,
+    `${process.env.PUBLIC_URL}/markdown/about.md`,
+    `${process.env.PUBLIC_URL}/markdown/privacy.md`,
+    `${process.env.PUBLIC_URL}/markdown/terms.md`,
 ]);
 
-console.log(process.env.PUBLIC_URL + "/styles.json");
+console.log(`${process.env.PUBLIC_URL}/styles.json`);
 
-const fileExtensionRegexp = new RegExp("/[^/?]+\\.[^/]+$");
+const fileExtensionRegexp = /[^?/]+\.[^/]+$/;
+
 registerRoute(
     // Return false to exempt requests from being fulfilled by index.html.
     ({ request, url }) => {
@@ -37,7 +39,7 @@ registerRoute(
 
         return true;
     },
-    createHandlerBoundToURL(process.env.PUBLIC_URL + "/index.html")
+    createHandlerBoundToURL(`${process.env.PUBLIC_URL}/index.html`)
 );
 
 registerRoute(

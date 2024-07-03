@@ -1,6 +1,6 @@
 import { useId, useRef, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Signup() {
     const [isLoading, setIsLoading] = useState(false);
@@ -24,8 +24,8 @@ export default function Signup() {
                 await signup(emailRef.current.value, passwordRef.current.value);
                 navigate("/");
                 // TODO: Show success toast message
-            } catch (error) {
-                setError("Failed to create an account: " + error);
+            } catch (tError) {
+                setError(`Failed to create an account: ${tError}`);
             }
 
             setIsLoading(false);

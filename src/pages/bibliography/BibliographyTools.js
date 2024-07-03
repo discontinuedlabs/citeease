@@ -1,6 +1,12 @@
 import { useEffect, useId, useRef, useState } from "react";
-import * as citationEngine from "../../utils/citationEngine.js";
-import { SOURCE_TYPES } from "./Bibliography.js";
+import { nanoid } from "nanoid";
+import DOMPurify from "dompurify";
+import HTMLReactParser from "html-react-parser/lib/index";
+import { FixedSizeList as List } from "react-window";
+import { useDispatch, useSelector } from "react-redux";
+import locatorTypes from "../../assets/locatorOptions.json";
+import * as citationEngine from "../../utils/citationEngine";
+import sourceTypes from "../../assets/sourceTypes.json";
 import {
     addNewCitation,
     copySelectedCitations,
@@ -12,13 +18,9 @@ import {
 } from "../../data/store/slices/bibsSlice";
 import BibliographyCard from "../../components/ui/BibliographyCard";
 import ContextMenu from "../../components/ui/ContextMenu";
-import DOMPurify from "dompurify";
-import HTMLReactParser from "html-react-parser/lib/index";
-import { FixedSizeList as List } from "react-window";
 import * as citationUtils from "../../utils/citationUtils.ts";
-import { useDispatch, useSelector } from "react-redux";
 import { useFindBib, useFindCheckedCitations } from "../../hooks/hooks.ts";
-import Tag from "../../components/ui/Tag.js";
+import Tag from "../../components/ui/Tag";
 
 // Source types
 import ArticleJournal from "../../components/sourceTypes/ArticleJournal";
@@ -31,167 +33,7 @@ const MASTER_CHECKBOX_STATES = {
     INDETERMINATE: "indeterminate", // Some reference entries are checked
 };
 
-// ATTENTION: Needs review
-const LOCATOR_OPTIONS = {
-    appendix: {
-        def: "A supplementary section at the end of a document.",
-        placeholder: "eg., Appendix A or Appendix B",
-        name: "Appendix",
-        code: "appendix",
-    },
-    "article-locator": {
-        def: "A unique identifier for an article, often used in digital or online publications.",
-        placeholder: "eg., 12345",
-        name: "Article Locator",
-        code: "article-locator",
-    },
-    book: {
-        def: "A specific book or volume within a series or collection.",
-        placeholder: "eg., Book Title or Book Collection",
-        name: "Book",
-        code: "book",
-    },
-    canon: {
-        def: "A standard or rule, often used in legal or religious contexts.",
-        placeholder: "eg., 15 or 15-20",
-        name: "Canon",
-        code: "canon",
-    },
-    chapter: {
-        def: "A specific chapter within a book.",
-        placeholder: "eg., 5 or 5-7",
-        name: "Chapter",
-        code: "chapter",
-    },
-    column: {
-        def: "A vertical division of text in a document, often in newspapers or magazines.",
-        placeholder: "eg., 3 or 3-4",
-        name: "Column",
-        code: "column",
-    },
-    elocation: {
-        def: "An electronic location identifier for digital content.",
-        placeholder: "eg., e12345",
-        name: "Elocation",
-        code: "elocation",
-    },
-    equation: {
-        def: "A specific equation within a text.",
-        placeholder: "eg., 7",
-        name: "Equation",
-        code: "equation",
-    },
-    figure: {
-        def: "A specific figure or illustration in a document.",
-        placeholder: "eg., 2",
-        name: "Figure",
-        code: "figure",
-    },
-    folio: {
-        def: "A leaf of a manuscript or book, numbered on the front side only.",
-        placeholder: "eg., 10",
-        name: "Folio",
-        code: "folio",
-    },
-    issue: {
-        def: "A specific issue of a journal or magazine.",
-        placeholder: "eg., 4",
-        name: "Issue",
-        code: "issue",
-    },
-    line: {
-        def: "A specific line in a poem, play, or other text.",
-        placeholder: "eg., 23",
-        name: "Line",
-        code: "line",
-    },
-    note: {
-        def: "A specific footnote or endnote in a text.",
-        placeholder: "eg., 7",
-        name: "Note",
-        code: "note",
-    },
-    opus: {
-        def: "A specific work or composition, often used in music.",
-        placeholder: "eg., 22",
-        name: "Opus",
-        code: "opus",
-    },
-    page: {
-        def: "A specific page or range of pages in a document.",
-        placeholder: "eg., 3 or 9-22",
-        name: "Page",
-        code: "page",
-    },
-    paragraph: {
-        def: "A specific paragraph in a document.",
-        placeholder: "eg., 4 or 4-6",
-        name: "Paragraph",
-        code: "paragraph",
-    },
-    part: {
-        def: "A specific part or section of a larger work.",
-        placeholder: "eg., 2 or 2-3",
-        name: "Part",
-        code: "part",
-    },
-    rule: {
-        def: "A specific rule or regulation, often used in legal or procedural contexts.",
-        placeholder: "eg., 5 or 5-8",
-        name: "Rule",
-        code: "rule",
-    },
-    section: {
-        def: "A specific section of a document.",
-        placeholder: "eg., Introduction",
-        name: "Section",
-        code: "section",
-    },
-    "sub-verbo": {
-        def: "An entry under a specific word or heading in a reference work.",
-        placeholder: "eg., Equity",
-        name: "Sub-Verbo",
-        code: "sub-verbo",
-    },
-    supplement: {
-        def: "A supplementary issue or addition to a publication.",
-        placeholder: "eg., 1",
-        name: "Supplement",
-        code: "supplement",
-    },
-    table: {
-        def: "A specific table within a document.",
-        placeholder: "eg., 4",
-        name: "Table",
-        code: "table",
-    },
-    timestamp: {
-        def: "A specific time marker, often used in audiovisual materials.",
-        placeholder: "eg., 00:15:30",
-        name: "Timestamp",
-        code: "timestamp",
-    },
-    title: {
-        def: "A specific title of a work or section within a larger work.",
-        placeholder: "eg., Title",
-        name: "Title",
-        code: "title",
-    },
-    verse: {
-        def: "A specific verse in a poem, song, or scripture.",
-        placeholder: "eg., 7 or 2-16",
-        name: "Verse",
-        code: "verse",
-    },
-    volume: {
-        def: "A specific volume within a series or set.",
-        placeholder: "eg., 3 or 3-4",
-        name: "Volume",
-        code: "volume",
-    },
-};
-
-const DEFAULT_LOCATOR = LOCATOR_OPTIONS.page;
+const DEFAULT_LOCATOR = locatorTypes.page;
 
 const MOST_POPULAR_STYLES = [
     "apa",
@@ -216,7 +58,7 @@ export function ReferenceEntries(props) {
             let checkedCount = 0;
             bibliography?.citations.forEach((cit) => {
                 if (cit?.isChecked) {
-                    checkedCount++;
+                    checkedCount += 1;
                 }
             });
 
@@ -240,9 +82,7 @@ export function ReferenceEntries(props) {
             setReferences(formattedCitations);
         }
         formatBibliography();
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [bibliography?.citations, bibliography?.style]); // Adding setSavedCslFiles to the dependency array will cause the component to rerender infinitely
+    }, [bibliography?.citations, bibliography?.style]);
 
     // FIXME: This useEffect causes infinte rerenders
     useEffect(() => {
@@ -275,13 +115,13 @@ export function ReferenceEntries(props) {
             }
         } else {
             const div = document.createElement("div");
-            for (const cit of formattedSelectedCitations) {
+            formattedSelectedCitations.forEach((cit) => {
                 const parser = new DOMParser();
                 const docFragment = parser.parseFromString(cit, "text/html");
                 const element = docFragment.body.firstChild;
                 div.appendChild(element);
                 div.appendChild(document.createElement("br"));
-            }
+            });
 
             if (isCtrlKeyDown) {
                 const sanitizedInnerHTML = DOMPurify.sanitize(div.innerHTML);
@@ -296,7 +136,7 @@ export function ReferenceEntries(props) {
 
     return (
         <div>
-            <div key={"header"}>
+            <div key="header">
                 {bibliography?.citations.length !== 0 && (
                     <input
                         type="checkbox"
@@ -306,10 +146,14 @@ export function ReferenceEntries(props) {
                     />
                 )}
 
-                {checkedCitations?.length !== 0 && <button onClick={openIntextCitationDialog}>In-text citation</button>}
+                {checkedCitations?.length !== 0 && (
+                    <button type="button" onClick={openIntextCitationDialog}>
+                        In-text citation
+                    </button>
+                )}
             </div>
 
-            <div className="max-w-[50rem] mx-auto p-4" key={"entries-container"}>
+            <div className="max-w-[50rem] mx-auto p-4" key="entries-container">
                 {/* IMPORTANT: Entries need to be mapped by the references array because it gets sorted according to the CSL file rules, unlike the bibliography.citations array */}
                 {references?.map((ref) => {
                     const refId = () => {
@@ -325,7 +169,7 @@ export function ReferenceEntries(props) {
                                 citation?.isChecked ? "bg-secondary-100 hover:bg-secondary-200" : ""
                             }`}
                             key={citation?.id}
-                            draggable={true}
+                            draggable
                             onDragStart={handleDrag}
                         >
                             <input
@@ -335,7 +179,9 @@ export function ReferenceEntries(props) {
                                 onChange={() => handleEntryCheck(citation)}
                             />
 
+                            {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
                             <div
+                                type="button"
                                 className={`font-cambo ${
                                     /^(apa|modern-language-association|chicago)$/i.test(bibliography?.style.code) // Include any other style that needs hanging indentation
                                         ? "hanging-indentation"
@@ -389,20 +235,22 @@ export function IntextCitationDialog(props) {
     return (
         <div>
             <div className="font-cambo">{IntextCitation}</div>
-            <button onClick={() => setIsVisible(false)}>X</button>
-            {citationsForIntext.map((cit, index) => {
+            <button type="button" onClick={() => setIsVisible(false)}>
+                X
+            </button>
+            {citationsForIntext.map((cit) => {
                 return (
-                    <div key={index}>
+                    <div key={nanoid}>
                         <div>{cit.title || `${cit.author[0].family} ${cit.issued["date-parts"].join(" ")}`}</div>
 
                         <select
                             value={cit?.label || DEFAULT_LOCATOR.code}
                             onChange={(event) =>
-                                updateContentField(cit.id, "label", LOCATOR_OPTIONS[event.target.value].code)
+                                updateContentField(cit.id, "label", locatorTypes[event.target.value].code)
                             }
                         >
-                            {Object.values(LOCATOR_OPTIONS).map((option, index) => (
-                                <option key={index} value={option.code}>
+                            {Object.values(locatorTypes).map((option) => (
+                                <option key={nanoid} value={option.code}>
                                     {option.name}
                                 </option>
                             ))}
@@ -411,11 +259,11 @@ export function IntextCitationDialog(props) {
                         <input
                             name="intext-locator"
                             type="text"
-                            placeholder={LOCATOR_OPTIONS[cit.label]?.placeholder || DEFAULT_LOCATOR.placeholder}
+                            placeholder={locatorTypes[cit.label]?.placeholder || DEFAULT_LOCATOR.placeholder}
                             value={citationsForIntext?.locator}
                             onChange={(event) => updateContentField(cit.id, "locator", event.target.value)}
                         />
-                        <small>{LOCATOR_OPTIONS[cit.label]?.def || DEFAULT_LOCATOR.def}</small>
+                        <small>{locatorTypes[cit.label]?.def || DEFAULT_LOCATOR.def}</small>
                     </div>
                 );
             })}
@@ -437,7 +285,9 @@ export function AddCitationMenu(props) {
         <div className="fixed bottom-[1rem] left-1/2 transform -translate-x-1/2">
             <div>
                 <h3>Add citation</h3>
-                <button onClick={() => setIsVisible(false)}>X</button>
+                <button type="button" onClick={() => setIsVisible(false)}>
+                    X
+                </button>
             </div>
 
             <div>
@@ -447,23 +297,27 @@ export function AddCitationMenu(props) {
                     ref={identifierRef}
                     name="search-by-identifiers"
                     placeholder="Search by unique identifiers..."
-                ></textarea>
+                />
                 <small>You can list all the identifiers at the same time.</small>
-                <button onClick={() => handleSearchByIdentifiers(identifierRef.current.value)}>
+                <button type="button" onClick={() => handleSearchByIdentifiers(identifierRef.current.value)}>
                     Generate citations
                 </button>
             </div>
 
             <search>
-                <input type="text" name="search-by-title" placeholder="Search by title..."></input>
-                <button onClick={handleSearchByTitle}>Search</button>
+                <input type="text" name="search-by-title" placeholder="Search by title..." />
+                <button type="button" onClick={handleSearchByTitle}>
+                    Search
+                </button>
             </search>
 
-            <button onClick={handleImportCitation}>Import citation</button>
+            <button type="button" onClick={handleImportCitation}>
+                Import citation
+            </button>
 
             <ContextMenu
                 label="Choose source type"
-                options={Object.values(SOURCE_TYPES).map((entry) => {
+                options={Object.values(sourceTypes).map((entry) => {
                     return {
                         label: entry.label,
                         method: () => openCitationForm(entry.code, true),
@@ -485,22 +339,8 @@ export function CitationForm(props) {
         setContent(bibliography?.editedCitation?.content || {});
     }, [bibliography?.editedCitation?.content]);
 
-    const citationControlProps = {
-        content,
-        setContent,
-        showAcceptDialog,
-        handleAddReference,
-        handleCancel,
-    };
-
-    const CITATION_COMPONENTS = {
-        [SOURCE_TYPES.ARTICLE_JOURNAL.code]: ArticleJournal(citationControlProps),
-        [SOURCE_TYPES.BOOK.code]: Book(citationControlProps),
-        [SOURCE_TYPES.WEBPAGE.code]: Webpage(citationControlProps),
-    };
-
     useEffect(() => {
-        dispatch(updateContentInEditedCitation({ bibliographyId: bibliography.id, content: content }));
+        dispatch(updateContentInEditedCitation({ bibliographyId: bibliography.id, content }));
     }, [content]);
 
     function handleAddReference(event) {
@@ -512,6 +352,20 @@ export function CitationForm(props) {
     function handleCancel() {
         setIsVisible(false);
     }
+
+    const citationControlProps = {
+        content,
+        setContent,
+        showAcceptDialog,
+        handleAddReference,
+        handleCancel,
+    };
+
+    const CITATION_COMPONENTS = {
+        [sourceTypes.articleJournal.code]: ArticleJournal(citationControlProps),
+        [sourceTypes.book.code]: Book(citationControlProps),
+        [sourceTypes.webpage.code]: Webpage(citationControlProps),
+    };
 
     return <div className="citation-window">{CITATION_COMPONENTS[content.type]}</div>;
 }
@@ -538,11 +392,19 @@ export function LaTeXDialog(props) {
             <div className="top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] w-[50rem] min-h-[70vh] max-h-[80vh] bg-white">
                 <div className="flex">
                     <div className="flex">
-                        <button onClick={() => setDisplayedLatex(bibtexString)}>BibTex</button>
-                        <button onClick={() => setDisplayedLatex(biblatexString)}>BibLaTeX</button>
-                        <button onClick={() => setDisplayedLatex(bibTxtString)}>BibTXT</button>
+                        <button type="button" onClick={() => setDisplayedLatex(bibtexString)}>
+                            BibTex
+                        </button>
+                        <button type="button" onClick={() => setDisplayedLatex(biblatexString)}>
+                            BibLaTeX
+                        </button>
+                        <button type="button" onClick={() => setDisplayedLatex(bibTxtString)}>
+                            BibTXT
+                        </button>
                     </div>
-                    <button onClick={() => setIsVisible(false)}>X</button>
+                    <button type="button" onClick={() => setIsVisible(false)}>
+                        X
+                    </button>
                 </div>
 
                 <div className="whitespace-pre-wrap">{displayedLatex || bibtexString}</div>
@@ -595,9 +457,12 @@ export function MoveDialog(props) {
 
     return (
         <div className="move-window">
-            <button onClick={() => setIsVisible(false)}>X</button>
+            <button type="button" onClick={() => setIsVisible(false)}>
+                X
+            </button>
             {bibliographies.map((bib) => {
                 if (bib.id !== bibliography.id)
+                    /* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
                     return (
                         <div onClick={() => handleSelect(bib.id)}>
                             <BibliographyCard
@@ -609,12 +474,13 @@ export function MoveDialog(props) {
                 return null;
             })}
             <button
+                type="button"
                 disabled={selectedBibliographyIds.length !== 1}
                 onClick={() => handleMove(selectedBibliographyIds[0])}
             >
                 Move
             </button>
-            <button disabled={selectedBibliographyIds.length === 0} onClick={handleCopy}>
+            <button type="button" disabled={selectedBibliographyIds.length === 0} onClick={handleCopy}>
                 Copy
             </button>
         </div>
@@ -622,8 +488,9 @@ export function MoveDialog(props) {
 }
 
 export function RenameDialog(props) {
+    const { title: pTitle } = props;
     const { handleRename, setRenameWindowVisible: setIsVisible } = props;
-    const [title, setTitle] = useState(props.title);
+    const [title, setTitle] = useState(pTitle);
 
     function handleSubmit() {
         setIsVisible(false);
@@ -641,7 +508,9 @@ export function RenameDialog(props) {
                     name="title-input"
                 />
                 <button type="submit">Rename</button>
-                <button onClick={() => setIsVisible(false)}>Cancel</button>
+                <button type="button" onClick={() => setIsVisible(false)}>
+                    Cancel
+                </button>
             </form>
         </div>
     );
@@ -676,7 +545,7 @@ export function CitationStylesMenu(props) {
     const filteredStyles = styles?.filter((style) => {
         function testStrings(stringsArray) {
             let found = false;
-            for (let i = 0; i < stringsArray.length; i++) {
+            for (let i = 0; i < stringsArray.length; i += 1) {
                 if (
                     // eg., "chicago manual of style 17th edition" => Chicago Manual of Style 17th edition
                     stringsArray[i]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -686,7 +555,7 @@ export function CitationStylesMenu(props) {
                         .split(/\s+|-/)
                         .map((sect) => {
                             if (/\d/.test(sect)) return sect.replace(/\D/g, "");
-                            else return sect[0];
+                            return sect[0];
                         })
                         .join("")
                         .includes(searchTerm.toLowerCase().replace(/\s+/g, "")) ||
@@ -697,7 +566,7 @@ export function CitationStylesMenu(props) {
                         .split(/\s+|-/)
                         .map((sect) => {
                             if (/\d/.test(sect)) return sect.replace(/\D/g, "");
-                            else return sect[0];
+                            return sect[0];
                         })
                         .join("")
                         .includes(searchTerm.toLowerCase().replace(/\s+/g, ""))
@@ -710,13 +579,15 @@ export function CitationStylesMenu(props) {
         }
 
         if (style === MOST_POPULAR_STYLES_LABEL || style === OTHER_STYLES_LABEL) return true;
-        else if (searchTerm) return testStrings([style?.name?.long, style?.name?.short, style?.code]);
-        else return true;
+        if (searchTerm) return testStrings([style?.name?.long, style?.name?.short, style?.code]);
+        return true;
     });
 
     return (
         <div className="citation-styles-menu">
-            <button onClick={() => setIsVisible(false)}>X</button>
+            <button type="button" onClick={() => setIsVisible(false)}>
+                X
+            </button>
 
             <search>
                 <form>
@@ -738,6 +609,7 @@ export function CitationStylesMenu(props) {
                     }
                     return (
                         <button
+                            type="button"
                             style={style}
                             onClick={() => {
                                 onStyleSelected(targetStyle);
@@ -771,9 +643,10 @@ export function SmartGeneratorDialog(props) {
         async function generateCitations() {
             const identifiers = input.split(/\n+/);
 
-            let newContentsArray = [];
+            const newContentsArray = [];
             identifiers.forEach(async (identifier) => {
                 let content;
+                /* eslint-disable indent */
                 switch (citationUtils.recognizeIdentifierType(identifier)) {
                     case "url":
                         content = await citationUtils.retrieveContentFromURL(identifier);
@@ -797,11 +670,13 @@ export function SmartGeneratorDialog(props) {
                 if (content) {
                     newContentsArray.push(content);
                     dispatch(addNewCitation({ bibliographyId: bibliography.id, content }));
-                } else {
-                    console.error("Couldn't find the content of the identifier " + identifier);
+                    return null;
                 }
+                console.error(`Couldn't find the content of the identifier ${identifier}`);
+                return null;
             });
             setContentsArray(newContentsArray);
+            return null;
         }
         generateCitations();
     }, [input, bibliography.id, dispatch]);
@@ -809,7 +684,7 @@ export function SmartGeneratorDialog(props) {
     useEffect(() => {
         async function formatBibliography() {
             const formattedCitation = await citationEngine.formatBibliography(
-                contentsArray.map((content) => ({ content: content })),
+                contentsArray.map((content) => ({ content })),
                 bibliography.style
             );
             const sanitizedReference = DOMPurify.sanitize(formattedCitation);
@@ -820,9 +695,11 @@ export function SmartGeneratorDialog(props) {
 
     return (
         <div>
-            <button onClick={() => setIsVisible(false)}>X</button>
+            <button type="button" onClick={() => setIsVisible(false)}>
+                X
+            </button>
             <div>{HTMLReactParser(references)}</div>
-            <button>Accept</button>
+            <button type="button">Accept</button>
         </div>
     );
 }
@@ -835,19 +712,21 @@ export function TagsDialog(props) {
 
     return (
         <div>
-            <button onClick={() => setIsVisible(false)}>X</button>
+            <button type="button" onClick={() => setIsVisible(false)}>
+                X
+            </button>
             <h3>Tags</h3>
             <div className="flex gap-1 flex-wrap">
-                {bibliography?.tags?.map((tag, index) => (
-                    <Tag key={index} tagProps={tag} onClick={onTagRemoved} showX={true} />
+                {bibliography?.tags?.map((tag) => (
+                    <Tag key={nanoid} tagProps={tag} onClick={onTagRemoved} showX />
                 ))}
             </div>
 
             <div className="flex gap-1 flex-wrap">
                 {settings.tags
                     ?.filter((tag) => !bibliography?.tags?.some((bibTag) => bibTag.id === tag.id))
-                    .map((tag, index) => {
-                        return <Tag key={index} tagProps={tag} onClick={onTagAdded} />;
+                    .map((tag) => {
+                        return <Tag key={nanoid} tagProps={tag} onClick={onTagAdded} />;
                     })}
             </div>
         </div>
@@ -877,7 +756,9 @@ export function IdAndPasswordDialogVisible(props) {
     return (
         <div>
             <h3>Open collaboration</h3>
-            <button onClick={() => setIsVisible(false)}>X</button>
+            <button type="button" onClick={() => setIsVisible(false)}>
+                X
+            </button>
             <p>Choose a unique identifer and a password for you collaborative bibliography.</p>
             <pre>{error}</pre>
             <form onSubmit={handleSubmit}>

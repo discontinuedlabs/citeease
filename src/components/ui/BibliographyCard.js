@@ -1,4 +1,5 @@
-import { timeAgo } from "../../utils/utils";
+import { nanoid } from "nanoid";
+import { timeAgo } from "../../utils/utils.ts";
 import Tag from "./Tag";
 import Icon from "./Icon";
 
@@ -32,6 +33,16 @@ export default function BibliographyCard(props) {
     //     formatMatcher: "basic" | "best fit",
     // };
 
+    function renderCitationCount(citations) {
+        if (citations.length === 0) {
+            return "No sources added";
+        }
+        if (citations.length === 1) {
+            return "1 source";
+        }
+        return `${citations.length} sources`;
+    }
+
     return (
         <div className="grid shadow-hardTransparent border-2 border-solid border-neutral-lightGray rounded-lg items-center p-4 bg-white transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
             <div className="w-full text-neutral-black sm:flex sm:justify-between gap-2">
@@ -41,22 +52,17 @@ export default function BibliographyCard(props) {
                         {bibliography?.title}
                     </h3>
                 </div>
-                <p className="mb-0">{`${
-                    bibliography?.style?.name?.short || bibliography?.style?.name?.long.replace(/\((.*?)\)/g, "")
-                } • ${
-                    bibliography?.citations?.length === 0
-                        ? "No sources added"
-                        : bibliography?.citations?.length === 1
-                        ? "1 source"
-                        : `${bibliography?.citations?.length} sources`
-                } • ${timeAgo(bibliography?.dateModified)}`}</p>
+                <p className="mb-0">
+                    {`${bibliography?.style?.name?.short || bibliography?.style?.name?.long.replace(/\((.*?)\)/g, "")} • 
+        ${renderCitationCount(bibliography?.citations)} • ${timeAgo(bibliography?.dateModified)}`}
+                </p>
             </div>
             <div
                 className="flex gap-1 flex-wrap"
                 style={{ marginTop: bibliography?.tags?.length === 0 ? "0" : "0.5rem" }}
             >
-                {bibliography?.tags?.map((tag, index) => (
-                    <Tag className="m-2" key={index} tagProps={tag} />
+                {bibliography?.tags?.map((tag) => (
+                    <Tag className="m-2" key={nanoid} tagProps={tag} />
                 ))}
             </div>
         </div>

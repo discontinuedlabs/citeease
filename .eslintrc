@@ -1,0 +1,44 @@
+{
+    "root": true,
+    "plugins": ["react", "import", "jsx-a11y", "prettier"],
+    "env": {
+        "browser": true,
+        "commonjs": true,
+        "es6": true,
+        "jest": true,
+        "node": true,
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:react/recommended",
+        "airbnb",
+        "plugin:import/errors",
+        "plugin:jsx-a11y/recommended",
+        "plugin:prettier/recommended",
+    ],
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true,
+        },
+        "ecmaVersion": "latest",
+        "sourceType": "module",
+    },
+    "settings": {
+        "react": {
+            "version": "detect",
+        },
+    },
+    "rules": {
+        "indent": ["warn", 4],
+        "quotes": ["warn", "double"],
+        "react/prop-types": "off",
+        "react/jsx-uses-vars": "warn",
+        "react/react-in-jsx-scope": "off",
+        "react/jsx-uses-react": "off",
+        "no-unused-vars": "warn",
+        "no-console": "off",
+        "react/jsx-filename-extension": "off",
+        "react/jsx-no-bind": "off",
+        "jsx-a11y/label-has-associated-control": "off", // bug?
+    },
+}
