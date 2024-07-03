@@ -172,20 +172,24 @@ export default function Bibliography(props) {
 
     function handleMove() {
         if (bibliographies.length > 1) setMoveWindowVisible(true);
-        else
-            showConfirmDialog(
-                "No bibliographies to move",
-                "You have no other bibliography to move citations to. Would you like to create a new bibliography and move the selected citations to it?",
-                () =>
-                    dispatch(
-                        addNewBibAndMoveSelectedCitations({
-                            checkedCitations,
-                            bibliographyStyle: bibliography?.style,
-                        })
-                    ),
-                "Create new bibliography",
-                "Cancel"
-            );
+        else {
+            // eslint-disable-next-line no-lone-blocks
+            {
+                showConfirmDialog(
+                    "No bibliographies to move",
+                    "You have no other bibliography to move citations to. Would you like to create a new bibliography and move the selected citations to it?",
+                    () =>
+                        dispatch(
+                            addNewBibAndMoveSelectedCitations({
+                                checkedCitations,
+                                bibliographyStyle: bibliography?.style,
+                            })
+                        ),
+                    "Create new bibliography",
+                    "Cancel"
+                );
+            }
+        }
     }
 
     function handleDuplicate() {

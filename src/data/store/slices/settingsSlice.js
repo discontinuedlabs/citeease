@@ -94,9 +94,7 @@ const settingsSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
-        builder.addCase(loadFromIndexedDB.fulfilled, (state, action) => {
-            return action?.payload || state;
-        });
+        builder.addCase(loadFromIndexedDB.fulfilled, (state, action) => action?.payload || state);
     },
 });
 

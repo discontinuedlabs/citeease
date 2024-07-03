@@ -5,7 +5,7 @@ export default function SourceTemplate(props) {
     const { content, setContent, toggleEditMode, showAcceptDialog } = props;
 
     function retrieveContent(source) {
-        if (source)
+        if (source) {
             fetch(`https://corsproxy.io/?https://api.crossref.org/works/${source}`)
                 .then((response) => response.json())
                 .then((data) => {
@@ -26,6 +26,7 @@ export default function SourceTemplate(props) {
                     }
                     console.error(error);
                 });
+        }
     }
 
     // This must recieve authors as an array with the full names ["Michael Connelly", ...]

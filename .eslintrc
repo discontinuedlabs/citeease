@@ -1,6 +1,14 @@
 {
     "root": true,
-    "plugins": ["react", "import", "jsx-a11y", "prettier"],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true,
+        },
+        "ecmaVersion": "latest",
+        "sourceType": "module",
+        "project": "./tsconfig.json",
+    },
     "env": {
         "browser": true,
         "commonjs": true,
@@ -8,6 +16,7 @@
         "jest": true,
         "node": true,
     },
+    "plugins": ["react", "import", "jsx-a11y", "prettier", "@typescript-eslint"],
     "extends": [
         "eslint:recommended",
         "plugin:react/recommended",
@@ -15,19 +24,14 @@
         "plugin:import/errors",
         "plugin:jsx-a11y/recommended",
         "plugin:prettier/recommended",
+        "plugin:@typescript-eslint/recommended",
     ],
-    "parserOptions": {
-        "ecmaFeatures": {
-            "jsx": true,
-        },
-        "ecmaVersion": "latest",
-        "sourceType": "module",
-    },
     "settings": {
         "react": {
             "version": "detect",
         },
     },
+    "ignorePatterns": ["tailwind.config.js", "postcss.config.js"],
     "rules": {
         "indent": ["warn", 4],
         "quotes": ["warn", "double"],

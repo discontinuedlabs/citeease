@@ -11,12 +11,10 @@ export default function ArticleJournal(props) {
     async function retrieveContent(source) {
         try {
             const retreivedContent = await citationUtils.retrieveContentFromDOI(source);
-            setContent((prevContent) => {
-                return {
-                    ...prevContent,
-                    ...retreivedContent,
-                };
-            });
+            setContent((prevContent) => ({
+                ...prevContent,
+                ...retreivedContent,
+            }));
         } catch (error) {
             if (!error.response && error.message === "Network Error") {
                 showAcceptDialog(

@@ -219,8 +219,8 @@ export function IntextCitationDialog(props) {
     }, [citationsForIntext, bibliography?.style]);
 
     function updateContentField(citId, key, value) {
-        setCitationsForIntext((prevCitationsForIntext) => {
-            return prevCitationsForIntext.map((content) => {
+        setCitationsForIntext((prevCitationsForIntext) =>
+            prevCitationsForIntext.map((content) => {
                 if (content.id === citId) {
                     return {
                         ...content,
@@ -228,8 +228,8 @@ export function IntextCitationDialog(props) {
                     };
                 }
                 return content;
-            });
-        });
+            })
+        );
     }
 
     return (
@@ -238,35 +238,31 @@ export function IntextCitationDialog(props) {
             <button type="button" onClick={() => setIsVisible(false)}>
                 X
             </button>
-            {citationsForIntext.map((cit) => {
-                return (
-                    <div key={nanoid}>
-                        <div>{cit.title || `${cit.author[0].family} ${cit.issued["date-parts"].join(" ")}`}</div>
+            {citationsForIntext.map((cit) => (
+                <div key={nanoid}>
+                    <div>{cit.title || `${cit.author[0].family} ${cit.issued["date-parts"].join(" ")}`}</div>
 
-                        <select
-                            value={cit?.label || DEFAULT_LOCATOR.code}
-                            onChange={(event) =>
-                                updateContentField(cit.id, "label", locatorTypes[event.target.value].code)
-                            }
-                        >
-                            {Object.values(locatorTypes).map((option) => (
-                                <option key={nanoid} value={option.code}>
-                                    {option.name}
-                                </option>
-                            ))}
-                        </select>
+                    <select
+                        value={cit?.label || DEFAULT_LOCATOR.code}
+                        onChange={(event) => updateContentField(cit.id, "label", locatorTypes[event.target.value].code)}
+                    >
+                        {Object.values(locatorTypes).map((option) => (
+                            <option key={nanoid} value={option.code}>
+                                {option.name}
+                            </option>
+                        ))}
+                    </select>
 
-                        <input
-                            name="intext-locator"
-                            type="text"
-                            placeholder={locatorTypes[cit.label]?.placeholder || DEFAULT_LOCATOR.placeholder}
-                            value={citationsForIntext?.locator}
-                            onChange={(event) => updateContentField(cit.id, "locator", event.target.value)}
-                        />
-                        <small>{locatorTypes[cit.label]?.def || DEFAULT_LOCATOR.def}</small>
-                    </div>
-                );
-            })}
+                    <input
+                        name="intext-locator"
+                        type="text"
+                        placeholder={locatorTypes[cit.label]?.placeholder || DEFAULT_LOCATOR.placeholder}
+                        value={citationsForIntext?.locator}
+                        onChange={(event) => updateContentField(cit.id, "locator", event.target.value)}
+                    />
+                    <small>{locatorTypes[cit.label]?.def || DEFAULT_LOCATOR.def}</small>
+                </div>
+            ))}
         </div>
     );
 }
@@ -317,13 +313,16 @@ export function AddCitationMenu(props) {
 
             <ContextMenu
                 label="Choose source type"
-                options={Object.values(sourceTypes).map((entry) => {
-                    return {
-                        label: entry.label,
-                        method: () => openCitationForm(entry.code, true),
-                    };
-                })}
-                menuStyle={{ position: "fixed", bottom: "100%", left: "50%", transform: "translateX(-50%)" }}
+                options={Object.values(sourceTypes).map((entry) => ({
+                    label: entry.label,
+                    method: () => openCitationForm(entry.code, true),
+                }))}
+                menuStyle={{
+                    position: "fixed",
+                    bottom: "100%",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                }}
             />
         </div>
     );
@@ -461,7 +460,7 @@ export function MoveDialog(props) {
                 X
             </button>
             {bibliographies.map((bib) => {
-                if (bib.id !== bibliography.id)
+                if (bib.id !== bibliography.id) {
                     /* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
                     return (
                         <div onClick={() => handleSelect(bib.id)}>
@@ -471,6 +470,7 @@ export function MoveDialog(props) {
                             />
                         </div>
                     );
+                }
                 return null;
             })}
             <button
@@ -625,7 +625,7 @@ export function CitationStylesMenu(props) {
                 <b>Note:</b> Some less common citation styles may have formatting issues. If you encounter any problems,
                 please report them by opening an issue on the{" "}
                 <a href="https://github.com/citation-style-language/styles/issues">CSL GitHub repository</a> or contact
-                us at <a href="mailto:discontinuedlabs@gmail.com">discontinuedlabs@gmail.com</a>.
+                us at<a href="mailto:discontinuedlabs@gmail.com">discontinuedlabs@gmail.com</a>.
             </small>
         </div>
     );
@@ -725,9 +725,9 @@ export function TagsDialog(props) {
             <div className="flex gap-1 flex-wrap">
                 {settings.tags
                     ?.filter((tag) => !bibliography?.tags?.some((bibTag) => bibTag.id === tag.id))
-                    .map((tag) => {
-                        return <Tag key={nanoid} tagProps={tag} onClick={onTagAdded} />;
-                    })}
+                    .map((tag) => (
+                        <Tag key={nanoid} tagProps={tag} onClick={onTagAdded} />
+                    ))}
             </div>
         </div>
     );

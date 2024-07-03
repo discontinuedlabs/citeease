@@ -43,10 +43,10 @@ export type Citation = {
 
 export type Bibliography = {
     title: string;
-    style: Object;
+    style: object;
     dateCreated: string;
     dateModified: string;
     id: string;
     citations: Citation[];
-    tags?: Object[];
+    tags?: object[];
 };

@@ -65,9 +65,7 @@ export async function updateCslFiles(bibStyle) {
 }
 
 function createContentArray(citationsArray) {
-    return citationsArray?.map((cit) => {
-        return { ...cit?.content };
-    });
+    return citationsArray?.map((cit) => ({ ...cit?.content }));
 }
 
 function splitContentArray(formattedCitations) {
@@ -137,9 +135,7 @@ export async function formatIntextCitation(citations, bibStyle, format = "html")
                 xhr.send(null);
                 return xhr.responseText;
             },
-            retrieveItem: (id) => {
-                return citations.find((cit) => id === cit.id);
-            },
+            retrieveItem: (id) => citations.find((cit) => id === cit.id),
         };
 
         const cslFile = await getCslFile(bibStyle);

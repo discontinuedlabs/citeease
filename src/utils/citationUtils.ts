@@ -1,14 +1,18 @@
 import axios, { AxiosResponse } from "axios";
 import * as cheerio from "cheerio";
 import { nanoid } from "nanoid";
-import { DateObject, Author, Content } from "../types/types";
+import { DateObject, Author, Content } from "../types/types.ts";
 
 const CORS_PROXY: string = "https://corsproxy.io/?";
+
+/* eslint-disable quotes, @typescript-eslint/no-explicit-any */
 
 // TODO: Needs review
 export function createDateObject(yearOrDate: Date | number, month?: number, day?: number): DateObject | undefined {
     if (yearOrDate === undefined) return undefined;
-    let year: number, adjustedMonth: number, adjustedDay: number;
+    let year: number;
+    let adjustedMonth: number;
+    let adjustedDay: number;
 
     if (yearOrDate instanceof Date) {
         year = yearOrDate.getFullYear();
@@ -20,7 +24,7 @@ export function createDateObject(yearOrDate: Date | number, month?: number, day?
         adjustedDay = day ?? 1;
     }
 
-    let dateParts: number[] = [year];
+    const dateParts: number[] = [year];
     if (adjustedMonth !== undefined) {
         dateParts.push(adjustedMonth);
         if (adjustedDay !== undefined) {
@@ -70,17 +74,19 @@ export function recognizeIdentifierType(string: string): string | undefined {
 
     if (urlPattern.test(string)) return "url";
 
-    for (let doiPattern of doiPatterns) {
-        if (doiPattern.test(string.replace(/doi:\s*/gi, ""))) return "doi";
+    if (doiPatterns.some((doiPattern) => doiPattern.test(string.replace(/doi:\s*/gi, "")))) {
+        return "doi";
     }
 
     if (pmcidPattern.test(string.replace(/pmcid:\s*/g, ""))) return "pmcid";
 
     if (pmidPatern.test(string.replace(/\s+/g, ""))) return "pmid";
 
-    for (let isbnPattern of isbnPatterns) {
-        if (isbnPattern.test(string.replace(/-|\s+/g, ""))) return "isbn";
+    if (isbnPatterns.some((isbnPattern) => isbnPattern.test(string.replace(/-|\s+/g, "")))) {
+        return "isbn";
     }
+
+    return undefined;
 }
 
 export async function retrieveContentFromURL(url: string): Promise<Content | null> {
@@ -96,9 +102,7 @@ export async function retrieveContentFromURL(url: string): Promise<Content | nul
             authors.push($(element).text().trim());
         });
 
-        authors = authors.filter((author, index, self) => {
-            return author.trim() !== "" && self.indexOf(author) === index;
-        });
+        authors = authors.filter((author, index, self) => author.trim() !== "" && self.indexOf(author) === index);
 
         return createAuthorsArray(authors);
     }
@@ -148,11 +152,11 @@ export async function retrieveContentFromDOI(doi: string): Promise<Content | nul
         const response = await fetch(`${CORS_PROXY}https://api.crossref.org/works/${cleanedDoi}`);
 
         const data: { message: any } = await response.json();
-        const message = data.message;
+        const { message } = data;
 
         return {
             DOI: message.DOI,
-            URL: message.URL || message.DOI ? "https://doi.org/" + message.DOI : undefined,
+            URL: message.URL || message.DOI ? `https://doi.org/${message.DOI}` : undefined,
             ISSN: message.ISSN,
             PMID: message.PMID,
             PMCID: message.PMCI,
@@ -220,7 +224,7 @@ export async function retrieveContentFromPMCID(pmcid: string): Promise<Content |
 
         return {
             DOI: data?.DOI,
-            URL: data?.URL || data?.DOI ? "https://doi.org/" + data.DOI : undefined,
+            URL: data?.URL || data?.DOI ? `https://doi.org/${data.DOI}` : undefined,
             ISSN: data?.ISSN,
             PMID: data?.PMID,
             PMCID: data?.PMCID,
@@ -259,7 +263,7 @@ export async function retrieveContentFromPMID(pmid: string): Promise<Content | n
 
         return {
             DOI: data?.DOI,
-            URL: data?.URL || data?.DOI ? "https://doi.org/" + data.DOI : undefined,
+            URL: data?.URL || data?.DOI ? `https://doi.org/${data.DOI}` : undefined,
             ISSN: data?.ISSN,
             PMID: data?.PMID,
             PMCID: data?.PMCID,

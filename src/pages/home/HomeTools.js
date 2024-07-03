@@ -96,7 +96,7 @@ export function CoBibsSearchDialog({ setIsVisible }) {
                 <div>
                     <div>
                         <h3>{searchResult.title}</h3>
-                        <div>Number of collaborators: {searchResult.collab.collaborators.length}</div>
+                        <div>Number of collaborators:{searchResult.collab.collaborators.length}</div>
                     </div>
                     <pre>{passwordError}</pre>
                     <form onSubmit={handleJoin}>

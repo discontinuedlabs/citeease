@@ -14,24 +14,20 @@ export default function AuthorsInput(props) {
             return author;
         });
 
-        setContent((prevContent) => {
-            return {
-                ...prevContent,
-                author: newArray,
-            };
-        });
+        setContent((prevContent) => ({
+            ...prevContent,
+            author: newArray,
+        }));
     }
 
     function handleAddAuthor() {
-        setContent((prevContent) => {
-            return {
-                ...prevContent,
-                author: [
-                    ...(Array.isArray(prevContent.author) ? prevContent.author : []),
-                    { given: "", family: "", id: nanoid() },
-                ],
-            };
-        });
+        setContent((prevContent) => ({
+            ...prevContent,
+            author: [
+                ...(Array.isArray(prevContent.author) ? prevContent.author : []),
+                { given: "", family: "", id: nanoid() },
+            ],
+        }));
     }
 
     return (

@@ -1,8 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { TAG_COLOR_VALUES } from "../data/store/slices/settingsSlice";
-import { Bibliography, Citation } from "../types/types";
-import { RootState } from "../data/store/store";
+import { Bibliography, Citation } from "../types/types.ts";
+import { RootState } from "../data/store/store.ts";
 
 type RouteParams = {
     bibId?: string;

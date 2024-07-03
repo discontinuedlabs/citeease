@@ -12,12 +12,10 @@ function saveToIndexedDB(newState) {
 export const loadFromIndexedDB = createAsyncThunk("bibliographies/loadFromIndexedDB", async () => {
     const loadedBibs = await db.items.get("bibliographies");
     const parsedBibs = await JSON.parse(loadedBibs.value);
-    const cleanedBibs = parsedBibs?.map((bib) => {
-        return {
-            ...bib,
-            citations: bib.citations.map((cit) => ({ ...cit, isChecked: false })),
-        };
-    });
+    const cleanedBibs = parsedBibs?.map((bib) => ({
+        ...bib,
+        citations: bib.citations.map((cit) => ({ ...cit, isChecked: false })),
+    }));
 
     return cleanedBibs;
 });
@@ -305,7 +303,12 @@ const bibsSlice = createSlice({
                 const updatedCitations = filteredCitations.map((cit) => ({ ...cit, isChecked: false }));
                 const copiedCitations = action.payload.checkedCitations.map((cit) => {
                     const newId = nanoid();
-                    return { ...cit, id: newId, content: { ...cit.content, id: newId }, isChecked: false };
+                    return {
+                        ...cit,
+                        id: newId,
+                        content: { ...cit.content, id: newId },
+                        isChecked: false,
+                    };
                 });
                 return {
                     ...bib,
@@ -374,9 +377,7 @@ const bibsSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
-        builder.addCase(loadFromIndexedDB.fulfilled, (state, action) => {
-            return action?.payload || state;
-        });
+        builder.addCase(loadFromIndexedDB.fulfilled, (state, action) => action?.payload || state);
     },
 });
 

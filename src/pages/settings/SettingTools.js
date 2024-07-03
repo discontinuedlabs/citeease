@@ -37,11 +37,9 @@ export function TagsManager(props) {
                 X
             </button>
             <div className="flex gap-1 flex-wrap">
-                {settings.tags?.map((tag) => {
-                    return (
-                        <Tag key={nanoid} tagProps={tag} showX onClick={() => dispatch(deleteTag({ tagId: tag.id }))} />
-                    );
-                })}
+                {settings.tags?.map((tag) => (
+                    <Tag key={nanoid} tagProps={tag} showX onClick={() => dispatch(deleteTag({ tagId: tag.id }))} />
+                ))}
             </div>
             <form onSubmit={addTagToBib}>
                 <input

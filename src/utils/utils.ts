@@ -43,3 +43,7 @@ export function timeAgo(dateString: string): string {
 
     return formattedTime;
 }
+
+export function tempFunction() {
+    return undefined;
+}

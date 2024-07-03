@@ -97,7 +97,12 @@ export default function App() {
 
     function showConfirmDialog(title, body, onConfirmMethod, yesLabel = "Yes", noLabel = "No") {
         console.log(onConfirmMethod);
-        setConfirmDialog({ message: { title, body }, onConfirmMethod, yesLabel, noLabel });
+        setConfirmDialog({
+            message: { title, body },
+            onConfirmMethod,
+            yesLabel,
+            noLabel,
+        });
     }
 
     return (
