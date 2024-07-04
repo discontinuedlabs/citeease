@@ -33,7 +33,11 @@ CiteEase is a powerful and user-friendly open-source citation management app des
 
 ## 🚀 Getting Started
 
--   **Node.js:** You'll need Node.js (version 14 or later) installed on your system. You can download it from the official website: [https://nodejs.org/en](https://nodejs.org/en).
+### Prerequisites
+
+-   **Docker:** Ensure Docker is installed on your system. You can download it from the official website: [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop).
+
+### Building and Running the Application
 
 1. **Clone the Repository:**
 
@@ -41,17 +45,31 @@ CiteEase is a powerful and user-friendly open-source citation management app des
     git clone https://github.com/discontinuedlabs/citeease.git
     ```
 
-2. **Install Dependencies:**
+2. **Navigate to the Project Directory:**
 
     ```bash
-    npm install
+    cd citeease
     ```
 
-3. **Run the App:**
+3. **Build the Docker Image:**
+
+    The Dockerfile in this repository uses `node:18-alpine` as the base image. To build the Docker image, use the following command:
 
     ```bash
-    npm start
+    docker build -t <image-name> .
     ```
+
+    Replace `<image-name>` with a name that suits your preference for the Docker image.
+
+    Note: Make sure that Docker Desktop is running on your machine. You can check this by looking at the system tray for the Docker icon.
+
+4. **Run the Docker Container:**
+
+    ```bash
+    docker run -p 3000:3000 <image-name>
+    ```
+
+Now you can access the app at `http://localhost:3000`.
 
 ## 📜 License
 

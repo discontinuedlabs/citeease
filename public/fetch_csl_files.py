@@ -63,15 +63,17 @@ class Result:
     ERROR = f"{Colors.BG_RED} ERROR {Colors.ENDC}"
 
 
-MAX_FILENAME_LENGTH = 45
+TERMINAL_WIDTH = os.get_terminal_size().columns
+PROGRESS_BAR_LENGTH = 25
+MAX_FILE_CODE_LENGTH = TERMINAL_WIDTH - PROGRESS_BAR_LENGTH - 30
 
 
-def get_progress_bar(current_index, total_files, bar_length=25):
+def get_progress_bar(current_index, total_files, bar_length=PROGRESS_BAR_LENGTH):
     percent = float(current_index + 1) / total_files
-    arrow = "\u2588" * int(round(percent * bar_length))
-    spaces = "\u2588" * (bar_length - len(arrow))
+    progress = "\u2588" * int(round(percent * bar_length))
+    spaces = "\u2588" * (bar_length - len(progress))
     percentage_str = f"%{int(percent * 100):<3d}"
-    return f"{Colors.BLUE}{arrow}{Colors.ENDC}{Colors.BG_DARK_BLUE}{spaces}{Colors.ENDC} {percentage_str}"
+    return f"{Colors.BLUE}{progress}{Colors.ENDC}{Colors.BG_DARK_BLUE}{spaces}{Colors.ENDC} {percentage_str}"
 
 
 def fetch_local_csl_files(directory):
@@ -82,7 +84,7 @@ def fetch_local_csl_files(directory):
 
     all_files = []
 
-    print("\nFetching CSL files...")
+    sys.stdout.write("\nFetching CSL files...\n")
 
     for root, _, files in os.walk(directory):
         csl_files = [file for file in files if file.endswith(".csl")]
@@ -90,12 +92,13 @@ def fetch_local_csl_files(directory):
 
         for index, file in enumerate(csl_files):
             progress_bar = get_progress_bar(index, total_files)
-            end_char = "" if index + 1 != total_files else "\n"
-            file_name_display = file[:MAX_FILENAME_LENGTH] if index + 1 != total_files else "DONE"
-            max_length = len(files[index-1][:MAX_FILENAME_LENGTH]) + 5
+            file_name_display = file[:MAX_FILE_CODE_LENGTH] if index + 1 != total_files else "DONE\n"
+            full_print_str = f"{progress_bar} | {index + 1}/{total_files} | {file_name_display}"
+            fixed_print_str = f"\r{progress_bar} | {index + 1}/{total_files} | "
 
-            print(f"\r{progress_bar} | {index + 1}/{total_files} | {" " * max_length}", end="") 
-            print(f"\r{progress_bar} | {index + 1}/{total_files} | {file_name_display}", end=end_char)
+            sys.stdout.write(f"\r{fixed_print_str}{" " * (TERMINAL_WIDTH - len(fixed_print_str) + 15)}")
+            sys.stdout.write(f"\r{full_print_str}")
+            sys.stdout.flush()
 
             file_path = os.path.join(root, file)
             with open(file_path, "r", encoding="utf-8") as f:
@@ -114,7 +117,10 @@ def extract_file_info(file_path, content):
     license_info = extract_license_info(content)
 
     return {
-        "name": {"long": long_title, "short": short_title},
+        "name": {
+            "long": long_title,
+            "short": short_title if short_title != None else generate_short_title(long_title)
+        },
         "code": code,
         "license": license_info,
     }
@@ -134,20 +140,37 @@ def extract_license_info(content):
     return {"text": None, "url": None}
 
 
+def generate_short_title(title):
+    paren_pattern = r'\([^)]*\)'
+    match = re.search(paren_pattern, title)
+    paren_info = match.group(0) if match else ''
+    main_title = title.split("(")[0]
+    acronym = "".join(char for char in main_title if char.isupper() or char.isdigit())
+    
+    if len(acronym) <= 2:
+        acronym = main_title
+        
+    short_title = f"{acronym} {paren_info}"
+    cleaned_title = re.sub(" +", " ", short_title)
+        
+    return cleaned_title
+
+
 def process_csl_files(all_files):
     data = []
 
-    print("\nProcessing CSL files...")
+    sys.stdout.write("\nProcessing CSL files...\n")
 
     total_files = len(all_files)
     for index, file_info in enumerate(all_files):
         progress_bar = get_progress_bar(index, total_files)
-        end_char = "" if index + 1 != total_files else "\n"
-        file_code_display = file_info["code"][:MAX_FILENAME_LENGTH] if index + 1 != total_files else "DONE"
-        max_length = len(all_files[index-1]["code"][:MAX_FILENAME_LENGTH]) + 5
+        file_name_display = file_info["code"][:MAX_FILE_CODE_LENGTH] if index + 1 != total_files else "DONE\n"
+        full_print_str = f"{progress_bar} | {index + 1}/{total_files} | {file_name_display}"
+        fixed_print_str = f"\r{progress_bar} | {index + 1}/{total_files} | "
 
-        print(f"\r{progress_bar} | {index + 1}/{total_files} | {" " * max_length}", end="")
-        print(f"\r{progress_bar} | {index + 1}/{total_files} | {file_code_display}", end=end_char)
+        sys.stdout.write(f"\r{fixed_print_str}{" " * (TERMINAL_WIDTH - len(fixed_print_str) + 15)}")
+        sys.stdout.write(f"\r{full_print_str}")
+        sys.stdout.flush()
 
         data.append(file_info)
 
@@ -157,7 +180,7 @@ def process_csl_files(all_files):
 def main(directory):
     start_time = time.time()
 
-    print(f"Starting to fetch CSL files from {directory}...")
+    sys.stdout.write(f"Starting to fetch CSL files from {directory}...\n")
 
     all_files = fetch_local_csl_files(directory)
     data = process_csl_files(all_files)
@@ -168,13 +191,13 @@ def main(directory):
     try:
         with open(output_file_path, "w", encoding="utf-8") as file:
             file.write(json_data)
-        print(f"\n{Result.SUCCESS}\n{Colors.GREEN}Successfully saved citation styles data to {output_file_path}.\nTotal files processed: {len(all_files)}\nProcessing time: {int(time.time() - start_time)}s{Colors.ENDC}")
+        sys.stdout.write(f"\n{Result.SUCCESS}\n{Colors.GREEN}Successfully saved citation styles data to {output_file_path}\nTotal files processed: {len(all_files)}\nProcessing time: {int(time.time() - start_time)}s{Colors.ENDC}")
     except IOError as error:
-        print(f"\n{Result.ERROR}\n{Colors.RED}Error writing to file: {str(error)}.{Colors.ENDC}")
+        sys.stdout.write(f"\n{Result.ERROR}\n{Colors.RED}Error writing to file: {str(error)}.{Colors.ENDC}")
 
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         main(sys.argv[1])
     else:
-        print(f"{Result.ERROR}\n{Colors.RED}Please provide the path to the local 'styles' repository as a command-line argument.{Colors.ENDC}")
+        sys.stdout.write(f"{Result.ERROR}\n{Colors.RED}Please provide the path to the local 'styles' repository as an argument.{Colors.ENDC}")
