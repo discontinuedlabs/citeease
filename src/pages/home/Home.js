@@ -42,8 +42,8 @@ export default function Home() {
     }
 
     return (
-        <div className="mx-auto max-w-[50rem]">
-            <div className="flex justify-between mb-5">
+        <main className="mx-auto max-w-[50rem]">
+            <header className="flex justify-between mb-5">
                 <h1 className="hidden">Home</h1> {/* For screen readers and tab title */}
                 <Logo />
                 <ContextMenu
@@ -57,7 +57,7 @@ export default function Home() {
                             : [{ label: "Log in", method: () => navigate("/login") }]),
                     ]}
                 />
-            </div>
+            </header>
 
             <div className="grid place-items-start gap-y-2">
                 {bibliographies && bibliographies.length > 0 ? (
@@ -88,12 +88,15 @@ export default function Home() {
             </button>
 
             {addBibOptionsMenuVisible && (
-                <div>
-                    <h3>Add bibliography</h3>
-                    <button type="button" onClick={() => setAddBibOptionsMenuVisible(false)}>
-                        X
-                    </button>
-                    <div>
+                <div role="dialog" aria-modal="true">
+                    <header>
+                        <h3>Add bibliography</h3>
+                        <button type="button" onClick={() => setAddBibOptionsMenuVisible(false)}>
+                            X
+                        </button>
+                    </header>
+
+                    <menu>
                         <button type="button" onClick={() => setCitationStyleMenuVisible(true)}>
                             Choose by citation style
                         </button>
@@ -101,7 +104,7 @@ export default function Home() {
                         <button type="button" onClick={openCoBibsSearchDialog}>
                             Search for collaborative bibliograpies
                         </button>
-                    </div>
+                    </menu>
                 </div>
             )}
 
@@ -110,6 +113,6 @@ export default function Home() {
             )}
 
             {coBibsSearchDialogVisible && <CoBibsSearchDialog setIsVisible={setCoBibsSearchDialogVisible} />}
-        </div>
+        </main>
     );
 }

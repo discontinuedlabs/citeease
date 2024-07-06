@@ -22,6 +22,7 @@ import * as citationUtils from "../../utils/citationUtils.ts";
 import { useFindBib, useFindCheckedCitations } from "../../hooks/hooks.ts";
 import Tag from "../../components/ui/Tag";
 import citationStyles from "../../assets/styles.json";
+import mostPopularStyles from "../../assets/mostPopularStyles.json";
 
 // Source types
 import ArticleJournal from "../../components/sourceTypes/ArticleJournal";
@@ -35,15 +36,6 @@ const MASTER_CHECKBOX_STATES = {
 };
 
 const DEFAULT_LOCATOR = locatorTypes.page;
-
-const MOST_POPULAR_STYLES = [
-    "apa",
-    "apa-6th-edition",
-    "modern-language-association",
-    "chicago-author-date",
-    "ieee",
-    "council-of-science-editors",
-];
 
 export function ReferenceEntries(props) {
     const { openCitationForm, openIntextCitationDialog } = props;
@@ -204,7 +196,7 @@ export function IntextCitationDialog(props) {
     const { setIntextCitationDialogVisible: setIsVisible } = props;
     const bibliography = useFindBib();
     const checkedCitations = useFindCheckedCitations();
-    const [IntextCitation, setIntextCitation] = useState("");
+    const [intextCitation, setIntextCitation] = useState("");
     const [citationsForIntext, setCitationsForIntext] = useState(checkedCitations.map((cit) => cit.content));
 
     useEffect(() => {
@@ -214,7 +206,7 @@ export function IntextCitationDialog(props) {
                 bibliography?.style,
                 "html"
             );
-            setIntextCitation(formattedIntextCitation);
+            setIntextCitation(DOMPurify.sanitize(formattedIntextCitation));
         }
         formatIntextCitation();
     }, [citationsForIntext, bibliography?.style]);
@@ -235,7 +227,7 @@ export function IntextCitationDialog(props) {
 
     return (
         <div>
-            <div className="font-cambo">{IntextCitation}</div>
+            <div className="font-cambo">{HTMLReactParser(intextCitation)}</div>
             <button type="button" onClick={() => setIsVisible(false)}>
                 X
             </button>
@@ -529,8 +521,8 @@ export function CitationStylesMenu(props) {
         function fetchStyles() {
             const updatedStyles = [OTHER_STYLES_LABEL, ...styles];
             const sortedStyles = updatedStyles.sort((a, b) => {
-                if (MOST_POPULAR_STYLES.includes(a?.code)) return -1;
-                if (MOST_POPULAR_STYLES.includes(b?.code)) return 1;
+                if (mostPopularStyles.includes(b?.code)) return 1;
+                if (mostPopularStyles.includes(a?.code)) return -1;
                 return 0;
             });
 
