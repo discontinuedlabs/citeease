@@ -11,13 +11,11 @@ clientsClaim();
 
 precacheAndRoute([
     ...self.__WB_MANIFEST,
-    `${process.env.PUBLIC_URL}/styles.json`,
+    "../assets/styles.json",
     `${process.env.PUBLIC_URL}/markdown/about.md`,
     `${process.env.PUBLIC_URL}/markdown/privacy.md`,
     `${process.env.PUBLIC_URL}/markdown/terms.md`,
 ]);
-
-console.log(`${process.env.PUBLIC_URL}/styles.json`);
 
 const fileExtensionRegexp = /[^?/]+\.[^/]+$/;
 

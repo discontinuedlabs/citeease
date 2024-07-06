@@ -7,6 +7,7 @@ import App from "./App";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 import store from "./data/store/store.ts";
 import { AuthProvider } from "./context/AuthContext";
+import ModalProvider from "./context/ModalContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -14,7 +15,9 @@ root.render(
         <HashRouter>
             <AuthProvider>
                 <ReduxeProvider store={store}>
-                    <App />
+                    <ModalProvider>
+                        <App />
+                    </ModalProvider>
                 </ReduxeProvider>
             </AuthProvider>
         </HashRouter>

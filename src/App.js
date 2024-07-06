@@ -81,7 +81,7 @@ export default function App() {
             });
             return subscribe;
         }
-        return null;
+        return undefined;
     }, [currentUser]);
 
     useEffect(() => {

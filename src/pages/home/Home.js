@@ -9,6 +9,7 @@ import { addNewBib } from "../../data/store/slices/bibsSlice";
 import Logo from "../../components/ui/Logo";
 import { useAuth } from "../../context/AuthContext";
 import { CoBibsSearchDialog } from "./HomeTools";
+import { useModal } from "../../context/ModalContext";
 
 export default function Home() {
     const bibliographies = useSelector((state) => state.bibliographies);
@@ -18,6 +19,7 @@ export default function Home() {
     const { currentUser } = useAuth();
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const modal = useModal();
 
     function addNewBibWithStyle(style) {
         setCitationStyleMenuVisible(false);
@@ -25,10 +27,24 @@ export default function Home() {
         citationEngine.updateCslFiles(style);
     }
 
+    function openCoBibsSearchDialog() {
+        if (currentUser) setCoBibsSearchDialogVisible(true);
+        else {
+            modal.open({
+                title: "Login required",
+                message: "You need to log in first to use this feature.",
+                actions: [
+                    ["Log in", () => navigate("/login")],
+                    ["Cancel", () => modal.close()],
+                ],
+            });
+        }
+    }
+
     return (
         <div className="mx-auto max-w-[50rem]">
             <div className="flex justify-between mb-5">
-                <h1 className="hidden">Home</h1> {/* For the screen readers and tab title */}
+                <h1 className="hidden">Home</h1> {/* For screen readers and tab title */}
                 <Logo />
                 <ContextMenu
                     icon="more_vert"
@@ -82,7 +98,7 @@ export default function Home() {
                             Choose by citation style
                         </button>
                         <button type="button">Import</button>
-                        <button type="button" onClick={() => setCoBibsSearchDialogVisible(true)}>
+                        <button type="button" onClick={openCoBibsSearchDialog}>
                             Search for collaborative bibliograpies
                         </button>
                     </div>

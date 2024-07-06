@@ -21,6 +21,7 @@ import ContextMenu from "../../components/ui/ContextMenu";
 import * as citationUtils from "../../utils/citationUtils.ts";
 import { useFindBib, useFindCheckedCitations } from "../../hooks/hooks.ts";
 import Tag from "../../components/ui/Tag";
+import citationStyles from "../../assets/styles.json";
 
 // Source types
 import ArticleJournal from "../../components/sourceTypes/ArticleJournal";
@@ -518,26 +519,22 @@ export function RenameDialog(props) {
 
 export function CitationStylesMenu(props) {
     const { setCitationStyleMenuVisible: setIsVisible, onStyleSelected } = props;
-    const [styles, setStyles] = useState([]);
+    const [styles, setStyles] = useState(citationStyles);
     const [searchTerm, setSearchTerm] = useState("");
 
     const MOST_POPULAR_STYLES_LABEL = "Most popular styles";
     const OTHER_STYLES_LABEL = "Other styles";
 
     useEffect(() => {
-        async function fetchStyles() {
-            const response = await fetch(`${process.env.PUBLIC_URL}/styles.json`);
-            const data = await response.json();
-
-            data.unshift(OTHER_STYLES_LABEL);
-            const sortedData = data.sort((a, b) => {
+        function fetchStyles() {
+            const updatedStyles = [OTHER_STYLES_LABEL, ...styles];
+            const sortedStyles = updatedStyles.sort((a, b) => {
                 if (MOST_POPULAR_STYLES.includes(a?.code)) return -1;
                 if (MOST_POPULAR_STYLES.includes(b?.code)) return 1;
                 return 0;
             });
-            sortedData.unshift(MOST_POPULAR_STYLES_LABEL);
 
-            setStyles(sortedData);
+            setStyles([MOST_POPULAR_STYLES_LABEL, ...sortedStyles]);
         }
         fetchStyles();
     }, []);
