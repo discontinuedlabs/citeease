@@ -9,7 +9,7 @@ export function useModal() {
 
 function Modal({ id, title, message, content, actions, icon, showCloseIcon = true, close }) {
     return (
-        <div className="fixed h-screen">
+        <div className="font-sans text-neutral-black fixed h-screen">
             <div className="fixed inset-0 bg-gray-900 opacity-75" />
 
             <div
@@ -40,7 +40,7 @@ function Modal({ id, title, message, content, actions, icon, showCloseIcon = tru
                             actions.map((action) => (
                                 <button
                                     // eslint-disable-next-line jsx-a11y/no-autofocus
-                                    autoFocus={Boolean(action[2]) || /auto-?focus|focus/i.test(action[2])}
+                                    autoFocus={action?.[2]?.autoFocus || actions.length === 1}
                                     key={nanoid}
                                     type="button"
                                     onClick={() => {

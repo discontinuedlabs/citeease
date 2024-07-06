@@ -2,11 +2,13 @@ import { useRef, useState } from "react";
 import * as citationUtils from "../../utils/citationUtils.ts";
 import DateInput from "../form/DateInput";
 import AuthorsInput from "../form/AuthorsInput";
+import { useModal } from "../../context/ModalContext";
 
 export default function Webpage(props) {
-    const { content, setContent, showAcceptDialog, handleAddReference, handleCancel } = props;
+    const { content, setContent, handleAddReference, handleCancel } = props;
     const [url, setUrl] = useState("");
     const autoFillUrlRef = useRef(null);
+    const modal = useModal();
 
     async function retrieveContent(source) {
         try {
@@ -17,15 +19,19 @@ export default function Webpage(props) {
             }));
         } catch (error) {
             if (!error.response && error.message === "Network Error") {
-                showAcceptDialog(
-                    "Network Error",
-                    "Unable to retrieve the webpage due to network issues. Please check your internet connection and try again."
-                );
+                modal.open({
+                    title: "Network Error",
+                    message:
+                        "Unable to retrieve the webpage due to network issues. Please check your internet connection and try again.",
+                    actions: [["Accept", () => modal.close()]],
+                });
             } else {
-                showAcceptDialog(
-                    "Webpage Access Error",
-                    "We couldn't retrieve the information from the webpage you're attempting to cite. This may be due to the webpage being protected by a login or paywall."
-                );
+                modal.open({
+                    title: "No results found",
+                    message:
+                        "Failed to retrieve information from DOI. Please check your internet connection and ensure the provided DOI is correct.",
+                    actions: [["Accept", () => modal.close()]],
+                });
             }
             console.error(error);
         }

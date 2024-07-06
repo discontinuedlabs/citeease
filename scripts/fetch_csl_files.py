@@ -184,7 +184,7 @@ def main(directory):
 
     json_data = json.dumps(data, indent=4)
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    output_file_path = os.path.join(script_dir, '..', 'src', 'styles.json')
+    output_file_path = os.path.join(script_dir, '..', 'src', 'assets', 'styles.json')
 
     try:
         with open(output_file_path, "w", encoding="utf-8") as file:

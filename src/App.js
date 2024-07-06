@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { collection, doc, getDoc, onSnapshot, setDoc } from "firebase/firestore";
@@ -12,7 +12,6 @@ import {
 import Settings from "./pages/settings/Settings";
 import BibliographySettings from "./pages/bibliography/BibliographySettings";
 import MarkdownPage from "./pages/MarkdownPage";
-import { AcceptDialog, ConfirmDialog } from "./components/ui/Dialogs";
 import NotFoundPage from "./pages/NotFoundPage";
 import Signup from "./pages/account/Signup";
 import { useAuth } from "./context/AuthContext";
@@ -22,8 +21,6 @@ import ForgotPassword from "./pages/account/ForgotPassword";
 import firestoreDB from "./data/db/firebase/firebase";
 
 export default function App() {
-    const [acceptDialog, setAcceptDialog] = useState({});
-    const [confirmDialog, setConfirmDialog] = useState({});
     const bibliographies = useSelector((state) => state.bibliographies);
     const settings = useSelector((state) => state.settings);
     const { currentUser } = useAuth();
@@ -91,22 +88,8 @@ export default function App() {
         }
     }, [bibliographies, settings]);
 
-    function showAcceptDialog(title, body = "") {
-        setAcceptDialog({ message: { title, body } });
-    }
-
-    function showConfirmDialog(title, body, onConfirmMethod, yesLabel = "Yes", noLabel = "No") {
-        console.log(onConfirmMethod);
-        setConfirmDialog({
-            message: { title, body },
-            onConfirmMethod,
-            yesLabel,
-            noLabel,
-        });
-    }
-
     return (
-        <div className="font-sans bg-neutral-white p-5 min-h-screen text-neutral-black">
+        <main className="font-sans bg-neutral-white p-5 min-h-screen text-neutral-black">
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/signup" element={<Signup />} />
@@ -114,11 +97,10 @@ export default function App() {
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/account" element={<Account />} /> {/* redirect to "/login" when !currentUser */}
                 <Route path="/settings" element={<Settings />} />
-                <Route
-                    path="/:bibId"
-                    element={<Bibliography showAcceptDialog={showAcceptDialog} showConfirmDialog={showConfirmDialog} />}
-                />
-                <Route path="/:bibId/settings" element={<BibliographySettings />} />
+                <Route path="/bib/:bibId" element={<Bibliography />} />
+                <Route path="/collab/:bibId" element={<Bibliography />} />
+                <Route path="/bib/:bibId/settings" element={<BibliographySettings />} />
+                <Route path="/collab/:bibId/settings" element={<BibliographySettings />} />
                 <Route
                     path="/about"
                     element={<MarkdownPage title="About CiteEase" filePath="/citeease/markdown/about.md" />}
@@ -133,13 +115,6 @@ export default function App() {
                 />
                 <Route path="*" element={<NotFoundPage />} />
             </Routes>
-
-            {acceptDialog.message && (
-                <AcceptDialog message={acceptDialog.message} closeDialog={() => setAcceptDialog({})} />
-            )}
-
-            {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-            {confirmDialog.message && <ConfirmDialog {...confirmDialog} closeDialog={() => setConfirmDialog({})} />}
-        </div>
+        </main>
     );
 }

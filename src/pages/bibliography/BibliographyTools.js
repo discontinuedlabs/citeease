@@ -322,7 +322,7 @@ export function AddCitationMenu(props) {
 }
 
 export function CitationForm(props) {
-    const { showAcceptDialog, setCitationFormVisible: setIsVisible } = props;
+    const { setCitationFormVisible: setIsVisible } = props;
     const bibliography = useFindBib();
     const [content, setContent] = useState(bibliography?.editedCitation?.content || {});
     const dispatch = useDispatch();
@@ -348,7 +348,6 @@ export function CitationForm(props) {
     const citationControlProps = {
         content,
         setContent,
-        showAcceptDialog,
         handleAddReference,
         handleCancel,
     };

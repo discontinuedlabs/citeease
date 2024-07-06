@@ -96,7 +96,7 @@ const bibsSlice = createSlice({
                 style: action.payload.bibliographyStyle,
                 dateCreated: new Date().toString(),
                 dateModified: new Date().toString(),
-                id: `bib=${nanoid(10)}`,
+                id: nanoid(10),
                 citations: [],
                 tags: [],
             };

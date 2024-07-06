@@ -1,8 +1,10 @@
 import DateInput from "../form/DateInput";
 import AuthorsInput from "../form/AuthorsInput";
+import { useModal } from "../../context/ModalContext";
 
 export default function SourceTemplate(props) {
-    const { content, setContent, toggleEditMode, showAcceptDialog } = props;
+    const { content, setContent, toggleEditMode } = props;
+    const modal = useModal();
 
     function retrieveContent(source) {
         if (source) {
@@ -14,15 +16,19 @@ export default function SourceTemplate(props) {
                 })
                 .catch((error) => {
                     if (!error.response && error.message === "Network Error") {
-                        showAcceptDialog(
-                            "Network Error",
-                            "Unable to retrieve the webpage due to network issues. Please check your internet connection and try again."
-                        );
+                        modal.open({
+                            title: "Network Error",
+                            message:
+                                "Unable to retrieve the webpage due to network issues. Please check your internet connection and try again.",
+                            actions: [["Accept", () => modal.close()]],
+                        });
                     } else {
-                        showAcceptDialog(
-                            "No results found",
-                            "Failed to retrieve information from DOI. Please check your internet connection and ensure the provided DOI is correct."
-                        );
+                        modal.open({
+                            title: "No results found",
+                            message:
+                                "Failed to retrieve information from DOI. Please check your internet connection and ensure the provided DOI is correct.",
+                            actions: [["Accept", () => modal.close()]],
+                        });
                     }
                     console.error(error);
                 });

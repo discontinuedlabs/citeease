@@ -34,7 +34,7 @@ export default function Home() {
                 title: "Login required",
                 message: "You need to log in first to use this feature.",
                 actions: [
-                    ["Log in", () => navigate("/login")],
+                    ["Log in", () => navigate("/login"), { autoFocus: true }],
                     ["Cancel", () => modal.close()],
                 ],
             });
@@ -42,7 +42,7 @@ export default function Home() {
     }
 
     return (
-        <main className="mx-auto max-w-[50rem]">
+        <div className="mx-auto max-w-[50rem]">
             <header className="flex justify-between mb-5">
                 <h1 className="hidden">Home</h1> {/* For screen readers and tab title */}
                 <Logo />
@@ -64,7 +64,7 @@ export default function Home() {
                     bibliographies.map((bib) => (
                         <Link
                             key={bib.id}
-                            to={`/${bib?.collab?.open ? bib.collab.id : bib.id}`}
+                            to={bib?.collab?.open ? `/collab/${bib.collab.id}` : `/bib/${bib.id}`}
                             className="w-full"
                             style={{ textDecoration: "none" }}
                         >
@@ -113,6 +113,6 @@ export default function Home() {
             )}
 
             {coBibsSearchDialogVisible && <CoBibsSearchDialog setIsVisible={setCoBibsSearchDialogVisible} />}
-        </main>
+        </div>
     );
 }

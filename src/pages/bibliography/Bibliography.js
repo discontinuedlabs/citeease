@@ -37,15 +37,16 @@ import Tag from "../../components/ui/Tag";
 import { useAuth } from "../../context/AuthContext";
 import Icon from "../../components/ui/Icon";
 import firestoreDB from "../../data/db/firebase/firebase";
+import { useModal } from "../../context/ModalContext";
 
 // TODO: The user cannot do any actions in collaborative bibliographies when they are offline
-export default function Bibliography(props) {
-    const { showConfirmDialog, showAcceptDialog } = props;
+export default function Bibliography() {
     const bibliographies = useSelector((state) => state.bibliographies);
     const bibliography = useFindBib();
     const checkedCitations = useFindCheckedCitations();
     const { currentUser } = useAuth();
     const { bibId } = useParams();
+    const modal = useModal();
 
     const [collaborationOpened, setCollaborationOpened] = useState(bibliography?.collab?.open);
     const [idAndPasswordDialogVisible, setIdAndPasswordDialogVisible] = useState(false);
@@ -171,24 +172,25 @@ export default function Bibliography(props) {
     }
 
     function handleMove() {
+        function addNewBib() {
+            dispatch(
+                addNewBibAndMoveSelectedCitations({
+                    checkedCitations,
+                    bibliographyStyle: bibliography?.style,
+                })
+            );
+        }
         if (bibliographies.length > 1) setMoveWindowVisible(true);
         else {
-            // eslint-disable-next-line no-lone-blocks
-            {
-                showConfirmDialog(
-                    "No bibliographies to move",
+            modal.open({
+                title: "No bibliographies to move",
+                message:
                     "You have no other bibliography to move citations to. Would you like to create a new bibliography and move the selected citations to it?",
-                    () =>
-                        dispatch(
-                            addNewBibAndMoveSelectedCitations({
-                                checkedCitations,
-                                bibliographyStyle: bibliography?.style,
-                            })
-                        ),
-                    "Create new bibliography",
-                    "Cancel"
-                );
-            }
+                actions: [
+                    ["Create new bibliography", addNewBib, "autofocus"],
+                    ["Cancel", () => modal.close()],
+                ],
+            });
         }
     }
 
@@ -202,7 +204,11 @@ export default function Bibliography(props) {
 
     function handleRename(value) {
         if (/^\s*$/.test(value)) {
-            showAcceptDialog("Title is empty", "You cant't set the title to an emdpty value.");
+            modal.open({
+                title: "Title is empty",
+                message: "You cant't set the title to an emdpty value.",
+                actions: [["Accept", () => modal.close()]],
+            });
         } else {
             dispatch(updateBibField({ bibliographyId: bibliography.id, key: "title", value }));
         }
@@ -259,54 +265,60 @@ export default function Bibliography(props) {
     function handleOpenCollaboration() {
         if (!currentUser) {
             // If not logged in
-            showConfirmDialog(
-                "Login required",
-                "You need to log in first to use this feature.",
-                () => navigate("/login"),
-                "Log In",
-                "Cancel"
-            );
+            modal.open({
+                title: "Login required",
+                message: "You need to log in first to use this feature.",
+                actions: [
+                    ["Log in", () => navigate("/login"), "autofocus"],
+                    ["Cancel", () => modal.close()],
+                ],
+            });
         } else if (bibliography?.collab) {
             // When attempting to open a bibliography that was previously set up for collaboration
-            showConfirmDialog(
-                "Open collaboration?",
-                "Are you sure you want to open this bibliography for collaboration?",
-                reopenCollaboration,
-                "Open",
-                "Cancel"
-            );
+            modal.open({
+                title: "Open collaboration?",
+                message: "Are you sure you want to open this bibliography for collaboration?",
+                actions: [
+                    ["Open", reopenCollaboration, "autofocus"],
+                    ["Cancel", () => modal.close()],
+                ],
+            });
         } else {
             const firstTimeEver = bibliographies.some((bib) => bib?.collab);
             if (firstTimeEver) {
                 // First time to open collaboration in any bibliography
-                showConfirmDialog(
-                    "Open collaboration?",
-                    "Are you sure you want to open this bibliography for collaboration?",
-                    () => setIdAndPasswordDialogVisible(true),
-                    "Open",
-                    "Cancel"
-                );
+                modal.open({
+                    title: "Open collaboration?",
+                    message: "Are you sure you want to open this bibliography for collaboration?",
+                    actions: [
+                        ["Open", () => setIdAndPasswordDialogVisible(true), "autofocus"],
+                        ["Cancel", () => modal.close()],
+                    ],
+                });
             } else {
                 // First time to open collaboration for the current bibliography only
-                showConfirmDialog(
-                    "Open collaboration?",
-                    "Are you sure you want to open this bibliography for collaboration?",
-                    () => setIdAndPasswordDialogVisible(true),
-                    "Open",
-                    "Cancel"
-                );
+                modal.open({
+                    title: "Open collaboration?",
+                    message: "Are you sure you want to open this bibliography for collaboration?",
+                    actions: [
+                        ["Open", () => setIdAndPasswordDialogVisible(true), "autofocus"],
+                        ["Cancel", () => modal.close()],
+                    ],
+                });
             }
         }
     }
 
     function handleCloseCollaboration() {
-        showConfirmDialog(
-            "Close collaboration?",
-            "This will remove all collaborators, permanently delete the collaboration history, and revoke access foe all contributors. The bibliography will be removed from their list of accessible bibliographies. Are you sure you want to proceed? Collaboration can be opened anytime if needed.",
-            closeCollaboration,
-            "Close collaboration",
-            "Cancel"
-        );
+        modal.open({
+            title: "Close collaboration?",
+            message:
+                "This will remove all collaborators, permanently delete the collaboration history, and revoke access foe all contributors. The bibliography will be removed from their list of accessible bibliographies. Are you sure you want to proceed? Collaboration can be opened anytime if needed.",
+            actions: [
+                ["Close collaboration", closeCollaboration, "autofocus"],
+                ["Cancel", () => modal.close()],
+            ],
+        });
     }
 
     function handleDeleteBibliography() {
@@ -384,19 +396,20 @@ export default function Bibliography(props) {
                                           {
                                               label: "Delete",
                                               method: () =>
-                                                  showConfirmDialog(
-                                                      `Delete ${
+                                                  modal.open({
+                                                      title: `Delete ${
                                                           checkedCitations?.length === 1 ? "citation" : "citations"
                                                       }?`,
-                                                      `Are you sure you want to delete ${
+                                                      message: `Are you sure you want to delete ${
                                                           checkedCitations?.length === 1
                                                               ? "this citation"
                                                               : "these citations"
                                                       }?`,
-                                                      handleDelete,
-                                                      "Delete",
-                                                      "Cancel"
-                                                  ),
+                                                      actions: [
+                                                          ["Delete", handleDelete, "autofocus"],
+                                                          ["Cancel", () => modal.close()],
+                                                      ],
+                                                  }),
                                               icon: "delete",
                                               style: { color: "crimson" },
                                           },
@@ -441,13 +454,15 @@ export default function Bibliography(props) {
                                           {
                                               label: "Delete bibliography",
                                               method: () =>
-                                                  showConfirmDialog(
-                                                      "Delete bibliography",
-                                                      "You'll no longer see this bibliography in your list. This will also delete related work and citations.",
-                                                      handleDeleteBibliography,
-                                                      "Delete",
-                                                      "Cancel"
-                                                  ),
+                                                  modal.open({
+                                                      title: "Delete bibliography?",
+                                                      message:
+                                                          "You'll no longer see this bibliography in your list. This will also delete related work and citations.",
+                                                      actions: [
+                                                          ["Delete", handleDeleteBibliography, "autofocus"],
+                                                          ["Cancel", () => modal.close()],
+                                                      ],
+                                                  }),
                                               icon: "delete",
                                               style: { color: "crimson" },
                                           },
@@ -480,7 +495,7 @@ export default function Bibliography(props) {
                 )}
 
                 {citationFormVisible && bibliography?.editedCitation && (
-                    <CitationForm {...{ showAcceptDialog, setCitationFormVisible }} />
+                    <CitationForm {...{ setCitationFormVisible }} />
                 )}
 
                 {citationStyleMenuVisible && (
