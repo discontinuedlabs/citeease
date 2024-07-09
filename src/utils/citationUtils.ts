@@ -1,4 +1,3 @@
-import axios, { AxiosResponse } from "axios";
 import * as cheerio from "cheerio";
 import { nanoid } from "nanoid";
 import { DateObject, Author, Content } from "../types/types.ts";
@@ -110,8 +109,9 @@ export async function retrieveContentFromURL(url: string): Promise<Content | nul
     if (!url) return null;
 
     try {
-        const response: AxiosResponse = await axios.get(`${CORS_PROXY}${url}`);
-        const $ = cheerio.load(response.data);
+        const response = await fetch(`${CORS_PROXY}${url}`);
+        const text = await response.text();
+        const $ = cheerio.load(text);
 
         return {
             type: "webpage",

@@ -8,7 +8,6 @@
         "@citation-js/plugin-bibtex": "^0.7.11",
         "@citation-js/plugin-csl": "^0.7.11",
         "@reduxjs/toolkit": "^2.2.5",
-        "axios": "^1.6.4",
         "cheerio": "^1.0.0-rc.12",
         "citation-js": "^0.7.11",
         "citeproc": "^2.4.63",
