@@ -54,7 +54,7 @@ export default function BibliographyCard(props) {
                 </div>
                 <p className="mb-0">
                     {`${bibliography?.style?.name?.short || bibliography?.style?.name?.long.replace(/\((.*?)\)/g, "")} • 
-        ${renderCitationCount(bibliography?.citations)} • ${timeAgo(bibliography?.dateModified)}`}
+                        ${renderCitationCount(bibliography?.citations)} • ${timeAgo(bibliography?.dateModified)}`}
                 </p>
             </div>
             <div
@@ -62,7 +62,7 @@ export default function BibliographyCard(props) {
                 style={{ marginTop: bibliography?.tags?.length === 0 ? "0" : "0.5rem" }}
             >
                 {bibliography?.tags?.map((tag) => (
-                    <Tag className="m-2" key={nanoid} tagProps={tag} />
+                    <Tag className="m-2" key={nanoid()} tagProps={tag} />
                 ))}
             </div>
         </div>

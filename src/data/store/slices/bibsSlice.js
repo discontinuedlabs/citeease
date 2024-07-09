@@ -1,16 +1,31 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { nanoid } from "nanoid";
-import db from "../../db/dexie/dexie";
+import { doc, setDoc } from "firebase/firestore";
+import firestoreDB from "../../db/firebase/firebase";
+import dexieDB from "../../db/dexie/dexie";
 
 const initialState = [];
 
-function saveToIndexedDB(newState) {
+function save(newState, currentUser = undefined) {
     const serializedState = JSON.stringify(newState);
-    db.items.put({ id: "bibliographies", value: serializedState });
+    dexieDB.items.put({ id: "bibliographies", value: serializedState });
+
+    if (currentUser) {
+        const parsedCurrentUser = JSON.parse(currentUser);
+        const userRef = doc(firestoreDB, "users", parsedCurrentUser.uid);
+        setDoc(userRef, { bibliographies: JSON.stringify(newState) });
+
+        newState.forEach((bib) => {
+            if (bib?.collab?.open) {
+                const coBibsRef = doc(firestoreDB, "coBibs", bib?.collab?.id);
+                setDoc(coBibsRef, { bibliography: JSON.stringify(newState) });
+            }
+        });
+    }
 }
 
 export const loadFromIndexedDB = createAsyncThunk("bibliographies/loadFromIndexedDB", async () => {
-    const loadedBibs = await db.items.get("bibliographies");
+    const loadedBibs = await dexieDB.items.get("bibliographies");
     const parsedBibs = await JSON.parse(loadedBibs.value);
     const cleanedBibs = parsedBibs?.map((bib) => ({
         ...bib,
@@ -20,31 +35,31 @@ export const loadFromIndexedDB = createAsyncThunk("bibliographies/loadFromIndexe
     return cleanedBibs;
 });
 
-// IMPORTANT: Date() objects should get converted toString() because they need to be serialized when saved to indexedDB
 const bibsSlice = createSlice({
     name: "bibliographies",
     initialState,
     reducers: {
         mergeWithCurrent: (bibs, action) => {
             // Prompt the user if they want to merge them first
-            if (!action.payload.bibliographies) return bibs;
-            const newBibs = action.payload.bibliographies;
+            if (!action.payload.bibs) return bibs;
+            const newBibs = action.payload.bibs;
             const newBibsIds = newBibs.map((bib) => bib.id);
             const filteredOldBibs = bibs.filter((bib) => !newBibsIds.includes(bib.id));
             const newState = [...filteredOldBibs, ...newBibs];
-            saveToIndexedDB(newState);
+            save(newState, action.payload.currentUser);
             return newState;
         },
         enableCollabInBib: (bibs, action) => {
             const newState = bibs.map((bib) => {
-                if (bib.id === action.payload.bibId) {
+                if (bib.id === action.payload.bibId && action.payload.currentUser) {
+                    const parsedCurrentUser = JSON.parse(action.payload.currentUser);
                     return {
                         ...bib,
                         collab: {
                             open: true,
                             id: action.payload.coId,
-                            adminId: action.payload.adminId,
-                            collaborators: [{ name: action.payload.adminName, id: action.payload.adminId }],
+                            adminId: parsedCurrentUser.uid,
+                            collaborators: [{ name: parsedCurrentUser.displayName, id: parsedCurrentUser.uid }],
                             preferences: {},
                             changelog: [],
                             password: action.payload.password,
@@ -53,7 +68,7 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
-            saveToIndexedDB(newState);
+            save(newState, action.payload.currentUser);
             return newState;
         },
         reEnableCollabInBib: (bibs, action) => {
@@ -69,7 +84,7 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
-            saveToIndexedDB(newState);
+            save(newState, action.payload.currentUser);
             return newState;
         },
         disableCollabInBib: (bibs, action) => {
@@ -87,7 +102,7 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
-            saveToIndexedDB(newState);
+            save(newState, action.payload.currentUser);
             return newState;
         },
         addNewBib: (bibs, action) => {
@@ -101,12 +116,12 @@ const bibsSlice = createSlice({
                 tags: [],
             };
             const newState = [...bibs, newBib];
-            saveToIndexedDB(newState);
+            save(newState, action.payload.currentUser);
             return newState;
         },
         deleteBib: (bibs, action) => {
             const newState = bibs?.filter((bib) => bib.id !== action.payload.bibliographyId);
-            saveToIndexedDB(newState);
+            save(newState, action.payload.currentUser);
             return newState;
         },
         updateBibField: (bibs, action) => {
@@ -116,7 +131,7 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
-            saveToIndexedDB(newState);
+            save(newState, action.payload.currentUser);
             return newState;
         },
         addNewCitation: (bibs, action) => {
@@ -160,7 +175,7 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
-            saveToIndexedDB(newState);
+            save(newState, action.payload.currentUser);
             return newState;
         },
         editCitation: (bibs, action) => {
@@ -174,7 +189,7 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
-            saveToIndexedDB(newState);
+            save(newState, action.payload.currentUser);
             return newState;
         },
         updateContentInEditedCitation: (bibs, action) => {
@@ -188,7 +203,7 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
-            saveToIndexedDB(newState);
+            save(newState, action.payload.currentUser);
             return newState;
         },
         updateCitation: (bibs, action) => {
@@ -218,7 +233,7 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
-            saveToIndexedDB(newState);
+            save(newState, action.payload.currentUser);
             return newState;
         },
         toggleEntryCheckbox: (bibs, action) => {
@@ -292,7 +307,7 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
-            saveToIndexedDB(newState);
+            save(newState, action.payload.currentUser);
             return newState;
         },
         copySelectedCitations: (bibs, action) => {
@@ -316,7 +331,7 @@ const bibsSlice = createSlice({
                     dateModified: new Date().toString(),
                 };
             });
-            saveToIndexedDB(newState);
+            save(newState, action.payload.currentUser);
             return newState;
         },
         duplicateSelectedCitations: (bibs, action) => {
@@ -340,7 +355,7 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
-            saveToIndexedDB(newState);
+            save(newState, action.payload.currentUser);
             return newState;
         },
         deleteSelectedCitations: (bibs, action) => {
@@ -355,7 +370,7 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
-            saveToIndexedDB(newState);
+            save(newState, action.payload.currentUser);
             return newState;
         },
         addNewBibAndMoveSelectedCitations: (bibs, action) => {
@@ -368,11 +383,11 @@ const bibsSlice = createSlice({
                 citations: [...action.payload.checkedCitations],
             };
             const newState = [...bibs, newBib];
-            saveToIndexedDB(newState);
+            save(newState, action.payload.currentUser);
             return newState;
         },
-        deleteAllBibs: () => {
-            saveToIndexedDB(initialState);
+        deleteAllBibs: (action) => {
+            save(initialState, action.payload?.saveToFirestore);
             return initialState;
         },
     },

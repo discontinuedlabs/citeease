@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import DateInput from "../form/DateInput";
 import AuthorsInput from "../form/AuthorsInput";
 import * as citationUtils from "../../utils/citationUtils.ts";
-import { useModal } from "../../context/ModalContext";
+import { useModal } from "../../context/ModalContext.tsx";
 
 export default function Book(props) {
     const { content, setContent, handleAddReference, handleCancel } = props;

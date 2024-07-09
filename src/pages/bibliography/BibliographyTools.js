@@ -41,6 +41,7 @@ export function ReferenceEntries(props) {
     const { openCitationForm, openIntextCitationDialog } = props;
     const bibliography = useFindBib();
     const checkedCitations = useFindCheckedCitations();
+    // eslint-disable-next-line
     const [formattedSelectedCitations, setFormattedSelectedCitations] = useState([]);
     const [references, setReferences] = useState([]);
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
@@ -78,15 +79,15 @@ export function ReferenceEntries(props) {
     }, [bibliography?.citations, bibliography?.style]);
 
     // FIXME: This useEffect causes infinte rerenders
-    useEffect(() => {
-        // console.log(checkedCitations, bibliography?.style);
-        // Used for the handleDrag function because event.dataTransfer.setData("text/html", sanitizedInnerHTML); doesn't wait
-        async function formatSelectedCitations() {
-            const formattedCitations = await citationEngine.formatBibliography(checkedCitations, bibliography?.style);
-            setFormattedSelectedCitations(formattedCitations);
-        }
-        formatSelectedCitations();
-    }, [checkedCitations, bibliography?.style]);
+    // useEffect(() => {
+    //     // console.log(checkedCitations, bibliography?.style);
+    //     // Used for the handleDrag function because event.dataTransfer.setData("text/html", sanitizedInnerHTML); doesn't wait
+    //     async function formatSelectedCitations() {
+    //         const formattedCitations = await citationEngine.formatBibliography(checkedCitations, bibliography?.style);
+    //         setFormattedSelectedCitations(formattedCitations);
+    //     }
+    //     formatSelectedCitations();
+    // }, [checkedCitations, bibliography?.style]);
 
     function handleMasterCheck() {
         dispatch(handleMasterEntriesCheckbox({ bibliographyId: bibliography?.id }));
@@ -232,7 +233,7 @@ export function IntextCitationDialog(props) {
                 X
             </button>
             {citationsForIntext.map((cit) => (
-                <div key={nanoid}>
+                <div key={nanoid()}>
                     <div>{cit.title || `${cit.author[0].family} ${cit.issued["date-parts"].join(" ")}`}</div>
 
                     <select
@@ -240,7 +241,7 @@ export function IntextCitationDialog(props) {
                         onChange={(event) => updateContentField(cit.id, "label", locatorTypes[event.target.value].code)}
                     >
                         {Object.values(locatorTypes).map((option) => (
-                            <option key={nanoid} value={option.code}>
+                            <option key={nanoid()} value={option.code}>
                                 {option.name}
                             </option>
                         ))}
@@ -627,6 +628,7 @@ export function SmartGeneratorDialog(props) {
     const [references, setReferences] = useState("");
     const dispatch = useDispatch();
 
+    // TODO: Refactor
     useEffect(() => {
         async function generateCitations() {
             const identifiers = input.split(/\n+/);
@@ -706,7 +708,7 @@ export function TagsDialog(props) {
             <h3>Tags</h3>
             <div className="flex gap-1 flex-wrap">
                 {bibliography?.tags?.map((tag) => (
-                    <Tag key={nanoid} tagProps={tag} onClick={onTagRemoved} showX />
+                    <Tag key={nanoid()} tagProps={tag} onClick={onTagRemoved} showX />
                 ))}
             </div>
 
@@ -714,7 +716,7 @@ export function TagsDialog(props) {
                 {settings.tags
                     ?.filter((tag) => !bibliography?.tags?.some((bibTag) => bibTag.id === tag.id))
                     .map((tag) => (
-                        <Tag key={nanoid} tagProps={tag} onClick={onTagAdded} />
+                        <Tag key={nanoid()} tagProps={tag} onClick={onTagAdded} />
                     ))}
             </div>
         </div>
@@ -736,6 +738,7 @@ export function IdAndPasswordDialogVisible(props) {
             setError("Password do not match");
         } else {
             const data = new FormData(event.target);
+            console.log(Object.fromEntries(data.entries()));
             onSubmit(Object.fromEntries(data.entries()));
             setIsVisible(false);
         }
@@ -751,11 +754,19 @@ export function IdAndPasswordDialogVisible(props) {
             <pre>{error}</pre>
             <form onSubmit={handleSubmit}>
                 <label htmlFor={`${id}-id`}>Unique identifer</label>
-                <input ref={idRef} type="text" id={`${id}-id`} name="id" required />
+                <input autoComplete="off" ref={idRef} type="text" id={`${id}-id`} name="id" required />
                 <label htmlFor={`${id}-password`}>Password</label>
-                <input ref={passwordRef} type="password" id={`${id}-password`} name="password" required />
+                <input
+                    autoComplete="off"
+                    ref={passwordRef}
+                    type="password"
+                    id={`${id}-password`}
+                    name="password"
+                    required
+                />
                 <label htmlFor={`${id}-confirmPassword`}>Confirm password</label>
                 <input
+                    autoComplete="off"
                     ref={confirmPasswordRef}
                     type="password"
                     id={`${id}-confirmPassword`}

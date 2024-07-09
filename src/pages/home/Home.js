@@ -9,7 +9,7 @@ import { addNewBib } from "../../data/store/slices/bibsSlice";
 import Logo from "../../components/ui/Logo";
 import { useAuth } from "../../context/AuthContext";
 import { CoBibsSearchDialog } from "./HomeTools";
-import { useModal } from "../../context/ModalContext";
+import { useModal } from "../../context/ModalContext.tsx";
 
 export default function Home() {
     const bibliographies = useSelector((state) => state.bibliographies);

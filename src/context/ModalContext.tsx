@@ -1,17 +1,54 @@
+/* eslint-disable react/require-default-props, no-unused-vars */
+
 import { nanoid } from "nanoid";
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-const ModalContext = createContext(null);
+type Action = [string, () => void, { autoFocus?: boolean }];
 
-export function useModal() {
-    return useContext(ModalContext);
+type ModalProps = {
+    id: string;
+    title: string;
+    message: string;
+    content?: JSX.Element | null;
+    actions?: Action[];
+    icon?: JSX.Element | null;
+    showCloseIcon?: boolean;
+    close: (id: string) => void;
+};
+
+type ModalContextType = {
+    open: (newModal: Omit<ModalProps, "id" | "close">) => void;
+    close: (id: string) => void;
+};
+
+const ModalContext = createContext<ModalContextType | undefined>(undefined);
+
+export function useModal(): ModalContextType {
+    const context = useContext(ModalContext);
+    if (!context) {
+        throw new Error("useModal must be used within a ModalProvider");
+    }
+    return context;
 }
 
-function Modal({ id, title, message, content, actions, icon, showCloseIcon = true, close }) {
+function Modal({ id, title, message, content, actions, icon, showCloseIcon = true, close }: ModalProps) {
+    useEffect(() => {
+        if (!showCloseIcon) return undefined;
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                close(id);
+            }
+        };
+        document.addEventListener("keydown", handleKeyDown);
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [close, id]);
+
     return (
         <div className="font-sans text-neutral-black fixed h-screen">
             <div className="fixed inset-0 bg-gray-900 opacity-75" />
-
+            {/* eslint-disable-next-line */}
             <div
                 role="dialog"
                 aria-modal="true"
@@ -41,11 +78,11 @@ function Modal({ id, title, message, content, actions, icon, showCloseIcon = tru
                                 <button
                                     // eslint-disable-next-line jsx-a11y/no-autofocus
                                     autoFocus={action?.[2]?.autoFocus || actions.length === 1}
-                                    key={nanoid}
+                                    key={nanoid()}
                                     type="button"
                                     onClick={() => {
                                         action[1]();
-                                        close();
+                                        close(id);
                                     }}
                                 >
                                     {action[0]}
@@ -58,14 +95,28 @@ function Modal({ id, title, message, content, actions, icon, showCloseIcon = tru
     );
 }
 
-export default function ModalProvider({ children }) {
-    const [modals, setModals] = useState([]);
+type ModalProviderProps = {
+    children: React.ReactNode;
+};
 
-    function openModal(newModal) {
-        setModals((prevModals) => [...prevModals, newModal]);
+export default function ModalProvider({ children }: ModalProviderProps) {
+    const [modals, setModals] = useState<
+        {
+            id: string;
+            title: string;
+            message: string;
+            content?: JSX.Element | null;
+            actions?: Action[];
+            icon?: JSX.Element | null;
+            showCloseIcon?: boolean;
+        }[]
+    >([]);
+
+    function openModal(newModal: Omit<ModalProps, "id" | "close">) {
+        setModals((prevModals) => [...prevModals, { ...newModal, id: nanoid() }]);
     }
 
-    function closeModal(id) {
+    function closeModal(id: string) {
         setModals((prevModals) => prevModals.filter((modal) => modal.id !== id));
     }
 
@@ -83,7 +134,8 @@ export default function ModalProvider({ children }) {
             {modals &&
                 modals.map((modal) => (
                     <Modal
-                        key={nanoid}
+                        id={modal.id}
+                        key={modal.id}
                         title={modal.title}
                         message={modal.message}
                         content={modal.content}

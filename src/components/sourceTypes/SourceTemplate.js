@@ -1,6 +1,6 @@
 import DateInput from "../form/DateInput";
 import AuthorsInput from "../form/AuthorsInput";
-import { useModal } from "../../context/ModalContext";
+import { useModal } from "../../context/ModalContext.tsx";
 
 export default function SourceTemplate(props) {
     const { content, setContent, toggleEditMode } = props;

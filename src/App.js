@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { collection, doc, getDoc, onSnapshot, setDoc } from "firebase/firestore";
+import { collection, doc, onSnapshot, setDoc } from "firebase/firestore";
 import Bibliography from "./pages/bibliography/Bibliography";
 import Home from "./pages/home/Home";
 import { loadFromIndexedDB as loadBibs, mergeWithCurrent as mergeWithCurrentBibs } from "./data/store/slices/bibsSlice";
@@ -19,74 +19,61 @@ import Login from "./pages/account/Login";
 import Account from "./pages/account/Account";
 import ForgotPassword from "./pages/account/ForgotPassword";
 import firestoreDB from "./data/db/firebase/firebase";
+import { useDynamicTitle } from "./hooks/hooks.ts";
 
 export default function App() {
     const bibliographies = useSelector((state) => state.bibliographies);
     const settings = useSelector((state) => state.settings);
     const { currentUser } = useAuth();
     const dispatch = useDispatch();
-
-    useEffect(() => {
-        const h1 = document.querySelector("h1");
-        document.title = h1 ? `${h1.textContent} - CiteEase` : "CiteEase";
-
-        return () => {
-            document.title = "CiteEase";
-        };
-    });
+    useDynamicTitle();
 
     useEffect(() => {
         dispatch(loadBibs());
         dispatch(loadSettings());
-    }, [dispatch]);
+    }, []);
 
-    // TODO: Clean this code
     useEffect(() => {
-        if (currentUser) {
-            const subscribe = onSnapshot(collection(firestoreDB, "users"), async (snapshot) => {
-                const userData = snapshot.docs.find((sDoc) => sDoc.id === currentUser.uid)?.data();
-                if (userData) {
-                    dispatch(mergeWithCurrentBibs({ bibliographies: JSON.parse(userData?.bibliographies) }));
-                    dispatch(mergeWithCurrentSettings({ settings: JSON.parse(userData?.settings) }));
+        if (!currentUser) return;
 
-                    const parsedBibs = JSON.parse(userData?.bibliographies);
-                    const coBibsIds = [];
-                    parsedBibs.forEach((bib) => {
-                        if (bib?.collab?.open) {
-                            coBibsIds.push(bib.collab.id);
-                        }
-                    });
+        const usersCollection = collection(firestoreDB, "users");
+        const coBibsCollection = collection(firestoreDB, "coBibs");
 
-                    coBibsIds.forEach(async (id) => {
-                        const result = await getDoc(doc(firestoreDB, "coBibs", id));
-                        if (result.data()) {
-                            dispatch(
-                                mergeWithCurrentBibs({ bibliographies: [JSON.parse(result.data().bibliography)] })
-                            );
-                        }
+        const unsubscribeUsers = onSnapshot(usersCollection, (snapshot) => {
+            const userData = snapshot.docs.find((sDoc) => sDoc.id === currentUser.uid)?.data();
+            if (userData?.bibliographies && userData?.settings) {
+                dispatch(mergeWithCurrentBibs({ bibs: JSON.parse(userData.bibliographies) }));
+                dispatch(mergeWithCurrentSettings({ settings: JSON.parse(userData.settings) }));
+            } else {
+                try {
+                    setDoc(doc(firestoreDB, "users", currentUser.uid), {
+                        bibliographies: JSON.stringify(bibliographies),
+                        settings: JSON.stringify(settings),
                     });
-                } else {
-                    try {
-                        await setDoc(doc(firestoreDB, "users", currentUser.uid), {
-                            bibliographies: JSON.stringify(bibliographies),
-                            settings: JSON.stringify(settings),
-                        });
-                    } catch (error) {
-                        console.error("Error adding document: ", error);
-                    }
+                } catch (error) {
+                    console.error("Error adding document: ", error);
                 }
-            });
-            return subscribe;
-        }
-        return undefined;
-    }, [currentUser]);
+            }
+        });
 
-    useEffect(() => {
-        if (currentUser) {
-            const userRef = doc(firestoreDB, "users", currentUser.uid);
-            setDoc(userRef, { bibliographies: JSON.stringify(bibliographies), settings: JSON.stringify(settings) });
-        }
-    }, [bibliographies, settings]);
+        const unsubscribeCoBibs = onSnapshot(coBibsCollection, (snapshot) => {
+            const coBibsIds = bibliographies.filter((bib) => bib?.collab?.open).map((bib) => bib.collab.id);
+
+            const updatedCoBibs = [];
+            coBibsIds.forEach((id) => {
+                const coBibData = snapshot.docs.find((sDoc) => sDoc.id === id)?.data();
+                updatedCoBibs.push(JSON.parse(coBibData));
+            });
+
+            dispatch(mergeWithCurrentBibs({ bibs: [...updatedCoBibs] }));
+        });
+
+        // eslint-disable-next-line consistent-return
+        return () => {
+            unsubscribeUsers();
+            unsubscribeCoBibs();
+        };
+    }, [currentUser]);
 
     return (
         <main className="font-sans bg-neutral-white p-5 min-h-screen text-neutral-black">

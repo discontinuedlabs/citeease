@@ -1,9 +1,9 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { nanoid } from "nanoid";
 import { HotKeys } from "react-hotkeys";
-import { useDispatch, useSelector } from "react-redux";
-import { collection, deleteDoc, doc, onSnapshot, setDoc } from "firebase/firestore";
+import { useSelector } from "react-redux";
+import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import ContextMenu from "../../components/ui/ContextMenu";
 import * as citationEngine from "../../utils/citationEngine";
 import {
@@ -30,14 +30,13 @@ import {
     enableCollabInBib,
     reEnableCollabInBib,
     disableCollabInBib,
-    mergeWithCurrent,
 } from "../../data/store/slices/bibsSlice";
-import { useFindBib, useFindCheckedCitations } from "../../hooks/hooks.ts";
+import { useEnhancedDispatch, useFindBib, useFindCheckedCitations } from "../../hooks/hooks.ts";
 import Tag from "../../components/ui/Tag";
 import { useAuth } from "../../context/AuthContext";
 import Icon from "../../components/ui/Icon";
 import firestoreDB from "../../data/db/firebase/firebase";
-import { useModal } from "../../context/ModalContext";
+import { useModal } from "../../context/ModalContext.tsx";
 
 // TODO: The user cannot do any actions in collaborative bibliographies when they are offline
 export default function Bibliography() {
@@ -62,7 +61,8 @@ export default function Bibliography() {
     const [searchByIdentifiersInput, setSearchByIdentifiersInput] = useState("");
 
     const navigate = useNavigate();
-    const dispatch = useDispatch();
+    const dispatch = useEnhancedDispatch();
+    const location = useLocation();
 
     const keyMap = {
         // "ctrl+a": selectAll,
@@ -82,35 +82,11 @@ export default function Bibliography() {
         // Prioritizes showing collab.id in the URL instead of the regular id
         if (!bibliography) return;
         if (bibliography?.collab?.open && bibId !== bibliography?.collab?.id) {
-            navigate(`/${bibliography.collab.id}`, { replace: true });
+            navigate(`/collab/${bibliography.collab.id}`, { replace: true });
         } else if (!bibliography?.collab?.open && bibId !== bibliography.id) {
-            navigate(`/${bibliography.id}`, { replace: true });
+            navigate(`/bib/${bibliography.id}`, { replace: true });
         }
-    }, [bibId, bibliography?.collab?.open]);
-
-    useEffect(() => {
-        if (currentUser && bibliography?.collab?.open) {
-            const subscribe = onSnapshot(collection(firestoreDB, "coBibs"), async (snapshot) => {
-                const coBibData = snapshot.docs.find((sDoc) => sDoc.id === bibliography.collab.id)?.data();
-                if (coBibData) {
-                    dispatch(mergeWithCurrent({ bibliographies: [JSON.parse(coBibData.bibliography)] }));
-                }
-            });
-            return subscribe;
-        }
-        return undefined;
-    }, [currentUser]);
-
-    useEffect(() => {
-        async function updateCoBibInFirestore() {
-            if (currentUser && bibliography?.collab?.open) {
-                const docRef = doc(firestoreDB, "coBibs", bibliography.collab.id);
-                await setDoc(docRef, { bibliography: JSON.stringify(bibliography) });
-                console.log("saved bib to db");
-            }
-        }
-        updateCoBibInFirestore();
-    }, [bibliography, currentUser]);
+    }, [bibId, bibliography?.collab?.open, location.pathname]);
 
     function openIntextCitationDialog() {
         setIntextCitationDialogVisible(true);
@@ -233,8 +209,6 @@ export default function Bibliography() {
         dispatch(
             enableCollabInBib({
                 bibId: bibliography.id,
-                adminId: currentUser.uid,
-                adminName: currentUser.displayName,
                 coId: data.id,
                 password: data.password,
             })
@@ -478,7 +452,7 @@ export default function Bibliography() {
 
                     <div className="flex gap-1 flex-wrap">
                         {bibliography?.tags?.map((tag) => (
-                            <Tag key={nanoid} tagProps={tag} onClick={() => setTagsDialogVisible(true)} />
+                            <Tag key={nanoid()} tagProps={tag} onClick={() => setTagsDialogVisible(true)} />
                         ))}
                     </div>
                 </div>
@@ -504,7 +478,11 @@ export default function Bibliography() {
                             setCitationStyleMenuVisible,
                             onStyleSelected: (style) =>
                                 dispatch(
-                                    updateBibField({ bibliographyId: bibliography.id, key: "style", value: style })
+                                    updateBibField({
+                                        bibliographyId: bibliography.id,
+                                        key: "style",
+                                        value: style,
+                                    })
                                 ),
                         }}
                     />
@@ -548,7 +526,7 @@ export default function Bibliography() {
                 {idAndPasswordDialogVisible && (
                     <IdAndPasswordDialogVisible
                         setIsVisible={setIdAndPasswordDialogVisible}
-                        onSubmit={() => openCollaboration()}
+                        onSubmit={openCollaboration}
                     />
                 )}
 
