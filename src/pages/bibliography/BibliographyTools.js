@@ -130,7 +130,7 @@ export function ReferenceEntries(props) {
 
     return (
         <div>
-            <div key="header">
+            <div>
                 {bibliography?.citations.length !== 0 && (
                     <input
                         type="checkbox"
@@ -147,7 +147,7 @@ export function ReferenceEntries(props) {
                 )}
             </div>
 
-            <div className="max-w-[50rem] mx-auto p-4" key="entries-container">
+            <div className="max-w-[50rem] mx-auto p-4">
                 {/* IMPORTANT: Entries need to be mapped by the references array because it gets sorted according to the CSL file rules, unlike the bibliography.citations array */}
                 {references?.map((ref) => {
                     const refId = () => {
@@ -162,7 +162,7 @@ export function ReferenceEntries(props) {
                             className={`flex items-start justify-between py-2 px-2 space-y-2 space-x-2 rounded-md mb-1 transition-all duration-200 hover:bg-neutral-transparentGray ${
                                 citation?.isChecked ? "bg-secondary-100 hover:bg-secondary-200" : ""
                             }`}
-                            key={citation?.id}
+                            key={citation?.id || nanoid()}
                             draggable
                             onDragStart={handleDrag}
                         >

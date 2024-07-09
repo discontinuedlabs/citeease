@@ -337,13 +337,15 @@ const bibsSlice = createSlice({
         duplicateSelectedCitations: (bibs, action) => {
             const newState = bibs?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
-                    const newIds = action.payload.checkedCitations.map(() => nanoid());
-                    const duplicatedCitations = action.payload.checkedCitations.map((cit, index) => ({
-                        ...cit,
-                        id: newIds[index],
-                        content: { ...cit.content, id: newIds[index] },
-                        isChecked: false,
-                    }));
+                    const duplicatedCitations = action.payload.checkedCitations?.map((cit) => {
+                        const newId = nanoid();
+                        return {
+                            ...cit,
+                            id: newId,
+                            content: { ...cit.content, id: newId },
+                            isChecked: false,
+                        };
+                    });
                     return {
                         ...bib,
                         citations: [

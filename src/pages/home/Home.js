@@ -45,7 +45,9 @@ export default function Home() {
         <div className="mx-auto max-w-[50rem]">
             <header className="flex justify-between mb-5">
                 <h1 className="hidden">Home</h1> {/* For screen readers and tab title */}
-                <Logo />
+                <a href="/" className="no-underline">
+                    <Logo />
+                </a>
                 <ContextMenu
                     icon="more_vert"
                     menuStyle={{}}

@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { useId, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import db from "../../data/db/firebase/firebase";
@@ -20,7 +20,6 @@ export function CoBibsSearchDialog({ setIsVisible }) {
 
     async function handleSearch(event) {
         event.preventDefault();
-        console.log();
         try {
             setSearchError(null);
             setSearchLoading(true);
@@ -32,7 +31,8 @@ export function CoBibsSearchDialog({ setIsVisible }) {
                 if (bibliographies.some((bib) => bib.id === result.id)) {
                     setSearchError(`You are already a collaborator in ${result.title} (${result.collab.id})`);
                 } else {
-                    setSearchResult(result);
+                    // WEIRD: Why does this result show the local bibliographies?
+                    setSearchResult(result.find((bib) => bib?.collab?.id === searchRef.current.value));
                 }
             } else {
                 setSearchError("No such collaborative bibliography!");
@@ -59,9 +59,7 @@ export function CoBibsSearchDialog({ setIsVisible }) {
                         ],
                     },
                 };
-                const coBibRef = doc(db, "coBibs", newCoBibState.collab.id);
-                await setDoc(coBibRef, { bibliography: JSON.stringify(newCoBibState) });
-                dispatch(mergeWithCurrent({ bibliographies: [newCoBibState] }));
+                dispatch(mergeWithCurrent({ bibs: [newCoBibState] }));
 
                 // push the user to coBib.collaborators
                 // push the coBib to the users bibliographies array
@@ -70,7 +68,7 @@ export function CoBibsSearchDialog({ setIsVisible }) {
                 setPasswordError("The password you entered is wrong");
             }
         } catch (error) {
-            setPasswordError(error);
+            setPasswordError(error.message);
         }
         setPasswordLoading(false);
     }
@@ -96,13 +94,12 @@ export function CoBibsSearchDialog({ setIsVisible }) {
                 <div>
                     <div>
                         <h3>{searchResult.title}</h3>
-                        <div>Number of collaborators:{searchResult.collab.collaborators.length}</div>
+                        <div>Number of collaborators:{searchResult?.collab?.collaborators.length}</div>
                     </div>
                     <pre>{passwordError}</pre>
                     <form onSubmit={handleJoin}>
-                        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
                         <label htmlFor={`${id}-password`}>Enter the password to join</label>
-                        <input ref={passwordRef} type="password" name="password" id={`${id}-password`} />
+                        <input autoFocus ref={passwordRef} type="password" name="password" id={`${id}-password`} />
                         <button type="submit" disabled={passwordLoading}>
                             Join
                         </button>

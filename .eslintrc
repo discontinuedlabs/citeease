@@ -44,5 +44,6 @@
         "react/jsx-filename-extension": "off",
         "react/jsx-no-bind": "off",
         "jsx-a11y/label-has-associated-control": "off", // bug?
+        "jsx-a11y/no-autofocus": "off",
     },
 }
