@@ -71,6 +71,10 @@ CiteEase is a powerful and user-friendly open-source citation management app des
 
 Now you can access the app at `http://localhost:3000`.
 
+## 🧪 Testing
+
+Rigorous testing is essential for ensuring the quality and stability of any application. We acknowledge its importance and plan to incorporate a comprehensive testing suite in the future. Currently, however, automated testing is not actively implemented in this project.
+
 ## 📜 License
 
 CiteEase is licensed under the MIT License. See the `LICENSE` file for details.
