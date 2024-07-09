@@ -31,7 +31,7 @@ import {
     reEnableCollabInBib,
     disableCollabInBib,
 } from "../../data/store/slices/bibsSlice";
-import { useEnhancedDispatch, useFindBib, useFindCheckedCitations } from "../../hooks/hooks.ts";
+import { useEnhancedDispatch, useFindBib } from "../../hooks/hooks.ts";
 import Tag from "../../components/ui/Tag";
 import { useAuth } from "../../context/AuthContext";
 import Icon from "../../components/ui/Icon";
@@ -42,7 +42,7 @@ import { useModal } from "../../context/ModalContext.tsx";
 export default function Bibliography() {
     const bibliographies = useSelector((state) => state.bibliographies);
     const bibliography = useFindBib();
-    const checkedCitations = useFindCheckedCitations();
+    const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
     const { currentUser } = useAuth();
     const { bibId } = useParams();
     const modal = useModal();

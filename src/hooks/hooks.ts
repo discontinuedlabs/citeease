@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { TAG_COLOR_VALUES } from "../data/store/slices/settingsSlice";
-import { Bibliography, Citation } from "../types/types.ts";
+import { Bibliography } from "../types/types.ts";
 import { RootState } from "../data/store/store.ts";
 import { useAuth } from "../context/AuthContext";
 
@@ -22,16 +22,6 @@ export function useFindBib(): Bibliography | undefined {
     const bibliographies = useSelector((state: RootState) => state.bibliographies);
     const bibliography = bibliographies?.find((bib) => bib.id === bibId || bib?.collab?.id === bibId);
     return bibliography;
-}
-
-/**
- * Filters checked citations from the current bibliography, which can be identified based on the URL params.
- *
- * @returns {Citation[] | undefined} Checked citations from the specified bibliography or undefined if not found.
- */
-export function useFindCheckedCitations(): Citation[] | undefined {
-    const bibliography = useFindBib();
-    return bibliography?.citations.filter((cit: Citation) => cit.isChecked);
 }
 
 /**

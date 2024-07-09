@@ -19,7 +19,7 @@ import {
 import BibliographyCard from "../../components/ui/BibliographyCard";
 import ContextMenu from "../../components/ui/ContextMenu";
 import * as citationUtils from "../../utils/citationUtils.ts";
-import { useFindBib, useFindCheckedCitations } from "../../hooks/hooks.ts";
+import { useFindBib } from "../../hooks/hooks.ts";
 import Tag from "../../components/ui/Tag";
 import citationStyles from "../../assets/styles.json";
 import mostPopularStyles from "../../assets/mostPopularStyles.json";
@@ -40,8 +40,7 @@ const DEFAULT_LOCATOR = locatorTypes.page;
 export function ReferenceEntries(props) {
     const { openCitationForm, openIntextCitationDialog } = props;
     const bibliography = useFindBib();
-    const checkedCitations = useFindCheckedCitations();
-    // eslint-disable-next-line
+    const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
     const [formattedSelectedCitations, setFormattedSelectedCitations] = useState([]);
     const [references, setReferences] = useState([]);
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
@@ -78,16 +77,16 @@ export function ReferenceEntries(props) {
         formatBibliography();
     }, [bibliography?.citations, bibliography?.style]);
 
-    // FIXME: This useEffect causes infinte rerenders
-    // useEffect(() => {
-    //     // console.log(checkedCitations, bibliography?.style);
-    //     // Used for the handleDrag function because event.dataTransfer.setData("text/html", sanitizedInnerHTML); doesn't wait
-    //     async function formatSelectedCitations() {
-    //         const formattedCitations = await citationEngine.formatBibliography(checkedCitations, bibliography?.style);
-    //         setFormattedSelectedCitations(formattedCitations);
-    //     }
-    //     formatSelectedCitations();
-    // }, [checkedCitations, bibliography?.style]);
+    // FIXME: This useEffect causes infinte rerenders; triggered by checkedCitations dependency
+    useEffect(() => {
+        // Used for the handleDrag function because event.dataTransfer.setData("text/html", sanitizedInnerHTML); doesn't wait
+        async function formatSelectedCitations() {
+            const formattedCitations = await citationEngine.formatBibliography(checkedCitations, bibliography?.style);
+            console.log(formattedCitations);
+            setFormattedSelectedCitations(formattedCitations);
+        }
+        formatSelectedCitations();
+    }, [checkedCitations, bibliography?.style]);
 
     function handleMasterCheck() {
         dispatch(handleMasterEntriesCheckbox({ bibliographyId: bibliography?.id }));
@@ -196,7 +195,7 @@ export function ReferenceEntries(props) {
 export function IntextCitationDialog(props) {
     const { setIntextCitationDialogVisible: setIsVisible } = props;
     const bibliography = useFindBib();
-    const checkedCitations = useFindCheckedCitations();
+    const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
     const [intextCitation, setIntextCitation] = useState("");
     const [citationsForIntext, setCitationsForIntext] = useState(checkedCitations.map((cit) => cit.content));
 
@@ -368,7 +367,8 @@ export function LaTeXDialog(props) {
     const [biblatexString, setBiblatexString] = useState("");
     const [bibTxtString, setBibTxtString] = useState("");
     const [displayedLatex, setDisplayedLatex] = useState(bibtexString);
-    const checkedCitations = useFindCheckedCitations();
+    const bibliography = useFindBib();
+    const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
 
     useEffect(() => {
         async function formatLaTeX() {
@@ -409,7 +409,7 @@ export function MoveDialog(props) {
     const { setMoveWindowVisible: setIsVisible } = props;
     const bibliographies = useSelector((state) => state.bibliographies);
     const bibliography = useFindBib();
-    const checkedCitations = useFindCheckedCitations();
+    const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
     const [selectedBibliographyIds, setSelectedBibliographyIds] = useState([]);
     const dispatch = useDispatch();
 
