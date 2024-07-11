@@ -1,5 +1,4 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { nanoid } from "nanoid";
 import DOMPurify from "dompurify";
 import HTMLReactParser from "html-react-parser/lib/index";
 import { FixedSizeList as List } from "react-window";
@@ -23,6 +22,7 @@ import { useFindBib } from "../../hooks/hooks.ts";
 import Tag from "../../components/ui/Tag";
 import citationStyles from "../../assets/styles.json";
 import mostPopularStyles from "../../assets/mostPopularStyles.json";
+import { uid } from "../../utils/utils.ts";
 
 // Source types
 import ArticleJournal from "../../components/sourceTypes/ArticleJournal";
@@ -161,7 +161,7 @@ export function ReferenceEntries(props) {
                             className={`flex items-start justify-between py-2 px-2 space-y-2 space-x-2 rounded-md mb-1 transition-all duration-200 hover:bg-neutral-transparentGray ${
                                 citation?.isChecked ? "bg-secondary-100 hover:bg-secondary-200" : ""
                             }`}
-                            key={citation?.id || nanoid()}
+                            key={citation?.id || uid()}
                             draggable
                             onDragStart={handleDrag}
                         >
@@ -232,7 +232,7 @@ export function IntextCitationDialog(props) {
                 X
             </button>
             {citationsForIntext.map((cit) => (
-                <div key={nanoid()}>
+                <div key={uid()}>
                     <div>{cit.title || `${cit.author[0].family} ${cit.issued["date-parts"].join(" ")}`}</div>
 
                     <select
@@ -240,7 +240,7 @@ export function IntextCitationDialog(props) {
                         onChange={(event) => updateContentField(cit.id, "label", locatorTypes[event.target.value].code)}
                     >
                         {Object.values(locatorTypes).map((option) => (
-                            <option key={nanoid()} value={option.code}>
+                            <option key={uid()} value={option.code}>
                                 {option.name}
                             </option>
                         ))}
@@ -708,7 +708,7 @@ export function TagsDialog(props) {
             <h3>Tags</h3>
             <div className="flex gap-1 flex-wrap">
                 {bibliography?.tags?.map((tag) => (
-                    <Tag key={nanoid()} tagProps={tag} onClick={onTagRemoved} showX />
+                    <Tag key={uid()} tagProps={tag} onClick={onTagRemoved} showX />
                 ))}
             </div>
 
@@ -716,7 +716,7 @@ export function TagsDialog(props) {
                 {settings.tags
                     ?.filter((tag) => !bibliography?.tags?.some((bibTag) => bibTag.id === tag.id))
                     .map((tag) => (
-                        <Tag key={nanoid()} tagProps={tag} onClick={onTagAdded} />
+                        <Tag key={uid()} tagProps={tag} onClick={onTagAdded} />
                     ))}
             </div>
         </div>

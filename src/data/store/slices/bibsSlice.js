@@ -1,8 +1,8 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { nanoid } from "nanoid";
 import { doc, setDoc } from "firebase/firestore";
 import firestoreDB from "../../db/firebase/firebase";
 import dexieDB from "../../db/dexie/dexie";
+import { uid } from "../../../utils/utils.ts";
 
 const initialState = [];
 
@@ -111,7 +111,7 @@ const bibsSlice = createSlice({
                 style: action.payload.bibliographyStyle,
                 dateCreated: new Date().toString(),
                 dateModified: new Date().toString(),
-                id: nanoid(10),
+                id: uid(10),
                 citations: [],
                 tags: [],
             };
@@ -137,7 +137,7 @@ const bibsSlice = createSlice({
         addNewCitation: (bibs, action) => {
             const newState = bibs.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
-                    const citId = nanoid();
+                    const citId = uid();
                     if (action.payload?.content) {
                         // If passed ready content, it gets added directly to the citations array
                         return {
@@ -165,7 +165,7 @@ const bibsSlice = createSlice({
                                 content: {
                                     id: citId,
                                     type: action.payload.sourceType,
-                                    author: [{ given: "", family: "", id: nanoid() }],
+                                    author: [{ given: "", family: "", id: uid() }],
                                 },
                                 isChecked: false,
                             },
@@ -317,7 +317,7 @@ const bibsSlice = createSlice({
                 );
                 const updatedCitations = filteredCitations.map((cit) => ({ ...cit, isChecked: false }));
                 const copiedCitations = action.payload.checkedCitations.map((cit) => {
-                    const newId = nanoid();
+                    const newId = uid();
                     return {
                         ...cit,
                         id: newId,
@@ -338,7 +338,7 @@ const bibsSlice = createSlice({
             const newState = bibs?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const duplicatedCitations = action.payload.checkedCitations?.map((cit) => {
-                        const newId = nanoid();
+                        const newId = uid();
                         return {
                             ...cit,
                             id: newId,
@@ -381,7 +381,7 @@ const bibsSlice = createSlice({
                 style: action.payload.bibliographyStyle,
                 dateCreated: new Date().toString(),
                 dateModified: new Date().toString(),
-                id: `bib=${nanoid(10)}`,
+                id: uid(10),
                 citations: [...action.payload.checkedCitations],
             };
             const newState = [...bibs, newBib];

@@ -1,4 +1,4 @@
-import { nanoid } from "nanoid";
+import { uid } from "../../utils/utils.ts";
 
 export default function AuthorsInput(props) {
     const { content, setContent } = props;
@@ -25,7 +25,7 @@ export default function AuthorsInput(props) {
             ...prevContent,
             author: [
                 ...(Array.isArray(prevContent.author) ? prevContent.author : []),
-                { given: "", family: "", id: nanoid() },
+                { given: "", family: "", id: uid() },
             ],
         }));
     }

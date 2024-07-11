@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props, no-unused-vars */
 
-import { nanoid } from "nanoid";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { uid } from "../utils/utils.ts";
 
 type Action = [string, () => void, { autoFocus?: boolean }];
 
@@ -78,7 +78,7 @@ function Modal({ id, title, message, content, actions, icon, showCloseIcon = tru
                                 <button
                                     // eslint-disable-next-line jsx-a11y/no-autofocus
                                     autoFocus={action?.[2]?.autoFocus || actions.length === 1}
-                                    key={nanoid()}
+                                    key={uid()}
                                     type="button"
                                     onClick={() => {
                                         action[1]();
@@ -113,7 +113,7 @@ export default function ModalProvider({ children }: ModalProviderProps) {
     >([]);
 
     function openModal(newModal: Omit<ModalProps, "id" | "close">) {
-        setModals((prevModals) => [...prevModals, { ...newModal, id: nanoid() }]);
+        setModals((prevModals) => [...prevModals, { ...newModal, id: uid() }]);
     }
 
     function closeModal(id: string) {

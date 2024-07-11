@@ -10,6 +10,7 @@ import Logo from "../../components/ui/Logo";
 import { useAuth } from "../../context/AuthContext";
 import { CoBibsSearchDialog } from "./HomeTools";
 import { useModal } from "../../context/ModalContext.tsx";
+import Icon from "../../components/ui/Icon";
 
 export default function Home() {
     const bibliographies = useSelector((state) => state.bibliographies);
@@ -49,16 +50,15 @@ export default function Home() {
                     <Logo />
                 </a>
                 <ContextMenu
-                    icon="more_vert"
-                    menuStyle={{}}
-                    buttonType="Small Button"
                     options={[
-                        { label: "Settings", method: () => navigate("/settings") },
+                        ["Settings", () => navigate("/settings")],
                         ...(currentUser
-                            ? [{ label: "Account", method: () => navigate("/account") }]
-                            : [{ label: "Log in", method: () => navigate("/login") }]),
+                            ? [["Account", () => navigate("/account")]]
+                            : [["Log in", () => navigate("/login")]]),
                     ]}
-                />
+                >
+                    <Icon name="more_vert" />
+                </ContextMenu>
             </header>
 
             <div className="grid place-items-start gap-y-2">

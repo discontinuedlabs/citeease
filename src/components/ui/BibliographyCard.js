@@ -1,5 +1,4 @@
-import { nanoid } from "nanoid";
-import { timeAgo } from "../../utils/utils.ts";
+import { timeAgo, uid } from "../../utils/utils.ts";
 import Tag from "./Tag";
 import Icon from "./Icon";
 
@@ -62,7 +61,7 @@ export default function BibliographyCard(props) {
                 style={{ marginTop: bibliography?.tags?.length === 0 ? "0" : "0.5rem" }}
             >
                 {bibliography?.tags?.map((tag) => (
-                    <Tag className="m-2" key={nanoid()} tagProps={tag} />
+                    <Tag className="m-2" key={uid()} tagProps={tag} />
                 ))}
             </div>
         </div>

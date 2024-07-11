@@ -1,6 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useId, useRef, useState } from "react";
-import { nanoid } from "nanoid";
 import { useNavigate } from "react-router-dom";
 import {
     TAG_COLORS,
@@ -14,6 +13,7 @@ import Tag from "../../components/ui/Tag";
 import { useTagBgColor } from "../../hooks/hooks.ts";
 import { useAuth } from "../../context/AuthContext";
 import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
+import { uid } from "../../utils/utils.ts";
 
 export function TagsManager(props) {
     const { setTagsManagerVisible: setIsVisible } = props;
@@ -26,7 +26,7 @@ export function TagsManager(props) {
     function addTagToBib(event) {
         event.preventDefault();
         if (!/^\s*$/.test(tagLabel)) {
-            dispatch(addTag({ tag: { label: tagLabel, color: tagColor, id: nanoid() } }));
+            dispatch(addTag({ tag: { label: tagLabel, color: tagColor, id: uid() } }));
             setTagLabel("");
         }
     }
@@ -38,7 +38,7 @@ export function TagsManager(props) {
             </button>
             <div className="flex gap-1 flex-wrap">
                 {settings.tags?.map((tag) => (
-                    <Tag key={nanoid} tagProps={tag} showX onClick={() => dispatch(deleteTag({ tagId: tag.id }))} />
+                    <Tag key={uid()} tagProps={tag} showX onClick={() => dispatch(deleteTag({ tagId: tag.id }))} />
                 ))}
             </div>
             <form onSubmit={addTagToBib}>
@@ -60,7 +60,7 @@ export function TagsManager(props) {
                         <button
                             className="rounded-full w-5 h-5"
                             type="button"
-                            key={nanoid}
+                            key={uid()}
                             style={{ backgroundColor: TAG_COLOR_VALUES[color] }}
                             onClick={() => setTagColor(color)}
                         />

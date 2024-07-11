@@ -1,3 +1,55 @@
+/**
+ * Generates a unique identifier of a specified length.
+ *
+ * This function creates a unique ID by generating a sequence of characters from a predefined alphabet.
+ * It uses a pool of random bytes to select characters from the alphabet, ensuring uniqueness.
+ *
+ * @param {number} length - The desired length of the unique ID.
+ * @returns {string} A unique identifier of the specified length.
+ */
+export function uid(length: number = 21): string {
+    const POOL_SIZE_MULTIPLIER = 128;
+    const URL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+
+    let pool: Uint8Array | undefined;
+    let poolOffset: number = 0;
+
+    /**
+     * Refills the random value pool with enough bytes to cover the requested length.
+     * If the pool is not yet large enough, it is expanded.
+     *
+     * @param {number} byteCount - The minimum number of bytes required in the pool.
+     */
+    function refillRandomValuePool(byteCount: number): void {
+        if (!pool || pool.length < byteCount) {
+            pool = new Uint8Array(POOL_SIZE_MULTIPLIER * byteCount);
+            window.crypto.getRandomValues(pool);
+            poolOffset = 0;
+        } else if (poolOffset + byteCount > pool.length) {
+            window.crypto.getRandomValues(pool.subarray(poolOffset, poolOffset + byteCount));
+            poolOffset = 0;
+        }
+        poolOffset += byteCount;
+    }
+
+    refillRandomValuePool(length);
+
+    let uniqueId: string = "";
+    for (let index = 0; index < length; index += 1) {
+        if (!pool) {
+            throw new Error("Pool is unexpectedly undefined.");
+        }
+        uniqueId += URL_ALPHABET[pool[index + poolOffset] % URL_ALPHABET.length];
+    }
+    return uniqueId;
+}
+
+/**
+ * Calculates the relative time from the given date to now.
+ *
+ * @param dateString - The date string to calculate the time difference from. This should be a valid ISO 8601 date string.
+ * @returns A string representing the time elapsed since the given date in a human-readable format.
+ */
 export function timeAgo(dateString: string): string {
     const now = new Date();
     const then = new Date(dateString);
@@ -42,8 +94,4 @@ export function timeAgo(dateString: string): string {
     }
 
     return formattedTime;
-}
-
-export function tempFunction() {
-    return undefined;
 }

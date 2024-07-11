@@ -15,7 +15,6 @@
         "dompurify": "^3.1.2",
         "firebase": "^10.12.2",
         "html-react-parser": "^5.1.10",
-        "nanoid": "^5.0.7",
         "react-hotkeys": "^2.0.0",
         "react-markdown": "^9.0.1",
         "react-redux": "^9.1.2",
@@ -34,9 +33,6 @@
         "workbox-routing": "^6.6.0",
         "workbox-strategies": "^6.6.0",
         "workbox-streams": "^6.6.0"
-    },
-    "overrides": {
-        "typescript": "^5.5.3"
     },
     "devDependencies": {
         "@eslint/js": "^9.6.0",
@@ -67,6 +63,9 @@
         "tailwindcss": "^3.4.3",
         "typescript": "^5.5.3"
     },
+    "overrides": {
+        "typescript": "^5.5.3"
+    },
     "scripts": {
         "predeploy": "npm run build",
         "deploy": "gh-pages -d build",
@@ -75,7 +74,8 @@
         "test": "react-scripts test",
         "eject": "react-scripts eject",
         "lint": "npx eslint .",
-        "lint:fix": "npx eslint --fix ."
+        "lint:fix": "npx eslint --fix .",
+        "coverage": "npm test --coverage --watchAll --collectCoverageFrom='src/**/**/*.{js,ts,jsx.tsx}'"
     },
     "eslintConfig": {
         "extends": [

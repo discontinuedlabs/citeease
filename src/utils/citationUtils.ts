@@ -1,6 +1,6 @@
 import * as cheerio from "cheerio";
-import { nanoid } from "nanoid";
 import { DateObject, Author, Content } from "../types/types.ts";
+import { uid } from "./utils.ts";
 
 const CORS_PROXY: string = "https://corsproxy.io/?";
 
@@ -47,7 +47,7 @@ export function createAuthorsArray(authors: string[]): Author[] {
         const names = author.split(/\s+/);
         const given = names.shift() || "";
         const family = names.join(" ");
-        return { given, family, id: nanoid() };
+        return { given, family, id: uid() };
     });
 
     return result;
@@ -173,7 +173,7 @@ export async function retrieveContentFromDOI(doi: string): Promise<Content | nul
             accessed: createDateObject(new Date()),
             author: message.author.map((author: Author[]) => ({
                 ...author,
-                id: nanoid(),
+                id: uid(),
             })),
         };
     } catch (error) {
@@ -241,7 +241,7 @@ export async function retrieveContentFromPMCID(pmcid: string): Promise<Content |
             accessed: createDateObject(new Date()),
             author: data?.author?.map((author: Author[]) => ({
                 ...author,
-                id: nanoid(),
+                id: uid(),
             })),
         };
     } catch (error) {
@@ -280,7 +280,7 @@ export async function retrieveContentFromPMID(pmid: string): Promise<Content | n
             accessed: createDateObject(new Date()),
             author: data?.author?.map((author: Author[]) => ({
                 ...author,
-                id: nanoid(),
+                id: uid(),
             })),
         };
     } catch (error) {
