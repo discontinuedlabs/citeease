@@ -1,4 +1,3 @@
-import * as cheerio from "cheerio";
 import { DateObject, Author, Content } from "../types/types.ts";
 import { uid } from "./utils.ts";
 
@@ -89,16 +88,18 @@ export function recognizeIdentifierType(string: string): string | undefined {
 }
 
 export async function retrieveContentFromURL(url: string): Promise<Content | null> {
-    function extractAuthors($: any): Author[] {
+    function extractAuthors(doc: Document): Author[] {
         let authors: string[] = [];
 
-        authors.push($('.author[rel="author"]').text());
-        $('meta[name="author"], meta[name="article:author"]').each((index: number, element: any) => {
-            authors.push($(element).attr("content") || "");
+        const authorElement = doc.querySelector('.author[rel="author"]');
+        if (authorElement) authors.push(authorElement.textContent || "");
+
+        doc.querySelectorAll('meta[name="author"], meta[name="article:author"]').forEach((meta) => {
+            authors.push(meta.getAttribute("content") || "");
         });
 
-        $('span.css-1baulvz.last-byline[itemprop="name"]').each((index: number, element: any) => {
-            authors.push($(element).text().trim());
+        doc.querySelectorAll('span.css-1baulvz.last-byline[itemprop="name"]').forEach((span) => {
+            authors.push(span.textContent?.trim() || "");
         });
 
         authors = authors.filter((author, index, self) => author.trim() !== "" && self.indexOf(author) === index);
@@ -106,36 +107,50 @@ export async function retrieveContentFromURL(url: string): Promise<Content | nul
         return createAuthorsArray(authors);
     }
 
+    function extractContent(doc: Document, selector: string, attr: string): string {
+        const element = doc.querySelector(selector);
+
+        if (!element) {
+            return "";
+        }
+
+        if (attr) {
+            return element.hasAttribute(attr) ? element.getAttribute(attr) || "" : element.textContent || "";
+        }
+        return element.textContent || "";
+    }
+
     if (!url) return null;
 
     try {
         const response = await fetch(`${CORS_PROXY}${url}`);
         const text = await response.text();
-        const $ = cheerio.load(text);
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, "text/html");
 
         return {
             type: "webpage",
-            title: $("title").text(),
-            author: extractAuthors($),
-            "container-title": $('meta[property="og:site_name"]').attr("content") || "",
-            publisher: $('meta[property="article:publisher"]').attr("content"),
+            title: extractContent(doc, "title", ""),
+            author: extractAuthors(doc),
+            "container-title": extractContent(doc, 'meta[property="og:site_name"]', "content"),
+            publisher: extractContent(doc, 'meta[property="article:publisher"]', "content"),
             accessed: createDateObject(new Date()),
             issued: createDateObject(
                 new Date(
-                    $('meta[name="date"]').attr("content") ||
-                        $('meta[name="article:published_time"]').attr("content") ||
-                        $('meta[property="article:published_time"]').attr("content") ||
-                        $('meta[name="article:modified_time"]').attr("content") ||
-                        $('meta[property="article:modified_time"]').attr("content") ||
-                        $('meta[name="og:updated_time"]').attr("content") ||
-                        $('meta[name="og:updated_time"]').attr("content") ||
-                        $(".publication-date").text()
+                    extractContent(doc, 'meta[name="date"]', "content") ||
+                        extractContent(doc, 'meta[name="article:published_time"]', "content") ||
+                        extractContent(doc, 'meta[property="article:published_time"]', "content") ||
+                        extractContent(doc, 'meta[name="article:modified_time"]', "content") ||
+                        extractContent(doc, 'meta[property="article:modified_time"]', "content") ||
+                        extractContent(doc, 'meta[name="og:updated_time"]', "content") ||
+                        extractContent(doc, 'meta[property="og:updated_time"]', "content") ||
+                        extractContent(doc, ".publication-date", "")
                 )
             ),
             URL:
-                $('meta[property="og:url"]').attr("content") ||
-                $('meta[name="url"]').attr("content") ||
-                $('link[rel="canonical"]').attr("href") ||
+                extractContent(doc, 'meta[property="og:url"]', "content") ||
+                extractContent(doc, 'meta[name="url"]', "content") ||
+                extractContent(doc, 'link[rel="canonical"]', "href") ||
                 url,
         };
     } catch (error) {

@@ -110,6 +110,6 @@ export function CoBibsSearchDialog({ setIsVisible }) {
     );
 }
 
-export function Input() {
+export function Temp() {
     return <div />;
 }

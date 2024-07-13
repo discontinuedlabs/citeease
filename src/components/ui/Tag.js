@@ -6,11 +6,11 @@ export default function Tag(props) {
     const [bgIdleColor, bgHoverColor, bgClickColor] = useTagBgColor(tagProps?.color);
 
     return (
-        <div className="bg-white rounded-md">
+        <div className="rounded-md bg-white">
             {/* eslint-disable no-param-reassign, no-return-assign */}
             <button
                 type="button"
-                className="flex gap-1 font-bold p-1 rounded-md transition duration-150 ease-in-out"
+                className="flex gap-1 rounded-md p-1 font-bold transition duration-150 ease-in-out"
                 style={{
                     border: `${TAG_COLOR_VALUES[tagProps?.color]} solid 2px`,
                     color: TAG_COLOR_VALUES[tagProps?.color],

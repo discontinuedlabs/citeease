@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom global styles */
 * {
     overflow-wrap: break-word;
     box-sizing: border-box;
@@ -12,8 +11,7 @@
 }
 
 ::selection {
-    @apply text-neutral-black;
-    @apply bg-neutral-yellow;
+    @apply bg-neutral-yellow text-neutral-black;
 }
 
 h1,
@@ -22,7 +20,7 @@ h3,
 h4,
 p,
 ul {
-    margin-bottom: 1rem;
+    @apply mb-4;
 }
 
 a {
@@ -30,17 +28,15 @@ a {
 }
 
 ul {
-    margin-inline-start: 2.5rem;
+    @apply ms-10;
 }
 
 button {
-    @apply font-sans;
-    user-select: none;
+    @apply select-none font-sans;
 }
 
 .hanging-indentation {
-    padding-left: 1.25rem;
-    text-indent: -1.25rem;
+    @apply pl-5 indent-[-1.5rem];
 }
 
 .csl-entry:has(.csl-left-margin) {
@@ -51,4 +47,8 @@ button {
 
 .csl-entry > .csl-left-margin {
     min-width: fit-content;
+}
+
+.transition-regular {
+    @apply transition duration-150 ease-in-out;
 }

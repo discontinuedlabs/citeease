@@ -37,6 +37,7 @@ import Icon from "../../components/ui/Icon";
 import firestoreDB from "../../data/db/firebase/firebase";
 import { useModal } from "../../context/ModalContext.tsx";
 import { uid } from "../../utils/utils.ts";
+import { Button } from "../../components/ui/StyledButtons";
 
 // TODO: The user cannot do any actions in collaborative bibliographies when they are offline
 export default function Bibliography() {
@@ -332,7 +333,7 @@ export default function Bibliography() {
     const optionsWhenNothingChecked = [
         ["Tags", () => setTagsDialogVisible(true)],
         ["Change style", () => setCitationStyleMenuVisible(true)],
-        ["Preferences", () => navigate(`/${bibliography.id}/preferences`)],
+        ["Bibliography Settings", () => navigate(`/bib/${bibliography.id}/settings`)],
 
         ...(collaborationOpened
             ? [["Close collaboration", handleCloseCollaboration]]
@@ -357,10 +358,10 @@ export default function Bibliography() {
         <div className="mx-auto max-w-[50rem]">
             <HotKeys keyMap={keyMap}>
                 <div>
-                    <div className="flex justify-between items-center">
+                    <div className="flex items-center justify-between">
                         <div>
                             {bibliography?.collab?.open && (
-                                <div className="text-md font-bold w-fit rounded-md transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
+                                <div className="text-md w-fit rounded-md font-bold transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
                                     <Icon name="group" /> {bibliography?.collab?.id}
                                 </div>
                             )}
@@ -387,7 +388,7 @@ export default function Bibliography() {
                         </h3>
                     </button>
 
-                    <div className="flex gap-1 flex-wrap">
+                    <div className="flex flex-wrap gap-1">
                         {bibliography?.tags?.map((tag) => (
                             <Tag key={uid()} tagProps={tag} onClick={() => setTagsDialogVisible(true)} />
                         ))}
@@ -467,9 +468,13 @@ export default function Bibliography() {
                     />
                 )}
 
-                <button type="button" onClick={() => setAddCitationMenuVisible(true)}>
+                <Button
+                    className="fixed bottom-5 right-5 border-2 border-neutral-black"
+                    onClick={() => setAddCitationMenuVisible(true)}
+                    type="button"
+                >
                     Add citation
-                </button>
+                </Button>
             </HotKeys>
         </div>
     );

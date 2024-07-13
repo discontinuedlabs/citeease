@@ -11,6 +11,7 @@ import { useAuth } from "../../context/AuthContext";
 import { CoBibsSearchDialog } from "./HomeTools";
 import { useModal } from "../../context/ModalContext.tsx";
 import Icon from "../../components/ui/Icon";
+import { Button } from "../../components/ui/StyledButtons";
 
 export default function Home() {
     const bibliographies = useSelector((state) => state.bibliographies);
@@ -44,7 +45,7 @@ export default function Home() {
 
     return (
         <div className="mx-auto max-w-[50rem]">
-            <header className="flex justify-between mb-5">
+            <header className="mb-5 flex justify-between">
                 <h1 className="hidden">Home</h1> {/* For screen readers and tab title */}
                 <a href="/" className="no-underline">
                     <Logo />
@@ -81,13 +82,13 @@ export default function Home() {
                 )}
             </div>
 
-            <button
-                className="border-2 border-neutral-black fixed p-3 bottom-5 right-5 bg-primary-500"
+            <Button
+                className="fixed bottom-5 right-5 border-2 border-neutral-black"
                 onClick={() => setAddBibOptionsMenuVisible(true)}
                 type="button"
             >
                 Add bibliography
-            </button>
+            </Button>
 
             {addBibOptionsMenuVisible && (
                 <div role="dialog" aria-modal="true">

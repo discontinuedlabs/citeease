@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { uid } from "../../utils/utils.ts";
+import { ContextMenuOption } from "./StyledButtons";
 
-export default function ContextMenu({ options, children }) {
+export default function ContextMenu({ options, children, direction = "down" }) {
     const [visible, setVisible] = useState(false);
 
     const handleClose = (event) => {
@@ -11,28 +12,27 @@ export default function ContextMenu({ options, children }) {
     };
 
     return (
-        <div className="relative">
-            <button type="button" onClick={() => setVisible(!visible)}>
-                {children}
-            </button>
+        <div className="relative h-min">
+            <ContextMenuOption onClick={() => setVisible(!visible)}>{children}</ContextMenuOption>
 
             {visible && (
                 <>
-                    {/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
+                    {/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
                     <div
-                        role="dialog"
                         tabIndex={0}
                         onClick={() => setVisible(false)}
                         onKeyDown={handleClose}
                         aria-hidden={!visible}
-                        className="w-screen h-screen fixed top-0 left-0"
+                        className="fixed left-0 top-0 h-screen w-screen"
                     />
-                    <div className="fixed z-50">
-                        <ul className="relative right-full">
+                    <div
+                        role="dialog"
+                        className={`absolute right-0 ${direction === "down" ? "top-full" : "bottom-full"} rounded-lg border-2 border-solid border-neutral-lightGray bg-white p-1 shadow-lg`}
+                    >
+                        <ul className="m-0 grid w-max gap-1">
                             {options.map((option) => (
                                 <li key={uid()} className="list-none">
-                                    <button
-                                        type="button"
+                                    <ContextMenuOption
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             option[1]();
@@ -40,9 +40,10 @@ export default function ContextMenu({ options, children }) {
                                         }}
                                         tabIndex={0}
                                         aria-label={`${option[0]} action`}
+                                        className="w-full text-start"
                                     >
                                         {option[0]}
-                                    </button>
+                                    </ContextMenuOption>
                                 </li>
                             ))}
                         </ul>

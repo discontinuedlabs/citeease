@@ -146,7 +146,7 @@ export function ReferenceEntries(props) {
                 )}
             </div>
 
-            <div className="max-w-[50rem] mx-auto p-4">
+            <div className="mx-auto max-w-[50rem] p-4">
                 {/* IMPORTANT: Entries need to be mapped by the references array because it gets sorted according to the CSL file rules, unlike the bibliography.citations array */}
                 {references?.map((ref) => {
                     const refId = () => {
@@ -158,7 +158,7 @@ export function ReferenceEntries(props) {
                     const sanitizedReferences = DOMPurify.sanitize(ref);
                     return (
                         <div
-                            className={`flex items-start justify-between py-2 px-2 space-y-2 space-x-2 rounded-md mb-1 transition-all duration-200 hover:bg-neutral-transparentGray ${
+                            className={`mb-1 flex items-start justify-between space-x-2 space-y-2 rounded-md px-2 py-2 transition-all duration-200 hover:bg-neutral-transparentGray ${
                                 citation?.isChecked ? "bg-secondary-100 hover:bg-secondary-200" : ""
                             }`}
                             key={citation?.id || uid()}
@@ -271,7 +271,7 @@ export function AddCitationMenu(props) {
     const identifierRef = useRef();
 
     return (
-        <div className="fixed bottom-[1rem] left-1/2 transform -translate-x-1/2">
+        <div className="fixed bottom-[1rem] left-1/2 -translate-x-1/2 transform">
             <div>
                 <h3>Add citation</h3>
                 <button type="button" onClick={() => setIsVisible(false)}>
@@ -305,18 +305,14 @@ export function AddCitationMenu(props) {
             </button>
 
             <ContextMenu
-                label="Choose source type"
-                options={Object.values(sourceTypes).map((entry) => ({
-                    label: entry.label,
-                    method: () => openCitationForm(entry.code, true),
-                }))}
-                menuStyle={{
-                    position: "fixed",
-                    bottom: "100%",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                }}
-            />
+                options={Object.values(sourceTypes).map((entry) => [
+                    entry.label,
+                    () => openCitationForm(entry.code, true),
+                ])}
+                direction="up"
+            >
+                Choose source type
+            </ContextMenu>
         </div>
     );
 }
@@ -380,8 +376,8 @@ export function LaTeXDialog(props) {
     }, [checkedCitations]);
 
     return (
-        <div className="fixed top-0 left-0 w-screen h-screen bg-transparent bg-overlay-500">
-            <div className="top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] w-[50rem] min-h-[70vh] max-h-[80vh] bg-white">
+        <div className="fixed left-0 top-0 h-screen w-screen bg-overlay-500">
+            <div className="left-1/2 top-1/2 max-h-[80vh] min-h-[70vh] w-[50rem] translate-x-[-50%] translate-y-[-50%] bg-white">
                 <div className="flex">
                     <div className="flex">
                         <button type="button" onClick={() => setDisplayedLatex(bibtexString)}>
@@ -706,13 +702,13 @@ export function TagsDialog(props) {
                 X
             </button>
             <h3>Tags</h3>
-            <div className="flex gap-1 flex-wrap">
+            <div className="flex flex-wrap gap-1">
                 {bibliography?.tags?.map((tag) => (
                     <Tag key={uid()} tagProps={tag} onClick={onTagRemoved} showX />
                 ))}
             </div>
 
-            <div className="flex gap-1 flex-wrap">
+            <div className="flex flex-wrap gap-1">
                 {settings.tags
                     ?.filter((tag) => !bibliography?.tags?.some((bibTag) => bibTag.id === tag.id))
                     .map((tag) => (

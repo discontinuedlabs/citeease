@@ -36,7 +36,7 @@ export function TagsManager(props) {
             <button type="button" onClick={() => setIsVisible(false)}>
                 X
             </button>
-            <div className="flex gap-1 flex-wrap">
+            <div className="flex flex-wrap gap-1">
                 {settings.tags?.map((tag) => (
                     <Tag key={uid()} tagProps={tag} showX onClick={() => dispatch(deleteTag({ tagId: tag.id }))} />
                 ))}
@@ -55,10 +55,10 @@ export function TagsManager(props) {
                     onChange={(event) => setTagLabel(event.target.value)}
                 />
                 <button type="submit">Add tag</button>
-                <div className="flex gap-1 flex-wrap">
+                <div className="flex flex-wrap gap-1">
                     {Object.values(TAG_COLORS)?.map((color) => (
                         <button
-                            className="rounded-full w-5 h-5"
+                            className="h-5 w-5 rounded-full"
                             type="button"
                             key={uid()}
                             style={{ backgroundColor: TAG_COLOR_VALUES[color] }}

@@ -42,7 +42,7 @@ export function SettingsNavigate(props) {
 
     return (
         <button
-            className="w-full p-2 bg-transparent border-transparent rounded-md mb-2 text-start transition duration-150 ease-in-out transform hover:bg-neutral-transparentGray"
+            className="mb-2 w-full transform rounded-md border-transparent bg-transparent p-2 text-start transition duration-150 ease-in-out hover:bg-neutral-transparentGray"
             onClick={(event) => {
                 if (to) navigate(to);
                 if (onClick) onClick(event);

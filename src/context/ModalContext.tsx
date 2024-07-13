@@ -46,15 +46,15 @@ function Modal({ id, title, message, content, actions, icon, showCloseIcon = tru
     }, [close, id]);
 
     return (
-        <div className="font-sans text-neutral-black fixed h-screen">
+        <div className="fixed h-screen font-sans text-neutral-black">
             <div className="fixed inset-0 bg-gray-900 opacity-75" />
             {/* eslint-disable-next-line */}
             <div
                 role="dialog"
                 aria-modal="true"
-                className="fixed top-[50%] left-[50%] translate-y-[-50%] translate-x-[-50%] p-5 bg-white grid items-start max-h-[80vh]"
+                className="fixed left-[50%] top-[50%] grid max-h-[80vh] translate-x-[-50%] translate-y-[-50%] items-start bg-white p-5"
             >
-                <header className="flex space-between items-start">
+                <header className="space-between flex items-start">
                     <h3 className="mb-2">{title}</h3>
                     {showCloseIcon && (
                         <button type="button" onClick={() => close(id)}>
@@ -63,15 +63,15 @@ function Modal({ id, title, message, content, actions, icon, showCloseIcon = tru
                     )}
                 </header>
 
-                <article className="overflow-y-auto h-full overscroll-contain-y grid justify-items-start">
-                    <div className="flex items-start mb-4">
+                <article className="overscroll-contain-y grid h-full justify-items-start overflow-y-auto">
+                    <div className="mb-4 flex items-start">
                         {icon}
                         <p>{message}</p>
                     </div>
                     {content && <article>{content}</article>}
                 </article>
 
-                <footer className="flex flex-wrap space-between items-start">
+                <footer className="space-between flex flex-wrap items-start">
                     <menu>
                         {actions &&
                             actions.map((action) => (

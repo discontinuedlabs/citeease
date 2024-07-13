@@ -1,5 +1,4 @@
-/* eslint-disable no-restricted-globals */
-/* eslint-disable no-underscore-dangle */
+/* eslint-disable no-restricted-globals, no-underscore-dangle */
 
 import { clientsClaim } from "workbox-core";
 import { ExpirationPlugin } from "workbox-expiration";

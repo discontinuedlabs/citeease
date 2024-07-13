@@ -43,8 +43,8 @@ export default function BibliographyCard(props) {
     }
 
     return (
-        <div className="grid shadow-hardTransparent border-2 border-solid border-neutral-lightGray rounded-lg items-center p-4 bg-white transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
-            <div className="w-full text-neutral-black sm:flex sm:justify-between gap-2">
+        <div className="grid items-center rounded-lg border-2 border-solid border-neutral-lightGray bg-white p-4 shadow-hardTransparent transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
+            <div className="w-full gap-2 text-neutral-black sm:flex sm:justify-between">
                 <div className="flex gap-1">
                     <h3 className="mb-0">
                         {bibliography?.collab?.open && <Icon className="text-neutral-lightGray" name="group" />}{" "}
@@ -57,7 +57,7 @@ export default function BibliographyCard(props) {
                 </p>
             </div>
             <div
-                className="flex gap-1 flex-wrap"
+                className="flex flex-wrap gap-1"
                 style={{ marginTop: bibliography?.tags?.length === 0 ? "0" : "0.5rem" }}
             >
                 {bibliography?.tags?.map((tag) => (
