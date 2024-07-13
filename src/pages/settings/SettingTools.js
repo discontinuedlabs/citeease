@@ -10,10 +10,10 @@ import {
     restoreDefaultTags,
 } from "../../data/store/slices/settingsSlice";
 import Tag from "../../components/ui/Tag";
-import { useTagBgColor } from "../../hooks/hooks.ts";
 import { useAuth } from "../../context/AuthContext";
 import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
 import { uid } from "../../utils/utils.ts";
+import { getGradient, getTagBgColors } from "../../utils/uiUtils.ts";
 
 export function TagsManager(props) {
     const { setTagsManagerVisible: setIsVisible } = props;
@@ -21,7 +21,7 @@ export function TagsManager(props) {
     const [tagLabel, setTagLabel] = useState("");
     const [tagColor, setTagColor] = useState(TAG_COLORS.YELLOW);
     const dispatch = useDispatch();
-    const [tagIdleColor] = useTagBgColor(tagColor);
+    const tagIdleColor = getGradient(getTagBgColors(tagColor)[0], "tailwind");
 
     function addTagToBib(event) {
         event.preventDefault();
@@ -43,10 +43,9 @@ export function TagsManager(props) {
             </div>
             <form onSubmit={addTagToBib}>
                 <input
-                    className="rounded-md p-2"
+                    className={`rounded-md p-2 ${tagIdleColor}`}
                     style={{
                         border: `solid 0.1rem ${TAG_COLOR_VALUES[tagColor]}`,
-                        backgroundColor: tagIdleColor,
                         color: TAG_COLOR_VALUES[tagColor],
                     }}
                     type="text"
@@ -56,15 +55,17 @@ export function TagsManager(props) {
                 />
                 <button type="submit">Add tag</button>
                 <div className="flex flex-wrap gap-1">
-                    {Object.values(TAG_COLORS)?.map((color) => (
-                        <button
-                            className="h-5 w-5 rounded-full"
-                            type="button"
-                            key={uid()}
-                            style={{ backgroundColor: TAG_COLOR_VALUES[color] }}
-                            onClick={() => setTagColor(color)}
-                        />
-                    ))}
+                    {Object.values(TAG_COLORS)?.map((color) => {
+                        const gradient = getGradient(TAG_COLOR_VALUES[color], "tailwind");
+                        return (
+                            <button
+                                className={`h-5 w-5 rounded-full border-solid border-neutral-black ${gradient}`}
+                                type="button"
+                                key={uid()}
+                                onClick={() => setTagColor(color)}
+                            />
+                        );
+                    })}
                 </div>
             </form>
             <button type="button" onClick={() => dispatch(restoreDefaultTags())}>

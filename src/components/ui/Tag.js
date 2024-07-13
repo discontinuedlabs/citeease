@@ -1,9 +1,9 @@
-import { useTagBgColor } from "../../hooks/hooks.ts";
 import { TAG_COLOR_VALUES } from "../../data/store/slices/settingsSlice";
+import { getTagBgColors } from "../../utils/uiUtils.ts";
 
 export default function Tag(props) {
     const { tagProps, onClick, showX } = props;
-    const [bgIdleColor, bgHoverColor, bgClickColor] = useTagBgColor(tagProps?.color);
+    const [bgIdleColor, bgHoverColor, bgClickColor] = getTagBgColors(tagProps?.color);
 
     return (
         <div className="rounded-md bg-white">

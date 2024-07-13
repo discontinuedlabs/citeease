@@ -3,10 +3,7 @@
 @tailwind utilities;
 
 * {
-    overflow-wrap: break-word;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+    @apply m-0 box-border break-words p-0;
     -webkit-tap-highlight-color: transparent;
 }
 
@@ -40,13 +37,11 @@ button {
 }
 
 .csl-entry:has(.csl-left-margin) {
-    display: flex;
-    align-items: flex-start;
-    margin-right: 0.5rem;
+    @apply mr-2 flex items-start;
 }
 
 .csl-entry > .csl-left-margin {
-    min-width: fit-content;
+    @apply min-w-fit;
 }
 
 .transition-regular {

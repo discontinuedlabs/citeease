@@ -7,9 +7,9 @@
  * @param {number} length - The desired length of the unique ID.
  * @returns {string} A unique identifier of the specified length.
  */
-export function uid(length: number = 21): string {
+export function uid(length: number = 20): string {
     const POOL_SIZE_MULTIPLIER = 128;
-    const URL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+    const ALLOWED_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
 
     let pool: Uint8Array | undefined;
     let poolOffset: number = 0;
@@ -39,7 +39,7 @@ export function uid(length: number = 21): string {
         if (!pool) {
             throw new Error("Pool is unexpectedly undefined.");
         }
-        uniqueId += URL_ALPHABET[pool[index + poolOffset] % URL_ALPHABET.length];
+        uniqueId += ALLOWED_CHARS[pool[index + poolOffset] % ALLOWED_CHARS.length];
     }
     return uniqueId;
 }

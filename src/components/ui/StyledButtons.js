@@ -1,6 +1,5 @@
 import { useState } from "react";
-import "../../css/StyledButtons.css";
-import { useBgGradient } from "../../hooks/hooks.ts";
+import { getGradient } from "../../utils/uiUtils.ts";
 
 /* eslint-disable react/jsx-props-no-spreading */
 
@@ -32,7 +31,7 @@ export function ContextMenuOption({ className, children, onClick, ...rest }) {
 
 export function Button({ className, children, onClick, color = "#ffd60a", ...rest }) {
     const [isClicked, setIsClicked] = useState(false);
-    const yellowGradient = useBgGradient(color);
+    const yellowGradient = getGradient(color, "tailwind");
 
     const upClasses = "transform translate-y-0 shadow-hard";
     const downClasses = "transform translate-y-1 shadow-none";
@@ -42,7 +41,7 @@ export function Button({ className, children, onClick, color = "#ffd60a", ...res
     return (
         <div>
             <button
-                className={`styled-button border-1 rounded-lg border-solid border-neutral-black ${yellowGradient} p-2 ${dynamicClasses} ${className}`}
+                className={`border-1 rounded-lg border-solid border-neutral-black p-2 ${dynamicClasses} ${className} ${yellowGradient}`}
                 type="button"
                 onClick={onClick}
                 onTouchStart={() => setIsClicked(true)}
