@@ -1,8 +1,27 @@
 {
     "homepage": "https://discontinuedlabs.github.io/citeease",
     "name": "citeease",
-    "version": "0.1.0",
+    "author": "discontinuedlabs",
+    "description": "CiteEase is a powerful and user-friendly open-source citation management app designed for students, researchers, and anyone who values efficiency and organization.",
+    "license": "MIT",
+    "version": "0.2.0",
     "private": true,
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/discontinuedlabs/citeease.git"
+    },
+    "keywords": [
+        "PWA",
+        "Progressive Web App",
+        "Open Source",
+        "React",
+        "MIT",
+        "Citation",
+        "Reference Management Tool"
+    ],
+    "bugs": {
+        "url": "https://github.com/discontinuedlabs/citeease/issues"
+    },
     "dependencies": {
         "@citation-js/core": "^0.7.11",
         "@citation-js/plugin-bibtex": "^0.7.11",
@@ -74,7 +93,7 @@
         "eject": "react-scripts eject",
         "lint": "npx eslint .",
         "lint:fix": "npx eslint --fix .",
-        "coverage": "npm test --coverage --watchAll --collectCoverageFrom='src/**/*.{js,ts,jsx.tsx}'"
+        "coverage": "npm test --coverage --watchAll --collectCoverageFrom='src/**/*.{js,ts,jsx,tsx}'"
     },
     "eslintConfig": {
         "extends": [
