@@ -31,7 +31,7 @@ export function ContextMenuOption({ className, children, onClick, ...rest }) {
 
 export function Button({ className, children, onClick, color = "#ffd60a", ...rest }) {
     const [isClicked, setIsClicked] = useState(false);
-    const yellowGradient = getGradient(color, "tailwind");
+    const yellowGradient = getGradient(color);
 
     const upClasses = "transform translate-y-0 shadow-hard";
     const downClasses = "transform translate-y-1 shadow-none";
@@ -41,7 +41,8 @@ export function Button({ className, children, onClick, color = "#ffd60a", ...res
     return (
         <div>
             <button
-                className={`border-1 rounded-lg border-solid border-neutral-black p-2 ${dynamicClasses} ${className} ${yellowGradient}`}
+                className={`border-1 rounded-lg border-solid border-neutral-black p-2 ${dynamicClasses} ${className}`}
+                style={{ background: yellowGradient }}
                 type="button"
                 onClick={onClick}
                 onTouchStart={() => setIsClicked(true)}

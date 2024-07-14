@@ -1,5 +1,5 @@
 import { TAG_COLOR_VALUES } from "../../data/store/slices/settingsSlice";
-import { getTagBgColors } from "../../utils/uiUtils.ts";
+import { getGradient, getTagBgColors } from "../../utils/uiUtils.ts";
 
 export default function Tag(props) {
     const { tagProps, onClick, showX } = props;
@@ -14,14 +14,14 @@ export default function Tag(props) {
                 style={{
                     border: `${TAG_COLOR_VALUES[tagProps?.color]} solid 2px`,
                     color: TAG_COLOR_VALUES[tagProps?.color],
-                    backgroundColor: bgIdleColor,
+                    background: getGradient(bgIdleColor),
                 }}
-                onMouseEnter={(event) => (event.currentTarget.style.backgroundColor = bgHoverColor)}
-                onMouseLeave={(event) => (event.currentTarget.style.backgroundColor = bgIdleColor)}
-                onTouchStart={(event) => (event.currentTarget.style.backgroundColor = bgClickColor)}
-                onTouchEnd={(event) => (event.currentTarget.style.backgroundColor = bgIdleColor)}
-                onMouseDown={(event) => (event.currentTarget.style.backgroundColor = bgClickColor)}
-                onMouseUp={(event) => (event.currentTarget.style.backgroundColor = bgIdleColor)}
+                onMouseEnter={(event) => (event.currentTarget.style.background = getGradient(bgHoverColor))}
+                onMouseLeave={(event) => (event.currentTarget.style.background = getGradient(bgIdleColor))}
+                onTouchStart={(event) => (event.currentTarget.style.background = getGradient(bgClickColor))}
+                onTouchEnd={(event) => (event.currentTarget.style.background = getGradient(bgIdleColor))}
+                onMouseDown={(event) => (event.currentTarget.style.background = getGradient(bgClickColor))}
+                onMouseUp={(event) => (event.currentTarget.style.background = getGradient(bgIdleColor))}
                 onClick={() => (onClick ? onClick(tagProps) : "")}
             >
                 {tagProps.label}

@@ -8,11 +8,16 @@ type HSLValue = [number, number, number, number];
 /**
  * Generates a gradient background CSS string based on the provided color.
  * @param {string} color - The input color in hex, rgb, rgba, hsl, or hsla format.
- * @param {"tailwind" | "vanilla"} [cssFormat="vanilla"] - The CSS format for the gradient ("tailwind" or "vanilla").
+ * @param {number} [intensity=10] - The amount to shift the hue by.
+ * @param {"positive" | "negative"} [hueShift="positive"] - The direction to shift the hue.
  * @returns {string} The gradient background CSS string.
  * @throws {Error} If the color format is unsupported.
  */
-export function getGradient(color: string, cssFormat: "tailwind" | "vanilla" = "vanilla"): string {
+export function getGradient(
+    color: string,
+    intensity: number = 10,
+    hueShift: "positive" | "negative" = "positive"
+): string {
     function hexToRgb(hex: string): RGBValue {
         const r = parseInt(hex.slice(1, 3), 16);
         const g = parseInt(hex.slice(3, 5), 16);
@@ -140,18 +145,17 @@ export function getGradient(color: string, cssFormat: "tailwind" | "vanilla" = "
         }
     }
 
-    function increaseHueByN(hslColor: HSLValue, n: number = 5): HSLValue {
+    function increaseHue(hslColor: HSLValue): HSLValue {
         const [h, s, l, a] = hslColor;
-        const newHue = (h + n) % 360;
+        const newHue = (hueShift === "positive" ? h + intensity : h - intensity) % 360;
         return [newHue, s, l, a];
     }
 
     const hsla = convertColor(color);
-    const toColor = increaseHueByN(hsla);
-    const tailwind = `bg-gradient-to-b from-[hsla(${Math.floor(hsla[0])},${Math.floor(hsla[1])}%,${Math.floor(hsla[2])}%,${Math.floor(hsla[3])}%)] to-[hsla(${Math.floor(toColor[0])},${Math.floor(toColor[1])}%,${Math.floor(toColor[2])}%,${Math.floor(toColor[3])}%)]`;
-    const vanilla = `linear-gradient(to bottom, hsla(${Math.floor(hsla[0])},${Math.floor(hsla[1])}%,${Math.floor(hsla[2])}%,${Math.floor(hsla[3])}%)), hsla(${Math.floor(toColor[0])},${Math.floor(toColor[1])}%,${Math.floor(toColor[2])}%,${Math.floor(toColor[3])}%))`;
+    const toColor = increaseHue(hsla);
+    const css = `linear-gradient(to bottom, hsla(${Math.floor(hsla[0])},${Math.floor(hsla[1])}%,${Math.floor(hsla[2])}%,${Math.floor(hsla[3])}%), hsla(${Math.floor(toColor[0])},${Math.floor(toColor[1])}%,${Math.floor(toColor[2])}%,${Math.floor(toColor[3])}%))`;
 
-    return cssFormat === "tailwind" ? tailwind : vanilla;
+    return css;
 }
 
 /**

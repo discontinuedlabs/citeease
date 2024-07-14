@@ -60,6 +60,8 @@ const FONT = {
     RESET: "\x1b[0m",
 };
 
+const yy = 9;
+
 const RESULT = {
     SUCCESS: `${FONT.BG_GREEN}${FONT.BOLD}${FONT.BLACK} SUCCESS ${FONT.RESET}`,
     ERROR: `${FONT.BG_RED}${FONT.BOLD}${FONT.BLACK} ERROR ${FONT.RESET}`,

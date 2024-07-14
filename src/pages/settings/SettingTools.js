@@ -21,7 +21,7 @@ export function TagsManager(props) {
     const [tagLabel, setTagLabel] = useState("");
     const [tagColor, setTagColor] = useState(TAG_COLORS.YELLOW);
     const dispatch = useDispatch();
-    const tagIdleColor = getGradient(getTagBgColors(tagColor)[0], "tailwind");
+    const tagIdleColor = getGradient(getTagBgColors(tagColor)[0], "vanilla");
 
     function addTagToBib(event) {
         event.preventDefault();
@@ -43,9 +43,10 @@ export function TagsManager(props) {
             </div>
             <form onSubmit={addTagToBib}>
                 <input
-                    className={`rounded-md p-2 ${tagIdleColor}`}
+                    className="rounded-md p-2"
                     style={{
                         border: `solid 0.1rem ${TAG_COLOR_VALUES[tagColor]}`,
+                        background: tagIdleColor,
                         color: TAG_COLOR_VALUES[tagColor],
                     }}
                     type="text"
@@ -56,10 +57,11 @@ export function TagsManager(props) {
                 <button type="submit">Add tag</button>
                 <div className="flex flex-wrap gap-1">
                     {Object.values(TAG_COLORS)?.map((color) => {
-                        const gradient = getGradient(TAG_COLOR_VALUES[color], "tailwind");
+                        const gradient = getGradient(TAG_COLOR_VALUES[color]);
                         return (
                             <button
-                                className={`h-5 w-5 rounded-full border-solid border-neutral-black ${gradient}`}
+                                className="h-5 w-5 rounded-full border-solid border-neutral-black"
+                                style={{ background: gradient }}
                                 type="button"
                                 key={uid()}
                                 onClick={() => setTagColor(color)}
