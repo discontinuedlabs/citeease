@@ -8,13 +8,7 @@ import { StaleWhileRevalidate } from "workbox-strategies";
 
 clientsClaim();
 
-precacheAndRoute([
-    ...self.__WB_MANIFEST,
-    "../assets/styles.json",
-    `${process.env.PUBLIC_URL}/markdown/about.md`,
-    `${process.env.PUBLIC_URL}/markdown/privacy.md`,
-    `${process.env.PUBLIC_URL}/markdown/terms.md`,
-]);
+precacheAndRoute([...self.__WB_MANIFEST]);
 
 const fileExtensionRegexp = /[^?/]+\.[^/]+$/;
 
