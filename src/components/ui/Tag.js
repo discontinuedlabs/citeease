@@ -1,5 +1,6 @@
 import { TAG_COLOR_VALUES } from "../../data/store/slices/settingsSlice";
 import { getGradient, getTagBgColors } from "../../utils/uiUtils.ts";
+import Icon from "./Icon";
 
 export default function Tag(props) {
     const { tagProps, onClick, showX } = props;
@@ -10,7 +11,7 @@ export default function Tag(props) {
             {/* eslint-disable no-param-reassign, no-return-assign */}
             <button
                 type="button"
-                className="flex gap-1 rounded-md p-1 font-bold transition duration-150 ease-in-out"
+                className="flex items-center gap-1 rounded-md p-1 font-bold transition duration-150 ease-in-out"
                 style={{
                     border: `${TAG_COLOR_VALUES[tagProps?.color]} solid 2px`,
                     color: TAG_COLOR_VALUES[tagProps?.color],
@@ -25,7 +26,7 @@ export default function Tag(props) {
                 onClick={() => (onClick ? onClick(tagProps) : "")}
             >
                 {tagProps.label}
-                {showX && <div>X</div>}
+                {showX && <Icon className="align-middle text-sm" name="close" />}
             </button>
         </div>
     );

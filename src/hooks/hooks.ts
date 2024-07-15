@@ -59,15 +59,20 @@ export function useEnhancedDispatch(config: EnhancedDispatchConfig) {
 }
 
 /**
- * Generates a dynamic title for the page based on the content of an <h1> tag,
- * appending a customizable prefix and suffix, and falls back to a customizable default title if no <h1> tag is found.
+ * Dynamically sets the page title based on an H1 element content,
+ * appending a prefix and suffix, and falls back to a default title.
+ *
+ * @param {string} prefix - Optional prefix to prepend to the title.
+ * @param {string} suffix - Optional suffix to append to the title.
+ * @param {string} fallback - Default title to use if no H1 element is found.
+ * @returns {string} The dynamically generated title.
  */
 export function useDynamicTitle(
     prefix: string = "",
     suffix: string = " - CiteEase",
     fallback: string = "CiteEase"
 ): string {
-    const [title, setTitle] = useState<string>(fallback);
+    const [title, setTitle] = useState(fallback);
     const location = useLocation();
 
     useEffect(() => {

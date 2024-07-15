@@ -7,7 +7,6 @@ import {
     addTag,
     deleteTag,
     resetAllSettings,
-    restoreDefaultTags,
 } from "../../data/store/slices/settingsSlice";
 import Tag from "../../components/ui/Tag";
 import { useAuth } from "../../context/AuthContext";
@@ -15,13 +14,12 @@ import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
 import { uid } from "../../utils/utils.ts";
 import { getGradient, getTagBgColors } from "../../utils/uiUtils.ts";
 
-export function TagsManager(props) {
-    const { setTagsManagerVisible: setIsVisible } = props;
+export function TagsManager() {
     const settings = useSelector((state) => state.settings);
     const [tagLabel, setTagLabel] = useState("");
     const [tagColor, setTagColor] = useState(TAG_COLORS.YELLOW);
     const dispatch = useDispatch();
-    const tagIdleColor = getGradient(getTagBgColors(tagColor)[0], "vanilla");
+    const tagIdleColor = getGradient(getTagBgColors(tagColor)[0]);
 
     function addTagToBib(event) {
         event.preventDefault();
@@ -33,9 +31,6 @@ export function TagsManager(props) {
 
     return (
         <div>
-            <button type="button" onClick={() => setIsVisible(false)}>
-                X
-            </button>
             <div className="flex flex-wrap gap-1">
                 {settings.tags?.map((tag) => (
                     <Tag key={uid()} tagProps={tag} showX onClick={() => dispatch(deleteTag({ tagId: tag.id }))} />
@@ -70,9 +65,6 @@ export function TagsManager(props) {
                     })}
                 </div>
             </form>
-            <button type="button" onClick={() => dispatch(restoreDefaultTags())}>
-                Restore default tags
-            </button>
         </div>
     );
 }

@@ -2,8 +2,9 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { uid } from "../utils/utils.ts";
+import Icon from "../components/ui/Icon";
 
-type Action = [string, () => void, { autoFocus?: boolean }];
+type Action = [string, () => void, { autoFocus?: boolean; closeOnClick?: boolean }];
 
 type ModalProps = {
     id: string;
@@ -58,7 +59,8 @@ function Modal({ id, title, message, content, actions, icon, showCloseIcon = tru
                     <h3 className="mb-2">{title}</h3>
                     {showCloseIcon && (
                         <button type="button" onClick={() => close(id)}>
-                            X
+                            {/* eslint-disable-next-line react/no-children-prop */}
+                            <Icon name="close" className={undefined} children={undefined} />
                         </button>
                     )}
                 </header>
@@ -78,11 +80,11 @@ function Modal({ id, title, message, content, actions, icon, showCloseIcon = tru
                                 <button
                                     // eslint-disable-next-line jsx-a11y/no-autofocus
                                     autoFocus={action?.[2]?.autoFocus || actions.length === 1}
-                                    key={uid()}
+                                    key={id}
                                     type="button"
                                     onClick={() => {
                                         action[1]();
-                                        close(id);
+                                        if (action?.[2]?.closeOnClick !== false) close(id);
                                     }}
                                 >
                                     {action[0]}
@@ -113,7 +115,7 @@ export default function ModalProvider({ children }: ModalProviderProps) {
     >([]);
 
     function openModal(newModal: Omit<ModalProps, "id" | "close">) {
-        setModals((prevModals) => [...prevModals, { ...newModal, id: uid() }]);
+        setModals((prevModals) => [...prevModals, { id: uid(), ...newModal }]); // id can be overrided if it was added to the newModal object
     }
 
     function closeModal(id: string) {

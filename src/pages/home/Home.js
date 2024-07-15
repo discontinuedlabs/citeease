@@ -47,7 +47,7 @@ export default function Home() {
         <div className="mx-auto max-w-[50rem]">
             <header className="mb-5 flex justify-between">
                 <h1 className="hidden">Home</h1> {/* For screen readers and tab title */}
-                <a href="/" className="no-underline">
+                <a href="/citeease" className="no-underline">
                     <Logo />
                 </a>
                 <ContextMenu
