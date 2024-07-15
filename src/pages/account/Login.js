@@ -33,10 +33,14 @@ export default function Login() {
                 <h1>Log in</h1>
                 <pre>{error}</pre>
                 <form onSubmit={handleSubmit}>
-                    <label htmlFor={`${id}-email`}>Email</label>
-                    <input id={`${id}-email`} type="email" ref={emailRef} required />
-                    <label htmlFor={`${id}-password`}>Password</label>
-                    <input id={`${id}-password`} type="password" ref={passwordRef} required />
+                    <label htmlFor={`${id}-email`}>
+                        Email
+                        <input id={`${id}-email`} type="email" ref={emailRef} required />
+                    </label>
+                    <label htmlFor={`${id}-password`}>
+                        Password
+                        <input id={`${id}-password`} type="password" ref={passwordRef} required />
+                    </label>
                     <Link to="/forgot-password">Forgot password?</Link>
                     <button type="submit" disabled={isLoading}>
                         Log in

@@ -110,8 +110,10 @@ export function UpdateEmailDialog(props) {
             <h3>Update email</h3>
             <pre>{error}</pre>
             <form onSubmit={handleSUbmit}>
-                <label htmlFor={`${id}-newEmail`}>Type your new email.</label>
-                <input id={`${id}-newEmail`} type="email" ref={newEmailRef} required />
+                <label htmlFor={`${id}-newEmail`}>
+                    Type your new email.
+                    <input id={`${id}-newEmail`} type="email" ref={newEmailRef} required />
+                </label>
                 <button type="submit" disabled={isLoading}>
                     Update email
                 </button>
@@ -158,12 +160,18 @@ export function ChangePasswordDialog(props) {
             <h3>Change password</h3>
             <pre>{error}</pre>
             <form onSubmit={handleSUbmit}>
-                <label htmlFor={`${id}-prevPassword`}>Previous password</label>
-                <input type="password" id={`${id}-prevPassword`} ref={prevPasswordRef} required />
-                <label htmlFor={`${id}-newPassword`}>New password</label>
-                <input type="password" id={`${id}-newPassword`} ref={newPasswordRef} required />
-                <label htmlFor={`${id}-confirmPassword`}>Confirm password</label>
-                <input type="password" id={`${id}-confirmPassword`} ref={confirmPasswordRef} required />
+                <label htmlFor={`${id}-prevPassword`}>
+                    Previous password
+                    <input type="password" id={`${id}-prevPassword`} ref={prevPasswordRef} required />
+                </label>
+                <label htmlFor={`${id}-newPassword`}>
+                    New password
+                    <input type="password" id={`${id}-newPassword`} ref={newPasswordRef} required />
+                </label>
+                <label htmlFor={`${id}-confirmPassword`}>
+                    Confirm password
+                    <input type="password" id={`${id}-confirmPassword`} ref={confirmPasswordRef} required />
+                </label>
                 <button type="submit" disabled={isLoading}>
                     Update password
                 </button>
@@ -211,10 +219,15 @@ export function DeleteAccountDialog(props) {
             <h3>Delete account?</h3>
             <pre>{error}</pre>
             <form onSubmit={handleSUbmit}>
-                <label htmlFor={`${id}-password`}>Type your password to delete your account.</label>
-                <input id={`${id}-password`} type="password" ref={passwordRef} required />
-                <input id={`${id}-checkbox`} type="checkbox" ref={checkboxRef} />
-                <label htmlFor={`${id}-checkbox`}>Keep a copy of the associated data locally</label>
+                <label htmlFor={`${id}-password`}>
+                    Type your password to delete your account.
+                    <input id={`${id}-password`} type="password" ref={passwordRef} required />
+                </label>
+
+                <label htmlFor={`${id}-checkbox`}>
+                    <input id={`${id}-checkbox`} type="checkbox" ref={checkboxRef} />
+                    Keep a copy of the associated data locally
+                </label>
                 <strong>Warning: This action can&apos;t be undone</strong>
                 <button type="submit" disabled={isLoading}>
                     Delete account

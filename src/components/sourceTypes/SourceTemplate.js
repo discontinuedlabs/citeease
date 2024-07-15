@@ -46,46 +46,58 @@ export default function SourceTemplate(props) {
     return (
         <form className="citation-form" onSubmit={handleFillIn}>
             <p>Insert the DOI here to fill the fields automatically:</p>
-            <label htmlFor="doi">DOI</label>
-            <input type="text" name="doi" placeholder="Insert a DOI" />
+            <label htmlFor="doi">
+                DOI
+                <input type="text" name="doi" placeholder="Insert a DOI" />
+            </label>
             <button type="submit">Fill in</button>
 
             <p>Or enter the article details manually:</p>
             <AuthorsInput content={content} setContent={setContent} />
 
-            <label htmlFor="title">Title</label>
-            <input
-                type="text"
-                name="title"
-                value={content.title}
-                placeholder="Page title"
-                onChange={(event) =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        title: event.target.value,
-                    }))
-                }
-            />
+            <label htmlFor="title">
+                Title
+                <input
+                    type="text"
+                    name="title"
+                    value={content.title}
+                    placeholder="Page title"
+                    onChange={(event) =>
+                        setContent((prevContent) => ({
+                            ...prevContent,
+                            title: event.target.value,
+                        }))
+                    }
+                />
+            </label>
 
-            <label htmlFor="publication-date">Publication date</label>
-            <DateInput name="publication-date" content={content} setContent={setContent} dateKey="publication" />
+            {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+            <label htmlFor="publication-date">
+                Publication date
+                <DateInput name="publication-date" content={content} setContent={setContent} dateKey="publication" />
+            </label>
 
-            <label htmlFor="doi">DOI</label>
-            <input
-                type="text"
-                name="doi"
-                value={content.doi}
-                placeholder="DOI"
-                onChange={(event) =>
-                    setContent((prevContent) => ({
-                        ...prevContent,
-                        url: event.target.value,
-                    }))
-                }
-            />
+            <label htmlFor="doi">
+                DOI
+                <input
+                    type="text"
+                    name="doi"
+                    value={content.doi}
+                    placeholder="DOI"
+                    onChange={(event) =>
+                        setContent((prevContent) => ({
+                            ...prevContent,
+                            url: event.target.value,
+                        }))
+                    }
+                />
+            </label>
 
-            <label htmlFor="access-date">Access date</label>
-            <DateInput name="access-date" content={content} setContent={setContent} dateKey="accessDate" />
+            {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+            <label htmlFor="access-date">
+                Access date
+                <DateInput name="access-date" content={content} setContent={setContent} dateKey="accessDate" />
+            </label>
 
             <button type="button" onClick={toggleEditMode}>
                 Add reference

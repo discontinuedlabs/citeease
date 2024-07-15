@@ -281,12 +281,15 @@ export function AddCitationMenu(props) {
 
             <div>
                 <small>Experimental</small>
-                <label>Search by URL, DOI, ISBN, or PubMed and PMC identifiers:</label>
-                <textarea
-                    ref={identifierRef}
-                    name="search-by-identifiers"
-                    placeholder="Search by unique identifiers..."
-                />
+                <label htmlFor="search-by-identifiers">
+                    Search by URL, DOI, ISBN, or PubMed and PMC identifiers:
+                    <textarea
+                        ref={identifierRef}
+                        name="search-by-identifiers"
+                        placeholder="Search by unique identifiers..."
+                    />
+                </label>
+
                 <small>You can list all the identifiers at the same time.</small>
                 <button type="button" onClick={() => handleSearchByIdentifiers(identifierRef.current.value)}>
                     Generate citations
@@ -749,26 +752,34 @@ export function IdAndPasswordDialogVisible(props) {
             <p>Choose a unique identifer and a password for you collaborative bibliography.</p>
             <pre>{error}</pre>
             <form onSubmit={handleSubmit}>
-                <label htmlFor={`${id}-id`}>Unique identifer</label>
-                <input autoComplete="off" ref={idRef} type="text" id={`${id}-id`} name="id" required />
-                <label htmlFor={`${id}-password`}>Password</label>
-                <input
-                    autoComplete="off"
-                    ref={passwordRef}
-                    type="password"
-                    id={`${id}-password`}
-                    name="password"
-                    required
-                />
-                <label htmlFor={`${id}-confirmPassword`}>Confirm password</label>
-                <input
-                    autoComplete="off"
-                    ref={confirmPasswordRef}
-                    type="password"
-                    id={`${id}-confirmPassword`}
-                    name="confirmPassword"
-                    required
-                />
+                <label htmlFor={`${id}-id`}>
+                    Unique identifer
+                    <input autoComplete="off" ref={idRef} type="text" id={`${id}-id`} name="id" required />
+                </label>
+                <label htmlFor={`${id}-password`}>
+                    Password
+                    <input
+                        autoComplete="off"
+                        ref={passwordRef}
+                        type="password"
+                        id={`${id}-password`}
+                        name="password"
+                        required
+                    />
+                </label>
+
+                <label htmlFor={`${id}-confirmPassword`}>
+                    Confirm password
+                    <input
+                        autoComplete="off"
+                        ref={confirmPasswordRef}
+                        type="password"
+                        id={`${id}-confirmPassword`}
+                        name="confirmPassword"
+                        required
+                    />
+                </label>
+
                 <button type="submit">Open collaboration</button>
             </form>
         </div>

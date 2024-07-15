@@ -1,7 +1,7 @@
 import * as sourceTypeUtils from "../../utils/citationUtils.ts";
 
 export default function DateInput(props) {
-    const { content, setContent, dateKey } = props;
+    const { content, setContent, dateKey, ariaLabelledby } = props;
 
     function handleDateChange(key, value) {
         const newDate = {
@@ -24,7 +24,7 @@ export default function DateInput(props) {
     }
 
     return (
-        <div className="date-inputs-container">
+        <div className="date-inputs-container" aria-labelledby={ariaLabelledby}>
             <input
                 type="number"
                 value={content[dateKey]?.["date-parts"]?.[0]?.[0]}

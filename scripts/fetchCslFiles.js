@@ -41,10 +41,10 @@
  * latest CSL styles.
  */
 
-const fs = require("fs");
-const os = require("os");
-const path = require("path");
-const { exec } = require("child_process");
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
+import { exec } from "child_process";
 
 const FONT = {
     BOLD: "\x1b[1m",
@@ -59,8 +59,6 @@ const FONT = {
     BG_RED: "\x1b[48;5;9m",
     RESET: "\x1b[0m",
 };
-
-const yy = 9;
 
 const RESULT = {
     SUCCESS: `${FONT.BG_GREEN}${FONT.BOLD}${FONT.BLACK} SUCCESS ${FONT.RESET}`,
@@ -89,8 +87,8 @@ function printProgress(currentIndex, currentFileName, totalFiles, barLength = pr
     process.stdout.write(`\r    ${fullMessage}`);
 }
 
-function colorFilePath(path, lightColor = FONT.WHITE, darkColor = FONT.BLACK) {
-    const splitPath = path.split("\\");
+function colorFilePath(filePath, lightColor = FONT.WHITE, darkColor = FONT.BLACK) {
+    const splitPath = filePath.split("\\");
     const lastIndex = splitPath.length - 1;
 
     splitPath[0] = darkColor + splitPath[0];
@@ -99,46 +97,25 @@ function colorFilePath(path, lightColor = FONT.WHITE, darkColor = FONT.BLACK) {
     return splitPath.join("\\");
 }
 
-function fetchLocalCslFiles(directory) {
-    if (!fs.existsSync(directory)) {
-        process.stderr.write(
-            `\n${RESULT.ERROR}\n${FONT.RED}The specified directory '${directory}' does not exist. Please check the path and try again.${FONT.RESET}`
-        );
-    }
+function generateShortTitle(title) {
+    const parenPattern = /\([^)]*\)/;
+    const match = title.match(parenPattern);
+    const parenInfo = match ? match[0] : "";
+    const mainTitle = title.split("(")[0];
+    let acronym = "";
 
-    let allFiles = [];
-    process.stdout.write("\nFetching CSL files...\n");
-
-    const cslFiles = fs.readdirSync(directory).filter((file) => file.endsWith(".csl"));
-    const totalFiles = cslFiles.length;
-
-    cslFiles.forEach((file, index) => {
-        printProgress(index, file, totalFiles);
-
-        const filePath = path.join(directory, file);
-        const content = fs.readFileSync(filePath, "utf-8");
-
-        const fileInfo = extractFileInfo(filePath, content);
-        allFiles.push(fileInfo);
+    mainTitle.split("").forEach((char) => {
+        if (char === char.toUpperCase() || !Number.isNaN(char)) {
+            acronym += char;
+        }
     });
 
-    return allFiles;
-}
+    if (acronym.length <= 2) {
+        acronym = mainTitle;
+    }
 
-function extractFileInfo(filePath, content) {
-    const code = path.basename(filePath).replace(".csl", "");
-    const longTitle = extractTagContent(content, "title");
-    const shortTitle = extractTagContent(content, "title-short");
-    const licenseInfo = extractLicenseInfo(content);
-
-    return {
-        name: {
-            long: longTitle,
-            short: shortTitle !== null ? shortTitle : generateShortTitle(longTitle),
-        },
-        code: code,
-        license: licenseInfo,
-    };
+    const shortTitle = `${acronym} ${parenInfo}`;
+    return shortTitle.replace(/\s+/g, " ");
 }
 
 function extractTagContent(content, tag) {
@@ -158,29 +135,50 @@ function extractLicenseInfo(content) {
     return { text: null, url: null };
 }
 
-function generateShortTitle(title) {
-    const parenPattern = /\([^)]*\)/;
-    const match = title.match(parenPattern);
-    const parenInfo = match ? match[0] : "";
-    const mainTitle = title.split("(")[0];
-    let acronym = "";
+function extractFileInfo(filePath, content) {
+    const code = path.basename(filePath).replace(".csl", "");
+    const longTitle = extractTagContent(content, "title");
+    const shortTitle = extractTagContent(content, "title-short");
+    const licenseInfo = extractLicenseInfo(content);
 
-    for (let char of mainTitle) {
-        if (char === char.toUpperCase() || !isNaN(char)) {
-            acronym += char;
-        }
+    return {
+        name: {
+            long: longTitle,
+            short: shortTitle !== null ? shortTitle : generateShortTitle(longTitle),
+        },
+        code,
+        license: licenseInfo,
+    };
+}
+
+function fetchLocalCslFiles(directory) {
+    if (!fs.existsSync(directory)) {
+        process.stderr.write(
+            `\n${RESULT.ERROR}\n${FONT.RED}The specified directory '${directory}' does not exist. Please check the path and try again.${FONT.RESET}`
+        );
     }
 
-    if (acronym.length <= 2) {
-        acronym = mainTitle;
-    }
+    const allFiles = [];
+    process.stdout.write("\nFetching CSL files...\n");
 
-    const shortTitle = `${acronym} ${parenInfo}`;
-    return shortTitle.replace(/\s+/g, " ");
+    const cslFiles = fs.readdirSync(directory).filter((file) => file.endsWith(".csl"));
+    const totalFiles = cslFiles.length;
+
+    cslFiles.forEach((file, index) => {
+        printProgress(index, file, totalFiles);
+
+        const filePath = path.join(directory, file);
+        const content = fs.readFileSync(filePath, "utf-8");
+
+        const fileInfo = extractFileInfo(filePath, content);
+        allFiles.push(fileInfo);
+    });
+
+    return allFiles;
 }
 
 function processCslFiles(allFiles) {
-    let data = [];
+    const data = [];
 
     process.stdout.write("\nProcessing CSL files...\n");
 

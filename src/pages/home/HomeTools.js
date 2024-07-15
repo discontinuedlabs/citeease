@@ -98,8 +98,10 @@ export function CoBibsSearchDialog({ setIsVisible }) {
                     </div>
                     <pre>{passwordError}</pre>
                     <form onSubmit={handleJoin}>
-                        <label htmlFor={`${id}-password`}>Enter the password to join</label>
-                        <input autoFocus ref={passwordRef} type="password" name="password" id={`${id}-password`} />
+                        <label htmlFor={`${id}-password`}>
+                            Enter the password to join
+                            <input autoFocus ref={passwordRef} type="password" name="password" id={`${id}-password`} />
+                        </label>
                         <button type="submit" disabled={passwordLoading}>
                             Join
                         </button>

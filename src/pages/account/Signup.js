@@ -38,12 +38,18 @@ export default function Signup() {
                 <h1>Sign Up</h1>
                 <pre>{error}</pre>
                 <form onSubmit={handleSubmit}>
-                    <label htmlFor={`${id}-email`}>Email</label>
-                    <input id={`${id}-email`} type="email" ref={emailRef} required />
-                    <label htmlFor={`${id}-password`}>Password</label>
-                    <input id={`${id}-password`} type="password" ref={passwordRef} required />
-                    <label htmlFor={`${id}-password-confirm`}>Password confirmation</label>
-                    <input id={`${id}-password-confirm`} type="password" ref={passwordConfirmRef} required />
+                    <label htmlFor={`${id}-email`}>
+                        Email
+                        <input id={`${id}-email`} type="email" ref={emailRef} required />
+                    </label>
+                    <label htmlFor={`${id}-password`}>
+                        Password
+                        <input id={`${id}-password`} type="password" ref={passwordRef} required />
+                    </label>
+                    <label htmlFor={`${id}-password-confirm`}>
+                        Password confirmation
+                        <input id={`${id}-password-confirm`} type="password" ref={passwordConfirmRef} required />
+                    </label>
                     <button type="submit" disabled={isLoading}>
                         Sign up
                     </button>

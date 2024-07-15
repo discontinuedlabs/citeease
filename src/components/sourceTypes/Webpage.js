@@ -55,15 +55,18 @@ export default function Webpage(props) {
     return (
         <form className="citation-form" onSubmit={(event) => handleAddReference(event, content)}>
             <p>Insert the URL (link) here to fill the fields automatically:</p>
-            <label htmlFor="auto-filler-url">URL</label>
-            <input
-                type="text"
-                name="auto-filler-url"
-                placeholder="Insert a URL"
-                ref={autoFillUrlRef}
-                value={url}
-                onChange={handleUrlChange}
-            />
+            <label htmlFor="auto-filler-url">
+                URL
+                <input
+                    type="text"
+                    name="auto-filler-url"
+                    placeholder="Insert a URL"
+                    ref={autoFillUrlRef}
+                    value={url}
+                    onChange={handleUrlChange}
+                />
+            </label>
+
             <button type="button" onClick={handleFillIn}>
                 Fill in
             </button>
@@ -71,40 +74,52 @@ export default function Webpage(props) {
             <p>Or enter webpage details manually:</p>
             <AuthorsInput content={content} setContent={setContent} />
 
-            <label htmlFor="title">Title</label>
-            <input
-                type="text"
-                name="title"
-                value={content.title}
-                placeholder="Page title"
-                onChange={(event) => updateContentField("title", event.target.value)}
-                required
-            />
+            <label htmlFor="title">
+                Title
+                <input
+                    type="text"
+                    name="title"
+                    value={content.title}
+                    placeholder="Page title"
+                    onChange={(event) => updateContentField("title", event.target.value)}
+                    required
+                />
+            </label>
 
-            <label htmlFor="website">Website</label>
-            <input
-                type="text"
-                name="website"
-                value={content["container-title"]}
-                placeholder="Website title"
-                onChange={(event) => updateContentField("container-title", event.target.value)}
-            />
+            <label htmlFor="website">
+                Website
+                <input
+                    type="text"
+                    name="website"
+                    value={content["container-title"]}
+                    placeholder="Website title"
+                    onChange={(event) => updateContentField("container-title", event.target.value)}
+                />
+            </label>
 
-            <label htmlFor="publication-date">Publication date</label>
-            <DateInput name="publication-date" content={content} setContent={setContent} dateKey="issued" />
+            {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+            <label htmlFor="publication-date">
+                Publication date
+                <DateInput name="publication-date" content={content} setContent={setContent} dateKey="issued" />
+            </label>
 
-            <label htmlFor="url">URL (link)</label>
-            <input
-                type="text"
-                name="url"
-                value={content.URL}
-                placeholder="URL (link)"
-                onChange={(event) => updateContentField("URL", event.target.value)}
-                required
-            />
+            <label htmlFor="url">
+                URL (link)
+                <input
+                    type="text"
+                    name="url"
+                    value={content.URL}
+                    placeholder="URL (link)"
+                    onChange={(event) => updateContentField("URL", event.target.value)}
+                    required
+                />
+            </label>
 
-            <label htmlFor="access-date">Access date</label>
-            <DateInput name="access-date" content={content} setContent={setContent} dateKey="accessed" />
+            {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+            <label htmlFor="access-date">
+                Access date
+                <DateInput name="access-date" content={content} setContent={setContent} dateKey="accessed" />
+            </label>
 
             <button type="submit">Add reference</button>
             <button type="button" onClick={handleCancel}>

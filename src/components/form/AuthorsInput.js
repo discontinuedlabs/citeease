@@ -36,27 +36,29 @@ export default function AuthorsInput(props) {
                 content.author &&
                 content.author.map((authorEntry) => (
                     <div key={authorEntry.id}>
-                        <label htmlFor="given-name family-name">Author</label>
-                        <input
-                            type="text"
-                            name="given-name"
-                            placeholder="Author's first name"
-                            value={authorEntry.given}
-                            onChange={(event) => {
-                                updateAuthors(authorEntry.id, "given", event.target.value);
-                            }}
-                            autoComplete="false"
-                        />
-                        <input
-                            type="text"
-                            name="family-name"
-                            placeholder="Author's last name"
-                            value={authorEntry.family}
-                            onChange={(event) => {
-                                updateAuthors(authorEntry.id, "family", event.target.value);
-                            }}
-                            autoComplete="false"
-                        />
+                        <label htmlFor="given-name family-name">
+                            Author
+                            <input
+                                type="text"
+                                name="given-name"
+                                placeholder="Author's first name"
+                                value={authorEntry.given}
+                                onChange={(event) => {
+                                    updateAuthors(authorEntry.id, "given", event.target.value);
+                                }}
+                                autoComplete="false"
+                            />
+                            <input
+                                type="text"
+                                name="family-name"
+                                placeholder="Author's last name"
+                                value={authorEntry.family}
+                                onChange={(event) => {
+                                    updateAuthors(authorEntry.id, "family", event.target.value);
+                                }}
+                                autoComplete="false"
+                            />
+                        </label>
                     </div>
                 ))}
 

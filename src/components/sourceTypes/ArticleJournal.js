@@ -55,15 +55,18 @@ export default function ArticleJournal(props) {
     return (
         <form className="citation-form" onSubmit={handleAddReference}>
             <p>Insert the DOI here to fill the fields automatically:</p>
-            <label htmlFor="auto-filler-doi">DOI</label>
-            <input
-                type="text"
-                name="auto-filler-doi"
-                placeholder="Insert a DOI"
-                ref={autoFillDoiRef}
-                value={doi}
-                onChange={handleDoiChange}
-            />
+            <label htmlFor="auto-filler-doi">
+                DOI
+                <input
+                    type="text"
+                    name="auto-filler-doi"
+                    placeholder="Insert a DOI"
+                    ref={autoFillDoiRef}
+                    value={doi}
+                    onChange={handleDoiChange}
+                />
+            </label>
+
             <button type="button" onClick={handleFillIn}>
                 Fill in
             </button>
@@ -71,85 +74,113 @@ export default function ArticleJournal(props) {
             <p>Or enter the article details manually:</p>
             <AuthorsInput content={content} setContent={setContent} />
 
-            <label htmlFor="title">Article title</label>
-            <input
-                type="text"
-                name="title"
-                value={content.title}
-                placeholder="Article title"
-                onChange={(event) => updateContentField("title", event.target.value)}
-                required
-            />
+            <label htmlFor="title">
+                Article title
+                <input
+                    type="text"
+                    name="title"
+                    value={content.title}
+                    placeholder="Article title"
+                    onChange={(event) => updateContentField("title", event.target.value)}
+                    required
+                />
+            </label>
 
-            <label htmlFor="journal">Journal title</label>
-            <input
-                type="text"
-                name="journal"
-                value={content["container-title"]}
-                placeholder="Journal title"
-                onChange={(event) => updateContentField("container-title", event.target.value)}
-            />
+            <label htmlFor="journal">
+                Journal title
+                <input
+                    type="text"
+                    name="journal"
+                    value={content["container-title"]}
+                    placeholder="Journal title"
+                    onChange={(event) => updateContentField("container-title", event.target.value)}
+                />
+            </label>
 
-            <label htmlFor="volume">Volume</label>
-            <input
-                type="number"
-                name="volume"
-                value={content.volume}
-                placeholder="Enter a number"
-                onChange={(event) => updateContentField("volume", event.target.value)}
-            />
+            <label htmlFor="volume">
+                Volume
+                <input
+                    type="number"
+                    name="volume"
+                    value={content.volume}
+                    placeholder="Enter a number"
+                    onChange={(event) => updateContentField("volume", event.target.value)}
+                />
+            </label>
 
-            <label htmlFor="issue">Issue</label>
-            <input
-                type="number"
-                name="issue"
-                value={content.issue}
-                placeholder="Enter a number"
-                onChange={(event) => updateContentField("issue", event.target.value)}
-            />
+            <label htmlFor="issue">
+                Issue
+                <input
+                    type="number"
+                    name="issue"
+                    value={content.issue}
+                    placeholder="Enter a number"
+                    onChange={(event) => updateContentField("issue", event.target.value)}
+                />
+            </label>
 
-            <label htmlFor="publication-date">Publication date</label>
-            <DateInput name="publication-date" content={content} setContent={setContent} dateKey="issued" />
+            {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+            <label htmlFor="publication-date">
+                Publication date
+                <DateInput
+                    name="publication-date"
+                    content={content}
+                    setContent={setContent}
+                    dateKey="issued"
+                    aria-labelledby="publication-date-label"
+                />
+            </label>
 
-            <label htmlFor="pages">Pages</label>
-            <input
-                type="text"
-                name="pages"
-                value={content.page}
-                placeholder="Page range"
-                onChange={(event) => updateContentField("page", event.target.value)}
-            />
+            <label htmlFor="pages">
+                Pages
+                <input
+                    type="text"
+                    name="pages"
+                    value={content.page}
+                    placeholder="Page range"
+                    onChange={(event) => updateContentField("page", event.target.value)}
+                />
+            </label>
 
-            <label htmlFor="issn">ISSN</label>
-            <input
-                type="text"
-                name="issn"
-                value={content.ISSN}
-                placeholder="ISSN number"
-                onChange={(event) => updateContentField("ISSN", event.target.value)}
-            />
+            <label htmlFor="issn">
+                ISSN
+                <input
+                    type="text"
+                    name="issn"
+                    value={content.ISSN}
+                    placeholder="ISSN number"
+                    onChange={(event) => updateContentField("ISSN", event.target.value)}
+                />
+            </label>
 
-            <label htmlFor="online">Accessed online?</label>
-            <input
-                type="checkbox"
-                name="online"
-                checked={content.online}
-                onChange={(event) => updateContentField("online", event.target.value)}
-            />
+            <label htmlFor="online">
+                Accessed online?
+                <input
+                    type="checkbox"
+                    name="online"
+                    checked={content.online}
+                    onChange={(event) => updateContentField("online", event.target.value)}
+                />
+            </label>
 
             {content.online && (
                 <>
-                    <label htmlFor="doi">DOI</label>
-                    <input
-                        type="text"
-                        name="doi"
-                        value={content.DOI}
-                        placeholder="DOI"
-                        onChange={(event) => updateContentField("DOI", event.target.value)}
-                    />
+                    <label htmlFor="doi">
+                        DOI
+                        <input
+                            type="text"
+                            name="doi"
+                            value={content.DOI}
+                            placeholder="DOI"
+                            onChange={(event) => updateContentField("DOI", event.target.value)}
+                        />
+                    </label>
 
-                    <label htmlFor="access-date">Access date</label>
-                    <DateInput name="access-date" content={content} setContent={setContent} dateKey="accessed" />
+                    {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+                    <label htmlFor="access-date">
+                        Access date
+                        <DateInput name="access-date" content={content} setContent={setContent} dateKey="accessed" />
+                    </label>
                 </>
             )}
 

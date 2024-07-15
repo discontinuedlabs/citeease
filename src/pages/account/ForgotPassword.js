@@ -31,8 +31,10 @@ export default function ForgotPassword() {
             <h1>Forgot password</h1>
             <pre>{error}</pre>
             <form onSubmit={handleSUbmit}>
-                <label htmlFor={`${id}-email`}>Email</label>
-                <input type="email" ref={emailRef} />
+                <label htmlFor={`${id}-email`}>
+                    Email
+                    <input type="email" ref={emailRef} />
+                </label>
                 <button type="submit" disabled={isLoading}>
                     Reset password
                 </button>
