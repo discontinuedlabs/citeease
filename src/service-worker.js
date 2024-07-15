@@ -34,7 +34,11 @@ registerRoute(
 );
 
 registerRoute(
-    ({ url }) => url.origin === self.location.origin && url.pathname.endsWith(/\.(png|jpg|jpeg|svg)$/),
+    ({ url }) => {
+        const path = url.pathname.split("/");
+        const lastSegment = path[path.length - 1];
+        return url.origin === self.location.origin && ["png", "jpg", "jpeg", "svg"].includes(lastSegment);
+    },
     new StaleWhileRevalidate({
         cacheName: "images",
         plugins: [new ExpirationPlugin({ maxEntries: 50 })],
