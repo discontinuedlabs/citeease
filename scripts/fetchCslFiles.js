@@ -41,10 +41,11 @@
  * latest CSL styles.
  */
 
-import * as fs from "fs";
-import * as os from "os";
-import * as path from "path";
-import { exec } from "child_process";
+/* eslint-disable @typescript-eslint/no-var-requires */
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+const { exec } = require("child_process");
 
 const FONT = {
     BOLD: "\x1b[1m",
