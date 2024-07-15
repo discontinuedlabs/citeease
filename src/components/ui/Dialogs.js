@@ -1,3 +1,5 @@
+import "../../css/Dialogs.css";
+
 export function ConfirmDialog(props) {
     const { message, onConfirmMethod, yesLabel, noLabel, closeDialog } = props;
 
