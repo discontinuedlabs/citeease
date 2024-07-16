@@ -43,7 +43,7 @@ export default function BibliographyCard(props) {
     }
 
     return (
-        <div className="grid items-center rounded-lg border-2 border-solid border-neutral-lightGray bg-white p-4 shadow-hardTransparent transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
+        <div className="border-neutral-gray grid items-center rounded-lg border-2 border-solid bg-white p-4 shadow-hardTransparent transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
             <div className="w-full gap-2 text-neutral-black sm:flex sm:justify-between">
                 <div className="flex gap-1">
                     <h3 className="mb-0">

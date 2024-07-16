@@ -27,7 +27,7 @@ export default function ContextMenu({ options, children, direction = "down" }) {
                     />
                     <div
                         role="dialog"
-                        className={`absolute right-0 ${direction === "down" ? "top-full" : "bottom-full"} rounded-lg border-2 border-solid border-neutral-lightGray bg-white p-1 shadow-lg`}
+                        className={`absolute right-0 ${direction === "down" ? "top-full" : "bottom-full"} border-neutral-gray rounded-lg border-2 border-solid bg-white p-1 shadow-lg`}
                     >
                         <ul className="m-0 grid w-max gap-1">
                             {options.map((option) => (

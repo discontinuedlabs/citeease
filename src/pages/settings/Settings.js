@@ -13,8 +13,12 @@ export default function Settings() {
             title: "Tags Manager",
             content: <TagsManager />,
             actions: [
-                ["Restore default tags", () => dispatch(restoreDefaultTags()), { closeOnClick: false }],
-                ["Cancel", () => tagsManagerModal.close()],
+                [
+                    "Restore default tags",
+                    () => dispatch(restoreDefaultTags()),
+                    { closeOnClick: false, autoFocus: false },
+                ],
+                ["Cancel", () => tagsManagerModal.close(), { autoFocus: false }],
             ],
             id: "tags-manager",
         });

@@ -48,7 +48,7 @@ function Modal({ id, title, message, content, actions, icon, showCloseIcon = tru
 
     return (
         <div className="fixed h-screen font-sans text-neutral-black">
-            <div className="fixed inset-0 bg-gray-900 opacity-75" />
+            <div className="fixed inset-0 bg-overlay-700" />
             {/* eslint-disable-next-line */}
             <div
                 role="dialog"
@@ -76,20 +76,28 @@ function Modal({ id, title, message, content, actions, icon, showCloseIcon = tru
                 <footer className="space-between flex flex-wrap items-start">
                     <menu>
                         {actions &&
-                            actions.map((action) => (
-                                <button
-                                    // eslint-disable-next-line jsx-a11y/no-autofocus
-                                    autoFocus={action?.[2]?.autoFocus || actions.length === 1}
-                                    key={id}
-                                    type="button"
-                                    onClick={() => {
-                                        action[1]();
-                                        if (action?.[2]?.closeOnClick !== false) close(id);
-                                    }}
-                                >
-                                    {action[0]}
-                                </button>
-                            ))}
+                            actions.map((action, index) => {
+                                const options = action?.[2];
+                                return (
+                                    <button
+                                        // eslint-disable-next-line jsx-a11y/no-autofocus
+                                        // WATCH: This must have some unintended results
+                                        autoFocus={
+                                            options?.autoFocus === true ||
+                                            (actions.length === 1 && options?.autoFocus !== false) ||
+                                            (index === 0 && options?.autoFocus !== false)
+                                        }
+                                        key={id}
+                                        type="button"
+                                        onClick={() => {
+                                            action[1]();
+                                            if (options?.closeOnClick !== false) close(id);
+                                        }}
+                                    >
+                                        {action[0]}
+                                    </button>
+                                );
+                            })}
                     </menu>
                 </footer>
             </div>
@@ -114,12 +122,34 @@ export default function ModalProvider({ children }: ModalProviderProps) {
         }[]
     >([]);
 
+    const focusableElements = [
+        "a[href]",
+        "button",
+        "[href]",
+        "input:not([disabled])",
+        "select:not([disabled])",
+        "textarea:not([disabled])",
+        "details",
+        // eslint-disable-next-line quotes
+        '[tabindex]:not([tabindex="-1"])',
+    ];
+
     function openModal(newModal: Omit<ModalProps, "id" | "close">) {
-        setModals((prevModals) => [...prevModals, { id: uid(), ...newModal }]); // id can be overrided if it was added to the newModal object
+        const focusableElementsArray = Array.from(document.querySelectorAll(focusableElements.join(","))).map(
+            (element) => element as HTMLElement
+        );
+        focusableElementsArray.forEach((element) => element.setAttribute("tabindex", "-1"));
+
+        setModals((prevModals) => [...prevModals, { id: uid(), ...newModal }]); // id should be overriden if it was added to the newModal object
     }
 
     function closeModal(id: string) {
         setModals((prevModals) => prevModals.filter((modal) => modal.id !== id));
+
+        const focusableElementsArray = Array.from(document.querySelectorAll(focusableElements.join(","))).map(
+            (element) => element as HTMLElement
+        );
+        focusableElementsArray.forEach((element) => element.removeAttribute("tabindex"));
     }
 
     const contextValue = useMemo(

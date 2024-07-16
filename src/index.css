@@ -2,48 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-    @apply m-0 box-border break-words p-0;
-    -webkit-tap-highlight-color: transparent;
+@layer base {
+    * {
+        @apply m-0 box-border break-words p-0;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    *:focus-visible {
+        @apply focus:outline-none focus:ring-2 focus:ring-secondary-500;
+    }
+
+    ::selection {
+        @apply bg-neutral-yellow text-neutral-black;
+    }
 }
 
-::selection {
-    @apply bg-neutral-yellow text-neutral-black;
-}
+@layer components {
+    h1,
+    h2,
+    h3,
+    h4,
+    p,
+    ul {
+        @apply mb-4;
+    }
 
-h1,
-h2,
-h3,
-h4,
-p,
-ul {
-    @apply mb-4;
-}
+    a {
+        @apply text-secondary-800;
+    }
 
-a {
-    @apply text-secondary-800;
-}
+    ul {
+        @apply ms-10;
+    }
 
-ul {
-    @apply ms-10;
-}
+    button {
+        @apply select-none font-sans;
+    }
 
-button {
-    @apply select-none font-sans;
-}
+    .hanging-indentation {
+        @apply pl-5 indent-[-1.5rem];
+    }
 
-.hanging-indentation {
-    @apply pl-5 indent-[-1.5rem];
-}
+    .csl-entry:has(.csl-left-margin) {
+        @apply mr-2 flex items-start;
+    }
 
-.csl-entry:has(.csl-left-margin) {
-    @apply mr-2 flex items-start;
-}
+    .csl-entry > .csl-left-margin {
+        @apply min-w-fit;
+    }
 
-.csl-entry > .csl-left-margin {
-    @apply min-w-fit;
-}
-
-.transition-regular {
-    @apply transition duration-150 ease-in-out;
+    .transition-regular {
+        @apply transition duration-150 ease-in-out;
+    }
 }
