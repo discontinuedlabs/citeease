@@ -3,15 +3,15 @@ import { getGradient, getTagBgColors } from "../../utils/uiUtils.ts";
 import Icon from "./Icon";
 
 export default function Tag(props) {
-    const { tagProps, onClick, showX } = props;
+    const { className, tagProps, onClick, showX } = props;
     const [bgIdleColor, bgHoverColor, bgClickColor] = getTagBgColors(tagProps?.color);
 
     return (
-        <div className="rounded-md bg-white">
+        <div className={`rounded-md bg-white ${className}`}>
             {/* eslint-disable no-param-reassign, no-return-assign */}
             <button
                 type="button"
-                className="flex items-center gap-1 rounded-md p-1 font-bold transition duration-150 ease-in-out"
+                className={`flex items-center gap-1 rounded-md p-1 font-bold transition duration-150 ease-in-out ${className}`}
                 style={{
                     border: `${TAG_COLOR_VALUES[tagProps?.color]} solid 2px`,
                     color: TAG_COLOR_VALUES[tagProps?.color],

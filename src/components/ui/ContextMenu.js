@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { uid } from "../../utils/utils.ts";
-import { ContextMenuOption } from "./StyledButtons";
+import { SoftButton } from "./StyledButtons";
 
 export default function ContextMenu({ options, children, direction = "down" }) {
     const [visible, setVisible] = useState(false);
@@ -13,7 +13,7 @@ export default function ContextMenu({ options, children, direction = "down" }) {
 
     return (
         <div className="relative h-min">
-            <ContextMenuOption onClick={() => setVisible(!visible)}>{children}</ContextMenuOption>
+            <SoftButton onClick={() => setVisible(!visible)}>{children}</SoftButton>
 
             {visible && (
                 <>
@@ -27,12 +27,12 @@ export default function ContextMenu({ options, children, direction = "down" }) {
                     />
                     <div
                         role="dialog"
-                        className={`absolute right-0 ${direction === "down" ? "top-full" : "bottom-full"} border-neutral-gray rounded-lg border-2 border-solid bg-white p-1 shadow-lg`}
+                        className={`absolute right-0 ${direction === "down" ? "top-full" : "bottom-full"} rounded-lg border-2 border-solid border-neutral-gray bg-white p-1 shadow-lg`}
                     >
                         <ul className="m-0 grid w-max gap-1">
                             {options.map((option) => (
                                 <li key={uid()} className="list-none">
-                                    <ContextMenuOption
+                                    <SoftButton
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             option[1]();
@@ -43,7 +43,7 @@ export default function ContextMenu({ options, children, direction = "down" }) {
                                         className="w-full text-start"
                                     >
                                         {option[0]}
-                                    </ContextMenuOption>
+                                    </SoftButton>
                                 </li>
                             ))}
                         </ul>

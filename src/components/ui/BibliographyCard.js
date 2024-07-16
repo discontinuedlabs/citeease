@@ -43,7 +43,7 @@ export default function BibliographyCard(props) {
     }
 
     return (
-        <div className="border-neutral-gray grid items-center rounded-lg border-2 border-solid bg-white p-4 shadow-hardTransparent transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
+        <div className="grid items-center rounded-lg border-2 border-solid border-neutral-gray bg-white p-4 shadow-hardTransparent transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
             <div className="w-full gap-2 text-neutral-black sm:flex sm:justify-between">
                 <div className="flex gap-1">
                     <h3 className="mb-0">
@@ -61,7 +61,7 @@ export default function BibliographyCard(props) {
                 style={{ marginTop: bibliography?.tags?.length === 0 ? "0" : "0.5rem" }}
             >
                 {bibliography?.tags?.map((tag) => (
-                    <Tag className="m-2" key={uid()} tagProps={tag} />
+                    <Tag key={uid()} tagProps={tag} />
                 ))}
             </div>
         </div>

@@ -13,6 +13,7 @@ import { useAuth } from "../../context/AuthContext";
 import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
 import { uid } from "../../utils/utils.ts";
 import { getGradient, getTagBgColors } from "../../utils/uiUtils.ts";
+import { Button } from "../../components/ui/StyledButtons";
 
 export function TagsManager() {
     const settings = useSelector((state) => state.settings);
@@ -38,7 +39,7 @@ export function TagsManager() {
             </div>
             <form onSubmit={addTagToBib}>
                 <input
-                    className="rounded-md p-2"
+                    className="rounded-md p-2 font-sans font-bold"
                     style={{
                         border: `solid 0.1rem ${TAG_COLOR_VALUES[tagColor]}`,
                         background: tagIdleColor,
@@ -49,16 +50,14 @@ export function TagsManager() {
                     value={tagLabel}
                     onChange={(event) => setTagLabel(event.target.value)}
                 />
-                <button type="submit">Add tag</button>
+                <Button type="submit">Add tag</Button>
                 <div className="flex flex-wrap gap-1">
                     {Object.values(TAG_COLORS)?.map((color) => {
-                        const gradient = getGradient(TAG_COLOR_VALUES[color]);
                         return (
-                            <button
-                                className="h-5 w-5 rounded-full border-solid border-neutral-black"
-                                style={{ background: gradient }}
-                                type="button"
+                            <Tag
+                                className="h-5 w-5 rounded-full"
                                 key={uid()}
+                                tagProps={{ color, id: color, label: "" }}
                                 onClick={() => setTagColor(color)}
                             />
                         );

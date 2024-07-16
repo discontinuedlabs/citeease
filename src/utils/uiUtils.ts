@@ -91,23 +91,11 @@ export function getGradient(
         return [h * 360, s * 100, l * 100, rgba[3] * 100];
     }
 
-    function detectColorFormat(value: string): "hex" | "rgb" | "rgba" | "hsl" | "hsla" {
-        if (/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{8})$/.test(value)) {
-            return "hex";
-        }
-        if (/^rgb\(/.test(value)) {
-            return "rgb";
-        }
-        if (/^rgba\(/.test(value)) {
-            return "rgba";
-        }
-        if (/^hsl\(/.test(value)) {
-            return "hsl";
-        }
-        if (/^hsla\(/.test(value)) {
-            return "hsla";
-        }
-        throw new Error("Unsupported color format");
+    function stringToHsla(value: string): HSLValue {
+        const match = /^[a-zA-Z]+$/.exec(value);
+        if (!match) throw new Error("Invalid color string");
+        const rgbValues = TAG_COLOR_VALUES[value].match(/\d+/g)!.map((x) => parseInt(x, 10));
+        return rgbToHsla(rgbValues);
     }
 
     function hslaParse(value: string): HSLValue {
@@ -122,10 +110,21 @@ export function getGradient(
         return [Number(match[1]), Number(match[2]), Number(match[3]), 1];
     }
 
+    function detectColorFormat(value: string): "hex" | "rgb" | "rgba" | "hsl" | "hsla" | "string" {
+        if (/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{8})$/.test(value)) return "hex";
+        if (/^rgb\(/.test(value)) return "rgb";
+        if (/^rgba\(/.test(value)) return "rgba";
+        if (/^hsl\(/.test(value)) return "hsl";
+        if (/^hsla\(/.test(value)) return "hsla";
+        if (/^[a-zA-Z]+$/.test(value)) return "string";
+        throw new Error("Unsupported color format");
+    }
+
     function convertColor(value: string): HSLValue {
         let rgbValues;
         let alpha;
         const format = detectColorFormat(value);
+
         switch (format) {
             case "hex":
                 return rgbToHsla(hexToRgb(value));
@@ -140,6 +139,8 @@ export function getGradient(
                 return hslParse(value);
             case "hsla":
                 return hslaParse(value);
+            case "string":
+                return stringToHsla(value);
             default:
                 throw new Error("Unsupported color format");
         }

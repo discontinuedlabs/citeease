@@ -71,11 +71,6 @@ module.exports = {
             },
         },
     },
-    variants: {
-        extend: {
-            borderColor: ["focus-visible"],
-        },
-    },
     plugins: [],
     corePlugins: {
         preflight: false,

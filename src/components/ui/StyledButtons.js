@@ -3,7 +3,7 @@ import { getGradient } from "../../utils/uiUtils.ts";
 
 /* eslint-disable react/jsx-props-no-spreading */
 
-export function ContextMenuOption({ className, children, onClick, ...rest }) {
+export function SoftButton({ className, children, onClick, ...rest }) {
     const [isClicked, setIsClicked] = useState(false);
 
     const upClasses = "bg-transparent hover:bg-neutral-transparentGray";
@@ -12,47 +12,44 @@ export function ContextMenuOption({ className, children, onClick, ...rest }) {
     const dynamicClasses = isClicked ? downClasses : upClasses;
 
     return (
-        <div>
-            <button
-                className={`transition-regular rounded border border-none p-2 ${dynamicClasses} ${className}`}
-                type="button"
-                onClick={onClick}
-                onTouchStart={() => setIsClicked(true)}
-                onMouseDown={() => setIsClicked(true)}
-                onMouseUp={() => setIsClicked(false)}
-                onTouchEnd={() => setIsClicked(false)}
-                {...rest}
-            >
-                {children}
-            </button>
-        </div>
+        <button
+            className={`transition-regular rounded border border-none p-2 ${dynamicClasses} ${className}`}
+            type="button"
+            onClick={onClick}
+            onTouchStart={() => setIsClicked(true)}
+            onMouseDown={() => setIsClicked(true)}
+            onMouseUp={() => setIsClicked(false)}
+            onTouchEnd={() => setIsClicked(false)}
+            {...rest}
+        >
+            {children}
+        </button>
     );
 }
 
 export function Button({ className, children, onClick, color = "#ffd60a", ...rest }) {
     const [isClicked, setIsClicked] = useState(false);
-    const yellowGradient = getGradient(color);
+    const gradient = getGradient(color);
+    console.log(color, gradient);
 
-    const upClasses = "transform translate-y-0 shadow-hard";
-    const downClasses = "transform translate-y-1 shadow-none";
+    const upClasses = "transform -translate-y-1 shadow-hard";
+    const downClasses = "transform translate-y-0 shadow-none";
 
     const dynamicClasses = isClicked ? downClasses : upClasses;
 
     return (
-        <div>
-            <button
-                className={`border-1 rounded-lg border-solid border-neutral-black p-2 ${dynamicClasses} ${className}`}
-                style={{ background: yellowGradient }}
-                type="button"
-                onClick={onClick}
-                onTouchStart={() => setIsClicked(true)}
-                onMouseDown={() => setIsClicked(true)}
-                onMouseUp={() => setIsClicked(false)}
-                onTouchEnd={() => setIsClicked(false)}
-                {...rest}
-            >
-                {children}
-            </button>
-        </div>
+        <button
+            className={`border-1 rounded-lg border-solid border-neutral-black p-2 transition-none ${dynamicClasses} ${className}`}
+            style={{ background: gradient }}
+            type="button"
+            onClick={onClick}
+            onTouchStart={() => setIsClicked(true)}
+            onMouseDown={() => setIsClicked(true)}
+            onMouseUp={() => setIsClicked(false)}
+            onTouchEnd={() => setIsClicked(false)}
+            {...rest}
+        >
+            {children}
+        </button>
     );
 }

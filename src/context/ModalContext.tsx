@@ -3,8 +3,9 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { uid } from "../utils/utils.ts";
 import Icon from "../components/ui/Icon";
+import { Button, SoftButton } from "../components/ui/StyledButtons";
 
-type Action = [string, () => void, { autoFocus?: boolean; closeOnClick?: boolean }];
+type Action = [string, () => void, { autoFocus?: boolean; closeOnClick?: boolean; color?: string }];
 
 type ModalProps = {
     id: string;
@@ -47,59 +48,68 @@ function Modal({ id, title, message, content, actions, icon, showCloseIcon = tru
     }, [close, id]);
 
     return (
-        <div className="fixed h-screen font-sans text-neutral-black">
-            <div className="fixed inset-0 bg-overlay-700" />
-            {/* eslint-disable-next-line */}
-            <div
-                role="dialog"
-                aria-modal="true"
-                className="fixed left-[50%] top-[50%] grid max-h-[80vh] translate-x-[-50%] translate-y-[-50%] items-start bg-white p-5"
-            >
-                <header className="space-between flex items-start">
-                    <h3 className="mb-2">{title}</h3>
-                    {showCloseIcon && (
-                        <button type="button" onClick={() => close(id)}>
-                            {/* eslint-disable-next-line react/no-children-prop */}
-                            <Icon name="close" className={undefined} children={undefined} />
-                        </button>
+        <div className="fixed h-screen items-center justify-center font-sans text-neutral-black">
+            <div className="fixed right-0 top-0 flex h-screen w-screen items-center justify-center bg-overlay-700">
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    className="m-5 grid max-w-3xl items-start rounded-lg bg-neutral-white shadow-xl"
+                >
+                    <header className="flex justify-between p-5">
+                        <h3>{title}</h3>
+                        {showCloseIcon && (
+                            <SoftButton className="top-0 p-0" onClick={() => close(id)}>
+                                {/* eslint-disable-next-line react/no-children-prop */}
+                                <Icon name="close" className="" children={undefined} />
+                            </SoftButton>
+                        )}
+                    </header>
+
+                    <article
+                        className={`border-t-4 border-indigo-500 bg-white p-5 shadow-md ${!actions ? "rounded-bl-lg rounded-br-lg" : ""}`}
+                    >
+                        {message && (
+                            <div className="mb-4 flex items-start">
+                                {icon}
+                                <p className="m-0">{message}</p>
+                            </div>
+                        )}
+                        {content && <div>{content}</div>}
+                    </article>
+
+                    {actions && (
+                        <footer className="flex flex-wrap justify-end p-5 px-5">
+                            <menu className="flex gap-1">
+                                {actions &&
+                                    actions.map((action, index) => {
+                                        const options = action?.[2];
+                                        return (
+                                            <Button
+                                                // eslint-disable-next-line jsx-a11y/no-autofocus
+                                                // WATCH: This must have some unintended results
+                                                autoFocus={
+                                                    options?.autoFocus === true ||
+                                                    (actions.length === 1 && options?.autoFocus !== false) ||
+                                                    (index === 0 && options?.autoFocus !== false)
+                                                }
+                                                color={
+                                                    options?.color || /cancel|no/i.test(action[0]) ? "red" : undefined
+                                                }
+                                                className=""
+                                                key={id}
+                                                onClick={() => {
+                                                    action[1]();
+                                                    if (options?.closeOnClick !== false) close(id);
+                                                }}
+                                            >
+                                                {action[0]}
+                                            </Button>
+                                        );
+                                    })}
+                            </menu>
+                        </footer>
                     )}
-                </header>
-
-                <article className="overscroll-contain-y grid h-full justify-items-start overflow-y-auto">
-                    <div className="mb-4 flex items-start">
-                        {icon}
-                        <p>{message}</p>
-                    </div>
-                    {content && <article>{content}</article>}
-                </article>
-
-                <footer className="space-between flex flex-wrap items-start">
-                    <menu>
-                        {actions &&
-                            actions.map((action, index) => {
-                                const options = action?.[2];
-                                return (
-                                    <button
-                                        // eslint-disable-next-line jsx-a11y/no-autofocus
-                                        // WATCH: This must have some unintended results
-                                        autoFocus={
-                                            options?.autoFocus === true ||
-                                            (actions.length === 1 && options?.autoFocus !== false) ||
-                                            (index === 0 && options?.autoFocus !== false)
-                                        }
-                                        key={id}
-                                        type="button"
-                                        onClick={() => {
-                                            action[1]();
-                                            if (options?.closeOnClick !== false) close(id);
-                                        }}
-                                    >
-                                        {action[0]}
-                                    </button>
-                                );
-                            })}
-                    </menu>
-                </footer>
+                </div>
             </div>
         </div>
     );

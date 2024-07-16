@@ -12,6 +12,7 @@ export default function Settings() {
         tagsManagerModal.open({
             title: "Tags Manager",
             content: <TagsManager />,
+            message: "Manage your own tags",
             actions: [
                 [
                     "Restore default tags",
