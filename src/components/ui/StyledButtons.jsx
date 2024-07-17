@@ -30,7 +30,6 @@ export function SoftButton({ className, children, onClick, ...rest }) {
 export function Button({ className, children, onClick, color = "#ffd60a", ...rest }) {
     const [isClicked, setIsClicked] = useState(false);
     const gradient = getGradient(color);
-    console.log(color, gradient);
 
     const upClasses = "transform -translate-y-1 shadow-hard";
     const downClasses = "transform translate-y-0 shadow-none";
