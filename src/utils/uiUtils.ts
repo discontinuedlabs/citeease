@@ -15,8 +15,8 @@ type HSLValue = [number, number, number, number];
  */
 export function getGradient(
     color: string,
-    intensity: number = 10,
-    hueShift: "positive" | "negative" = "positive"
+    intensity: number = 5,
+    hueShift: "positive" | "negative" = "negative"
 ): string {
     function hexToRgb(hex: string): RGBValue {
         const r = parseInt(hex.slice(1, 3), 16);
