@@ -31,7 +31,7 @@
             "version": "detect",
         },
     },
-    "ignorePatterns": ["tailwind.config.js", "postcss.config.js"],
+    "ignorePatterns": ["tailwind.config.js", "postcss.config.js", "vite.config.js"],
     "rules": {
         "indent": ["warn", 4],
         "quotes": ["warn", "double"],

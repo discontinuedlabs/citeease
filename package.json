@@ -64,6 +64,7 @@
         "@types/react-dom": "^18.3.0",
         "@typescript-eslint/eslint-plugin": "^7.15.0",
         "@typescript-eslint/parser": "^7.15.0",
+        "@vitejs/plugin-react": "^4.3.1",
         "autoprefixer": "^10.4.19",
         "eslint": "^8.57.0",
         "eslint-config-airbnb": "^19.0.4",
@@ -79,8 +80,8 @@
         "prettier-plugin-tailwindcss": "^0.6.5",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
-        "react-scripts": "^5.0.1",
-        "typescript": "^5.5.3"
+        "typescript": "^5.5.3",
+        "vite": "^5.3.4"
     },
     "overrides": {
         "typescript": "^5.5.3"
@@ -88,10 +89,10 @@
     "scripts": {
         "predeploy": "npm run build",
         "deploy": "gh-pages -d build",
-        "start": "react-scripts start",
-        "build": "react-scripts build",
-        "test": "react-scripts test",
-        "eject": "react-scripts eject",
+        "start": "vite",
+        "build": "vite build",
+        "serve": "vite preview",
+        "test": "jest",
         "lint": "npx eslint .",
         "lint:fix": "npx eslint --fix .",
         "coverage": "npm test --coverage --watchAll --collectCoverageFrom='src/**/*.{js,ts,jsx,tsx}'"

@@ -19,7 +19,7 @@ import Login from "./pages/account/Login";
 import Account from "./pages/account/Account";
 import ForgotPassword from "./pages/account/ForgotPassword";
 import firestoreDB from "./data/db/firebase/firebase";
-import { useDynamicTitle } from "./hooks/hooks.ts";
+import { useDynamicTitle } from "./hooks/hooks.tsx";
 
 export default function App() {
     const bibliographies = useSelector((state) => state.bibliographies);

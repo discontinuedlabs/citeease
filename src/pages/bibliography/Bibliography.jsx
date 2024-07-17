@@ -30,7 +30,7 @@ import {
     reEnableCollabInBib,
     disableCollabInBib,
 } from "../../data/store/slices/bibsSlice";
-import { useEnhancedDispatch, useFindBib } from "../../hooks/hooks.ts";
+import { useEnhancedDispatch, useFindBib } from "../../hooks/hooks.tsx";
 import Tag from "../../components/ui/Tag";
 import { useAuth } from "../../context/AuthContext";
 import Icon from "../../components/ui/Icon";

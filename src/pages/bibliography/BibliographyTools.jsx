@@ -18,7 +18,7 @@ import {
 import BibliographyCard from "../../components/ui/BibliographyCard";
 import ContextMenu from "../../components/ui/ContextMenu";
 import * as citationUtils from "../../utils/citationUtils.ts";
-import { useFindBib } from "../../hooks/hooks.ts";
+import { useFindBib } from "../../hooks/hooks.tsx";
 import Tag from "../../components/ui/Tag";
 import citationStyles from "../../assets/styles.json";
 import mostPopularStyles from "../../assets/mostPopularStyles.json";

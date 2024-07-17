@@ -1,6 +1,6 @@
 import { timeAgo, uid } from "../../utils/utils.ts";
-import Tag from "./Tag";
-import Icon from "./Icon";
+import Tag from "./Tag.jsx";
+import Icon from "./Icon.jsx";
 
 export default function BibliographyCard(props) {
     const { bibliography } = props;

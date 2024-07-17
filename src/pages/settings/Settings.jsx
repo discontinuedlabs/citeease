@@ -1,8 +1,8 @@
 import { useDispatch } from "react-redux";
-import { SettingsSection, SettingsNavigate } from "./SettingsComponents";
-import { TagsManager } from "./SettingTools";
+import { SettingsSection, SettingsNavigate } from "./SettingsComponents.jsx";
+import { TagsManager } from "./SettingTools.jsx";
 import { useModal } from "../../context/ModalContext.tsx";
-import { restoreDefaultTags } from "../../data/store/slices/settingsSlice";
+import { restoreDefaultTags } from "../../data/store/slices/settingsSlice.js";
 
 export default function Settings() {
     const tagsManagerModal = useModal();

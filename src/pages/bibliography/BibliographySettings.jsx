@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useFindBib } from "../../hooks/hooks.ts";
+import { useFindBib } from "../../hooks/hooks.tsx";
 
 export default function BibliographySettings() {
     const { bibId } = useParams();
