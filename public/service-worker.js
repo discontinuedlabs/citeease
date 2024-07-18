@@ -1,10 +1,13 @@
-/* eslint-disable no-restricted-globals, no-underscore-dangle */
+/* eslint-disable no-restricted-globals, no-underscore-dangle, import/no-unresolved, import/extensions */
 
-import { clientsClaim } from "workbox-core";
-import { ExpirationPlugin } from "workbox-expiration";
-import { precacheAndRoute, createHandlerBoundToURL } from "workbox-precaching";
-import { registerRoute } from "workbox-routing";
-import { StaleWhileRevalidate } from "workbox-strategies";
+import { clientsClaim } from "https://storage.googleapis.com/workbox-cdn/releases/6.4.2/workbox-core.prod.js";
+import { ExpirationPlugin } from "https://storage.googleapis.com/workbox-cdn/releases/6.4.2/workbox-expiration.prod.js";
+import {
+    precacheAndRoute,
+    createHandlerBoundToURL,
+} from "https://storage.googleapis.com/workbox-cdn/releases/6.4.2/workbox-precaching.prod.js";
+import { registerRoute } from "https://storage.googleapis.com/workbox-cdn/releases/6.4.2/workbox-routing.prod.js";
+import { StaleWhileRevalidate } from "https://storage.googleapis.com/workbox-cdn/releases/6.4.2/workbox-strategies.prod.js";
 
 clientsClaim();
 
