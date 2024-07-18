@@ -4,7 +4,6 @@ import "./index.css";
 import { HashRouter } from "react-router-dom";
 import { Provider as ReduxeProvider } from "react-redux";
 import App from "./App";
-import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 import store from "./data/store/store.ts";
 import { AuthProvider } from "./context/AuthContext";
 import ModalProvider from "./context/ModalContext.tsx";
@@ -23,5 +22,3 @@ root.render(
         </HashRouter>
     </React.StrictMode>
 );
-
-serviceWorkerRegistration.register();
