@@ -6,7 +6,7 @@ const isLocalhost = Boolean(
 
 function registerValidSW(swUrl, config) {
     navigator.serviceWorker
-        .register(swUrl)
+        .register(swUrl, { type: "module" })
         .then((registration) => {
             // eslint-disable-next-line no-param-reassign
             registration.onupdatefound = () => {
