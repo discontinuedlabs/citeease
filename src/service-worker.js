@@ -6,11 +6,9 @@ import { precacheAndRoute, createHandlerBoundToURL } from "workbox-precaching";
 import { registerRoute } from "workbox-routing";
 import { StaleWhileRevalidate } from "workbox-strategies";
 
-console.log("from service-worker.js");
-
 clientsClaim();
 
-precacheAndRoute([...this.__WB_MANIFEST]);
+precacheAndRoute([...self.__WB_MANIFEST]);
 
 const fileExtensionRegexp = /[^?/]+\.[^/]+$/;
 
