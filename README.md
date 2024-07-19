@@ -2,11 +2,22 @@
 
 **Welcome to CiteEase, an open-source Progressive Web App (PWA) for managing citations and collaborating on bibliographies.**
 
-## 📚 What is CiteEase?
+## Table of Contents
+
+    - [What is CiteEase?](#what-is-citeease)
+    - [Key Features](#key-features)
+    - [Upcoming Features (to-do)](#upcoming-features-to-do)
+    - [Getting Started](#getting-started)
+    - [Testing](#testing)
+    - [License](#license)
+    - [Contributing](#contributing)
+    - [Contact](#contact)
+
+## What is CiteEase?
 
 CiteEase is a powerful and user-friendly open-source citation management app designed for students, researchers, and anyone who values efficiency and organization.
 
-## 🛠️ Key Features
+## Key Features
 
 -   **Unlimited Usage:** No sign-in required for most functionalities, unless you want to sync data across devices, restor passwords, and collaborate.
 -   **Offline Functionality:** Work on your bibliographies seamlessly, even without an internet connection.
@@ -24,14 +35,14 @@ CiteEase is a powerful and user-friendly open-source citation management app des
     -   Open collaboration on bibliographies using a unique identifier and password.
     -   Collaborate with others in real-time, allowing everyone to add, modify, or delete citations within a shared bibliography.
 
-## 📋 Upcoming Features (to-do)
+## Upcoming Features (to-do)
 
 -   Integration with popular reference managers (Zotero, Mendeley, EndNote).
 -   Version control to track changes and revert to previous versions (local for privacy).
 -   Advanced search with filters and Boolean operators for specific fields.
 -   CSL file manager to create, customize, and manage citation styles (including update checks and adding new ones).
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -71,19 +82,19 @@ CiteEase is a powerful and user-friendly open-source citation management app des
 
 Now you can access the app at `http://localhost:3000`.
 
-## 🧪 Testing
+## Testing
 
 Rigorous testing is essential for ensuring the quality and stability of any application. We acknowledge its importance and plan to incorporate a comprehensive testing suite in the future. Currently, however, automated testing is not actively implemented in this project.
 
-## 📜 License
+## License
 
 CiteEase is licensed under the MIT License. See the `LICENSE` file for details.
 
-## 🤝 Contributing
+## Contributing
 
 While we don't actively seek contributions, we appreciate your interest. If you encounter issues or have suggestions, please feel free to open an issue.
 
-## 📧 Contact
+## Contact
 
 For inquiries or more information, you can reach out to us at [discontinuedlabs@gmail.com](mailto:discontinuedlabs@gmail.com).
 
