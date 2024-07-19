@@ -4,14 +4,14 @@
 
 ## Table of Contents
 
-    - [What is CiteEase?](#what-is-citeease)
-    - [Key Features](#key-features)
-    - [Upcoming Features (to-do)](#upcoming-features-to-do)
-    - [Getting Started](#getting-started)
-    - [Testing](#testing)
-    - [License](#license)
-    - [Contributing](#contributing)
-    - [Contact](#contact)
+-   [What is CiteEase?](#what-is-citeease)
+-   [Key Features](#key-features)
+-   [Upcoming Features (to-do)](#upcoming-features-to-do)
+-   [Getting Started](#getting-started)
+-   [Testing](#testing)
+-   [License](#license)
+-   [Contributing](#contributing)
+-   [Contact](#contact)
 
 ## What is CiteEase?
 
