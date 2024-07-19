@@ -1,29 +1,29 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-// import { doc, setDoc } from "firebase/firestore";
-// import firestoreDB from "../../db/firebase/firebase";
+import { doc, setDoc } from "firebase/firestore";
+import firestoreDB from "../../db/firebase/firebase";
 import dexieDB from "../../db/dexie/dexie";
 import { uid } from "../../../utils/utils.ts";
 
 const initialState = [];
 
-function save(newState, currentUser = undefined) {
+function save(newState, currentUser) {
     const serializedState = JSON.stringify(newState);
     dexieDB.items.put({ id: "bibliographies", value: serializedState });
 
     console.log(currentUser);
 
-    // if (currentUser) {
-    //     const parsedCurrentUser = JSON.parse(currentUser);
-    //     const userRef = doc(firestoreDB, "users", parsedCurrentUser?.uid);
-    //     setDoc(userRef, { bibliographies: JSON.stringify(newState) });
+    if (currentUser) {
+        const parsedCurrentUser = JSON.parse(currentUser);
+        const userRef = doc(firestoreDB, "users", parsedCurrentUser?.uid);
+        setDoc(userRef, { bibliographies: JSON.stringify(newState) });
 
-    //     newState.forEach((bib) => {
-    //         if (bib?.collab?.open) {
-    //             const coBibsRef = doc(firestoreDB, "coBibs", bib?.collab?.id);
-    //             setDoc(coBibsRef, { bibliography: JSON.stringify(newState) });
-    //         }
-    //     });
-    // }
+        newState.forEach((bib) => {
+            if (bib?.collab?.open) {
+                const coBibsRef = doc(firestoreDB, "coBibs", bib?.collab?.id);
+                setDoc(coBibsRef, { bibliography: JSON.stringify(newState) });
+            }
+        });
+    }
 }
 
 export const loadFromIndexedDB = createAsyncThunk("bibliographies/loadFromIndexedDB", async () => {

@@ -19,20 +19,23 @@ import Login from "./pages/account/Login";
 import Account from "./pages/account/Account";
 import ForgotPassword from "./pages/account/ForgotPassword";
 import firestoreDB from "./data/db/firebase/firebase";
-import { useDynamicTitle } from "./hooks/hooks.tsx";
+import { useDynamicTitle, useEnhancedDispatch } from "./hooks/hooks.tsx";
 
 export default function App() {
     const bibliographies = useSelector((state) => state.bibliographies);
     const settings = useSelector((state) => state.settings);
     const { currentUser } = useAuth();
-    const dispatch = useDispatch();
+    const reduxDispatch = useDispatch();
+    const dispatch = useEnhancedDispatch();
     useDynamicTitle();
 
+    // FIXME: Fix the useEnhancedDispatch hook because it doesnt accept Promises (loadBibs, and loadSettings in this case).
     useEffect(() => {
-        dispatch(loadBibs());
-        dispatch(loadSettings());
+        reduxDispatch(loadBibs());
+        reduxDispatch(loadSettings());
     }, []);
 
+    // FIXME: Dont't use onSnapshot listener here as it causes a loop. Only use it for retreiving data for collaborative bibliographies.
     useEffect(() => {
         if (!currentUser) return;
 
@@ -41,6 +44,7 @@ export default function App() {
 
         const unsubscribeUsers = onSnapshot(usersCollection, (snapshot) => {
             const userData = snapshot.docs.find((sDoc) => sDoc.id === currentUser.uid)?.data();
+            // console.log(userData);
             if (userData?.bibliographies && userData?.settings) {
                 dispatch(mergeWithCurrentBibs({ bibs: JSON.parse(userData.bibliographies) }));
                 dispatch(mergeWithCurrentSettings({ settings: JSON.parse(userData.settings) }));
@@ -62,6 +66,7 @@ export default function App() {
             const updatedCoBibs = [];
             coBibsIds.forEach((id) => {
                 const coBibData = snapshot.docs.find((sDoc) => sDoc.id === id)?.data();
+                // console.log(coBibData);
                 updatedCoBibs.push(JSON.parse(coBibData));
             });
 

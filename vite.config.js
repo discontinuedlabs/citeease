@@ -5,6 +5,10 @@ import { VitePWA } from "vite-plugin-pwa";
 export default defineConfig(({ mode }) => {
     const { VITE_PUBLIC_URL } = loadEnv(mode, process.cwd());
     return {
+        server: {
+            port: 3000,
+        },
+
         base: VITE_PUBLIC_URL,
 
         build: {
