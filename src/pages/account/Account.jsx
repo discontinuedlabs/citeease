@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useAuth } from "../../context/AuthContext";
 import { ChangePasswordDialog, DeleteAccountDialog, UpdateEmailDialog } from "../settings/SettingTools";
@@ -21,30 +21,30 @@ export default function Account() {
         return false;
     });
     const dispatch = useDispatch();
-    const [loggedOut, setLoggedOut] = useState(!currentUser);
+    // const [loggedOut, setLoggedOut] = useState(!currentUser);
 
-    useEffect(() => {
-        // WATCH: This effect should execute only when there's a change in the 'currentUser' state.
-        // If the 'loggedOut' state is true (which depends on the 'currentUser' state being falsy),
-        // then it proceeds with its task. This is because the 'useAuth().signOut()' function
-        // doesn't immediately set the 'currentUser' state to null upon resolving its promise;
-        // it retains the 'currentUser' for a brief period, necessitating this useEffect.
-        if (loggedOut) {
-            navigate("/");
-            dispatch(deleteAllBibs());
-            dispatch(resetAllSettings());
-            // TODO: show success taost message
-        }
-    }, [currentUser]);
+    // useEffect(() => {
+    //     // WATCH: This effect should execute only when there's a change in the 'currentUser' state.
+    //     // If the 'loggedOut' state is true (which depends on the 'currentUser' state being falsy),
+    //     // then it proceeds with its task. This is because the 'useAuth().signOut()' function
+    //     // doesn't immediately set the 'currentUser' state to null upon resolving its promise;
+    //     // it retains the 'currentUser' for a brief period, necessitating this useEffect.
+    //     if (loggedOut) {
+    //         navigate("/");
+    //         dispatch(deleteAllBibs());
+    //         dispatch(resetAllSettings());
+    //         // TODO: show success taost message
+    //     }
+    // }, [currentUser]);
 
     // TODO: Show confirm dialog first
     async function handleLogout() {
-        try {
-            setLogoutLoading(true);
-            await logout();
-            setLoggedOut(true);
-        } catch (error) {
-            // TODO: Show taost message for error
+        setLogoutLoading(true);
+        const credentials = await logout();
+        if (!credentials) {
+            navigate("/");
+            dispatch(deleteAllBibs());
+            dispatch(resetAllSettings());
         }
         setLogoutLoading(false);
     }

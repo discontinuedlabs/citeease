@@ -10,9 +10,11 @@ import {
     signInWithEmailAndPassword,
     signOut,
     updatePassword,
+    updateProfile,
     verifyBeforeUpdateEmail,
 } from "firebase/auth";
-import { auth } from "../data/db/firebase/firebase";
+import { deleteDoc, doc } from "firebase/firestore";
+import db, { auth } from "../data/db/firebase/firebase";
 
 const AuthContext = createContext();
 
@@ -33,8 +35,9 @@ export function AuthProvider({ children }) {
         return unsubscribe;
     }, []);
 
-    async function signup(email, password) {
-        return createUserWithEmailAndPassword(auth, email, password);
+    async function signup(email, password, displayName) {
+        await createUserWithEmailAndPassword(auth, email, password);
+        await updateProfile(auth.currentUser, { displayName });
     }
 
     async function login(email, password) {
@@ -42,7 +45,9 @@ export function AuthProvider({ children }) {
     }
 
     async function logout() {
-        return signOut(auth);
+        await signOut(auth);
+        console.log(auth.currentUser);
+        return auth.currentUser;
     }
 
     async function verifyEmail() {
@@ -64,6 +69,8 @@ export function AuthProvider({ children }) {
     }
 
     async function deleteAccount(password) {
+        const userDocRef = doc(db, "users", currentUser.uid);
+        await deleteDoc(userDocRef);
         const credential = EmailAuthProvider.credential(currentUser.email, password);
         await reauthenticateWithCredential(auth.currentUser, credential);
         return deleteUser(currentUser);

@@ -77,7 +77,7 @@
     "scripts": {
         "predeploy": "npm run build",
         "deploy": "gh-pages -d build",
-        "start": "vite",
+        "start": "vite --open",
         "build": "vite build",
         "serve": "vite preview",
         "test": "jest",

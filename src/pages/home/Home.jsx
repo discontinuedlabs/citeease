@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import ContextMenu from "../../components/ui/ContextMenu";
 import BibliographyCard from "../../components/ui/BibliographyCard";
 import { CitationStylesMenu } from "../bibliography/BibliographyTools";
@@ -12,6 +12,7 @@ import { CoBibsSearchDialog } from "./HomeTools";
 import { useModal } from "../../context/ModalContext.tsx";
 import Icon from "../../components/ui/Icon";
 import { Button } from "../../components/ui/StyledButtons";
+import { useEnhancedDispatch } from "../../hooks/hooks.tsx";
 
 export default function Home() {
     const bibliographies = useSelector((state) => state.bibliographies);
@@ -20,7 +21,7 @@ export default function Home() {
     const [coBibsSearchDialogVisible, setCoBibsSearchDialogVisible] = useState(false);
     const { currentUser } = useAuth();
     const navigate = useNavigate();
-    const dispatch = useDispatch();
+    const dispatch = useEnhancedDispatch();
     const modal = useModal();
 
     function addNewBibWithStyle(style) {

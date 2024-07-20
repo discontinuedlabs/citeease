@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import { HashRouter } from "react-router-dom";
+import { HashRouter as Router } from "react-router-dom";
 import { Provider as ReduxeProvider } from "react-redux";
 import App from "./App";
 import store from "./data/store/store.ts";
@@ -11,7 +11,7 @@ import ModalProvider from "./context/ModalContext.tsx";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
     <React.StrictMode>
-        <HashRouter>
+        <Router>
             <AuthProvider>
                 <ReduxeProvider store={store}>
                     <ModalProvider>
@@ -19,6 +19,6 @@ root.render(
                     </ModalProvider>
                 </ReduxeProvider>
             </AuthProvider>
-        </HashRouter>
+        </Router>
     </React.StrictMode>
 );

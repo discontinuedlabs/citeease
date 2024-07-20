@@ -6,21 +6,20 @@ import { uid } from "../../../utils/utils.ts";
 
 const initialState = [];
 
-function save(newState, currentUser) {
+function save(newState, currentUser = undefined) {
     const serializedState = JSON.stringify(newState);
     dexieDB.items.put({ id: "bibliographies", value: serializedState });
 
-    console.log(currentUser);
-
-    if (currentUser) {
-        const parsedCurrentUser = JSON.parse(currentUser);
+    if (!currentUser) return;
+    const parsedCurrentUser = JSON.parse(currentUser);
+    if (parsedCurrentUser) {
         const userRef = doc(firestoreDB, "users", parsedCurrentUser?.uid);
-        setDoc(userRef, { bibliographies: JSON.stringify(newState) });
+        setDoc(userRef, { bibliographies: serializedState });
 
         newState.forEach((bib) => {
             if (bib?.collab?.open) {
                 const coBibsRef = doc(firestoreDB, "coBibs", bib?.collab?.id);
-                setDoc(coBibsRef, { bibliography: JSON.stringify(newState) });
+                setDoc(coBibsRef, { bibliography: serializedState });
             }
         });
     }
@@ -42,6 +41,7 @@ const bibsSlice = createSlice({
     initialState,
     reducers: {
         mergeWithCurrent: (bibs, action) => {
+            console.log(action);
             // Prompt the user if they want to merge them first
             if (!action.payload.bibs) return bibs;
             const newBibs = action.payload.bibs;
@@ -390,8 +390,8 @@ const bibsSlice = createSlice({
             save(newState, action.payload.currentUser);
             return newState;
         },
-        deleteAllBibs: (action) => {
-            save(initialState, action.payload?.saveToFirestore);
+        deleteAllBibs: () => {
+            save(initialState);
             return initialState;
         },
     },

@@ -1,10 +1,14 @@
 import { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { collection, doc, onSnapshot, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot, setDoc } from "firebase/firestore";
 import Bibliography from "./pages/bibliography/Bibliography";
 import Home from "./pages/home/Home";
-import { loadFromIndexedDB as loadBibs, mergeWithCurrent as mergeWithCurrentBibs } from "./data/store/slices/bibsSlice";
+import {
+    deleteAllBibs,
+    loadFromIndexedDB as loadBibs,
+    mergeWithCurrent as mergeWithCurrentBibs,
+} from "./data/store/slices/bibsSlice";
 import {
     loadFromIndexedDB as loadSettings,
     mergeWithCurrent as mergeWithCurrentSettings,
@@ -20,6 +24,7 @@ import Account from "./pages/account/Account";
 import ForgotPassword from "./pages/account/ForgotPassword";
 import firestoreDB from "./data/db/firebase/firebase";
 import { useDynamicTitle, useEnhancedDispatch } from "./hooks/hooks.tsx";
+import { useModal } from "./context/ModalContext.tsx";
 
 export default function App() {
     const bibliographies = useSelector((state) => state.bibliographies);
@@ -28,6 +33,7 @@ export default function App() {
     const reduxDispatch = useDispatch();
     const dispatch = useEnhancedDispatch();
     useDynamicTitle();
+    const modal = useModal();
 
     // FIXME: Fix the useEnhancedDispatch hook because it doesnt accept Promises (loadBibs, and loadSettings in this case).
     useEffect(() => {
@@ -35,30 +41,51 @@ export default function App() {
         reduxDispatch(loadSettings());
     }, []);
 
-    // FIXME: Dont't use onSnapshot listener here as it causes a loop. Only use it for retreiving data for collaborative bibliographies.
+    // TODO: This logic should be part of the signing in process so it won't be disturbed by user's actions
+    useEffect(() => {
+        async function fetchUserData() {
+            if (!currentUser) return;
+
+            const userDocRef = doc(firestoreDB, "users", currentUser.uid);
+            const docSnap = await getDoc(userDocRef);
+
+            if (docSnap.exists()) {
+                const userData = docSnap.data();
+                console.log(userData);
+                if (userData?.bibliographies) {
+                    dispatch(mergeWithCurrentBibs({ bibs: JSON.parse(userData.bibliographies) }));
+                }
+                if (userData?.settings) {
+                    dispatch(mergeWithCurrentSettings({ settings: JSON.parse(userData.settings) }));
+                }
+            } else {
+                modal.open({
+                    title: "Associate current data with this email?",
+                    message:
+                        "Do you want to associate your current data with this email? If you press 'No', your current data will be lost forever. If you press 'Yes' your current data will be saved on the server with your email.",
+                    actions: [
+                        [
+                            "Yes",
+                            () =>
+                                setDoc(doc(firestoreDB, "users", currentUser.uid), {
+                                    bibliographies: JSON.stringify(bibliographies),
+                                    settings: JSON.stringify(settings),
+                                }),
+                            { autoFocus: true },
+                        ],
+                        ["No", () => dispatch(deleteAllBibs())],
+                    ],
+                });
+            }
+        }
+
+        fetchUserData();
+    }, [currentUser]);
+
     useEffect(() => {
         if (!currentUser) return;
 
-        const usersCollection = collection(firestoreDB, "users");
         const coBibsCollection = collection(firestoreDB, "coBibs");
-
-        const unsubscribeUsers = onSnapshot(usersCollection, (snapshot) => {
-            const userData = snapshot.docs.find((sDoc) => sDoc.id === currentUser.uid)?.data();
-            // console.log(userData);
-            if (userData?.bibliographies && userData?.settings) {
-                dispatch(mergeWithCurrentBibs({ bibs: JSON.parse(userData.bibliographies) }));
-                dispatch(mergeWithCurrentSettings({ settings: JSON.parse(userData.settings) }));
-            } else {
-                try {
-                    setDoc(doc(firestoreDB, "users", currentUser.uid), {
-                        bibliographies: JSON.stringify(bibliographies),
-                        settings: JSON.stringify(settings),
-                    });
-                } catch (error) {
-                    console.error("Error adding document: ", error);
-                }
-            }
-        });
 
         const unsubscribeCoBibs = onSnapshot(coBibsCollection, (snapshot) => {
             const coBibsIds = bibliographies.filter((bib) => bib?.collab?.open).map((bib) => bib.collab.id);
@@ -66,7 +93,7 @@ export default function App() {
             const updatedCoBibs = [];
             coBibsIds.forEach((id) => {
                 const coBibData = snapshot.docs.find((sDoc) => sDoc.id === id)?.data();
-                // console.log(coBibData);
+                console.log(coBibData);
                 updatedCoBibs.push(JSON.parse(coBibData));
             });
 
@@ -74,10 +101,7 @@ export default function App() {
         });
 
         // eslint-disable-next-line consistent-return
-        return () => {
-            unsubscribeUsers();
-            unsubscribeCoBibs();
-        };
+        return () => unsubscribeCoBibs();
     }, [currentUser]);
 
     return (
