@@ -9,8 +9,8 @@
 -   [Upcoming Features (to-do)](#upcoming-features-to-do)
 -   [Getting Started](#getting-started)
 -   [Testing](#testing)
--   [License](#license)
 -   [Contributing](#contributing)
+-   [License](#license)
 -   [Contact](#contact)
 
 ## What is CiteEase?
@@ -86,13 +86,13 @@ Now you can access the app at `http://localhost:3000`.
 
 Rigorous testing is essential for ensuring the quality and stability of any application. We acknowledge its importance and plan to incorporate a comprehensive testing suite in the future. Currently, however, automated testing is not actively implemented in this project.
 
-## License
-
-CiteEase is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
 ## Contributing
 
 While we don't actively seek contributions, we appreciate your interest. If you encounter issues or have suggestions, please feel free to open an issue.
+
+## License
+
+CiteEase is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Contact
 
