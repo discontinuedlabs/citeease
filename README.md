@@ -88,7 +88,7 @@ Rigorous testing is essential for ensuring the quality and stability of any appl
 
 ## License
 
-CiteEase is licensed under the MIT License. See the `LICENSE` file for details.
+CiteEase is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
