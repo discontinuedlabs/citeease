@@ -32,6 +32,10 @@
         @apply ms-10;
     }
 
+    code {
+        @apply rounded-md bg-secondary-800 px-2 py-1 text-white;
+    }
+
     button {
         @apply cursor-pointer select-none font-sans;
     }

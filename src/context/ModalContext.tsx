@@ -1,6 +1,7 @@
 /* eslint-disable react/require-default-props, no-unused-vars */
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import Markdown from "react-markdown";
 import { uid } from "../utils/utils.ts";
 import Icon from "../components/ui/Icon";
 import { Button, SoftButton } from "../components/ui/StyledButtons";
@@ -65,13 +66,11 @@ function Modal({ id, title, message, content, actions, icon, showCloseIcon = tru
                         )}
                     </header>
 
-                    <article
-                        className={`border-t-4 border-indigo-500 bg-white p-5 shadow-md ${!actions ? "rounded-bl-lg rounded-br-lg" : ""}`}
-                    >
+                    <article className={`bg-white p-5 shadow-md ${!actions ? "rounded-bl-lg rounded-br-lg" : ""}`}>
                         {message && (
-                            <div className="mb-4 flex items-start">
+                            <div className="flex items-start">
                                 {icon}
-                                <p className="m-0">{message}</p>
+                                <Markdown className="m-0">{message}</Markdown>
                             </div>
                         )}
                         {content && <div>{content}</div>}
@@ -95,7 +94,7 @@ function Modal({ id, title, message, content, actions, icon, showCloseIcon = tru
                                                 color={
                                                     options?.color || /cancel|no/i.test(action[0]) ? "red" : undefined
                                                 }
-                                                className=""
+                                                className="min-w-20"
                                                 key={id}
                                                 onClick={() => {
                                                     action[1]();

@@ -38,34 +38,39 @@ export function AuthProvider({ children }) {
     async function signup(email, password, displayName) {
         await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(auth.currentUser, { displayName });
+        return auth.currentUser;
     }
 
     async function login(email, password) {
-        return signInWithEmailAndPassword(auth, email, password);
+        await signInWithEmailAndPassword(auth, email, password);
+        return auth.currentUser;
     }
 
     async function logout() {
         await signOut(auth);
-        console.log(auth.currentUser);
         return auth.currentUser;
     }
 
     async function verifyEmail() {
-        return sendEmailVerification(currentUser);
+        await sendEmailVerification(currentUser);
+        return auth.currentUser;
     }
 
     async function resetPassword(email) {
-        return sendPasswordResetEmail(auth, email);
+        await sendPasswordResetEmail(auth, email);
+        return auth.currentUser;
     }
 
     async function updateEmail(email) {
-        return verifyBeforeUpdateEmail(currentUser, email);
+        await verifyBeforeUpdateEmail(currentUser, email);
+        return auth.currentUser;
     }
 
     async function changePassword(prevPassword, newPassword) {
         const credential = EmailAuthProvider.credential(currentUser.email, prevPassword);
         await reauthenticateWithCredential(auth.currentUser, credential);
-        return updatePassword(currentUser, newPassword);
+        await updatePassword(currentUser, newPassword);
+        return auth.currentUser;
     }
 
     async function deleteAccount(password) {
@@ -73,7 +78,8 @@ export function AuthProvider({ children }) {
         await deleteDoc(userDocRef);
         const credential = EmailAuthProvider.credential(currentUser.email, password);
         await reauthenticateWithCredential(auth.currentUser, credential);
-        return deleteUser(currentUser);
+        await deleteUser(currentUser);
+        return auth.currentUser;
     }
 
     const value = useMemo(

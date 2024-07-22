@@ -1,6 +1,11 @@
 import { useId, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { doc, setDoc } from "firebase/firestore";
+import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "../../context/AuthContext";
+import db from "../../data/db/firebase/firebase";
+import { useModal } from "../../context/ModalContext.tsx";
+import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
 
 export default function Signup() {
     const [isLoading, setIsLoading] = useState(false);
@@ -12,6 +17,17 @@ export default function Signup() {
     const nameRef = useRef();
     const { signup } = useAuth();
     const navigate = useNavigate();
+    const bibliographies = useSelector((state) => state.bibliographies);
+    const settings = useSelector((state) => state.settings);
+    const modal = useModal();
+    const dispatch = useDispatch();
+
+    function moveLocalDataToFirestore(credintials) {
+        setDoc(doc(db, "users", credintials.uid), {
+            bibliographies: JSON.stringify(bibliographies),
+            settings: JSON.stringify(settings),
+        });
+    }
 
     async function handleSubmit(event) {
         event.preventDefault();
@@ -22,42 +38,23 @@ export default function Signup() {
             try {
                 setError("");
                 setIsLoading(true);
-                await signup(emailRef.current.value, passwordRef.current.value, nameRef.current.value);
-                // const credintials = await signup(emailRef.current.value, passwordRef.current.value, nameRef.current.value);
+                const credintials = await signup(
+                    emailRef.current.value,
+                    passwordRef.current.value,
+                    nameRef.current.value
+                );
 
-                // if (!currentUser) return;
-
-                // const userDocRef = doc(firestoreDB, "users", currentUser.uid);
-                // const docSnap = await getDoc(userDocRef);
-
-                // if (docSnap.exists()) {
-                //     const userData = docSnap.data();
-                //     console.log(userData);
-                //     if (userData?.bibliographies) {
-                //         dispatch(mergeWithCurrentBibs({ bibs: JSON.parse(userData.bibliographies) }));
-                //     }
-                //     if (userData?.settings) {
-                //         dispatch(mergeWithCurrentSettings({ settings: JSON.parse(userData.settings) }));
-                //     }
-                // } else {
-                //     modal.open({
-                //         title: "Associate current data with this email?",
-                //         message:
-                //             "Do you want to associate your current data with this email? If you press 'No', your current data will be lost forever. If you press 'Yes' your current data will be saved on the server with your email.",
-                //         actions: [
-                //             [
-                //                 "Yes",
-                //                 () =>
-                //                     setDoc(doc(firestoreDB, "users", currentUser.uid), {
-                //                         bibliographies: JSON.stringify(bibliographies),
-                //                         settings: JSON.stringify(settings),
-                //                     }),
-                //                 { autoFocus: true },
-                //             ],
-                //             ["No", () => dispatch(deleteAllBibs())],
-                //         ],
-                //     });
-                // }
+                if (bibliographies.length > 0) {
+                    modal.open({
+                        title: "Associate current data with this email?",
+                        message:
+                            "Do you want to associate your current data with this email? Choosing 'No' will delete your current data permanently.",
+                        actions: [
+                            ["Yes", () => moveLocalDataToFirestore(credintials), { autoFocus: true }],
+                            ["No", () => dispatch(deleteAllBibs())],
+                        ],
+                    });
+                }
 
                 navigate("/");
                 // TODO: Show success toast message
