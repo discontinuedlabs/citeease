@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Bibliography } from "../types/types.ts";
@@ -86,4 +86,17 @@ export function useDynamicTitle(
     }, [title]);
 
     return title;
+}
+
+export function useTimeout(callback: () => void, ms: number = 3000) {
+    const savedCallback = useRef(callback);
+
+    useEffect(() => {
+        savedCallback.current = callback;
+    }, [callback]);
+
+    useEffect(() => {
+        const functionId = setTimeout(() => savedCallback.current(), ms);
+        return () => clearTimeout(functionId);
+    }, []);
 }

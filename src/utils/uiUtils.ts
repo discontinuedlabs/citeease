@@ -12,7 +12,7 @@ type HSLValue = [number, number, number, number];
  * @param {number} [intensity=10] - The intensity of the gradient. Determines how much lighter or darker the colors in the gradient will be. Default is 10.
  * @returns {[string, string]} - An array containing two strings representing the lightened and darkened versions of the input color in HSLA format.
  */
-export function getGradient(color: string, intensity: number = 15): [string, string] {
+export function getGradient(color: string, intensity: number = 10): [string, string, string] {
     function hexToRgb(hex: string): RGBValue {
         const r = parseInt(hex.slice(1, 3), 16);
         const g = parseInt(hex.slice(3, 5), 16);
@@ -90,6 +90,7 @@ export function getGradient(color: string, intensity: number = 15): [string, str
         const match = /^[a-zA-Z]+$/.exec(value);
         if (!match) throw new Error("Invalid color string");
         const rgbValues = TAG_COLOR_VALUES[value].match(/\d+/g)!.map((x) => parseInt(x, 10));
+        console.log(rgbValues);
         return rgbToHsla(rgbValues);
     }
 
@@ -160,10 +161,11 @@ export function getGradient(color: string, intensity: number = 15): [string, str
     const hsla = convertColor(color);
     const lightenedColor = lightenColor(hsla);
     const lightColor = `hsla(${Math.floor(lightenedColor[0])},${Math.floor(lightenedColor[1])}%,${Math.floor(lightenedColor[2])}%,${Math.floor(lightenedColor[3])}%)`;
+    const mainColor = `hsla(${Math.floor(hsla[0])},${Math.floor(hsla[1])}%,${Math.floor(hsla[2])}%,${Math.floor(hsla[3])}%)`;
     const darkenedColor = darkenColor(hsla);
     const darkColor = `hsla(${Math.floor(darkenedColor[0])},${Math.floor(darkenedColor[1])}%,${Math.floor(darkenedColor[2])}%,${Math.floor(darkenedColor[3])}%)`;
 
-    return [lightColor, darkColor];
+    return [lightColor, mainColor, darkColor];
 }
 
 /**

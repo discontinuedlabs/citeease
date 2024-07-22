@@ -55,4 +55,20 @@
     .transition-regular {
         @apply transition duration-150 ease-in-out;
     }
+
+    .toast-component {
+        animation-name: slideInFromTop;
+        animation-duration: 0.4s;
+    }
+
+    @keyframes slideInFromTop {
+        0% {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
 }

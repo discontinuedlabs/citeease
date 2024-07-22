@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import db from "../../data/db/firebase/firebase";
 import { useAuth } from "../../context/AuthContext";
 import { mergeWithCurrentBibs } from "../../data/store/slices/bibsSlice";
+import { useToast } from "../../context/ToastContext.tsx";
 
 export function CoBibsSearchDialog({ setIsVisible }) {
     const [searchResult, setSearchResult] = useState(null);
@@ -17,6 +18,7 @@ export function CoBibsSearchDialog({ setIsVisible }) {
     const bibliographies = useSelector((state) => state.bibliographies);
     const { currentUser } = useAuth();
     const dispatch = useDispatch();
+    const toast = useToast();
 
     async function handleSearch(event) {
         event.preventDefault();
@@ -63,7 +65,12 @@ export function CoBibsSearchDialog({ setIsVisible }) {
 
                 // push the user to coBib.collaborators
                 // push the coBib to the users bibliographies array
-                // Show toast: `You successfully joined ${result.title} (${result.collab.id})`
+
+                toast.show({
+                    message: `You successfully joined ${searchResult.title} (${searchResult.collab.id})`,
+                    icon: "check",
+                    color: "green",
+                });
             } else {
                 setPasswordError("The password you entered is wrong");
             }

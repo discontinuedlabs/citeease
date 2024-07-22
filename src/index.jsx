@@ -7,6 +7,7 @@ import App from "./App";
 import store from "./data/store/store.ts";
 import { AuthProvider } from "./context/AuthContext";
 import ModalProvider from "./context/ModalContext.tsx";
+import ToastProvider from "./context/ToastContext.tsx";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -16,9 +17,11 @@ root.render(
             <Router>
                 <AuthProvider>
                     <ReduxeProvider store={store}>
-                        <ModalProvider>
-                            <App />
-                        </ModalProvider>
+                        <ToastProvider>
+                            <ModalProvider>
+                                <App />
+                            </ModalProvider>
+                        </ToastProvider>
                     </ReduxeProvider>
                 </AuthProvider>
             </Router>
