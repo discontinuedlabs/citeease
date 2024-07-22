@@ -60,7 +60,7 @@ const settingsSlice = createSlice({
     name: "settings",
     initialState,
     reducers: {
-        mergeWithCurrent: (settings, action) => {
+        replaceAllSettings: (settings, action) => {
             if (!action.payload.settings) return settings;
             const newState = action.payload.settings;
             saveToIndexedDB(newState);
@@ -98,6 +98,6 @@ const settingsSlice = createSlice({
     },
 });
 
-export const { mergeWithCurrent, restoreDefaultTags, addTag, deleteTag, resetAllSettings } = settingsSlice.actions;
+export const { replaceAllSettings, restoreDefaultTags, addTag, deleteTag, resetAllSettings } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

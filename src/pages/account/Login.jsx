@@ -4,8 +4,8 @@ import { useDispatch } from "react-redux";
 import { doc, getDoc } from "firebase/firestore";
 import { useAuth } from "../../context/AuthContext";
 import db from "../../data/db/firebase/firebase";
-import { mergeWithCurrent as mergeWithCurrentSettings } from "../../data/store/slices/settingsSlice";
-import { mergeWithCurrent as mergeWithCurrentBibs } from "../../data/store/slices/bibsSlice";
+import { replaceAllSettings } from "../../data/store/slices/settingsSlice";
+import { replaceAllBibs } from "../../data/store/slices/bibsSlice";
 
 export default function Login() {
     const [isLoading, setIsLoading] = useState(false);
@@ -32,10 +32,10 @@ export default function Login() {
                 const userData = docSnap.data();
                 console.log(userData);
                 if (userData?.bibliographies) {
-                    dispatch(mergeWithCurrentBibs({ bibs: JSON.parse(userData.bibliographies) }));
+                    dispatch(replaceAllBibs({ bibs: JSON.parse(userData.bibliographies) }));
                 }
                 if (userData?.settings) {
-                    dispatch(mergeWithCurrentSettings({ settings: JSON.parse(userData.settings) }));
+                    dispatch(replaceAllSettings({ settings: JSON.parse(userData.settings) }));
                 }
             }
 

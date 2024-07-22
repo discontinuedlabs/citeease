@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { collection, onSnapshot } from "firebase/firestore";
 import Bibliography from "./pages/bibliography/Bibliography";
 import Home from "./pages/home/Home";
-import { loadFromIndexedDB as loadBibs, mergeWithCurrent as mergeWithCurrentBibs } from "./data/store/slices/bibsSlice";
+import { loadFromIndexedDB as loadBibs, mergeWithCurrentBibs } from "./data/store/slices/bibsSlice";
 import { loadFromIndexedDB as loadSettings } from "./data/store/slices/settingsSlice";
 import Settings from "./pages/settings/Settings";
 import BibliographySettings from "./pages/bibliography/BibliographySettings";
@@ -16,14 +16,14 @@ import Login from "./pages/account/Login";
 import Account from "./pages/account/Account";
 import ForgotPassword from "./pages/account/ForgotPassword";
 import firestoreDB from "./data/db/firebase/firebase";
-import { useDynamicTitle, useEnhancedDispatch } from "./hooks/hooks.tsx";
+import { useDynamicTitle } from "./hooks/hooks.tsx";
 
 export default function App() {
     const bibliographies = useSelector((state) => state.bibliographies);
     const { currentUser } = useAuth();
     const reduxDispatch = useDispatch();
-    const dispatch = useEnhancedDispatch();
     useDynamicTitle();
+    const dispatch = useDispatch();
 
     // FIXME: Fix the useEnhancedDispatch hook because it doesnt accept Promises (loadBibs, and loadSettings in this case).
     useEffect(() => {

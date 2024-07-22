@@ -2,8 +2,8 @@ import { doc, getDoc } from "firebase/firestore";
 import { useId, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import db from "../../data/db/firebase/firebase";
-import { mergeWithCurrent } from "../../data/store/slices/bibsSlice";
 import { useAuth } from "../../context/AuthContext";
+import { mergeWithCurrentBibs } from "../../data/store/slices/bibsSlice";
 
 export function CoBibsSearchDialog({ setIsVisible }) {
     const [searchResult, setSearchResult] = useState(null);
@@ -15,8 +15,8 @@ export function CoBibsSearchDialog({ setIsVisible }) {
     const searchRef = useRef();
     const passwordRef = useRef();
     const bibliographies = useSelector((state) => state.bibliographies);
-    const dispatch = useDispatch();
     const { currentUser } = useAuth();
+    const dispatch = useDispatch();
 
     async function handleSearch(event) {
         event.preventDefault();
@@ -59,7 +59,7 @@ export function CoBibsSearchDialog({ setIsVisible }) {
                         ],
                     },
                 };
-                dispatch(mergeWithCurrent({ bibs: [newCoBibState] }));
+                dispatch(mergeWithCurrentBibs({ bibs: [newCoBibState] }));
 
                 // push the user to coBib.collaborators
                 // push the coBib to the users bibliographies array

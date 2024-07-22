@@ -40,14 +40,17 @@ const bibsSlice = createSlice({
     name: "bibliographies",
     initialState,
     reducers: {
-        mergeWithCurrent: (bibs, action) => {
-            console.log(action);
-            // Prompt the user if they want to merge them first
+        mergeWithCurrentBibs: (bibs, action) => {
             if (!action.payload.bibs) return bibs;
             const newBibs = action.payload.bibs;
             const newBibsIds = newBibs.map((bib) => bib.id);
             const filteredOldBibs = bibs.filter((bib) => !newBibsIds.includes(bib.id));
             const newState = [...filteredOldBibs, ...newBibs];
+            save(newState, action.payload.currentUser);
+            return newState;
+        },
+        replaceAllBibs: (bibs, action) => {
+            const newState = action.payload.bibs;
             save(newState, action.payload.currentUser);
             return newState;
         },
@@ -401,7 +404,8 @@ const bibsSlice = createSlice({
 });
 
 export const {
-    mergeWithCurrent,
+    mergeWithCurrentBibs,
+    replaceAllBibs,
     enableCollabInBib,
     reEnableCollabInBib,
     disableCollabInBib,
