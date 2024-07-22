@@ -31,26 +31,29 @@ export function TagsManager() {
     }
 
     return (
-        <div>
+        <div className="grid gap-2">
             <div className="flex flex-wrap gap-1">
                 {settings.tags?.map((tag) => (
                     <Tag key={uid()} tagProps={tag} showX onClick={() => dispatch(deleteTag({ tagId: tag.id }))} />
                 ))}
             </div>
-            <form onSubmit={addTagToBib}>
-                <div className="flex grid-cols-2 gap-2 py-2">
-                    <input
-                        className="w-full grid-flow-row-dense rounded-md p-2 font-sans font-bold"
-                        style={{
-                            border: `solid 0.1rem ${TAG_COLOR_VALUES[tagColor]}`,
-                            background: `linear-gradient(to bottom, ${lightColor}, ${darkColor}`,
-                            color: TAG_COLOR_VALUES[tagColor],
-                        }}
-                        type="text"
-                        placeholder="Tag label"
-                        value={tagLabel}
-                        onChange={(event) => setTagLabel(event.target.value)}
-                    />
+            <form onSubmit={addTagToBib} className="grid gap-1 rounded-md bg-overlay-100 p-4">
+                <div className="flex grid-cols-2 gap-2">
+                    <div className="rounded-md bg-white">
+                        <input
+                            className="w-full grid-flow-row-dense rounded-md p-2 font-sans font-bold"
+                            style={{
+                                border: `solid 0.1rem ${TAG_COLOR_VALUES[tagColor]}`,
+                                background: `linear-gradient(to bottom, ${lightColor}, ${darkColor}`,
+                                color: TAG_COLOR_VALUES[tagColor],
+                            }}
+                            type="text"
+                            placeholder="Tag label"
+                            value={tagLabel}
+                            onChange={(event) => setTagLabel(event.target.value)}
+                        />
+                    </div>
+
                     <Button className="text-nowrap" type="submit">
                         Add tag
                     </Button>
