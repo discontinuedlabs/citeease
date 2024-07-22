@@ -29,17 +29,17 @@ export function SoftButton({ className, children, onClick, ...rest }) {
 
 export function Button({ className, children, onClick, color = "#ffd60a", ...rest }) {
     const [isClicked, setIsClicked] = useState(false);
-    const gradient = getGradient(color);
-
-    const upClasses = "transform -translate-y-1 shadow-hard";
-    const downClasses = "transform translate-y-0 shadow-none";
-
-    const dynamicClasses = isClicked ? downClasses : upClasses;
+    const [lightColor, darkColor] = getGradient(color);
 
     return (
         <button
-            className={`border-1 rounded-lg border-solid border-neutral-black p-2 transition-none ${dynamicClasses} ${className}`}
-            style={{ background: gradient }}
+            className={`rounded-lg p-2 transition-none ${className}`}
+            style={{
+                background: `linear-gradient(to bottom, ${color}, ${lightColor}`,
+                border: `0.1rem ${darkColor} solid`,
+                boxShadow: isClicked ? "" : `0 0.25rem 0 ${darkColor}`,
+                transform: isClicked ? "translateY(0)" : "translateY(-0.25rem)",
+            }}
             type="button"
             onClick={onClick}
             onTouchStart={() => setIsClicked(true)}

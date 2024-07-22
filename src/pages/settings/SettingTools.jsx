@@ -20,7 +20,7 @@ export function TagsManager() {
     const [tagLabel, setTagLabel] = useState("");
     const [tagColor, setTagColor] = useState(TAG_COLORS.YELLOW);
     const dispatch = useDispatch();
-    const tagIdleColor = getGradient(getTagBgColors(tagColor)[0]);
+    const [lightColor, darkColor] = getGradient(getTagBgColors(tagColor)[0]);
 
     function addTagToBib(event) {
         event.preventDefault();
@@ -43,7 +43,7 @@ export function TagsManager() {
                         className="w-full grid-flow-row-dense rounded-md p-2 font-sans font-bold"
                         style={{
                             border: `solid 0.1rem ${TAG_COLOR_VALUES[tagColor]}`,
-                            background: tagIdleColor,
+                            background: `linear-gradient(to bottom, ${lightColor}, ${darkColor}`,
                             color: TAG_COLOR_VALUES[tagColor],
                         }}
                         type="text"

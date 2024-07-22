@@ -6,18 +6,13 @@ type RGBValue = number[];
 type HSLValue = [number, number, number, number];
 
 /**
- * Generates a gradient background CSS string based on the provided color.
- * @param {string} color - The input color in hex, rgb, rgba, hsl, or hsla format.
- * @param {number} [intensity=10] - The amount to shift the hue by.
- * @param {"positive" | "negative"} [hueShift="positive"] - The direction to shift the hue.
- * @returns {string} The gradient background CSS string.
- * @throws {Error} If the color format is unsupported.
+ * Generates a gradient based on the input color and intensity.
+ *
+ * @param {string} color - The initial color from which the gradient will be generated. Can be in various formats like hex, rgb, rgba, hsl, hsla, or a predefined string name.
+ * @param {number} [intensity=10] - The intensity of the gradient. Determines how much lighter or darker the colors in the gradient will be. Default is 10.
+ * @returns {[string, string]} - An array containing two strings representing the lightened and darkened versions of the input color in HSLA format.
  */
-export function getGradient(
-    color: string,
-    intensity: number = 5,
-    hueShift: "positive" | "negative" = "negative"
-): string {
+export function getGradient(color: string, intensity: number = 15): [string, string] {
     function hexToRgb(hex: string): RGBValue {
         const r = parseInt(hex.slice(1, 3), 16);
         const g = parseInt(hex.slice(3, 5), 16);
@@ -146,17 +141,29 @@ export function getGradient(
         }
     }
 
-    function increaseHue(hslColor: HSLValue): HSLValue {
+    function lightenColor(hslColor: HSLValue): HSLValue {
         const [h, s, l, a] = hslColor;
-        const newHue = (hueShift === "positive" ? h + intensity : h - intensity) % 360;
-        return [newHue, s, l, a];
+        const newHue = (h + intensity) % 360;
+        const newSaturation = s + intensity;
+        const newLightness = l + intensity;
+        return [newHue, newSaturation, newLightness, a];
+    }
+
+    function darkenColor(hslColor: HSLValue): HSLValue {
+        const [h, s, l, a] = hslColor;
+        const newHue = (h - intensity) % 360;
+        const newSaturation = s + intensity;
+        const newLightness = l - intensity;
+        return [newHue, newSaturation, newLightness, a];
     }
 
     const hsla = convertColor(color);
-    const toColor = increaseHue(hsla);
-    const css = `linear-gradient(to bottom, hsla(${Math.floor(hsla[0])},${Math.floor(hsla[1])}%,${Math.floor(hsla[2])}%,${Math.floor(hsla[3])}%), hsla(${Math.floor(toColor[0])},${Math.floor(toColor[1])}%,${Math.floor(toColor[2])}%,${Math.floor(toColor[3])}%))`;
+    const lightenedColor = lightenColor(hsla);
+    const lightColor = `hsla(${Math.floor(lightenedColor[0])},${Math.floor(lightenedColor[1])}%,${Math.floor(lightenedColor[2])}%,${Math.floor(lightenedColor[3])}%)`;
+    const darkenedColor = darkenColor(hsla);
+    const darkColor = `hsla(${Math.floor(darkenedColor[0])},${Math.floor(darkenedColor[1])}%,${Math.floor(darkenedColor[2])}%,${Math.floor(darkenedColor[3])}%)`;
 
-    return css;
+    return [lightColor, darkColor];
 }
 
 /**

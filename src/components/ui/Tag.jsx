@@ -15,14 +15,26 @@ export default function Tag(props) {
                 style={{
                     border: `${TAG_COLOR_VALUES[tagProps?.color]} solid 2px`,
                     color: TAG_COLOR_VALUES[tagProps?.color],
-                    background: getGradient(bgIdleColor),
+                    background: `linear-gradient(to bottom, ${getGradient(bgIdleColor)[0]}, ${getGradient(bgIdleColor)[1]}`,
                 }}
-                onMouseEnter={(event) => (event.currentTarget.style.background = getGradient(bgHoverColor))}
-                onMouseLeave={(event) => (event.currentTarget.style.background = getGradient(bgIdleColor))}
-                onTouchStart={(event) => (event.currentTarget.style.background = getGradient(bgClickColor))}
-                onTouchEnd={(event) => (event.currentTarget.style.background = getGradient(bgIdleColor))}
-                onMouseDown={(event) => (event.currentTarget.style.background = getGradient(bgClickColor))}
-                onMouseUp={(event) => (event.currentTarget.style.background = getGradient(bgIdleColor))}
+                onMouseEnter={(event) =>
+                    (event.currentTarget.style.background = `linear-gradient(to bottom, ${getGradient(bgHoverColor)[0]}, ${getGradient(bgHoverColor)[1]}`)
+                }
+                onMouseLeave={(event) =>
+                    (event.currentTarget.style.background = `linear-gradient(to bottom, ${getGradient(bgIdleColor)[0]}, ${getGradient(bgIdleColor)[1]}`)
+                }
+                onTouchStart={(event) =>
+                    (event.currentTarget.style.background = `linear-gradient(to bottom, ${getGradient(bgClickColor)[0]}, ${getGradient(bgClickColor)[1]}`)
+                }
+                onTouchEnd={(event) =>
+                    (event.currentTarget.style.background = `linear-gradient(to bottom, ${getGradient(bgIdleColor)[0]}, ${getGradient(bgIdleColor)[1]}`)
+                }
+                onMouseDown={(event) =>
+                    (event.currentTarget.style.background = `linear-gradient(to bottom, ${getGradient(bgClickColor)[0]}, ${getGradient(bgClickColor)[1]}`)
+                }
+                onMouseUp={(event) =>
+                    (event.currentTarget.style.background = `linear-gradient(to bottom, ${getGradient(bgIdleColor)[0]}, ${getGradient(bgIdleColor)[1]}`)
+                }
                 onClick={() => (onClick ? onClick(tagProps) : "")}
             >
                 {tagProps.label}
