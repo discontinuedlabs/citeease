@@ -1,8 +1,8 @@
 import { useDispatch } from "react-redux";
-import { SettingsSection, SettingsNavigate } from "./SettingsComponents.jsx";
-import { TagsManager } from "./SettingTools.jsx";
+import { SettingsSection, SettingsNavigate } from "./SettingsComponents";
+import { TagsManager } from "./SettingTools";
 import { useModal } from "../../context/ModalContext.tsx";
-import { restoreDefaultTags } from "../../data/store/slices/settingsSlice.js";
+import { restoreDefaultTags } from "../../data/store/slices/settingsSlice";
 
 export default function Settings() {
     const tagsManagerModal = useModal();
@@ -12,7 +12,6 @@ export default function Settings() {
         tagsManagerModal.open({
             title: "Tags Manager",
             content: <TagsManager />,
-            message: "Manage your own tags",
             actions: [
                 [
                     "Restore default tags",

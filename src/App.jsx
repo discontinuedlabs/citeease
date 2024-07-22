@@ -43,6 +43,13 @@ export default function App() {
 
     // TODO: This logic should be part of the signing in process so it won't be disturbed by user's actions
     useEffect(() => {
+        function moveLocalDataToFirestore() {
+            setDoc(doc(firestoreDB, "users", currentUser.uid), {
+                bibliographies: JSON.stringify(bibliographies),
+                settings: JSON.stringify(settings),
+            });
+        }
+
         async function fetchUserData() {
             if (!currentUser) return;
 
@@ -58,21 +65,13 @@ export default function App() {
                 if (userData?.settings) {
                     dispatch(mergeWithCurrentSettings({ settings: JSON.parse(userData.settings) }));
                 }
-            } else {
+            } else if (bibliographies.size !== 0) {
                 modal.open({
                     title: "Associate current data with this email?",
                     message:
-                        "Do you want to associate your current data with this email? If you press 'No', your current data will be lost forever. If you press 'Yes' your current data will be saved on the server with your email.",
+                        "Do you want to associate your current data with this email? Choosing 'No' will delete your current data permanently.",
                     actions: [
-                        [
-                            "Yes",
-                            () =>
-                                setDoc(doc(firestoreDB, "users", currentUser.uid), {
-                                    bibliographies: JSON.stringify(bibliographies),
-                                    settings: JSON.stringify(settings),
-                                }),
-                            { autoFocus: true },
-                        ],
+                        ["Yes", moveLocalDataToFirestore, { autoFocus: true }],
                         ["No", () => dispatch(deleteAllBibs())],
                     ],
                 });

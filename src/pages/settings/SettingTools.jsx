@@ -38,24 +38,29 @@ export function TagsManager() {
                 ))}
             </div>
             <form onSubmit={addTagToBib}>
-                <input
-                    className="rounded-md p-2 font-sans font-bold"
-                    style={{
-                        border: `solid 0.1rem ${TAG_COLOR_VALUES[tagColor]}`,
-                        background: tagIdleColor,
-                        color: TAG_COLOR_VALUES[tagColor],
-                    }}
-                    type="text"
-                    placeholder="Tag label"
-                    value={tagLabel}
-                    onChange={(event) => setTagLabel(event.target.value)}
-                />
-                <Button type="submit">Add tag</Button>
+                <div className="flex grid-cols-2 gap-2 py-2">
+                    <input
+                        className="w-full grid-flow-row-dense rounded-md p-2 font-sans font-bold"
+                        style={{
+                            border: `solid 0.1rem ${TAG_COLOR_VALUES[tagColor]}`,
+                            background: tagIdleColor,
+                            color: TAG_COLOR_VALUES[tagColor],
+                        }}
+                        type="text"
+                        placeholder="Tag label"
+                        value={tagLabel}
+                        onChange={(event) => setTagLabel(event.target.value)}
+                    />
+                    <Button className="text-nowrap" type="submit">
+                        Add tag
+                    </Button>
+                </div>
+
                 <div className="flex flex-wrap gap-1">
                     {Object.values(TAG_COLORS)?.map((color) => {
                         return (
                             <Tag
-                                className="h-5 w-5 rounded-full"
+                                className="h-8 w-8 rounded-full"
                                 key={uid()}
                                 tagProps={{ color, id: color, label: "" }}
                                 onClick={() => setTagColor(color)}

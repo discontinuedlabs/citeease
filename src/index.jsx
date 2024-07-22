@@ -7,18 +7,21 @@ import App from "./App";
 import store from "./data/store/store.ts";
 import { AuthProvider } from "./context/AuthContext";
 import ModalProvider from "./context/ModalContext.tsx";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
     <React.StrictMode>
-        <Router>
-            <AuthProvider>
-                <ReduxeProvider store={store}>
-                    <ModalProvider>
-                        <App />
-                    </ModalProvider>
-                </ReduxeProvider>
-            </AuthProvider>
-        </Router>
+        <ErrorBoundary>
+            <Router>
+                <AuthProvider>
+                    <ReduxeProvider store={store}>
+                        <ModalProvider>
+                            <App />
+                        </ModalProvider>
+                    </ReduxeProvider>
+                </AuthProvider>
+            </Router>
+        </ErrorBoundary>
     </React.StrictMode>
 );

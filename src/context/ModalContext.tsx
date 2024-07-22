@@ -56,9 +56,9 @@ function Modal({ id, title, message, content, actions, icon, showCloseIcon = tru
                     className="m-5 grid max-w-3xl items-start rounded-lg bg-neutral-white shadow-xl"
                 >
                     <header className="flex justify-between p-5">
-                        <h3>{title}</h3>
+                        <h3 className="m-0">{title}</h3>
                         {showCloseIcon && (
-                            <SoftButton className="top-0 p-0" onClick={() => close(id)}>
+                            <SoftButton className="top-0 px-0 py-0" onClick={() => close(id)}>
                                 {/* eslint-disable-next-line react/no-children-prop */}
                                 <Icon name="close" className="" children={undefined} />
                             </SoftButton>
