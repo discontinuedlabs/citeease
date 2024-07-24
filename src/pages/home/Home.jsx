@@ -11,8 +11,8 @@ import { useAuth } from "../../context/AuthContext";
 import { CoBibsSearchDialog } from "./HomeTools";
 import { useModal } from "../../context/ModalContext.tsx";
 import Icon from "../../components/ui/Icon";
-import { Button } from "../../components/ui/StyledButtons";
 import { useEnhancedDispatch } from "../../hooks/hooks.tsx";
+import { Fab } from "../../components/ui/MaterialComponents";
 
 export default function Home() {
     const bibliographies = useSelector((state) => state.bibliographies);
@@ -83,13 +83,11 @@ export default function Home() {
                 )}
             </div>
 
-            <Button
-                className="fixed bottom-5 right-5 border-2 border-neutral-black"
+            <Fab
+                label="Add bibliography"
+                className="fixed bottom-5 right-5"
                 onClick={() => setAddBibOptionsMenuVisible(true)}
-                type="button"
-            >
-                Add bibliography
-            </Button>
+            />
 
             {addBibOptionsMenuVisible && (
                 <div role="dialog" aria-modal="true">

@@ -37,7 +37,7 @@
     }
 
     button {
-        @apply cursor-pointer select-none font-sans;
+        @apply font-sans;
     }
 
     .hanging-indentation {

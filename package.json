@@ -26,6 +26,7 @@
         "@citation-js/core": "^0.7.11",
         "@citation-js/plugin-bibtex": "^0.7.11",
         "@citation-js/plugin-csl": "^0.7.11",
+        "@material/web": "^1.5.1",
         "@reduxjs/toolkit": "^2.2.5",
         "citation-js": "^0.7.11",
         "citeproc": "^2.4.63",
