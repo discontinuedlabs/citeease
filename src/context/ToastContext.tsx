@@ -1,6 +1,6 @@
 /* eslint-disable react/require-default-props, no-unused-vars, react/no-children-prop */
 
-import { createContext, useContext, useMemo, useState } from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 import { uid } from "../utils/utils.ts";
 import Icon from "../components/ui/Icon";
 import { getGradient } from "../utils/uiUtils.ts";

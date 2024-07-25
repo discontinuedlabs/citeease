@@ -54,7 +54,7 @@ export default function App() {
     }, [currentUser]);
 
     return (
-        <main className="min-h-screen bg-neutral-white p-5 font-sans text-neutral-black">
+        <main className="primary min-h-screen bg-neutral-white p-5 font-sans text-neutral-black">
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/signup" element={<Signup />} />

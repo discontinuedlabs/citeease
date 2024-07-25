@@ -1,6 +1,6 @@
 /* eslint-disable react/require-default-props, no-unused-vars */
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import Markdown from "react-markdown";
 import { uid } from "../utils/utils.ts";
 import Icon from "../components/ui/Icon";
@@ -12,9 +12,9 @@ type ModalProps = {
     id: string;
     title: string;
     message: string;
-    content?: JSX.Element | null;
+    content?: React.JSX.Element | null;
     actions?: Action[];
-    icon?: JSX.Element | null;
+    icon?: React.JSX.Element | null;
     showCloseIcon?: boolean;
     close: (id: string) => void;
 };
@@ -124,9 +124,9 @@ export default function ModalProvider({ children }: ModalProviderProps) {
             id: string;
             title: string;
             message: string;
-            content?: JSX.Element | null;
+            content?: React.JSX.Element | null;
             actions?: Action[];
-            icon?: JSX.Element | null;
+            icon?: React.JSX.Element | null;
             showCloseIcon?: boolean;
         }[]
     >([]);

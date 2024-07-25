@@ -20,11 +20,11 @@
     "extends": [
         "eslint:recommended",
         "plugin:react/recommended",
+        "plugin:@typescript-eslint/recommended",
         "airbnb",
         "plugin:import/errors",
         "plugin:jsx-a11y/recommended",
         "plugin:prettier/recommended",
-        "plugin:@typescript-eslint/recommended",
     ],
     "settings": {
         "react": {

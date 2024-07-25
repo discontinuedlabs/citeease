@@ -4,7 +4,11 @@ import "@material/web/all";
 import "../../material.css";
 
 export function Fab({ label, className, onClick, ...rest }) {
-    return <md-fab label={label} class={`font-sans ${className}`} onClick={onClick} {...rest} />;
+    return (
+        <md-fab label={label} class={`font-sans ${className}`} onClick={onClick} {...rest}>
+            <md-icon slot="icon">edit</md-icon> {/* This doesnt show */}
+        </md-fab>
+    );
 }
 
 export function FilledButton({ className, onClick, children, ...rest }) {
