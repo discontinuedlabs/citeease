@@ -46,6 +46,7 @@ export default function Home() {
         <div className="mx-auto max-w-[50rem]">
             <TopBar
                 headline="Home"
+                showBackButton={false}
                 options={[
                     ["Settings", () => navigate("/settings")],
                     ...(currentUser
@@ -93,6 +94,7 @@ export default function Home() {
 
             <Fab
                 label="Add bibliography"
+                icon="add"
                 variant="primary"
                 className="fixed bottom-5 right-5"
                 onClick={() => setAddBibOptionsMenuVisible(true)}

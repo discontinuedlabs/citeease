@@ -1,14 +1,31 @@
 /* eslint-disable react/jsx-props-no-spreading, prettier/prettier */
 
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { uid } from "../../utils/utils.ts";
 import ContextMenu from "./ContextMenu";
-import { useEffect, useState } from "react";
 
-export function Fab({ label, className, onClick, ...rest }) {
+export function Fab({ label, icon, className, onClick, ...rest }) {
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    const handleScroll = () => {
+        const show = window.scrollY > 40;
+        setIsScrolled(show);
+    };
+
+    useEffect(() => {
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
     return (
-        <md-fab label={label} class={`font-sans ${className}`} onClick={onClick} {...rest}>
-            <md-icon slot="icon">edit</md-icon> {/* This doesnt show */}
+        <md-fab
+            label={isScrolled ? "" : label}
+            class={`font-sans transition duration-150 ease-in-out ${className}`}
+            onClick={onClick}
+            {...rest}
+        >
+            <md-icon slot="icon">{icon}</md-icon>
         </md-fab>
     );
 }
@@ -55,7 +72,7 @@ export function TextButton({ className, onClick, children, ...rest }) {
 
 export function IconButton({ className, onClick, name, ...rest }) {
     return (
-        <md-icon-button class={`font-sans ${className}`} onClick={onClick} {...rest}>
+        <md-icon-button class={className} onClick={onClick} {...rest}>
             <md-icon>{name}</md-icon>
         </md-icon-button>
     );
@@ -89,8 +106,6 @@ export function TopBar({ headline, showBackButton = true, options }) {
         setIsScrolled(show);
     };
 
-    console.log(window.scrollY);
-
     useEffect(() => {
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
@@ -98,22 +113,26 @@ export function TopBar({ headline, showBackButton = true, options }) {
 
     return (
         <>
-            <div className="sticky top-0 z-50 flex h-12 items-center justify-between bg-[#fcf7fc] py-8">
-                {showBackButton && (
-                    <div className="flex items-center">
-                        <IconButton className="mx-2" name="arrow_back" onClick={() => navigate(-1)} />
-                        <h2 className={`transition-opacity duration-150 ease-in-out ${isScrolled ? "" : "opacity-0"}`}>
-                            {headline}
-                        </h2>
-                    </div>
-                )}
+            <div
+                className={`sticky top-0 z-50 flex h-12 items-center justify-between bg-[#fcf7fc] py-8 ${isScrolled ? "bg-[#f3e2f3]" : ""}`}
+            >
+                <div className={`${showBackButton ? "mx-2" : "mx-4"} flex items-center`}>
+                    {showBackButton && <IconButton name="arrow_back" onClick={() => navigate(-1)} />}
+
+                    <h2
+                        className={`transition duration-150 ease-in-out ${isScrolled ? "translate-y-0" : "translate-y-4 opacity-0"}`}
+                    >
+                        {headline}
+                    </h2>
+                </div>
+
                 {options && (
                     <ContextMenu options={options}>
                         <IconButton name="more_vert" />
                     </ContextMenu>
                 )}
             </div>
-            <h1 className="mx-4 mt-4">{headline}</h1>
+            <h1 className="m-4">{headline}</h1>
         </>
     );
 }
