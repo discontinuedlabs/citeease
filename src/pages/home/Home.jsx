@@ -8,9 +8,8 @@ import { useAuth } from "../../context/AuthContext";
 import { CoBibsSearchDialog } from "./HomeTools";
 import { useModal } from "../../context/ModalContext.tsx";
 import { useEnhancedDispatch } from "../../hooks/hooks.tsx";
-import { Fab, List, TopBar } from "../../components/ui/MaterialComponents";
-import { timeAgo, uid } from "../../utils/utils.ts";
-import Tag from "../../components/ui/Tag";
+import { ChipSet, Fab, List, TopBar } from "../../components/ui/MaterialComponents";
+import { timeAgo } from "../../utils/utils.ts";
 
 export default function Home() {
     const bibliographies = useSelector((state) => state.bibliographies);
@@ -72,14 +71,10 @@ export default function Home() {
                             title: bib.title,
                             description: `${bib.style.name.short || bib.style.name.long.replace(/\((.*?)\)/g, "")} • ${renderCitationCount(bib.citations)} • ${timeAgo(bib.dateModified)}`,
                             content: (
-                                <div
-                                    className="flex flex-wrap gap-1"
+                                <ChipSet
+                                    chips={bib.tags.map(({ label, color }) => ({ label, color }))}
                                     style={{ marginTop: bib.tags.length === 0 ? "0" : "0.5rem" }}
-                                >
-                                    {bib.tags.map((tag) => (
-                                        <Tag key={uid()} tagProps={tag} />
-                                    ))}
-                                </div>
+                                />
                             ),
                             onClick: () => navigate(bib?.collab?.open ? `/collab/${bib.collab.id}` : `/bib/${bib.id}`),
                         };
@@ -95,7 +90,7 @@ export default function Home() {
             <Fab
                 label="Add bibliography"
                 icon="add"
-                variant="primary"
+                variant="tertiary"
                 className="fixed bottom-5 right-5"
                 onClick={() => setAddBibOptionsMenuVisible(true)}
             />

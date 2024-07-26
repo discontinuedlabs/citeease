@@ -33,7 +33,7 @@ export default function Settings() {
             <List
                 items={[
                     { title: "Manage tags", onClick: openTagsManager },
-                    "DEVIDER",
+                    "DIVIDER",
                     { title: "About CiteEase", onClick: () => navigate("/about") },
                     { title: "Terms of Use", onClick: () => navigate("/terms") },
                     { title: "Privacy Policy", onClick: () => navigate("/privacy") },

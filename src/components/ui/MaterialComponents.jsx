@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { uid } from "../../utils/utils.ts";
 import ContextMenu from "./ContextMenu";
+import { TAG_COLOR_VALUES } from "../../data/store/slices/settingsSlice";
 
 export function Fab({ label, icon, className, onClick, ...rest }) {
     const [isScrolled, setIsScrolled] = useState(false);
 
     const handleScroll = () => {
-        const show = window.scrollY > 40;
+        const show = window.scrollY > 50;
         setIsScrolled(show);
     };
 
@@ -82,8 +83,8 @@ export function List({ items = [], className, ...rest }) {
     return (
         <md-list class={className} {...rest}>
             {items.map((item) => {
-                if (typeof item === "string" && /devider/i.test(item)) {
-                    return <md-devider />;
+                if (typeof item === "string" && /divider/i.test(item)) {
+                    return <md-divider />;
                 }
                 return (
                     <md-list-item type="button" onClick={item.onClick} key={uid()}>
@@ -102,7 +103,7 @@ export function TopBar({ headline, showBackButton = true, options }) {
     const [isScrolled, setIsScrolled] = useState(false);
 
     const handleScroll = () => {
-        const show = window.scrollY > 40;
+        const show = window.scrollY > 50;
         setIsScrolled(show);
     };
 
@@ -114,13 +115,16 @@ export function TopBar({ headline, showBackButton = true, options }) {
     return (
         <>
             <div
-                className={`sticky top-0 z-50 flex h-12 items-center justify-between bg-[#fcf7fc] py-8 ${isScrolled ? "bg-[#f3e2f3]" : ""}`}
+                className="sticky top-0 z-10 flex h-12 items-center justify-between px-2 py-8"
+                style={{
+                    background: isScrolled ? "var(--md-sys-color-surface-container)" : "var(--md-sys-color-surface)",
+                }}
             >
-                <div className={`${showBackButton ? "mx-2" : "mx-4"} flex items-center`}>
+                <div className="flex items-center">
                     {showBackButton && <IconButton name="arrow_back" onClick={() => navigate(-1)} />}
 
                     <h2
-                        className={`transition duration-150 ease-in-out ${isScrolled ? "translate-y-0" : "translate-y-4 opacity-0"}`}
+                        className={`mx-2 transition duration-150 ease-in-out ${isScrolled ? "translate-y-0" : "translate-y-4 opacity-0"}`}
                     >
                         {headline}
                     </h2>
@@ -132,7 +136,35 @@ export function TopBar({ headline, showBackButton = true, options }) {
                     </ContextMenu>
                 )}
             </div>
-            <h1 className="m-4">{headline}</h1>
+            <div
+                className="p-4"
+                style={{
+                    background: isScrolled ? "var(--md-sys-color-surface-container)" : "var(--md-sys-color-surface)",
+                }}
+            >
+                <h1 className="m-0">{headline}</h1>
+            </div>
         </>
+    );
+}
+
+export function ChipSet({ chips = [], removable = false, className, ...rest }) {
+    return (
+        <md-chip-set class={className} {...rest}>
+            {chips.map((chip) => {
+                const chipStyle = {
+                    "--md-assist-chip-outline-color": TAG_COLOR_VALUES[chip.color],
+                    "--md-assist-chip-label-text-color": TAG_COLOR_VALUES[chip.color],
+                };
+                if (removable) {
+                    return (
+                        <md-input-chip style={chipStyle} key={uid()} label={chip.label}>
+                            <md-icon slot-icon>close</md-icon>
+                        </md-input-chip>
+                    );
+                }
+                return <md-assist-chip style={chipStyle} key={uid()} label={chip.label} />;
+            })}
+        </md-chip-set>
     );
 }

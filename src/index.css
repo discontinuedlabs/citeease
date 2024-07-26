@@ -3,18 +3,76 @@
 @tailwind utilities;
 
 @layer base {
-    * {
-        @apply m-0 box-border break-words p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500;
-        -webkit-tap-highlight-color: transparent;
-        transition: box-shadow ease-out 0.1s;
+    :root {
+        --md-ref-typeface-brand: Poppins;
+        --md-ref-typeface-plain: Poppins;
+
+        --md-sys-color-primary: #6f5d0e;
+        --md-sys-color-on-primary: #ffffff;
+        --md-sys-color-primary-container: #fbe187;
+        --md-sys-color-on-primary-container: #221b00;
+
+        --md-sys-color-secondary: #675e40;
+        --md-sys-color-on-secondary: #ffffff;
+        --md-sys-color-secondary-container: #efe2bc;
+        --md-sys-color-on-secondary-container: #211b04;
+
+        --md-sys-color-tertiary: #44664d;
+        --md-sys-color-on-tertiary: #44664d;
+        --md-sys-color-tertiary-container: #c6eccc;
+        --md-sys-color-on-tertiary-container: #00210e;
+
+        --md-sys-color-error: #ba1a1a;
+        --md-sys-color-on-error: #ffffff;
+        --md-sys-color-error-container: #ffdad6;
+        --md-sys-color-on-error-container: #410002;
+
+        --md-sys-color-background: #ffd60a;
+        --md-sys-color-surface: #fff8ef;
+        --md-sys-color-surface-bright: #ffffff;
+        --md-sys-color-surface-dim: #e0d9cc;
+
+        --md-sys-color-surface-container-lowest: #ffffff;
+        --md-sys-color-surface-container-low: #faf3e5;
+        --md-sys-color-surface-container: #f4eddf;
+        --md-sys-color-surface-container-high: #efe7da;
+        --md-sys-color-surface-container-highest: #e9e2d4;
+
+        --md-sys-color-on-surface: #1e1b13;
+        --md-sys-color-on-surface-variant: #4b4639;
+        --md-sys-color-outline: #7d7767;
+        --md-sys-color-outline-variant: #cec6b4;
+
+        --md-sys-color-inverse-surface: #e9e2d4;
+        --md-sys-color-inverse-on-surface: #333027;
+        --md-sys-color-inverse-primary: #6f5d0e;
+
+        --md-sys-color-shadow: #000000;
+        --md-sys-color-scrim: #000000;
+
+        --md-list-item-container-shape: var(--md-sys-shape-corner-full);
+
+        background-color: var(--md-sys-color-surface);
+        color: var(--md-sys-color-on-surface);
     }
 
     ::selection {
-        @apply bg-neutral-yellow text-neutral-black;
+        background-color: var(--md-sys-color-primary-container);
+        color: var(--md-sys-color-on-primary-container);
+    }
+
+    * {
+        @apply box-border break-words p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500;
+        -webkit-tap-highlight-color: transparent;
+        transition: box-shadow ease-out 0.1s;
     }
 }
 
 @layer components {
+    body {
+        @apply m-0;
+    }
+
     h1,
     h2,
     h3,
