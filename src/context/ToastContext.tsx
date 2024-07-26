@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useMemo, useState } from "react";
 import { uid } from "../utils/utils.ts";
-import Icon from "../components/ui/Icon";
+import { Icon } from "../components/ui/MaterialComponents";
 import { getGradient } from "../utils/uiUtils.ts";
 import { SoftButton } from "../components/ui/StyledButtons";
 import { useTimeout } from "../hooks/hooks.tsx";

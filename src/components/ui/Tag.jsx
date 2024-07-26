@@ -1,6 +1,6 @@
 import { TAG_COLOR_VALUES } from "../../data/store/slices/settingsSlice";
 import { getGradient, getTagBgColors } from "../../utils/uiUtils.ts";
-import Icon from "./Icon";
+import { Icon } from "./MaterialComponents";
 
 export default function Tag(props) {
     const { className, tagProps, onClick, showX } = props;

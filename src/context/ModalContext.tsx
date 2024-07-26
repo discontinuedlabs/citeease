@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import Markdown from "react-markdown";
 import { uid } from "../utils/utils.ts";
-import Icon from "../components/ui/Icon";
+import { Icon } from "../components/ui/MaterialComponents";
 import { Button, SoftButton } from "../components/ui/StyledButtons";
 
 type Action = [string, () => void, { autoFocus?: boolean; closeOnClick?: boolean; color?: string }];

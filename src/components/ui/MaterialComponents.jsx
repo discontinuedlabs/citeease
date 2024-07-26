@@ -6,6 +6,14 @@ import { uid } from "../../utils/utils.ts";
 import ContextMenu from "./ContextMenu";
 import { TAG_COLOR_VALUES } from "../../data/store/slices/settingsSlice";
 
+export function Icon({ name, className, ...rest }) {
+    return (
+        <md-icon slot="icon" {...rest} class={className}>
+            {name}
+        </md-icon>
+    );
+}
+
 export function Fab({ label, icon, className, onClick, ...rest }) {
     const [isScrolled, setIsScrolled] = useState(false);
 
@@ -98,7 +106,7 @@ export function List({ items = [], className, ...rest }) {
     );
 }
 
-export function TopBar({ headline, showBackButton = true, options }) {
+export function TopBar({ headline, description, showBackButton = true, options }) {
     const navigate = useNavigate();
     const [isScrolled, setIsScrolled] = useState(false);
 
@@ -124,7 +132,7 @@ export function TopBar({ headline, showBackButton = true, options }) {
                     {showBackButton && <IconButton name="arrow_back" onClick={() => navigate(-1)} />}
 
                     <h2
-                        className={`mx-2 transition duration-150 ease-in-out ${isScrolled ? "translate-y-0" : "translate-y-4 opacity-0"}`}
+                        className={`mx-2 overflow-hidden text-ellipsis whitespace-nowrap transition duration-150 ease-in-out ${isScrolled ? "translate-y-0" : "translate-y-4 opacity-0"}`}
                     >
                         {headline}
                     </h2>
@@ -143,6 +151,7 @@ export function TopBar({ headline, showBackButton = true, options }) {
                 }}
             >
                 <h1 className="m-0">{headline}</h1>
+                <div>{description}</div>
             </div>
         </>
     );

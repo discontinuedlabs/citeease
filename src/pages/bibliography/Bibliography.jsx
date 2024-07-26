@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { HotKeys } from "react-hotkeys";
 import { useSelector } from "react-redux";
 import { deleteDoc, doc, setDoc } from "firebase/firestore";
-import ContextMenu from "../../components/ui/ContextMenu";
 import * as citationEngine from "../../utils/citationEngine";
 import {
     IntextCitationDialog,
@@ -31,13 +30,10 @@ import {
     disableCollabInBib,
 } from "../../data/store/slices/bibsSlice";
 import { useEnhancedDispatch, useFindBib } from "../../hooks/hooks.tsx";
-import Tag from "../../components/ui/Tag";
 import { useAuth } from "../../context/AuthContext";
-import Icon from "../../components/ui/Icon";
 import firestoreDB from "../../data/db/firebase/firebase";
 import { useModal } from "../../context/ModalContext.tsx";
-import { uid } from "../../utils/utils.ts";
-import { Button } from "../../components/ui/StyledButtons";
+import { ChipSet, Fab, TopBar } from "../../components/ui/MaterialComponents";
 
 // TODO: The user cannot do any actions in collaborative bibliographies when they are offline
 export default function Bibliography() {
@@ -333,7 +329,8 @@ export default function Bibliography() {
     const optionsWhenNothingChecked = [
         ["Tags", () => setTagsDialogVisible(true)],
         ["Change style", () => setCitationStyleMenuVisible(true)],
-        ["Bibliography Settings", () => navigate(`/bib/${bibliography.id}/settings`)],
+        ["Rename bibliography", () => setRenameWindowVisible(true)],
+        [("Bibliography Settings", () => navigate(`/bib/${bibliography.id}/settings`))],
 
         ...(collaborationOpened
             ? [["Close collaboration", handleCloseCollaboration]]
@@ -357,43 +354,21 @@ export default function Bibliography() {
     return (
         <div className="mx-auto max-w-[50rem]">
             <HotKeys keyMap={keyMap}>
-                <div>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            {bibliography?.collab?.open && (
-                                <div className="text-md w-fit rounded-md font-bold transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
-                                    <Icon name="group" /> {bibliography?.collab?.id}
-                                </div>
-                            )}
-                            <button type="button" style={{ all: "unset" }} onClick={() => setRenameWindowVisible(true)}>
-                                <h1 className="m-0 rounded-md transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
-                                    {bibliography?.title}
-                                </h1>
-                            </button>
-                        </div>
-
-                        <ContextMenu
-                            options={[
-                                ...(checkedCitations?.length !== 0
-                                    ? optionsWhenCitationsChecked
-                                    : optionsWhenNothingChecked),
-                            ]}
-                        >
-                            <Icon name="more_vert" />
-                        </ContextMenu>
-                    </div>
-                    <button type="button" style={{ all: "unset" }} onClick={() => setCitationStyleMenuVisible(true)}>
-                        <h3 className="w-fit rounded-md transition duration-150 ease-in-out hover:bg-neutral-transparentGray">
-                            {bibliography?.style.name.long}
-                        </h3>
-                    </button>
-
-                    <div className="flex flex-wrap gap-1">
-                        {bibliography?.tags?.map((tag) => (
-                            <Tag key={uid()} tagProps={tag} onClick={() => setTagsDialogVisible(true)} />
-                        ))}
-                    </div>
-                </div>
+                <TopBar
+                    headline={bibliography?.title}
+                    description={
+                        <>
+                            {`${bibliography?.collab?.open ? `${bibliography?.collab?.id} • ` : ""}${bibliography?.style.name.long}`}
+                            <ChipSet
+                                chips={bibliography?.tags?.map(({ label, color }) => ({ label, color }))}
+                                style={{ marginTop: bibliography?.tags?.length === 0 ? "0" : "0.5rem" }}
+                            />
+                        </>
+                    }
+                    options={[
+                        ...(checkedCitations?.length !== 0 ? optionsWhenCitationsChecked : optionsWhenNothingChecked),
+                    ]}
+                />
 
                 <ReferenceEntries
                     {...{
@@ -468,13 +443,13 @@ export default function Bibliography() {
                     />
                 )}
 
-                <Button
-                    className="fixed bottom-5 right-5 border-2 border-neutral-black"
+                <Fab
+                    label="Add citation"
+                    icon="add"
+                    variant="tertiary"
+                    className="fixed bottom-5 right-5"
                     onClick={() => setAddCitationMenuVisible(true)}
-                    type="button"
-                >
-                    Add citation
-                </Button>
+                />
             </HotKeys>
         </div>
     );
