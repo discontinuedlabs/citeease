@@ -1,12 +1,14 @@
+import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { SettingsSection, SettingsNavigate } from "./SettingsComponents";
 import { TagsManager } from "./SettingTools";
 import { useModal } from "../../context/ModalContext.tsx";
 import { restoreDefaultTags } from "../../data/store/slices/settingsSlice";
+import { List, TopBar } from "../../components/ui/MaterialComponents";
 
 export default function Settings() {
     const tagsManagerModal = useModal();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     function openTagsManager() {
         tagsManagerModal.open({
@@ -26,15 +28,17 @@ export default function Settings() {
 
     return (
         <div className="mx-auto max-w-[50rem]">
-            <h1>Settings</h1>
+            <TopBar headline="Settings" />
 
-            <SettingsNavigate onClick={openTagsManager}>Manage tags</SettingsNavigate>
-
-            <SettingsSection>
-                <SettingsNavigate to="/about">About CiteEase</SettingsNavigate>
-                <SettingsNavigate to="/terms">Terms of Use</SettingsNavigate>
-                <SettingsNavigate to="/privacy">Privacy Policy</SettingsNavigate>
-            </SettingsSection>
+            <List
+                items={[
+                    { title: "Manage tags", onClick: openTagsManager },
+                    "DEVIDER",
+                    { title: "About CiteEase", onClick: () => navigate("/about") },
+                    { title: "Terms of Use", onClick: () => navigate("/terms") },
+                    { title: "Privacy Policy", onClick: () => navigate("/privacy") },
+                ]}
+            />
         </div>
     );
 }

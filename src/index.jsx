@@ -1,6 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
+import "@material/web/all";
+import "./material.css";
 import { HashRouter as Router } from "react-router-dom";
 import { Provider as ReduxeProvider } from "react-redux";
 import App from "./App";

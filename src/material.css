@@ -5,9 +5,5 @@
     --md-sys-color-on-primary: #ffd60a;
     --md-sys-color-primary-container: #ffd60a;
     --md-sys-color-on-primary-container: #ffd60a; */
+    background-color: #fcf7fc;
 }
-
-/* .primary {
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
-} */
