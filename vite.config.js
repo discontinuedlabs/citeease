@@ -19,10 +19,10 @@ export default defineConfig(({ mode }) => {
             react(),
             VitePWA({
                 registerType: "autoUpdate",
-                workbox: {
-                    clientsClaim: true,
-                    skipWaiting: true,
-                },
+                // workbox: {
+                //     clientsClaim: true,
+                //     skipWaiting: true,
+                // },
                 devOptions: {
                     enabled: true,
                 },
