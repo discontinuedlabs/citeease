@@ -41,10 +41,10 @@ export function ReferenceEntries(props) {
     const { openCitationForm, openIntextCitationDialog } = props;
     const bibliography = useFindBib();
     const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
-    const [formattedSelectedCitations, setFormattedSelectedCitations] = useState([]);
     const [references, setReferences] = useState([]);
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
     const dispatch = useDispatch();
+    const formattedSelectedCitationsRef = useRef([]);
 
     useEffect(() => {
         function updateMasterCheckboxState() {
@@ -77,22 +77,15 @@ export function ReferenceEntries(props) {
         formatBibliography();
     }, [bibliography?.citations, bibliography?.style]);
 
-    // FIXME: This useEffect causes infinte rerenders
-    // It's triggered by checkedCitations dependency
-    // It doesnt have this issue when citationEngine.formatBibliography is not used
     useEffect(() => {
         // Used for the handleDrag function because event.dataTransfer.setData("text/html", sanitizedInnerHTML) doesn't wait
         async function formatSelectedCitations() {
             const formattedCitations = await citationEngine.formatBibliography(checkedCitations, bibliography?.style);
             console.log(formattedCitations);
-            setFormattedSelectedCitations(formattedCitations);
+            formattedSelectedCitationsRef.current = formattedCitations;
         }
         formatSelectedCitations();
     }, [checkedCitations, bibliography?.style]);
-
-    // useEffect(() => {
-    //     console.log(checkedCitations);
-    // }, [checkedCitations]);
 
     function handleMasterCheck() {
         dispatch(handleMasterEntriesCheckbox({ bibliographyId: bibliography?.id }));
@@ -114,7 +107,7 @@ export function ReferenceEntries(props) {
             }
         } else {
             const div = document.createElement("div");
-            formattedSelectedCitations.forEach((cit) => {
+            formattedSelectedCitationsRef.current.forEach((cit) => {
                 const parser = new DOMParser();
                 const docFragment = parser.parseFromString(cit, "text/html");
                 const element = docFragment.body.firstChild;
