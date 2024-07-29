@@ -41,6 +41,12 @@ export default function Home() {
         }
     }
 
+    const sortedBibliographies = Array.from(bibliographies).sort((a, b) => {
+        const dateA = new Date(a.dateModified);
+        const dateB = new Date(b.dateModified);
+        return dateB - dateA;
+    });
+
     return (
         <div className="mx-auto max-w-[50rem]">
             <TopBar
@@ -54,9 +60,9 @@ export default function Home() {
                 ]}
             />
 
-            {bibliographies.length > 0 ? (
+            {sortedBibliographies.length > 0 ? (
                 <List
-                    items={bibliographies.map((bib) => {
+                    items={sortedBibliographies.map((bib) => {
                         function renderCitationCount(citations) {
                             if (citations.length === 0) {
                                 return "No sources added";
@@ -81,7 +87,7 @@ export default function Home() {
                     })}
                 />
             ) : (
-                <p>
+                <p className="mx-4">
                     No bibliographies added yet. Click the button to create one based on citation style or to import
                     from other softwares.
                 </p>
