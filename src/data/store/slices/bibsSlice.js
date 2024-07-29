@@ -4,22 +4,22 @@ import firestoreDB from "../../db/firebase/firebase";
 import dexieDB from "../../db/dexie/dexie";
 import { uid } from "../../../utils/utils.ts";
 
-const initialState = [];
+const initialState = { data: [], loadedFromIndexedDB: false };
 
 function save(newState, currentUser = undefined) {
-    const serializedState = JSON.stringify(newState);
-    dexieDB.items.put({ id: "bibliographies", value: serializedState });
+    const serializedBibs = JSON.stringify(newState.data);
+    dexieDB.items.put({ id: "bibliographies", value: serializedBibs });
 
     if (!currentUser) return;
     const parsedCurrentUser = JSON.parse(currentUser);
     if (parsedCurrentUser) {
         const userRef = doc(firestoreDB, "users", parsedCurrentUser?.uid);
-        setDoc(userRef, { bibliographies: serializedState });
+        setDoc(userRef, { bibliographies: JSON.stringify(newState.data) });
 
-        newState.forEach((bib) => {
+        newState.data.forEach((bib) => {
             if (bib?.collab?.open) {
                 const coBibsRef = doc(firestoreDB, "coBibs", bib?.collab?.id);
-                setDoc(coBibsRef, { bibliography: serializedState });
+                setDoc(coBibsRef, { bibliography: JSON.stringify(bib) });
             }
         });
     }
@@ -33,6 +33,8 @@ export const loadFromIndexedDB = createAsyncThunk("bibliographies/loadFromIndexe
         citations: bib.citations.map((cit) => ({ ...cit, isChecked: false })),
     }));
 
+    console.log(cleanedBibs);
+
     return cleanedBibs;
 });
 
@@ -40,22 +42,22 @@ const bibsSlice = createSlice({
     name: "bibliographies",
     initialState,
     reducers: {
-        mergeWithCurrentBibs: (bibs, action) => {
-            if (!action.payload.bibs) return bibs;
+        mergeWithCurrentBibs: (state, action) => {
+            if (!action.payload.bibs) return state;
             const newBibs = action.payload.bibs;
             const newBibsIds = newBibs.map((bib) => bib.id);
-            const filteredOldBibs = bibs.filter((bib) => !newBibsIds.includes(bib.id));
-            const newState = [...filteredOldBibs, ...newBibs];
+            const filteredOldBibs = state.data.filter((bib) => !newBibsIds.includes(bib.id));
+            const newState = { ...state, data: [...filteredOldBibs, ...newBibs] };
             save(newState, action.payload.currentUser);
             return newState;
         },
-        replaceAllBibs: (bibs, action) => {
-            const newState = action.payload.bibs;
+        replaceAllBibs: (state, action) => {
+            const newState = { ...state, data: action.payload.bibs };
             save(newState, action.payload.currentUser);
             return newState;
         },
-        enableCollabInBib: (bibs, action) => {
-            const newState = bibs.map((bib) => {
+        enableCollabInBib: (state, action) => {
+            const newBibs = state.data.map((bib) => {
                 if (bib.id === action.payload.bibId && action.payload.currentUser) {
                     const parsedCurrentUser = JSON.parse(action.payload.currentUser);
                     return {
@@ -73,11 +75,12 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
+            const newState = { ...state, data: newBibs };
             save(newState, action.payload.currentUser);
             return newState;
         },
-        reEnableCollabInBib: (bibs, action) => {
-            const newState = bibs.map((bib) => {
+        reEnableCollabInBib: (state, action) => {
+            const newBibs = state.data.map((bib) => {
                 if (bib.id === action.payload.bibId) {
                     return {
                         ...bib,
@@ -89,11 +92,12 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
+            const newState = { ...state, data: newBibs };
             save(newState, action.payload.currentUser);
             return newState;
         },
-        disableCollabInBib: (bibs, action) => {
-            const newState = bibs.map((bib) => {
+        disableCollabInBib: (state, action) => {
+            const newBibs = state.data.map((bib) => {
                 if (bib.id === action.payload.bibId) {
                     return {
                         ...bib,
@@ -107,10 +111,11 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
+            const newState = { ...state, data: newBibs };
             save(newState, action.payload.currentUser);
             return newState;
         },
-        addNewBib: (bibs, action) => {
+        addNewBib: (state, action) => {
             const newBib = {
                 title: "Untitled Bibliography",
                 style: action.payload.bibliographyStyle,
@@ -120,27 +125,30 @@ const bibsSlice = createSlice({
                 citations: [],
                 tags: [],
             };
-            const newState = [...bibs, newBib];
+            const newBibs = [...state.data, newBib];
+            const newState = { ...state, data: newBibs };
             save(newState, action.payload.currentUser);
             return newState;
         },
-        deleteBib: (bibs, action) => {
-            const newState = bibs?.filter((bib) => bib.id !== action.payload.bibliographyId);
+        deleteBib: (state, action) => {
+            const newBibs = state.data?.filter((bib) => bib.id !== action.payload.bibliographyId);
+            const newState = { ...state, data: newBibs };
             save(newState, action.payload.currentUser);
             return newState;
         },
-        updateBibField: (bibs, action) => {
-            const newState = bibs?.map((bib) => {
+        updateBibField: (state, action) => {
+            const newBibs = state.data?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     return { ...bib, [action.payload.key]: action.payload.value, dateModified: new Date().toString() };
                 }
                 return bib;
             });
+            const newState = { ...state, data: newBibs };
             save(newState, action.payload.currentUser);
             return newState;
         },
-        addNewCitation: (bibs, action) => {
-            const newState = bibs.map((bib) => {
+        addNewCitation: (state, action) => {
+            const newBibs = state.data.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const citId = uid();
                     if (action.payload?.content) {
@@ -180,11 +188,12 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
+            const newState = { ...state, data: newBibs };
             save(newState, action.payload.currentUser);
             return newState;
         },
-        editCitation: (bibs, action) => {
-            const newState = bibs?.map((bib) => {
+        editCitation: (state, action) => {
+            const newBibs = state.data?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const targetCitation = bib.citations.find((cit) => cit.id === action.payload.citationId);
                     return {
@@ -194,11 +203,12 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
+            const newState = { ...state, data: newBibs };
             save(newState, action.payload.currentUser);
             return newState;
         },
-        updateContentInEditedCitation: (bibs, action) => {
-            const newState = bibs?.map((bib) => {
+        updateContentInEditedCitation: (state, action) => {
+            const newBibs = state.data?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     return {
                         ...bib,
@@ -208,11 +218,12 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
+            const newState = { ...state, data: newBibs };
             save(newState, action.payload.currentUser);
             return newState;
         },
-        updateCitation: (bibs, action) => {
-            const newState = bibs.map((bib) => {
+        updateCitation: (state, action) => {
+            const newBibs = state.data.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const citationIndex = bib.citations.findIndex((cit) => cit.id === action.payload.editedCitation.id);
                     let updatedCitations;
@@ -238,11 +249,12 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
+            const newState = { ...state, data: newBibs };
             save(newState, action.payload.currentUser);
             return newState;
         },
-        toggleEntryCheckbox: (bibs, action) => {
-            const newState = bibs?.map((bib) => {
+        toggleEntryCheckbox: (state, action) => {
+            const newBibs = state.data?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const citationIndex = bib.citations.findIndex((cit) => cit.id === action.payload.citationId);
 
@@ -260,10 +272,11 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
+            const newState = { ...state, data: newBibs };
             return newState;
         },
-        handleMasterEntriesCheckbox: (bibs, action) => {
-            const newState = bibs?.map((bib) => {
+        handleMasterEntriesCheckbox: (state, action) => {
+            const newBibs = state.data?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const allChecked = bib.citations.every((cit) => cit.isChecked);
                     const allUnchecked = bib.citations.every((cit) => !cit.isChecked);
@@ -291,10 +304,11 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
+            const newState = { ...state, data: newBibs };
             return newState;
         },
-        moveSelectedCitations: (bibs, action) => {
-            const newState = bibs?.map((bib) => {
+        moveSelectedCitations: (state, action) => {
+            const newBibs = state.data?.map((bib) => {
                 if (bib.id === action.payload.toId) {
                     return {
                         ...bib,
@@ -312,11 +326,12 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
+            const newState = { ...state, data: newBibs };
             save(newState, action.payload.currentUser);
             return newState;
         },
-        copySelectedCitations: (bibs, action) => {
-            const newState = bibs?.map((bib) => {
+        copySelectedCitations: (state, action) => {
+            const newBibs = state.data?.map((bib) => {
                 const filteredCitations = bib.citations.filter(
                     (cit) => !action.payload.checkedCitations.some((checkedCit) => checkedCit.id === cit.id)
                 );
@@ -336,11 +351,12 @@ const bibsSlice = createSlice({
                     dateModified: new Date().toString(),
                 };
             });
+            const newState = { ...state, data: newBibs };
             save(newState, action.payload.currentUser);
             return newState;
         },
-        duplicateSelectedCitations: (bibs, action) => {
-            const newState = bibs?.map((bib) => {
+        duplicateSelectedCitations: (state, action) => {
+            const newBibs = state.data?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const duplicatedCitations = action.payload.checkedCitations?.map((cit) => {
                         const newId = uid();
@@ -362,11 +378,12 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
+            const newState = { ...state, data: newBibs };
             save(newState, action.payload.currentUser);
             return newState;
         },
-        deleteSelectedCitations: (bibs, action) => {
-            const newState = bibs?.map((bib) => {
+        deleteSelectedCitations: (state, action) => {
+            const newBibs = state.data?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
                     const targetIds = action.payload.checkedCitations.map((cit) => cit.id);
                     return {
@@ -377,10 +394,11 @@ const bibsSlice = createSlice({
                 }
                 return bib;
             });
+            const newState = { ...state, data: newBibs };
             save(newState, action.payload.currentUser);
             return newState;
         },
-        addNewBibAndMoveSelectedCitations: (bibs, action) => {
+        addNewBibAndMoveSelectedCitations: (state, action) => {
             const newBib = {
                 title: "Untitled Bibliography",
                 style: action.payload.bibliographyStyle,
@@ -389,7 +407,8 @@ const bibsSlice = createSlice({
                 id: uid(10),
                 citations: [...action.payload.checkedCitations],
             };
-            const newState = [...bibs, newBib];
+            const newBibs = [...state.data, newBib];
+            const newState = { ...state, data: newBibs };
             save(newState, action.payload.currentUser);
             return newState;
         },
@@ -398,8 +417,12 @@ const bibsSlice = createSlice({
             return initialState;
         },
     },
+
     extraReducers: (builder) => {
-        builder.addCase(loadFromIndexedDB.fulfilled, (state, action) => action?.payload || state);
+        builder.addCase(loadFromIndexedDB.fulfilled, (state, action) => {
+            console.log("reducer", { ...state, data: action?.payload, loadedFromIndexedDB: true });
+            return { ...state, data: action?.payload, loadedFromIndexedDB: true };
+        });
     },
 });
 

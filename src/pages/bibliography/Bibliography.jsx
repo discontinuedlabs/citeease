@@ -37,7 +37,7 @@ import { ChipSet, Fab, TopBar } from "../../components/ui/MaterialComponents";
 
 // TODO: The user cannot do any actions in collaborative bibliographies when they are offline
 export default function Bibliography() {
-    const bibliographies = useSelector((state) => state.bibliographies);
+    const bibliographies = useSelector((state) => state.bibliographies.data);
     const bibliography = useFindBib();
     const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
     const { currentUser } = useAuth();

@@ -49,4 +49,13 @@ export type Bibliography = {
     id: string;
     citations: Citation[];
     tags?: object[];
+    collab?: {
+        open: boolean;
+        id: string;
+        adminId: string;
+        collaborators: { name: string; id: string }[];
+        preferences: object;
+        changelog: [];
+        password: string;
+    };
 };

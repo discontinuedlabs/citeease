@@ -79,7 +79,7 @@ export function ReferenceEntries(props) {
 
     // FIXME: This useEffect causes infinte rerenders; triggered by checkedCitations dependency
     useEffect(() => {
-        // Used for the handleDrag function because event.dataTransfer.setData("text/html", sanitizedInnerHTML); doesn't wait
+        // Used for the handleDrag function because event.dataTransfer.setData("text/html", sanitizedInnerHTML) doesn't wait
         async function formatSelectedCitations() {
             const formattedCitations = await citationEngine.formatBibliography(checkedCitations, bibliography?.style);
             console.log(formattedCitations);
@@ -406,7 +406,7 @@ export function LaTeXDialog(props) {
 
 export function MoveDialog(props) {
     const { setMoveWindowVisible: setIsVisible } = props;
-    const bibliographies = useSelector((state) => state.bibliographies);
+    const bibliographies = useSelector((state) => state.bibliographies.data);
     const bibliography = useFindBib();
     const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
     const [selectedBibliographyIds, setSelectedBibliographyIds] = useState([]);

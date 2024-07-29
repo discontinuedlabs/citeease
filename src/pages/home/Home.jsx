@@ -12,7 +12,7 @@ import { ChipSet, Fab, List, TopBar } from "../../components/ui/MaterialComponen
 import { timeAgo } from "../../utils/utils.ts";
 
 export default function Home() {
-    const bibliographies = useSelector((state) => state.bibliographies);
+    const bibliographies = useSelector((state) => state.bibliographies.data);
     const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
     const [addBibOptionsMenuVisible, setAddBibOptionsMenuVisible] = useState(false);
     const [coBibsSearchDialogVisible, setCoBibsSearchDialogVisible] = useState(false);

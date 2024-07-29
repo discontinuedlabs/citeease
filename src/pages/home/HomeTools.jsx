@@ -15,7 +15,7 @@ export function CoBibsSearchDialog({ setIsVisible }) {
     const id = useId();
     const searchRef = useRef();
     const passwordRef = useRef();
-    const bibliographies = useSelector((state) => state.bibliographies);
+    const bibliographies = useSelector((state) => state.bibliographies.data);
     const { currentUser } = useAuth();
     const dispatch = useDispatch();
     const toast = useToast();
@@ -30,16 +30,17 @@ export function CoBibsSearchDialog({ setIsVisible }) {
 
             if (docSnap.exists()) {
                 const result = JSON.parse(docSnap.data().bibliography);
+                console.log(result);
                 if (bibliographies.some((bib) => bib.id === result.id)) {
                     setSearchError(`You are already a collaborator in ${result.title} (${result.collab.id})`);
                 } else {
-                    // WEIRD: Why does this result show the local bibliographies?
-                    setSearchResult(result.find((bib) => bib?.collab?.id === searchRef.current.value));
+                    setSearchResult(result);
                 }
             } else {
                 setSearchError("No such collaborative bibliography!");
             }
         } catch (error) {
+            console.log(error);
             setSearchError(error);
         }
         setSearchLoading(false);

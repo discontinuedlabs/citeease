@@ -18,7 +18,7 @@ type RouteParams = {
  */
 export function useFindBib(): Bibliography | undefined {
     const { bibId }: RouteParams = useParams<RouteParams>();
-    const bibliographies = useSelector((state: RootState) => state.bibliographies);
+    const bibliographies: Bibliography[] = useSelector((state: RootState) => state.bibliographies.data);
     const bibliography = bibliographies?.find((bib) => bib.id === bibId || bib?.collab?.id === bibId);
     return bibliography;
 }

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { collection, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import Bibliography from "./pages/bibliography/Bibliography";
 import Home from "./pages/home/Home";
 import { loadFromIndexedDB as loadBibs, mergeWithCurrentBibs } from "./data/store/slices/bibsSlice";
@@ -19,39 +19,31 @@ import firestoreDB from "./data/db/firebase/firebase";
 import { useDynamicTitle } from "./hooks/hooks.tsx";
 
 export default function App() {
-    const bibliographies = useSelector((state) => state.bibliographies);
+    const { data: bibliographies, loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies); // WATCH: In some browsers, state.bibliographies may display [object Object] on subsequent renders in StrictMode
     const { currentUser } = useAuth();
-    const reduxDispatch = useDispatch();
-    useDynamicTitle();
     const dispatch = useDispatch();
+    useDynamicTitle();
 
     // FIXME: Fix the useEnhancedDispatch hook because it doesnt accept Promises (loadBibs, and loadSettings in this case).
     useEffect(() => {
-        reduxDispatch(loadBibs());
-        reduxDispatch(loadSettings());
+        dispatch(loadBibs());
+        dispatch(loadSettings());
     }, []);
 
     useEffect(() => {
-        if (!currentUser) return;
+        if (!currentUser || !bibsLoaded) return;
 
-        const coBibsCollection = collection(firestoreDB, "coBibs");
+        const coBibsIds = bibliographies.filter((bib) => bib?.collab?.open).map((bib) => bib.collab.id);
 
-        const unsubscribeCoBibs = onSnapshot(coBibsCollection, (snapshot) => {
-            const coBibsIds = bibliographies.filter((bib) => bib?.collab?.open).map((bib) => bib.collab.id);
-
-            const updatedCoBibs = [];
-            coBibsIds.forEach((id) => {
-                const coBibData = snapshot.docs.find((sDoc) => sDoc.id === id)?.data();
-                console.log(coBibData);
-                updatedCoBibs.push(JSON.parse(coBibData));
+        coBibsIds.forEach((id) => {
+            const unsubscribe = onSnapshot(doc(firestoreDB, "coBibs", id), (sDoc) => {
+                const parsedCoBib = JSON.parse(sDoc.data().bibliography);
+                dispatch(mergeWithCurrentBibs({ bibs: [parsedCoBib] }));
             });
 
-            dispatch(mergeWithCurrentBibs({ bibs: [...updatedCoBibs] }));
+            return () => unsubscribe();
         });
-
-        // eslint-disable-next-line consistent-return
-        return () => unsubscribeCoBibs();
-    }, [currentUser]);
+    }, [currentUser, bibsLoaded]);
 
     return (
         <main className="min-h-screen font-sans">
