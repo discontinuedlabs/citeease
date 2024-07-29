@@ -16,14 +16,6 @@ export default defineConfig(({ mode }) => {
             assetsDir: ".",
         },
 
-        plugins: [
-            react(),
-            VitePWA({
-                registerType: "autoUpdate",
-                devOptions: {
-                    enabled: true,
-                },
-            }),
-        ],
+        plugins: [react(), VitePWA()],
     };
 });
