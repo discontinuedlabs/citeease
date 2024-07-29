@@ -35,6 +35,7 @@ type EnhancedDispatchConfig = {
  * @param {boolean} [config.includeCurrentUser=true] Whether to include the current user in dispatched actions.
  * @returns {Function} An enhanced version of the Redux dispatch function.
  */
+// FIXME: Fix this hook because it doesnt accept Promises (loadBibs, and loadSettings in this case).
 export function useEnhancedDispatch(config: EnhancedDispatchConfig) {
     const dispatch = useDispatch();
     const { currentUser } = useAuth();

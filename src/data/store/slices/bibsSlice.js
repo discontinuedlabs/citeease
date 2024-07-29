@@ -33,8 +33,6 @@ export const loadFromIndexedDB = createAsyncThunk("bibliographies/loadFromIndexe
         citations: bib.citations.map((cit) => ({ ...cit, isChecked: false })),
     }));
 
-    console.log(cleanedBibs);
-
     return cleanedBibs;
 });
 
@@ -420,7 +418,6 @@ const bibsSlice = createSlice({
 
     extraReducers: (builder) => {
         builder.addCase(loadFromIndexedDB.fulfilled, (state, action) => {
-            console.log("reducer", { ...state, data: action?.payload, loadedFromIndexedDB: true });
             return { ...state, data: action?.payload, loadedFromIndexedDB: true };
         });
     },

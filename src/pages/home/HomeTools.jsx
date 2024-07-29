@@ -30,7 +30,6 @@ export function CoBibsSearchDialog({ setIsVisible }) {
 
             if (docSnap.exists()) {
                 const result = JSON.parse(docSnap.data().bibliography);
-                console.log(result);
                 if (bibliographies.some((bib) => bib.id === result.id)) {
                     setSearchError(`You are already a collaborator in ${result.title} (${result.collab.id})`);
                 } else {

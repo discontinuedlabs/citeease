@@ -5,16 +5,16 @@ import DOMPurify from "dompurify";
 import CSL from "citeproc";
 import db from "../data/db/dexie/dexie";
 
-function saveLocalSCLFiles(CSLFiles) {
-    const serializedFiles = JSON.stringify(CSLFiles);
-    db.items.put({ id: "savedCSLFiles", value: serializedFiles });
+function saveLocalSCLFiles(CslFiles) {
+    const serializedFiles = JSON.stringify(CslFiles);
+    db.items.put({ id: "savedCslFiles", value: serializedFiles });
 }
 
 async function loadLocalSCLFiles() {
     try {
-        const loadedLocalCSLFiles = await db.items.get("savedCSLFiles");
-        if (loadedLocalCSLFiles) {
-            const parsedLocalCSLFiles = await JSON.parse(loadedLocalCSLFiles.value);
+        const loadedLocalCslFiles = await db.items.get("savedCslFiles");
+        if (loadedLocalCslFiles) {
+            const parsedLocalCSLFiles = await JSON.parse(loadedLocalCslFiles.value);
             return parsedLocalCSLFiles;
         }
         return null;
@@ -27,10 +27,10 @@ async function loadLocalSCLFiles() {
 async function getCslFile(bibStyle) {
     if (!bibStyle) return null;
     try {
-        const savedCSLFiles = await loadLocalSCLFiles();
-        if (savedCSLFiles && bibStyle?.code in savedCSLFiles) {
+        const savedCslFiles = await loadLocalSCLFiles();
+        if (savedCslFiles && bibStyle?.code in savedCslFiles) {
             // Get CSL from the savedCSLFiles object
-            return savedCSLFiles?.[bibStyle?.code];
+            return savedCslFiles?.[bibStyle?.code];
         }
         if (navigator.onLine && bibStyle?.code) {
             // Get CSL file from citation-style-language/styles repository and save it to the savedCSLFiles object
@@ -38,7 +38,7 @@ async function getCslFile(bibStyle) {
                 `https://raw.githubusercontent.com/citation-style-language/styles/master/${bibStyle?.code}.csl`
             );
             const data = await response.text();
-            saveLocalSCLFiles({ ...savedCSLFiles, [bibStyle?.code]: data });
+            saveLocalSCLFiles({ ...savedCslFiles, [bibStyle?.code]: data });
             return data;
         }
         console.error(

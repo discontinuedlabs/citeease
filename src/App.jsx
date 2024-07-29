@@ -24,7 +24,6 @@ export default function App() {
     const dispatch = useDispatch();
     useDynamicTitle();
 
-    // FIXME: Fix the useEnhancedDispatch hook because it doesnt accept Promises (loadBibs, and loadSettings in this case).
     useEffect(() => {
         dispatch(loadBibs());
         dispatch(loadSettings());

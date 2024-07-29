@@ -30,7 +30,6 @@ export default function Login() {
 
             if (docSnap.exists()) {
                 const userData = docSnap.data();
-                console.log(userData);
                 if (userData?.bibliographies) {
                     dispatch(replaceAllBibs({ bibs: JSON.parse(userData.bibliographies) }));
                 }
