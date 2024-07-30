@@ -31,15 +31,12 @@ export default function App() {
 
     useEffect(() => {
         if (!currentUser || !bibsLoaded) return;
-
         const coBibsIds = bibliographies.filter((bib) => bib?.collab?.open).map((bib) => bib.collab.id);
-
         coBibsIds.forEach((id) => {
             const unsubscribe = onSnapshot(doc(firestoreDB, "coBibs", id), (sDoc) => {
                 const parsedCoBib = JSON.parse(sDoc.data().bibliography);
                 dispatch(mergeWithCurrentBibs({ bibs: [parsedCoBib] }));
             });
-
             return () => unsubscribe();
         });
     }, [currentUser, bibsLoaded]);
