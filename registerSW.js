@@ -1,1 +1,1 @@
-if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('https://discontinuedlabs.github.io/citeease/sw.js', { scope: 'https://discontinuedlabs.github.io/citeease/' })})}
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/citeease/sw.js', { scope: '/citeease/' })})}
