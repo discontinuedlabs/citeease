@@ -5,7 +5,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { useAuth } from "../../context/AuthContext";
 import db from "../../data/db/firebase/firebase";
 import { replaceAllSettings } from "../../data/store/slices/settingsSlice";
-import { replaceAllBibs } from "../../data/store/slices/bibsSlice";
+import { mergeWithCurrentBibs, replaceAllBibs } from "../../data/store/slices/bibsSlice";
 
 export default function Login() {
     const [isLoading, setIsLoading] = useState(false);
@@ -17,6 +17,50 @@ export default function Login() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
+    async function retreiveCoBibs(bibs) {
+        const coBibIds = bibs.filter((bib) => bib?.collab?.open).map((bib) => bib.collab.id);
+
+        const promises = coBibIds.map(async (coBibId) => {
+            const coBibDocRef = doc(db, "coBibs", coBibId);
+            const coBibDocSnap = await getDoc(coBibDocRef);
+            if (coBibDocSnap.exists()) {
+                const parsedCoBib = JSON.parse(coBibDocSnap.data().bibliography);
+                return parsedCoBib;
+            }
+            return null;
+        });
+
+        const results = await Promise.all(promises);
+
+        const validResults = results.filter((result) => result !== null);
+
+        dispatch(mergeWithCurrentBibs({ bibs: [...validResults] }));
+
+        return validResults;
+    }
+
+    async function retreiveUserData(credintials) {
+        const userDocRef = doc(db, "users", credintials.uid);
+        const userDocSnap = await getDoc(userDocRef);
+
+        let bibs;
+        let settings;
+
+        if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            if (userData?.bibliographies) {
+                bibs = JSON.parse(userData.bibliographies);
+                dispatch(replaceAllBibs({ bibs }));
+            }
+            if (userData?.settings) {
+                settings = JSON.parse(userData.settings);
+                dispatch(replaceAllSettings({ settings }));
+            }
+        }
+
+        return [bibs, settings];
+    }
+
     async function handleSubmit(event) {
         event.preventDefault();
 
@@ -25,18 +69,9 @@ export default function Login() {
             setIsLoading(true);
             const credintials = await login(emailRef.current.value, passwordRef.current.value);
 
-            const userDocRef = doc(db, "users", credintials.uid);
-            const docSnap = await getDoc(userDocRef);
+            const [bibs] = await retreiveUserData(credintials);
 
-            if (docSnap.exists()) {
-                const userData = docSnap.data();
-                if (userData?.bibliographies) {
-                    dispatch(replaceAllBibs({ bibs: JSON.parse(userData.bibliographies) }));
-                }
-                if (userData?.settings) {
-                    dispatch(replaceAllSettings({ settings: JSON.parse(userData.settings) }));
-                }
-            }
+            await retreiveCoBibs(bibs);
 
             navigate("/");
             // TODO: Show success toast message

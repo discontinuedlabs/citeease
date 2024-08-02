@@ -8,7 +8,7 @@ import { useAuth } from "../../context/AuthContext";
 import { CoBibsSearchDialog } from "./HomeTools";
 import { useModal } from "../../context/ModalContext.tsx";
 import { useEnhancedDispatch } from "../../hooks/hooks.tsx";
-import { ChipSet, Fab, List, TopBar } from "../../components/ui/MaterialComponents";
+import { ChipSet, Fab, Icon, List, TopBar } from "../../components/ui/MaterialComponents";
 import { timeAgo } from "../../utils/utils.ts";
 
 export default function Home() {
@@ -74,7 +74,13 @@ export default function Home() {
                         }
 
                         return {
-                            title: bib.title,
+                            title: bib?.collab?.open ? (
+                                <>
+                                    <Icon name="group" /> {bib.title}
+                                </>
+                            ) : (
+                                bib.title
+                            ),
                             description: `${bib.style.name.short || bib.style.name.long.replace(/\((.*?)\)/g, "")} • ${renderCitationCount(bib.citations)} • ${timeAgo(bib.dateModified)}`,
                             content: (
                                 <ChipSet

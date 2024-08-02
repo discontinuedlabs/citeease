@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import DOMPurify from "dompurify";
 import HTMLReactParser from "html-react-parser/lib/index";
-import { FixedSizeList as List } from "react-window";
+import { FixedSizeList } from "react-window";
 import { useDispatch, useSelector } from "react-redux";
 import locatorTypes from "../../assets/locatorOptions.json";
 import * as citationEngine from "../../utils/citationEngine";
@@ -23,6 +23,7 @@ import Tag from "../../components/ui/Tag";
 import citationStyles from "../../assets/styles.json";
 import mostPopularStyles from "../../assets/mostPopularStyles.json";
 import { uid } from "../../utils/utils.ts";
+import { Checkbox, FilledButton, List } from "../../components/ui/MaterialComponents";
 
 // Source types
 import ArticleJournal from "../../components/sourceTypes/ArticleJournal";
@@ -81,7 +82,6 @@ export function ReferenceEntries(props) {
         // Used for the handleDrag function because event.dataTransfer.setData("text/html", sanitizedInnerHTML) doesn't wait
         async function formatSelectedCitations() {
             const formattedCitations = await citationEngine.formatBibliography(checkedCitations, bibliography?.style);
-            console.log(formattedCitations);
             formattedSelectedCitationsRef.current = formattedCitations;
         }
         formatSelectedCitations();
@@ -128,52 +128,51 @@ export function ReferenceEntries(props) {
 
     return (
         <div>
-            <div>
+            <div className="flex items-center justify-start gap-4 p-4">
                 {bibliography?.citations.length !== 0 && (
-                    <input
-                        type="checkbox"
-                        className="master-checkbox"
+                    <Checkbox
+                        indeterminate={masterCheckboxState === MASTER_CHECKBOX_STATES.INDETERMINATE}
                         checked={masterCheckboxState === MASTER_CHECKBOX_STATES.CHECKED}
-                        onChange={handleMasterCheck}
+                        onClick={handleMasterCheck}
                     />
                 )}
 
                 {checkedCitations?.length !== 0 && (
-                    <button type="button" onClick={openIntextCitationDialog}>
-                        In-text citation
-                    </button>
+                    <FilledButton onClick={openIntextCitationDialog}>In-text citation</FilledButton>
                 )}
             </div>
 
-            <div className="mx-auto max-w-[50rem] p-4">
-                {/* IMPORTANT: Entries need to be mapped by the references array because it gets sorted according to the CSL file rules, unlike the bibliography.citations array */}
-                {references?.map((ref) => {
-                    const refId = () => {
+            {/* className={`mb-1 flex items-start justify-between space-x-2 space-y-2 rounded-md px-2 py-2 transition-all duration-200 hover:bg-neutral-transparentGray ${
+                                    citation?.isChecked ? "bg-secondary-100 hover:bg-secondary-200" : ""
+                                }`}
+                                key={citation?.id || uid()}
+                                draggable
+                                onDragStart={handleDrag}
+                                
+                                
+                                */}
+
+            {/* IMPORTANT: Entries need to be mapped by the references array because it gets sorted according to the CSL file rules, unlike the bibliography.citations array */}
+            <List
+                items={references?.map((ref) => {
+                    function getRefId() {
                         const parser = new DOMParser();
                         const doc = parser.parseFromString(ref, "text/html");
                         return doc.querySelector("[data-csl-entry-id]").getAttribute("data-csl-entry-id");
-                    };
-                    const citation = bibliography?.citations.find((cit) => cit?.id === refId());
+                    }
+                    const citation = bibliography?.citations.find((cit) => cit?.id === getRefId());
                     const sanitizedReferences = DOMPurify.sanitize(ref);
-                    return (
-                        <div
-                            className={`mb-1 flex items-start justify-between space-x-2 space-y-2 rounded-md px-2 py-2 transition-all duration-200 hover:bg-neutral-transparentGray ${
-                                citation?.isChecked ? "bg-secondary-100 hover:bg-secondary-200" : ""
-                            }`}
-                            key={citation?.id || uid()}
-                            draggable
-                            onDragStart={handleDrag}
-                        >
-                            <input
-                                type="checkbox"
-                                className="top-0 m-0"
+                    return {
+                        icon: (
+                            <Checkbox
+                                i={console.log(citation?.isChecked || false)}
                                 checked={citation?.isChecked || false}
-                                onChange={() => handleEntryCheck(citation)}
+                                onClick={() => handleEntryCheck(citation)}
                             />
-
-                            {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+                        ),
+                        description: (
+                            // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                             <div
-                                type="button"
                                 className={`font-cambo ${
                                     /^(apa|modern-language-association|chicago)$/i.test(bibliography?.style.code) // Include any other style that needs hanging indentation
                                         ? "hanging-indentation"
@@ -183,10 +182,10 @@ export function ReferenceEntries(props) {
                             >
                                 {HTMLReactParser(sanitizedReferences)}
                             </div>
-                        </div>
-                    );
+                        ),
+                    };
                 })}
-            </div>
+            />
         </div>
     );
 }
@@ -588,7 +587,7 @@ export function CitationStylesMenu(props) {
                 </form>
             </search>
 
-            <List height={500} itemCount={filteredStyles.length} itemSize={45} width={300}>
+            <FixedSizeList height={500} itemCount={filteredStyles.length} itemSize={45} width={300}>
                 {({ index, style }) => {
                     const targetStyle = filteredStyles[index];
                     if (/other styles|most popular/i.test(targetStyle)) {
@@ -607,7 +606,7 @@ export function CitationStylesMenu(props) {
                         </button>
                     );
                 }}
-            </List>
+            </FixedSizeList>
             <small>
                 <b>Note:</b> Some less common citation styles may have formatting issues. If you encounter any problems,
                 please report them by opening an issue on the{" "}

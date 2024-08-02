@@ -33,7 +33,7 @@ import { useEnhancedDispatch, useFindBib } from "../../hooks/hooks.tsx";
 import { useAuth } from "../../context/AuthContext";
 import firestoreDB from "../../data/db/firebase/firebase";
 import { useModal } from "../../context/ModalContext.tsx";
-import { ChipSet, Fab, TopBar } from "../../components/ui/MaterialComponents";
+import { ChipSet, Fab, Icon, TopBar } from "../../components/ui/MaterialComponents";
 
 // TODO: The user cannot do any actions in collaborative bibliographies when they are offline
 export default function Bibliography() {
@@ -170,8 +170,21 @@ export default function Bibliography() {
         dispatch(duplicateSelectedCitations({ bibliographyId: bibliography?.id, checkedCitations }));
     }
 
-    function handleDelete() {
-        dispatch(deleteSelectedCitations({ bibliographyId: bibliography?.id, checkedCitations }));
+    function handleDeleteSelectedCitations() {
+        modal.open({
+            title: `Delete ${checkedCitations?.length === 1 ? "citation" : "citations"}?`,
+            message: `Are you sure you want to delete ${
+                checkedCitations?.length === 1 ? "this citation" : "these citations"
+            }?`,
+            actions: [
+                [
+                    "Delete",
+                    () => dispatch(deleteSelectedCitations({ bibliographyId: bibliography?.id, checkedCitations })),
+                    "autofocus",
+                ],
+                ["Cancel", () => modal.close()],
+            ],
+        });
     }
 
     function handleRename(value) {
@@ -292,64 +305,66 @@ export default function Bibliography() {
     }
 
     function handleDeleteBibliography() {
-        navigate("/");
-        dispatch(deleteBib({ bibliographyId: bibliography.id }));
+        modal.open({
+            title: "Delete bibliography?",
+            message:
+                "You'll no longer see this bibliography in your list. This will also delete related work and citations.",
+            actions: [
+                [
+                    "Delete",
+                    () => {
+                        navigate("/");
+                        dispatch(deleteBib({ bibliographyId: bibliography.id }));
+                    },
+                    "autofocus",
+                ],
+                ["Cancel", () => modal.close()],
+            ],
+        });
     }
 
-    /* eslint-disable indent */
-    const optionsWhenCitationsChecked = [
+    function getConditionalOptionsWhenCitationsSelected() {
+        if (checkedCitations?.length === 1) {
+            const options = [["Edit", () => openCitationForm(checkedCitations[0].content.type)]];
+
+            if (checkedCitations[0].content.URL)
+                options.push(["Visit website", () => window.open(checkedCitations[0].content.URL, "_blank")]);
+
+            return options;
+        }
+        return [];
+    }
+
+    const optionsWhenCitationsSelected = [
         ["Copy to clipboard", handleCopy], // TODO: This should give options to choose the type of copied text: Text, HTML, or Markdown.
         ["Export to LaTeX", () => setLaTeXWindowVisible(true)], // TODO: This should be "Export" only, and gives you more options to export to: LaTeX, HTML, Markdown, PDF, Word, or JSON.
         ["Move", handleMove],
         ["Duplicate", handleDuplicate],
-        ...(checkedCitations?.length === 1
-            ? [
-                  ...(checkedCitations[0].content.URL
-                      ? [["Visit website", () => window.open(checkedCitations[0].content.URL, "_blank")]]
-                      : []),
-                  ["Edit", () => openCitationForm(checkedCitations[0].content.type)],
-              ]
-            : []),
-        [
-            "Delete",
-            () =>
-                modal.open({
-                    title: `Delete ${checkedCitations?.length === 1 ? "citation" : "citations"}?`,
-                    message: `Are you sure you want to delete ${
-                        checkedCitations?.length === 1 ? "this citation" : "these citations"
-                    }?`,
-                    actions: [
-                        ["Delete", handleDelete, "autofocus"],
-                        ["Cancel", () => modal.close()],
-                    ],
-                }),
-        ],
-    ];
+        ["Delete", handleDeleteSelectedCitations],
+    ].concat(getConditionalOptionsWhenCitationsSelected());
 
-    const optionsWhenNothingChecked = [
+    function getConditionalOptionsWhenNothingSelected() {
+        // Options for admin of collaborative bibliographies
+        if (collaborationOpened && bibliography.collab.adminId === currentUser.uid)
+            return [
+                ["Bibliography Settings", () => navigate(`/bib/${bibliography.id}/settings`)],
+                ["Close collaboration", handleCloseCollaboration],
+            ];
+        // Options if bibliography not open for collaboration
+        if (!collaborationOpened)
+            return [
+                ["Bibliography Settings", () => navigate(`/bib/${bibliography.id}/settings`)],
+                ["Open collaboration", handleOpenCollaboration],
+                ["Delete bibliography", handleDeleteBibliography],
+            ];
+        return [];
+    }
+
+    const optionsWhenNothingSelected = [
         ["Tags", () => setTagsDialogVisible(true)],
         ["Change style", () => setCitationStyleMenuVisible(true)],
         ["Rename bibliography", () => setRenameWindowVisible(true)],
-        [("Bibliography Settings", () => navigate(`/bib/${bibliography.id}/settings`))],
-
-        ...(collaborationOpened
-            ? [["Close collaboration", handleCloseCollaboration]]
-            : [["Open collaboration", handleOpenCollaboration]]),
-
-        [
-            "Delete bibliography",
-            () =>
-                modal.open({
-                    title: "Delete bibliography?",
-                    message:
-                        "You'll no longer see this bibliography in your list. This will also delete related work and citations.",
-                    actions: [
-                        ["Delete", handleDeleteBibliography, "autofocus"],
-                        ["Cancel", () => modal.close()],
-                    ],
-                }),
-        ],
-    ];
+    ].concat(getConditionalOptionsWhenNothingSelected());
 
     return (
         <div className="mx-auto max-w-[50rem]">
@@ -358,7 +373,11 @@ export default function Bibliography() {
                     headline={bibliography?.title}
                     description={
                         <>
-                            {`${bibliography?.collab?.open ? `${bibliography?.collab?.id} • ` : ""}${bibliography?.style.name.long}`}
+                            <>
+                                {bibliography?.collab?.open ? <Icon name="group" /> : ""}
+                                {`${bibliography?.collab?.open ? ` ${bibliography?.collab?.id} • ` : ""}${bibliography?.style.name.long}`}
+                            </>
+
                             <ChipSet
                                 chips={bibliography?.tags?.map(({ label, color }) => ({ label, color }))}
                                 style={{ marginTop: bibliography?.tags?.length === 0 ? "0" : "0.5rem" }}
@@ -366,9 +385,20 @@ export default function Bibliography() {
                         </>
                     }
                     options={[
-                        ...(checkedCitations?.length !== 0 ? optionsWhenCitationsChecked : optionsWhenNothingChecked),
+                        ...(checkedCitations?.length !== 0 ? optionsWhenCitationsSelected : optionsWhenNothingSelected),
                     ]}
                 />
+
+                {/* {bibliography?.collab?.open && (
+                    <div>
+                        <div>
+                            collabortaors{" "}
+                            {bibliography.collab.collaborators.map((co) => (
+                                <li>{co.name || co.id}</li>
+                            ))}
+                        </div>
+                    </div>
+                )} */}
 
                 <ReferenceEntries
                     {...{

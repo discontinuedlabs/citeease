@@ -1,14 +1,31 @@
 /* eslint-disable react/jsx-props-no-spreading, prettier/prettier */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { uid } from "../../utils/utils.ts";
 import ContextMenu from "./ContextMenu";
 import { TAG_COLOR_VALUES } from "../../data/store/slices/settingsSlice";
 
+export function Checkbox({ className, ...rest }) {
+    const [isChecked, setIsChecked] = useState(false);
+    const ref = useRef();
+    console.log(ref);
+
+    return (
+        <md-checkbox
+            ref={ref}
+            class={`m-0 ${className}`}
+            touch-target="wrapper"
+            checked={isChecked}
+            onClick={() => setIsChecked(ref.current.checked)}
+            {...rest}
+        />
+    );
+}
+
 export function Icon({ name, className, ...rest }) {
     return (
-        <md-icon slot="icon" {...rest} class={className}>
+        <md-icon slot="icon" {...rest} class={`align-middle text-xl ${className}`}>
             {name}
         </md-icon>
     );
@@ -96,6 +113,7 @@ export function List({ items = [], className, ...rest }) {
                 }
                 return (
                     <md-list-item type="button" onClick={item.onClick} key={uid()}>
+                        {item?.icon && <div slot="start">{item.icon}</div>}
                         {item?.title && <div slot="headline">{item.title}</div>}
                         {item?.description && <div slot="supporting-text">{item.description}</div>}
                         {item?.content && <div slot="supporting-text">{item.content}</div>}
