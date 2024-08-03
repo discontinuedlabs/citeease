@@ -47,6 +47,8 @@ export function ReferenceEntries(props) {
     const dispatch = useDispatch();
     const formattedSelectedCitationsRef = useRef([]);
 
+    console.log(undefined);
+
     useEffect(() => {
         function updateMasterCheckboxState() {
             let checkedCount = 0;
