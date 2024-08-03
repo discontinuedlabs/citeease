@@ -23,7 +23,7 @@ import Tag from "../../components/ui/Tag";
 import citationStyles from "../../assets/styles.json";
 import mostPopularStyles from "../../assets/mostPopularStyles.json";
 import { uid } from "../../utils/utils.ts";
-import { Checkbox, FilledButton, List } from "../../components/ui/MaterialComponents";
+import { Checkbox, List, OutlinedButton } from "../../components/ui/MaterialComponents";
 
 // Source types
 import ArticleJournal from "../../components/sourceTypes/ArticleJournal";
@@ -48,6 +48,7 @@ export function ReferenceEntries(props) {
     const formattedSelectedCitationsRef = useRef([]);
 
     useEffect(() => {
+        console.warn("master");
         function updateMasterCheckboxState() {
             let checkedCount = 0;
             bibliography?.citations.forEach((cit) => {
@@ -128,29 +129,19 @@ export function ReferenceEntries(props) {
 
     return (
         <div>
-            <div className="flex items-center justify-start gap-4 p-4">
+            <div className="flex items-center justify-between gap-4 p-4">
                 {bibliography?.citations.length !== 0 && (
                     <Checkbox
                         indeterminate={masterCheckboxState === MASTER_CHECKBOX_STATES.INDETERMINATE}
                         checked={masterCheckboxState === MASTER_CHECKBOX_STATES.CHECKED}
-                        onClick={handleMasterCheck}
+                        onChange={handleMasterCheck}
                     />
                 )}
 
                 {checkedCitations?.length !== 0 && (
-                    <FilledButton onClick={openIntextCitationDialog}>In-text citation</FilledButton>
+                    <OutlinedButton onClick={openIntextCitationDialog}>In-text citation</OutlinedButton>
                 )}
             </div>
-
-            {/* className={`mb-1 flex items-start justify-between space-x-2 space-y-2 rounded-md px-2 py-2 transition-all duration-200 hover:bg-neutral-transparentGray ${
-                                    citation?.isChecked ? "bg-secondary-100 hover:bg-secondary-200" : ""
-                                }`}
-                                key={citation?.id || uid()}
-                                draggable
-                                onDragStart={handleDrag}
-                                
-                                
-                                */}
 
             {/* IMPORTANT: Entries need to be mapped by the references array because it gets sorted according to the CSL file rules, unlike the bibliography.citations array */}
             <List
@@ -162,27 +153,35 @@ export function ReferenceEntries(props) {
                     }
                     const citation = bibliography?.citations.find((cit) => cit?.id === getRefId());
                     const sanitizedReferences = DOMPurify.sanitize(ref);
+                    const hangingIndentationStyle = { paddingLeft: "1.5rem", textIndent: "-1.5rem" };
+
                     return {
-                        icon: (
+                        start: (
                             <Checkbox
-                                i={console.log(citation?.isChecked || false)}
                                 checked={citation?.isChecked || false}
-                                onClick={() => handleEntryCheck(citation)}
+                                onChange={() => handleEntryCheck(citation)}
                             />
                         ),
                         description: (
-                            // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+                            // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
                             <div
-                                className={`font-cambo ${
-                                    /^(apa|modern-language-association|chicago)$/i.test(bibliography?.style.code) // Include any other style that needs hanging indentation
-                                        ? "hanging-indentation"
-                                        : ""
-                                }`}
+                                className="font-cambo"
                                 onClick={() => openCitationForm(citation?.content.type, false, citation?.id)}
+                                style={
+                                    /^(apa|modern-language-association|chicago)$/i.test(bibliography?.style.code)
+                                        ? hangingIndentationStyle
+                                        : {}
+                                }
                             >
                                 {HTMLReactParser(sanitizedReferences)}
                             </div>
                         ),
+                        style: {
+                            backgroundColor: citation?.isChecked ? "var(--md-sys-color-tertiary-container)" : "",
+                            color: citation?.isChecked ? "var(--md-sys-color-on-tertiary-container)" : "",
+                        },
+                        draggable: true, // FIXME: Only works when dragged from the edge of the list item
+                        onDragStart: handleDrag,
                     };
                 })}
             />
@@ -735,7 +734,6 @@ export function IdAndPasswordDialogVisible(props) {
             setError("Password do not match");
         } else {
             const data = new FormData(event.target);
-            console.log(Object.fromEntries(data.entries()));
             onSubmit(Object.fromEntries(data.entries()));
             setIsVisible(false);
         }

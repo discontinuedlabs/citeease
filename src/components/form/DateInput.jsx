@@ -27,7 +27,7 @@ export default function DateInput(props) {
         <div className="date-inputs-container" aria-labelledby={ariaLabelledby}>
             <input
                 type="number"
-                value={content[dateKey]?.["date-parts"]?.[0]?.[0]}
+                value={content[dateKey]?.["date-parts"]?.[0]?.[0] || ""}
                 min="1"
                 max={new Date().getFullYear()}
                 placeholder="YYYY"
@@ -35,7 +35,7 @@ export default function DateInput(props) {
             />
             <input
                 type="number"
-                value={content[dateKey]?.["date-parts"]?.[0]?.[1]}
+                value={content[dateKey]?.["date-parts"]?.[0]?.[1] || ""}
                 min="1"
                 max="12"
                 placeholder="MM"
@@ -43,7 +43,7 @@ export default function DateInput(props) {
             />
             <input
                 type="number"
-                value={content[dateKey]?.["date-parts"]?.[0]?.[2]}
+                value={content[dateKey]?.["date-parts"]?.[0]?.[2] || ""}
                 min="1"
                 max="31"
                 placeholder="DD"

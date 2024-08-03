@@ -6,21 +6,20 @@ import { uid } from "../../utils/utils.ts";
 import ContextMenu from "./ContextMenu";
 import { TAG_COLOR_VALUES } from "../../data/store/slices/settingsSlice";
 
-export function Checkbox({ className, ...rest }) {
-    const [isChecked, setIsChecked] = useState(false);
+export function Checkbox({ className, onChange, checked = false, indeterminate = false, ...rest }) {
     const ref = useRef();
-    console.log(ref);
 
-    return (
-        <md-checkbox
-            ref={ref}
-            class={`m-0 ${className}`}
-            touch-target="wrapper"
-            checked={isChecked}
-            onClick={() => setIsChecked(ref.current.checked)}
-            {...rest}
-        />
-    );
+    useEffect(() => {
+        ref?.current?.addEventListener("change", onChange);
+
+        // eslint-disable-next-line consistent-return
+        return () => ref?.current?.removeEventListener("change", onChange);
+    }, []);
+
+    const nClass = `m-0 align-middle ${className}`;
+    if (checked) return <md-checkbox ref={ref} class={nClass} touch-target="wrapper" checked />;
+    if (indeterminate) return <md-checkbox ref={ref} class={nClass} touch-target="wrapper" indeterminate {...rest} />;
+    return <md-checkbox ref={ref} class={nClass} touch-target="wrapper" {...rest} />;
 }
 
 export function Icon({ name, className, ...rest }) {
@@ -112,11 +111,12 @@ export function List({ items = [], className, ...rest }) {
                     return <md-divider />;
                 }
                 return (
-                    <md-list-item type="button" onClick={item.onClick} key={uid()}>
-                        {item?.icon && <div slot="start">{item.icon}</div>}
+                    <md-list-item {...item} type="button" onClick={item.onClick} key={uid()}>
+                        {item?.start && <div slot="start">{item.start}</div>}
                         {item?.title && <div slot="headline">{item.title}</div>}
                         {item?.description && <div slot="supporting-text">{item.description}</div>}
                         {item?.content && <div slot="supporting-text">{item.content}</div>}
+                        {item?.end && <div slot="end">{item.end}</div>}
                     </md-list-item>
                 );
             })}
