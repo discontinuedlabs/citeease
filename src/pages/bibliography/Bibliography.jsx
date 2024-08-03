@@ -16,6 +16,7 @@ import {
     CitationStylesMenu,
     TagsDialog,
     IdAndPasswordDialogVisible,
+    IconsMenu,
 } from "./BibliographyTools";
 import {
     addNewBibAndMoveSelectedCitations,
@@ -59,6 +60,7 @@ export default function Bibliography() {
     const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
     const [tagsDialogVisible, setTagsDialogVisible] = useState(false);
     const [searchByIdentifiersInput, setSearchByIdentifiersInput] = useState("");
+    const [iconsMenuVisible, setIconsMenuVisible] = useState(false);
 
     const keyMap = {
         // "ctrl+a": selectAll,
@@ -364,17 +366,19 @@ export default function Bibliography() {
         ["Tags", () => setTagsDialogVisible(true)],
         ["Change style", () => setCitationStyleMenuVisible(true)],
         ["Rename bibliography", () => setRenameWindowVisible(true)],
+        ["Change icon", () => setIconsMenuVisible(true)],
     ].concat(getConditionalOptionsWhenNothingSelected());
 
     return (
         <div className="mx-auto max-w-[50rem]">
             <HotKeys keyMap={keyMap}>
                 <TopBar
+                    icon={bibliography?.icon}
                     headline={bibliography?.title}
                     description={
                         <>
                             <>
-                                {bibliography?.collab?.open ? <Icon name="group" /> : ""}
+                                {bibliography?.collab?.open ? <Icon name="group" className="text-xl" /> : ""}
                                 {`${bibliography?.collab?.open ? ` ${bibliography?.collab?.id} • ` : ""}${bibliography?.style.name.long}`}
                             </>
 
@@ -470,6 +474,17 @@ export default function Bibliography() {
                     <IdAndPasswordDialogVisible
                         setIsVisible={setIdAndPasswordDialogVisible}
                         onSubmit={openCollaboration}
+                    />
+                )}
+
+                {iconsMenuVisible && (
+                    <IconsMenu
+                        setIsVisible={setIconsMenuVisible}
+                        onSubmit={(chosenIcon) =>
+                            dispatch(
+                                updateBibField({ bibliographyId: bibliography.id, key: "icon", value: chosenIcon })
+                            )
+                        }
                     />
                 )}
 

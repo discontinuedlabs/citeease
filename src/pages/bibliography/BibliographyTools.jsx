@@ -23,7 +23,8 @@ import Tag from "../../components/ui/Tag";
 import citationStyles from "../../assets/styles.json";
 import mostPopularStyles from "../../assets/mostPopularStyles.json";
 import { uid } from "../../utils/utils.ts";
-import { Checkbox, List, OutlinedButton } from "../../components/ui/MaterialComponents";
+import { Checkbox, Icon, List, OutlinedButton, TextButton } from "../../components/ui/MaterialComponents";
+import icons from "../../assets/icons.json";
 
 // Source types
 import ArticleJournal from "../../components/sourceTypes/ArticleJournal";
@@ -167,7 +168,7 @@ export function ReferenceEntries(props) {
                                 className="font-cambo"
                                 onClick={() => openCitationForm(citation?.content.type, false, citation?.id)}
                                 style={
-                                    /^(apa|modern-language-association|chicago)$/i.test(bibliography?.style.code)
+                                    /^(apa|modern-language-association|chicago)/.test(bibliography?.style.code)
                                         ? hangingIndentationStyle
                                         : {}
                                 }
@@ -177,7 +178,6 @@ export function ReferenceEntries(props) {
                         ),
                         style: {
                             backgroundColor: citation?.isChecked ? "var(--md-sys-color-tertiary-container)" : "",
-                            color: citation?.isChecked ? "var(--md-sys-color-on-tertiary-container)" : "",
                         },
                         draggable: true, // FIXME: Only works when dragged from the edge of the list item
                         onDragStart: handleDrag,
@@ -685,6 +685,31 @@ export function SmartGeneratorDialog(props) {
             </button>
             <div>{HTMLReactParser(references)}</div>
             <button type="button">Accept</button>
+        </div>
+    );
+}
+
+export function IconsMenu({ onSubmit, setIsVisible }) {
+    return (
+        <div>
+            <button type="button" onClick={() => setIsVisible(false)}>
+                X
+            </button>
+            <h3>Icons Menu</h3>
+            <div>
+                {icons.map((icon) => {
+                    return (
+                        <TextButton
+                            onClick={() => {
+                                onSubmit(icon);
+                                setIsVisible(false);
+                            }}
+                        >
+                            <Icon name={icon} />
+                        </TextButton>
+                    );
+                })}
+            </div>
         </div>
     );
 }

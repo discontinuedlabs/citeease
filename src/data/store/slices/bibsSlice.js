@@ -120,6 +120,7 @@ const bibsSlice = createSlice({
                 dateCreated: new Date().toString(),
                 dateModified: new Date().toString(),
                 id: uid(10),
+                icon: "book_2",
                 citations: [],
                 tags: [],
             };

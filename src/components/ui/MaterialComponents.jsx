@@ -24,7 +24,7 @@ export function Checkbox({ className, onChange, checked = false, indeterminate =
 
 export function Icon({ name, className, ...rest }) {
     return (
-        <md-icon slot="icon" {...rest} class={`align-middle text-xl ${className}`}>
+        <md-icon slot="icon" {...rest} class={`align-middle ${className}`}>
             {name}
         </md-icon>
     );
