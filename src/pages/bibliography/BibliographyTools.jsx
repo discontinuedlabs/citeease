@@ -48,7 +48,6 @@ export function ReferenceEntries(props) {
     const formattedSelectedCitationsRef = useRef([]);
 
     useEffect(() => {
-        console.warn("master");
         function updateMasterCheckboxState() {
             let checkedCount = 0;
             bibliography?.citations.forEach((cit) => {
