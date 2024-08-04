@@ -7,6 +7,7 @@ import { useAuth } from "../../context/AuthContext";
 import { mergeWithCurrentBibs } from "../../data/store/slices/bibsSlice";
 import { useToast } from "../../context/ToastContext.tsx";
 import { useModal } from "../../context/ModalContext.tsx";
+import { setTryingToJoinBib } from "../../data/store/slices/settingsSlice";
 
 export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib }) {
     const [searchResult, setSearchResult] = useState(null);
@@ -68,6 +69,7 @@ export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib }) {
     useEffect(() => {
         if (tryingToJoinBib) {
             searchForBib(tryingToJoinBib);
+            dispatch(setTryingToJoinBib({ bibId: null }));
         }
     }, [tryingToJoinBib]);
 

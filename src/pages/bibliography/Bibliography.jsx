@@ -80,7 +80,7 @@ export default function Bibliography() {
     };
 
     useEffect(() => {
-        if (location.pathname.startsWith("/collab/") && bibId) {
+        if (location.pathname.startsWith("/collab/") && bibId && !bibliography) {
             dispatch(setTryingToJoinBib({ bibId }));
         }
         if (!bibliography) {

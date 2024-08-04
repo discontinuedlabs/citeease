@@ -37,11 +37,6 @@ export default function App() {
         coBibsIds.forEach((id) => {
             const unsubscribe = onSnapshot(doc(firestoreDB, "coBibs", id), (sDoc) => {
                 const parsedCoBib = JSON.parse(sDoc.data().bibliography);
-                console.log(
-                    currentUser.uid,
-                    parsedCoBib.collab.collaborators,
-                    parsedCoBib.collab.collaborators.some((co) => co.id === currentUser.uid)
-                );
                 if (!parsedCoBib.collab.collaborators.some((co) => co.id === currentUser.uid)) {
                     // remove the user from the bibliography if they were removed by admin
                     dispatch(deleteBib({ bibliographyId: parsedCoBib.id }));
