@@ -35,6 +35,7 @@ import { useAuth } from "../../context/AuthContext";
 import firestoreDB from "../../data/db/firebase/firebase";
 import { useModal } from "../../context/ModalContext.tsx";
 import { ChipSet, Fab, Icon, TopBar } from "../../components/ui/MaterialComponents";
+import { setTryingToJoinBib } from "../../data/store/slices/settingsSlice";
 
 // TODO: The user cannot do any actions in collaborative bibliographies when they are offline
 export default function Bibliography() {
@@ -43,6 +44,8 @@ export default function Bibliography() {
     const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
     const { currentUser } = useAuth();
     const { bibId } = useParams();
+    const params = useParams();
+    console.log(params);
     const modal = useModal();
     const navigate = useNavigate();
     const dispatch = useEnhancedDispatch();
@@ -75,6 +78,15 @@ export default function Bibliography() {
         // "ctrl+s": changeStyle,
         // "ctrl+n": addCitation,
     };
+
+    useEffect(() => {
+        if (location.pathname.startsWith("/collab/") && bibId) {
+            dispatch(setTryingToJoinBib({ bibId }));
+        }
+        if (!bibliography) {
+            navigate("/");
+        }
+    }, []);
 
     useEffect(() => {
         // Prioritizes showing collab.id in the URL instead of the regular id
@@ -349,25 +361,28 @@ export default function Bibliography() {
         // Options for admin of collaborative bibliographies
         if (collaborationOpened && bibliography.collab.adminId === currentUser.uid)
             return [
-                ["Bibliography Settings", () => navigate(`/bib/${bibliography.id}/settings`)],
+                ["Tags", () => setTagsDialogVisible(true)],
+                ["Change style", () => setCitationStyleMenuVisible(true)],
+                ["Rename bibliography", () => setRenameWindowVisible(true)],
+                ["Change icon", () => setIconsMenuVisible(true)],
+                ["Bibliography settings", () => navigate(`/bib/${bibliography.id}/settings`)],
                 ["Close collaboration", handleCloseCollaboration],
             ];
         // Options if bibliography not open for collaboration
         if (!collaborationOpened)
             return [
-                ["Bibliography Settings", () => navigate(`/bib/${bibliography.id}/settings`)],
+                ["Tags", () => setTagsDialogVisible(true)],
+                ["Change style", () => setCitationStyleMenuVisible(true)],
+                ["Rename bibliography", () => setRenameWindowVisible(true)],
+                ["Change icon", () => setIconsMenuVisible(true)],
+                ["Bibliography settings", () => navigate(`/bib/${bibliography.id}/settings`)],
                 ["Open collaboration", handleOpenCollaboration],
                 ["Delete bibliography", handleDeleteBibliography],
             ];
         return [];
     }
 
-    const optionsWhenNothingSelected = [
-        ["Tags", () => setTagsDialogVisible(true)],
-        ["Change style", () => setCitationStyleMenuVisible(true)],
-        ["Rename bibliography", () => setRenameWindowVisible(true)],
-        ["Change icon", () => setIconsMenuVisible(true)],
-    ].concat(getConditionalOptionsWhenNothingSelected());
+    const optionsWhenNothingSelected = [].concat(getConditionalOptionsWhenNothingSelected());
 
     return (
         <div className="mx-auto max-w-[50rem]">

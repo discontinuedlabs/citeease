@@ -43,7 +43,7 @@ const PREBUILT_TAGS = [
     { label: "Discontinued", color: TAG_COLORS.GRAY, id: "builtin-discontinued" },
 ];
 
-const initialState = { tags: PREBUILT_TAGS };
+const initialState = { tags: PREBUILT_TAGS, tryingToJoinBib: null };
 
 async function saveToIndexedDB(newState) {
     const serializedState = JSON.stringify(newState);
@@ -88,6 +88,10 @@ const settingsSlice = createSlice({
             saveToIndexedDB(newState);
             return newState;
         },
+        setTryingToJoinBib: (settings, action) => {
+            const newState = { ...settings, tryingToJoinBib: action.payload.bibId };
+            return newState;
+        },
         resetAllSettings: () => {
             saveToIndexedDB(initialState);
             return initialState;
@@ -98,6 +102,7 @@ const settingsSlice = createSlice({
     },
 });
 
-export const { replaceAllSettings, restoreDefaultTags, addTag, deleteTag, resetAllSettings } = settingsSlice.actions;
+export const { replaceAllSettings, restoreDefaultTags, addTag, deleteTag, setTryingToJoinBib, resetAllSettings } =
+    settingsSlice.actions;
 
 export default settingsSlice.reducer;

@@ -111,7 +111,7 @@ export function List({ items = [], className, ...rest }) {
                     return <md-divider />;
                 }
                 return (
-                    <md-list-item {...item} type="button" onClick={item.onClick} key={uid()}>
+                    <md-list-item {...item} type="button" onClick={item?.onClick} key={uid()}>
                         {item?.start && <div slot="start">{item.start}</div>}
                         {item?.title && <div slot="headline">{item.title}</div>}
                         {item?.description && <div slot="supporting-text">{item.description}</div>}
@@ -193,5 +193,24 @@ export function ChipSet({ chips = [], removable = false, className, ...rest }) {
                 return <md-assist-chip style={chipStyle} key={uid()} label={chip.label} />;
             })}
         </md-chip-set>
+    );
+}
+
+export function EmptyPage({ icon = "error", title, message, actions = [] }) {
+    return (
+        <div className="flex h-full w-full items-center justify-center">
+            <div className="text-center">
+                <Icon style={{ color: "var(--md-sys-color-outline)" }} className="h-32 w-32 text-9xl" name={icon} />
+                {title && <h3>{title}</h3>}
+                {message && <p>{message}</p>}
+                {actions.length !== 0 && (
+                    <div className="flex justify-center gap-2">
+                        {actions.map((action) => {
+                            return <FilledButton onClick={action[1]}>{action[0]}</FilledButton>;
+                        })}
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }

@@ -1,12 +1,13 @@
-import { doc, getDoc } from "firebase/firestore";
-import { useId, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { useEffect, useId, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import db from "../../data/db/firebase/firebase";
 import { useAuth } from "../../context/AuthContext";
 import { mergeWithCurrentBibs } from "../../data/store/slices/bibsSlice";
 import { useToast } from "../../context/ToastContext.tsx";
 
-export function CoBibsSearchDialog({ setIsVisible }) {
+export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib }) {
     const [searchResult, setSearchResult] = useState(null);
     const [searchLoading, setSearchLoading] = useState(false);
     const [searchError, setSearchError] = useState(null);
@@ -19,25 +20,34 @@ export function CoBibsSearchDialog({ setIsVisible }) {
     const { currentUser } = useAuth();
     const dispatch = useDispatch();
     const toast = useToast();
+    const navigate = useNavigate();
+
+    async function searchForBib(bibId) {
+        setSearchError(null);
+        setSearchLoading(true);
+        const docRef = doc(db, "coBibs", bibId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            const result = JSON.parse(docSnap.data().bibliography);
+            if (bibliographies.some((bib) => bib.id === result.id)) {
+                setSearchError(`You are already a collaborator in ${result.title} (${result.collab.id})`);
+            } else {
+                setSearchResult(result);
+            }
+        } else {
+            setSearchError("No such collaborative bibliography!");
+        }
+    }
+
+    useEffect(() => {
+        searchForBib(tryingToJoinBib);
+    }, [tryingToJoinBib]);
 
     async function handleSearch(event) {
         event.preventDefault();
         try {
-            setSearchError(null);
-            setSearchLoading(true);
-            const docRef = doc(db, "coBibs", searchRef.current.value);
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
-                const result = JSON.parse(docSnap.data().bibliography);
-                if (bibliographies.some((bib) => bib.id === result.id)) {
-                    setSearchError(`You are already a collaborator in ${result.title} (${result.collab.id})`);
-                } else {
-                    setSearchResult(result);
-                }
-            } else {
-                setSearchError("No such collaborative bibliography!");
-            }
+            searchForBib(searchRef.current.value);
         } catch (error) {
             console.log(error);
             setSearchError(error);
@@ -53,6 +63,7 @@ export function CoBibsSearchDialog({ setIsVisible }) {
             if (passwordRef.current.value === searchResult.collab.password) {
                 const newCoBibState = {
                     ...searchResult,
+                    dateModified: new Date().toString(),
                     collab: {
                         ...searchResult.collab,
                         collaborators: [
@@ -63,14 +74,16 @@ export function CoBibsSearchDialog({ setIsVisible }) {
                 };
                 dispatch(mergeWithCurrentBibs({ bibs: [newCoBibState] }));
 
-                // push the user to coBib.collaborators
-                // push the coBib to the users bibliographies array
+                const coBibsRef = doc(db, "coBibs", newCoBibState?.collab?.id);
+                setDoc(coBibsRef, { bibliography: JSON.stringify(newCoBibState) });
 
                 toast.show({
                     message: `You successfully joined ${searchResult.title} (${searchResult.collab.id})`,
                     icon: "check",
                     color: "green",
                 });
+
+                navigate(`/collab/${newCoBibState.collab.id}`);
             } else {
                 setPasswordError("The password you entered is wrong");
             }

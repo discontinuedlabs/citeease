@@ -70,6 +70,7 @@
         "react-dom": "^18.3.1",
         "typescript": "^5.5.3",
         "vite": "^5.3.4",
+        "vite-plugin-eslint": "^1.8.1",
         "vite-plugin-pwa": "^0.20.0"
     },
     "overrides": {
@@ -82,8 +83,9 @@
         "build": "vite build",
         "serve": "vite preview",
         "test": "jest",
-        "lint": "npx eslint .",
+        "lint": "eslint .",
         "lint:fix": "npx eslint --fix .",
+        "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css}\"",
         "coverage": "npm test --coverage --watchAll --collectCoverageFrom='src/**/*.{js,ts,jsx,tsx}'"
     },
     "eslintConfig": {

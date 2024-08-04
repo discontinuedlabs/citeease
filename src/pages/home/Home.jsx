@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { CitationStylesMenu } from "../bibliography/BibliographyTools";
 import * as citationEngine from "../../utils/citationEngine";
@@ -13,13 +13,21 @@ import { timeAgo } from "../../utils/utils.ts";
 
 export default function Home() {
     const bibliographies = useSelector((state) => state.bibliographies.data);
+    const settings = useSelector((state) => state.settings);
     const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
     const [addBibOptionsMenuVisible, setAddBibOptionsMenuVisible] = useState(false);
     const [coBibsSearchDialogVisible, setCoBibsSearchDialogVisible] = useState(false);
+    const { tryingToJoinBib } = settings;
     const { currentUser } = useAuth();
     const navigate = useNavigate();
     const dispatch = useEnhancedDispatch();
     const modal = useModal();
+
+    useEffect(() => {
+        if (tryingToJoinBib) {
+            setCoBibsSearchDialogVisible(true);
+        }
+    }, []);
 
     function addNewBibWithStyle(style) {
         setCitationStyleMenuVisible(false);
@@ -133,7 +141,9 @@ export default function Home() {
                 <CitationStylesMenu {...{ setCitationStyleMenuVisible, onStyleSelected: addNewBibWithStyle }} />
             )}
 
-            {coBibsSearchDialogVisible && <CoBibsSearchDialog setIsVisible={setCoBibsSearchDialogVisible} />}
+            {coBibsSearchDialogVisible && (
+                <CoBibsSearchDialog tryingToJoinBib={tryingToJoinBib} setIsVisible={setCoBibsSearchDialogVisible} />
+            )}
         </div>
     );
 }
