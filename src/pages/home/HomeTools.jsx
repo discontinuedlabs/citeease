@@ -6,6 +6,7 @@ import db from "../../data/db/firebase/firebase";
 import { useAuth } from "../../context/AuthContext";
 import { mergeWithCurrentBibs } from "../../data/store/slices/bibsSlice";
 import { useToast } from "../../context/ToastContext.tsx";
+import { useModal } from "../../context/ModalContext.tsx";
 
 export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib }) {
     const [searchResult, setSearchResult] = useState(null);
@@ -21,6 +22,30 @@ export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib }) {
     const dispatch = useDispatch();
     const toast = useToast();
     const navigate = useNavigate();
+    const modal = useModal();
+
+    useEffect(() => {
+        if (!currentUser) {
+            modal.open({
+                showCloseIcon: false,
+                title: "Login required",
+                message: "You need to log in first to use this feature.",
+                actions: [
+                    ["Log in", () => navigate("/login"), { autoFocus: true }],
+                    [
+                        "Cancel",
+                        () => {
+                            setIsVisible(false);
+                            modal.close();
+                        },
+                    ],
+                ],
+            });
+
+            return undefined;
+        }
+        return undefined;
+    }, []);
 
     async function searchForBib(bibId) {
         setSearchError(null);
@@ -41,7 +66,9 @@ export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib }) {
     }
 
     useEffect(() => {
-        searchForBib(tryingToJoinBib);
+        if (tryingToJoinBib) {
+            searchForBib(tryingToJoinBib);
+        }
     }, [tryingToJoinBib]);
 
     async function handleSearch(event) {

@@ -6,7 +6,6 @@ import * as citationEngine from "../../utils/citationEngine";
 import { addNewBib } from "../../data/store/slices/bibsSlice";
 import { useAuth } from "../../context/AuthContext";
 import { CoBibsSearchDialog } from "./HomeTools";
-import { useModal } from "../../context/ModalContext.tsx";
 import { useEnhancedDispatch } from "../../hooks/hooks.tsx";
 import { ChipSet, Fab, Icon, List, TopBar } from "../../components/ui/MaterialComponents";
 import { timeAgo } from "../../utils/utils.ts";
@@ -21,7 +20,6 @@ export default function Home() {
     const { currentUser } = useAuth();
     const navigate = useNavigate();
     const dispatch = useEnhancedDispatch();
-    const modal = useModal();
 
     useEffect(() => {
         if (tryingToJoinBib) {
@@ -36,17 +34,7 @@ export default function Home() {
     }
 
     function openCoBibsSearchDialog() {
-        if (currentUser) setCoBibsSearchDialogVisible(true);
-        else {
-            modal.open({
-                title: "Login required",
-                message: "You need to log in first to use this feature.",
-                actions: [
-                    ["Log in", () => navigate("/login"), { autoFocus: true }],
-                    ["Cancel", () => modal.close()],
-                ],
-            });
-        }
+        setCoBibsSearchDialogVisible(true);
     }
 
     const sortedBibliographies = Array.from(bibliographies).sort((a, b) => {
