@@ -1,11 +1,10 @@
-/* eslint-disable prettier/prettier */
-
 import React from "react";
+import { EmptyPage } from "./ui/MaterialComponents";
 
 class ErrorBoundary extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { hasError: false };
+        this.state = { hasError: false, errorMessage: "" };
     }
 
     static getDerivedStateFromError() {
@@ -14,14 +13,15 @@ class ErrorBoundary extends React.Component {
 
     componentDidCatch(error, errorInfo) {
         console.error("Uncaught error:", error, errorInfo);
+        this.setState({ errorMessage: error.toString() });
     }
 
     render() {
-        const { hasError } = this.state;
+        const { hasError, errorMessage } = this.state;
         const { children } = this.props;
 
         if (hasError) {
-            return <h1>Something went wrong.</h1>;
+            return <EmptyPage title="Something went wrong!" message={errorMessage} />;
         }
 
         return children;

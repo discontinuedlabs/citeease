@@ -6,6 +6,7 @@ import { useAuth } from "../../context/AuthContext";
 import db from "../../data/db/firebase/firebase";
 import { replaceAllSettings } from "../../data/store/slices/settingsSlice";
 import { mergeWithCurrentBibs, replaceAllBibs } from "../../data/store/slices/bibsSlice";
+import { useToast } from "../../context/ToastContext.tsx";
 
 export default function Login() {
     const [isLoading, setIsLoading] = useState(false);
@@ -16,6 +17,7 @@ export default function Login() {
     const { login } = useAuth();
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const toast = useToast();
 
     async function retreiveCoBibs(bibs) {
         const coBibIds = bibs.filter((bib) => bib?.collab?.open).map((bib) => bib.collab.id);
@@ -58,7 +60,7 @@ export default function Login() {
             }
         }
 
-        return [bibs, settings];
+        return { bibliographies: bibs, settings };
     }
 
     async function handleSubmit(event) {
@@ -69,12 +71,11 @@ export default function Login() {
             setIsLoading(true);
             const credintials = await login(emailRef.current.value, passwordRef.current.value);
 
-            const [bibs] = await retreiveUserData(credintials);
-
-            await retreiveCoBibs(bibs);
+            const { bibliographies } = await retreiveUserData(credintials);
+            await retreiveCoBibs(bibliographies);
 
             navigate("/");
-            // TODO: Show success toast message
+            toast.show({ message: "You successfully logged in", color: "green", icon: "check" });
         } catch (tError) {
             setError(`Failed to sign in: ${tError}`);
         }

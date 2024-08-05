@@ -198,7 +198,7 @@ export function ChipSet({ chips = [], removable = false, className, ...rest }) {
 
 export function EmptyPage({ icon = "error", title, message, actions = [] }) {
     return (
-        <div className="flex h-full w-full items-center justify-center">
+        <div className="flex h-full w-full items-center justify-center p-5 font-sans">
             <div className="text-center">
                 <Icon style={{ color: "var(--md-sys-color-outline)" }} className="h-32 w-32 text-9xl" name={icon} />
                 {title && <h3>{title}</h3>}

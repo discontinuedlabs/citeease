@@ -4,8 +4,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { doc, onSnapshot } from "firebase/firestore";
 import Bibliography from "./pages/bibliography/Bibliography";
 import Home from "./pages/home/Home";
-import { deleteBib, loadFromIndexedDB as loadBibs, mergeWithCurrentBibs } from "./data/store/slices/bibsSlice";
-import { loadFromIndexedDB as loadSettings } from "./data/store/slices/settingsSlice";
+import {
+    deleteBib,
+    loadFromIndexedDB as loadBibs,
+    mergeWithCurrentBibs,
+    replaceAllBibs,
+} from "./data/store/slices/bibsSlice";
+import { loadFromIndexedDB as loadSettings, replaceAllSettings } from "./data/store/slices/settingsSlice";
 import Settings from "./pages/settings/Settings";
 import BibliographySettings from "./pages/bibliography/BibliographySettings";
 import MarkdownPage from "./pages/MarkdownPage";
@@ -18,9 +23,10 @@ import ForgotPassword from "./pages/account/ForgotPassword";
 import firestoreDB from "./data/db/firebase/firebase";
 import { useDynamicTitle } from "./hooks/hooks.tsx";
 import { useToast } from "./context/ToastContext.tsx";
+import { retrieveUserData } from "./utils/dataUtils.ts";
 
 export default function App() {
-    const { data: bibliographies, loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies); // WATCH: In some browsers, state.bibliographies may display [object Object] on subsequent renders in StrictMode
+    const { loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies); // WATCH: In some browsers, state.bibliographies may display [object Object] on subsequent renders in StrictMode
     const { currentUser } = useAuth();
     const dispatch = useDispatch();
     const toast = useToast();
@@ -33,24 +39,34 @@ export default function App() {
 
     useEffect(() => {
         if (!currentUser || !bibsLoaded) return;
-        const coBibsIds = bibliographies.filter((bib) => bib?.collab?.open).map((bib) => bib.collab.id);
-        coBibsIds.forEach((id) => {
-            const unsubscribe = onSnapshot(doc(firestoreDB, "coBibs", id), (sDoc) => {
-                const parsedCoBib = JSON.parse(sDoc.data().bibliography);
-                if (!parsedCoBib.collab.collaborators.some((co) => co.id === currentUser.uid)) {
-                    // remove the user from the bibliography if they were removed by admin
-                    dispatch(deleteBib({ bibliographyId: parsedCoBib.id }));
-                    toast.show({
-                        message: `You were removed from \`${parsedCoBib.title}\` collaborative bibliography`,
-                        icon: "group",
-                        color: "red",
-                    });
-                } else {
-                    dispatch(mergeWithCurrentBibs({ bibs: [parsedCoBib] }));
-                }
+
+        async function getDataAndListenToSnapshot() {
+            const userData = await retrieveUserData(currentUser);
+
+            dispatch(replaceAllBibs({ bibs: userData.bibliographies }));
+            dispatch(replaceAllSettings({ settings: userData.settings }));
+
+            const coBibsIds = userData.bibliographies.filter((bib) => bib?.collab?.open).map((bib) => bib.collab.id);
+            coBibsIds.forEach((id) => {
+                const unsubscribe = onSnapshot(doc(firestoreDB, "coBibs", id), (sDoc) => {
+                    const parsedCoBib = JSON.parse(sDoc.data().bibliography);
+                    if (!parsedCoBib.collab.collaborators.some((co) => co.id === currentUser.uid)) {
+                        // Remove the bibliography from the user's data if they were removed from it by the admin
+                        dispatch(deleteBib({ bibliographyId: parsedCoBib.id }));
+                        toast.show({
+                            message: `You were removed from \`${parsedCoBib.title}\` collaborative bibliography`,
+                            icon: "group",
+                            color: "red",
+                        });
+                    } else {
+                        dispatch(mergeWithCurrentBibs({ bibs: [parsedCoBib] }));
+                    }
+                });
+                return () => unsubscribe();
             });
-            return () => unsubscribe();
-        });
+        }
+
+        getDataAndListenToSnapshot();
     }, [currentUser, bibsLoaded]);
 
     return (
