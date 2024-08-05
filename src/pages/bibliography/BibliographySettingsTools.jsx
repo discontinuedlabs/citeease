@@ -39,7 +39,7 @@ export function CollaboratorsManager({ setIsVisible }) {
     async function handleShare() {
         try {
             if (navigator.share) {
-                const text = `Let's work together on this bibliography!\n\nClick the link below to join the collaboration:\nhttps://discontinuedlabs.github.io/citeease/collab/${bibliography?.collab?.id}\n\nPassword: ${bibliography.collab.password}`;
+                const text = `Let's work together on this bibliography!\n\nClick the link below to join the collaboration:\nhttps://discontinuedlabs.github.io/citeease/#/collab/${bibliography?.collab?.id}\n\nPassword: ${bibliography.collab.password}`;
 
                 await navigator.share({
                     title: bibliography?.title,

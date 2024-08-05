@@ -44,8 +44,6 @@ export default function Bibliography() {
     const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
     const { currentUser } = useAuth();
     const { bibId } = useParams();
-    const params = useParams();
-    console.log(params);
     const modal = useModal();
     const navigate = useNavigate();
     const dispatch = useEnhancedDispatch();

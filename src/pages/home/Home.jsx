@@ -27,8 +27,6 @@ export default function Home() {
         }
     }, []);
 
-    console.log("11111111");
-
     function addNewBibWithStyle(style) {
         setCitationStyleMenuVisible(false);
         dispatch(addNewBib({ bibliographyStyle: style }));

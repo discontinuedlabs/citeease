@@ -10,6 +10,7 @@ import { useModal } from "../../context/ModalContext.tsx";
 import { setTryingToJoinBib } from "../../data/store/slices/settingsSlice";
 
 export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib }) {
+    const { data: bibliographies, loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies);
     const [searchResult, setSearchResult] = useState(null);
     const [searchLoading, setSearchLoading] = useState(false);
     const [searchError, setSearchError] = useState(null);
@@ -18,7 +19,6 @@ export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib }) {
     const id = useId();
     const searchRef = useRef();
     const passwordRef = useRef();
-    const bibliographies = useSelector((state) => state.bibliographies.data);
     const { currentUser } = useAuth();
     const dispatch = useDispatch();
     const toast = useToast();
@@ -49,39 +49,44 @@ export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib }) {
     }, []);
 
     async function searchForBib(bibId) {
-        setSearchError(null);
-        setSearchLoading(true);
-        const docRef = doc(db, "coBibs", bibId);
-        const docSnap = await getDoc(docRef);
+        try {
+            setSearchError(null);
+            setSearchLoading(true);
+            const docRef = doc(db, "coBibs", bibId);
+            const docSnap = await getDoc(docRef);
 
-        if (docSnap.exists()) {
-            const result = JSON.parse(docSnap.data().bibliography);
-            if (bibliographies.some((bib) => bib.id === result.id)) {
-                setSearchError(`You are already a collaborator in ${result.title} (${result.collab.id})`);
+            if (docSnap.exists()) {
+                const result = JSON.parse(docSnap.data().bibliography);
+                console.log(
+                    result.id,
+                    bibliographies.map((bib) => bib.id)
+                );
+                if (bibliographies.some((bib) => bib.id === result.id)) {
+                    setSearchError(`You are already a collaborator in ${result.title} (${result.collab.id})`);
+                } else {
+                    setSearchResult(result);
+                }
             } else {
-                setSearchResult(result);
+                setSearchError("No such collaborative bibliography!");
             }
-        } else {
-            setSearchError("No such collaborative bibliography!");
+        } catch (error) {
+            console.error(error);
+            setSearchError(error);
         }
+
+        setSearchLoading(false);
+        dispatch(setTryingToJoinBib({ bibId: null }));
     }
 
     useEffect(() => {
-        if (tryingToJoinBib) {
+        if (tryingToJoinBib && bibsLoaded) {
             searchForBib(tryingToJoinBib);
-            dispatch(setTryingToJoinBib({ bibId: null }));
         }
-    }, [tryingToJoinBib]);
+    }, [tryingToJoinBib, bibsLoaded]);
 
     async function handleSearch(event) {
         event.preventDefault();
-        try {
-            searchForBib(searchRef.current.value);
-        } catch (error) {
-            console.log(error);
-            setSearchError(error);
-        }
-        setSearchLoading(false);
+        searchForBib(searchRef.current.value);
     }
 
     async function handleJoin(event) {
