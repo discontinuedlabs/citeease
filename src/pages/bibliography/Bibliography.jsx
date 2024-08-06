@@ -29,12 +29,13 @@ import {
     reEnableCollabInBib,
     disableCollabInBib,
 } from "../../data/store/slices/bibsSlice";
-import { useEnhancedDispatch, useFindBib, useKeyboardShortcuts } from "../../hooks/hooks.tsx";
+import useOnlineStatus, { useEnhancedDispatch, useFindBib, useKeyboardShortcuts } from "../../hooks/hooks.tsx";
 import { useAuth } from "../../context/AuthContext";
 import firestoreDB from "../../data/db/firebase/firebase";
 import { useModal } from "../../context/ModalContext.tsx";
 import { ChipSet, Fab, Icon, TopBar } from "../../components/ui/MaterialComponents";
 import { setTryingToJoinBib } from "../../data/store/slices/settingsSlice";
+import { useToast } from "../../context/ToastContext.tsx";
 
 // TODO: The user cannot do any actions in collaborative bibliographies when they are offline
 export default function Bibliography() {
@@ -47,6 +48,8 @@ export default function Bibliography() {
     const navigate = useNavigate();
     const dispatch = useEnhancedDispatch();
     const location = useLocation();
+    const isOnline = useOnlineStatus();
+    const toast = useToast();
 
     const [collaborationOpened, setCollaborationOpened] = useState(bibliography?.collab?.open);
     const [idAndPasswordDialogVisible, setIdAndPasswordDialogVisible] = useState(false);
@@ -86,6 +89,11 @@ export default function Bibliography() {
     }
 
     function openCitationForm(sourceType, isNew = false, specificId = "") {
+        if (!isOnline && bibliography?.collab?.open) {
+            toast.show({ message: "You are offline", icon: "error", color: "red" });
+            return;
+        }
+
         const checkedCitationsIds = [...(specificId ? [specificId] : [])];
         bibliography?.citations.forEach((cit) => {
             if (cit.isChecked) {
@@ -100,11 +108,21 @@ export default function Bibliography() {
     }
 
     function handleSearchByIdentifiers(input) {
+        if (!isOnline && bibliography?.collab?.open) {
+            toast.show({ message: "You are offline", icon: "error", color: "red" });
+            return;
+        }
+
         setSearchByIdentifiersInput(input);
         setSmartGeneratorDialogVisible(true);
     }
 
     function addTagToBib(tag) {
+        if (!isOnline && bibliography?.collab?.open) {
+            toast.show({ message: "You are offline", icon: "error", color: "red" });
+            return;
+        }
+
         dispatch(
             updateBibField({
                 bibliographyId: bibliography.id,
@@ -115,6 +133,11 @@ export default function Bibliography() {
     }
 
     function removeTagFromBib(tag) {
+        if (!isOnline && bibliography?.collab?.open) {
+            toast.show({ message: "You are offline", icon: "error", color: "red" });
+            return;
+        }
+
         dispatch(
             updateBibField({
                 bibliographyId: bibliography.id,
@@ -124,7 +147,13 @@ export default function Bibliography() {
         );
     }
 
-    function handleImportCitation() {}
+    function handleImportCitation() {
+        if (!isOnline && bibliography?.collab?.open) {
+            toast.show({ message: "You are offline", icon: "error", color: "red" });
+            return undefined;
+        }
+        return undefined;
+    }
 
     async function handleCopy() {
         if (checkedCitations.length !== 0) {
@@ -166,12 +195,22 @@ export default function Bibliography() {
     }
 
     function handleDuplicate() {
+        if (!isOnline && bibliography?.collab?.open) {
+            toast.show({ message: "You are offline", icon: "error", color: "red" });
+            return;
+        }
+
         if (checkedCitations.length !== 0) {
             dispatch(duplicateSelectedCitations({ bibliographyId: bibliography?.id, checkedCitations }));
         }
     }
 
     function handleDeleteSelectedCitations() {
+        if (!isOnline && bibliography?.collab?.open) {
+            toast.show({ message: "You are offline", icon: "error", color: "red" });
+            return;
+        }
+
         if (checkedCitations.length !== 0) {
             modal.open({
                 title: `Delete ${checkedCitations?.length === 1 ? "citation" : "citations"}?`,
@@ -191,6 +230,11 @@ export default function Bibliography() {
     }
 
     function handleRename(value) {
+        if (!isOnline && bibliography?.collab?.open) {
+            toast.show({ message: "You are offline", icon: "error", color: "red" });
+            return;
+        }
+
         if (/^\s*$/.test(value)) {
             modal.open({
                 title: "Title is empty",
@@ -203,6 +247,11 @@ export default function Bibliography() {
     }
 
     async function openCollaboration(data) {
+        if (!isOnline && bibliography?.collab?.open) {
+            toast.show({ message: "You are offline", icon: "error", color: "red" });
+            return;
+        }
+
         const newCoBib = {
             ...bibliography,
             collab: {
@@ -229,6 +278,11 @@ export default function Bibliography() {
     }
 
     async function reopenCollaboration() {
+        if (!isOnline && bibliography?.collab?.open) {
+            toast.show({ message: "You are offline", icon: "error", color: "red" });
+            return;
+        }
+
         const reopenedCoBib = {
             ...bibliography,
             collab: {
@@ -243,6 +297,11 @@ export default function Bibliography() {
     }
 
     async function closeCollaboration() {
+        if (!isOnline && bibliography?.collab?.open) {
+            toast.show({ message: "You are offline", icon: "error", color: "red" });
+            return;
+        }
+
         await deleteDoc(doc(firestoreDB, "coBibs", bibliography.collab.id));
         dispatch(disableCollabInBib({ bibId: bibliography.id }));
         setCollaborationOpened(false);
@@ -296,6 +355,11 @@ export default function Bibliography() {
     }
 
     function handleCloseCollaboration() {
+        if (!isOnline && bibliography?.collab?.open) {
+            toast.show({ message: "You are offline", icon: "error", color: "red" });
+            return;
+        }
+
         modal.open({
             title: "Close collaboration?",
             message:
@@ -409,17 +473,6 @@ export default function Bibliography() {
                     ...(checkedCitations?.length !== 0 ? optionsWhenCitationsSelected : optionsWhenNothingSelected),
                 ]}
             />
-
-            {/* {bibliography?.collab?.open && (
-                    <div>
-                        <div>
-                            collabortaors{" "}
-                            {bibliography.collab.collaborators.map((co) => (
-                                <li>{co.name || co.id}</li>
-                            ))}
-                        </div>
-                    </div>
-                )} */}
 
             <ReferenceEntries
                 {...{

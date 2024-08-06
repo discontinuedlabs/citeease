@@ -5,6 +5,39 @@ import { Bibliography } from "../types/types.ts";
 import { RootState } from "../data/store/store.ts";
 import { useAuth } from "../context/AuthContext";
 
+/* eslint-disable no-unused-vars */
+
+/**
+ * Adds an event listener to the specified element, document, or window object.
+ *
+ * This custom hook allows you to attach an event listener to a target element, document, or window.
+ * It uses React's `useEffect` to ensure the event listener is added after the component mounts
+ * and removed when the component unmounts. The event type and callback function are passed as arguments,
+ * and an optional target element can be specified. If no target is provided, the default is the window object.
+ *
+ * @param {string} eventType - The type of event to listen for (e.g., "click", "mouseover").
+ * @param {(event: Event) => void} callback - The callback function to execute when the event occurs.
+ * @param {Element | Document | Window} [element=window] - The target element, document, or window to attach the event listener to.
+ */
+export function useEventListener(
+    eventType: string,
+    callback: (event: Event) => void,
+    element: Element | Document | Window = window
+): void {
+    const callbackRef = useRef<(event: Event) => void>(() => {});
+
+    useEffect(() => {
+        callbackRef.current = callback;
+    }, [callback]);
+
+    useEffect(() => {
+        if (!element) return;
+
+        const handler = (e: Event) => callbackRef.current(e);
+        element.addEventListener(eventType, handler, false);
+    }, [eventType, element, callbackRef.current]);
+}
+
 type RouteParams = {
     bibId?: string;
 };
@@ -87,6 +120,15 @@ export function useDynamicTitle(
     }, [title]);
 
     return title;
+}
+
+export default function useOnlineStatus() {
+    const [online, setOnline] = useState(navigator.onLine);
+
+    useEventListener("online", () => setOnline(navigator.onLine));
+    useEventListener("offline", () => setOnline(navigator.onLine));
+
+    return online;
 }
 
 export function useTimeout(callback: () => void, ms: number = 3000) {

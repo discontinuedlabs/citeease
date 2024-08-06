@@ -18,7 +18,7 @@ import {
 import BibliographyCard from "../../components/ui/BibliographyCard";
 import ContextMenu from "../../components/ui/ContextMenu";
 import * as citationUtils from "../../utils/citationUtils.ts";
-import { useFindBib } from "../../hooks/hooks.tsx";
+import useOnlineStatus, { useFindBib } from "../../hooks/hooks.tsx";
 import Tag from "../../components/ui/Tag";
 import citationStyles from "../../assets/styles.json";
 import mostPopularStyles from "../../assets/mostPopularStyles.json";
@@ -30,6 +30,7 @@ import icons from "../../assets/icons.json";
 import ArticleJournal from "../../components/sourceTypes/ArticleJournal";
 import Webpage from "../../components/sourceTypes/Webpage";
 import Book from "../../components/sourceTypes/Book";
+import { useToast } from "../../context/ToastContext.tsx";
 
 const MASTER_CHECKBOX_STATES = {
     CHECKED: "checked", // All reference entries are checked
@@ -407,6 +408,8 @@ export function MoveDialog(props) {
     const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
     const [selectedBibliographyIds, setSelectedBibliographyIds] = useState([]);
     const dispatch = useDispatch();
+    const isOnline = useOnlineStatus();
+    const toast = useToast();
 
     function handleSelect(bibId) {
         const index = selectedBibliographyIds.indexOf(bibId);
@@ -420,6 +423,11 @@ export function MoveDialog(props) {
     }
 
     function handleMove(toId) {
+        if (!isOnline && bibliographies.find((bib) => bib.id === toId)?.collab?.open) {
+            toast.show({ message: "You are offline", icon: "error", color: "red" });
+            return;
+        }
+
         dispatch(
             moveSelectedCitations({
                 fromId: bibliography.id,
