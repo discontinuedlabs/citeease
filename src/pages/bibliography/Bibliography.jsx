@@ -1,6 +1,5 @@
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { HotKeys } from "react-hotkeys";
 import { useSelector } from "react-redux";
 import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import * as citationEngine from "../../utils/citationEngine";
@@ -30,7 +29,7 @@ import {
     reEnableCollabInBib,
     disableCollabInBib,
 } from "../../data/store/slices/bibsSlice";
-import { useEnhancedDispatch, useFindBib } from "../../hooks/hooks.tsx";
+import { useEnhancedDispatch, useFindBib, useKeyboardShortcuts } from "../../hooks/hooks.tsx";
 import { useAuth } from "../../context/AuthContext";
 import firestoreDB from "../../data/db/firebase/firebase";
 import { useModal } from "../../context/ModalContext.tsx";
@@ -62,20 +61,6 @@ export default function Bibliography() {
     const [tagsDialogVisible, setTagsDialogVisible] = useState(false);
     const [searchByIdentifiersInput, setSearchByIdentifiersInput] = useState("");
     const [iconsMenuVisible, setIconsMenuVisible] = useState(false);
-
-    const keyMap = {
-        // "ctrl+a": selectAll,
-        // "delete|backspace": deleteSelected,
-        // "ctrl+d": duplicate,
-        // "ctrl+c": copy,
-        // "ctrl+z": undo,
-        // "ctrl+y": redo,
-        // "ctrl+e": exportSelected,
-        // "ctrl+m": move,
-        // f2: rename,
-        // "ctrl+s": changeStyle,
-        // "ctrl+n": addCitation,
-    };
 
     useEffect(() => {
         if (location.pathname.startsWith("/collab/") && bibId && !bibliography) {
@@ -142,16 +127,18 @@ export default function Bibliography() {
     function handleImportCitation() {}
 
     async function handleCopy() {
-        const formattedCitations = await citationEngine.formatBibliography(
-            checkedCitations,
-            bibliography?.style,
-            "text"
-        );
+        if (checkedCitations.length !== 0) {
+            const formattedCitations = await citationEngine.formatBibliography(
+                checkedCitations,
+                bibliography?.style,
+                "text"
+            );
 
-        try {
-            navigator.clipboard.writeText(formattedCitations);
-        } catch (err) {
-            console.error("Failed to copy text: ", err);
+            try {
+                navigator.clipboard.writeText(formattedCitations);
+            } catch (err) {
+                console.error("Failed to copy text: ", err);
+            }
         }
     }
 
@@ -179,24 +166,28 @@ export default function Bibliography() {
     }
 
     function handleDuplicate() {
-        dispatch(duplicateSelectedCitations({ bibliographyId: bibliography?.id, checkedCitations }));
+        if (checkedCitations.length !== 0) {
+            dispatch(duplicateSelectedCitations({ bibliographyId: bibliography?.id, checkedCitations }));
+        }
     }
 
     function handleDeleteSelectedCitations() {
-        modal.open({
-            title: `Delete ${checkedCitations?.length === 1 ? "citation" : "citations"}?`,
-            message: `Are you sure you want to delete ${
-                checkedCitations?.length === 1 ? "this citation" : "these citations"
-            }?`,
-            actions: [
-                [
-                    "Delete",
-                    () => dispatch(deleteSelectedCitations({ bibliographyId: bibliography?.id, checkedCitations })),
-                    "autofocus",
+        if (checkedCitations.length !== 0) {
+            modal.open({
+                title: `Delete ${checkedCitations?.length === 1 ? "citation" : "citations"}?`,
+                message: `Are you sure you want to delete ${
+                    checkedCitations?.length === 1 ? "this citation" : "these citations"
+                }?`,
+                actions: [
+                    [
+                        "Delete",
+                        () => dispatch(deleteSelectedCitations({ bibliographyId: bibliography?.id, checkedCitations })),
+                        "autofocus",
+                    ],
+                    ["Cancel", () => modal.close()],
                 ],
-                ["Cancel", () => modal.close()],
-            ],
-        });
+            });
+        }
     }
 
     function handleRename(value) {
@@ -382,31 +373,44 @@ export default function Bibliography() {
 
     const optionsWhenNothingSelected = [].concat(getConditionalOptionsWhenNothingSelected());
 
+    useKeyboardShortcuts({
+        // "ctrl+a": () => dispatch(handleMasterEntriesCheckbox({ bibliographyId: bibliography?.id })),
+        // "delete|backspace": handleDeleteSelectedCitations,
+        // "ctrl+d": handleDuplicate,
+        // "ctrl+c": handleCopy,
+        // "ctrl+z": undo,
+        // "ctrl+y": redo,
+        // "ctrl+e": exportSelected,
+        // "ctrl+m": move,
+        // f2: rename,
+        // "ctrl+s": changeStyle,
+        // "ctrl+n": addCitation,
+    });
+
     return (
         <div className="mx-auto max-w-[50rem]">
-            <HotKeys keyMap={keyMap}>
-                <TopBar
-                    icon={bibliography?.icon}
-                    headline={bibliography?.title}
-                    description={
+            <TopBar
+                icon={bibliography?.icon}
+                headline={bibliography?.title}
+                description={
+                    <>
                         <>
-                            <>
-                                {bibliography?.collab?.open ? <Icon name="group" className="text-xl" /> : ""}
-                                {`${bibliography?.collab?.open ? ` ${bibliography?.collab?.id} • ` : ""}${bibliography?.style.name.long}`}
-                            </>
-
-                            <ChipSet
-                                chips={bibliography?.tags?.map(({ label, color }) => ({ label, color }))}
-                                style={{ marginTop: bibliography?.tags?.length === 0 ? "0" : "0.5rem" }}
-                            />
+                            {bibliography?.collab?.open ? <Icon name="group" className="text-xl" /> : ""}
+                            {`${bibliography?.collab?.open ? ` ${bibliography?.collab?.id} • ` : ""}${bibliography?.style.name.long}`}
                         </>
-                    }
-                    options={[
-                        ...(checkedCitations?.length !== 0 ? optionsWhenCitationsSelected : optionsWhenNothingSelected),
-                    ]}
-                />
 
-                {/* {bibliography?.collab?.open && (
+                        <ChipSet
+                            chips={bibliography?.tags?.map(({ label, color }) => ({ label, color }))}
+                            style={{ marginTop: bibliography?.tags?.length === 0 ? "0" : "0.5rem" }}
+                        />
+                    </>
+                }
+                options={[
+                    ...(checkedCitations?.length !== 0 ? optionsWhenCitationsSelected : optionsWhenNothingSelected),
+                ]}
+            />
+
+            {/* {bibliography?.collab?.open && (
                     <div>
                         <div>
                             collabortaors{" "}
@@ -417,98 +421,88 @@ export default function Bibliography() {
                     </div>
                 )} */}
 
-                <ReferenceEntries
+            <ReferenceEntries
+                {...{
+                    openCitationForm,
+                    openIntextCitationDialog,
+                }}
+            />
+
+            {intextCitationDialogVisible && checkedCitations.length !== 0 && (
+                <IntextCitationDialog {...{ setIntextCitationDialogVisible }} />
+            )}
+
+            {citationFormVisible && bibliography?.editedCitation && <CitationForm {...{ setCitationFormVisible }} />}
+
+            {citationStyleMenuVisible && (
+                <CitationStylesMenu
                     {...{
-                        openCitationForm,
-                        openIntextCitationDialog,
+                        setCitationStyleMenuVisible,
+                        onStyleSelected: (style) =>
+                            dispatch(
+                                updateBibField({
+                                    bibliographyId: bibliography.id,
+                                    key: "style",
+                                    value: style,
+                                })
+                            ),
                     }}
                 />
+            )}
 
-                {intextCitationDialogVisible && checkedCitations.length !== 0 && (
-                    <IntextCitationDialog {...{ setIntextCitationDialogVisible }} />
-                )}
+            {LaTeXWindowVisible && <LaTeXDialog {...{ setLaTeXWindowVisible }} />}
 
-                {citationFormVisible && bibliography?.editedCitation && (
-                    <CitationForm {...{ setCitationFormVisible }} />
-                )}
+            {moveWindowVisible && <MoveDialog {...{ setMoveWindowVisible }} />}
 
-                {citationStyleMenuVisible && (
-                    <CitationStylesMenu
-                        {...{
-                            setCitationStyleMenuVisible,
-                            onStyleSelected: (style) =>
-                                dispatch(
-                                    updateBibField({
-                                        bibliographyId: bibliography.id,
-                                        key: "style",
-                                        value: style,
-                                    })
-                                ),
-                        }}
-                    />
-                )}
+            {renameWindowVisible && (
+                <RenameDialog {...{ title: bibliography?.title, setRenameWindowVisible, handleRename }} />
+            )}
 
-                {LaTeXWindowVisible && <LaTeXDialog {...{ setLaTeXWindowVisible }} />}
-
-                {moveWindowVisible && <MoveDialog {...{ setMoveWindowVisible }} />}
-
-                {renameWindowVisible && (
-                    <RenameDialog {...{ title: bibliography?.title, setRenameWindowVisible, handleRename }} />
-                )}
-
-                {smartGeneratorDialogVisible && searchByIdentifiersInput.length && (
-                    <SmartGeneratorDialog
-                        {...{
-                            searchByIdentifiersInput,
-                            setSmartGeneratorDialogVisible,
-                        }}
-                    />
-                )}
-
-                {addCitationMenuVisible && (
-                    // TODO: Since the openCitationForm is passed to this component, make the handleSearchByIdentifiers and handleImportCitation inside it
-                    <AddCitationMenu
-                        {...{
-                            setAddCitationMenuVisible,
-                            openCitationForm,
-                            handleSearchByIdentifiers,
-                            handleImportCitation,
-                        }}
-                    />
-                )}
-
-                {tagsDialogVisible && (
-                    <TagsDialog
-                        {...{ setTagsDialogVisible, onTagAdded: addTagToBib, onTagRemoved: removeTagFromBib }}
-                    />
-                )}
-
-                {idAndPasswordDialogVisible && (
-                    <IdAndPasswordDialogVisible
-                        setIsVisible={setIdAndPasswordDialogVisible}
-                        onSubmit={openCollaboration}
-                    />
-                )}
-
-                {iconsMenuVisible && (
-                    <IconsMenu
-                        setIsVisible={setIconsMenuVisible}
-                        onSubmit={(chosenIcon) =>
-                            dispatch(
-                                updateBibField({ bibliographyId: bibliography.id, key: "icon", value: chosenIcon })
-                            )
-                        }
-                    />
-                )}
-
-                <Fab
-                    label="Add citation"
-                    icon="add"
-                    variant="tertiary"
-                    className="fixed bottom-5 right-5"
-                    onClick={() => setAddCitationMenuVisible(true)}
+            {smartGeneratorDialogVisible && searchByIdentifiersInput.length && (
+                <SmartGeneratorDialog
+                    {...{
+                        searchByIdentifiersInput,
+                        setSmartGeneratorDialogVisible,
+                    }}
                 />
-            </HotKeys>
+            )}
+
+            {addCitationMenuVisible && (
+                // TODO: Since the openCitationForm is passed to this component, make the handleSearchByIdentifiers and handleImportCitation inside it
+                <AddCitationMenu
+                    {...{
+                        setAddCitationMenuVisible,
+                        openCitationForm,
+                        handleSearchByIdentifiers,
+                        handleImportCitation,
+                    }}
+                />
+            )}
+
+            {tagsDialogVisible && (
+                <TagsDialog {...{ setTagsDialogVisible, onTagAdded: addTagToBib, onTagRemoved: removeTagFromBib }} />
+            )}
+
+            {idAndPasswordDialogVisible && (
+                <IdAndPasswordDialogVisible setIsVisible={setIdAndPasswordDialogVisible} onSubmit={openCollaboration} />
+            )}
+
+            {iconsMenuVisible && (
+                <IconsMenu
+                    setIsVisible={setIconsMenuVisible}
+                    onSubmit={(chosenIcon) =>
+                        dispatch(updateBibField({ bibliographyId: bibliography.id, key: "icon", value: chosenIcon }))
+                    }
+                />
+            )}
+
+            <Fab
+                label="Add citation"
+                icon="add"
+                variant="tertiary"
+                className="fixed bottom-5 right-5"
+                onClick={() => setAddCitationMenuVisible(true)}
+            />
         </div>
     );
 }

@@ -14,12 +14,6 @@ export function uid(length: number = 20): string {
     let pool: Uint8Array | undefined;
     let poolOffset: number = 0;
 
-    /**
-     * Refills the random value pool with enough bytes to cover the requested length.
-     * If the pool is not yet large enough, it is expanded.
-     *
-     * @param {number} byteCount - The minimum number of bytes required in the pool.
-     */
     function refillRandomValuePool(byteCount: number): void {
         if (!pool || pool.length < byteCount) {
             pool = new Uint8Array(POOL_SIZE_MULTIPLIER * byteCount);

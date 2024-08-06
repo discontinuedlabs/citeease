@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Bibliography } from "../types/types.ts";
@@ -100,4 +100,67 @@ export function useTimeout(callback: () => void, ms: number = 3000) {
         const functionId = setTimeout(() => savedCallback.current(), ms);
         return () => clearTimeout(functionId);
     }, []);
+}
+
+// eslint-disable-next-line no-unused-vars
+type ShortcutAction = (event: KeyboardEvent) => void;
+type OptionalConfig = Pick<KeyboardEvent, "altKey" | "ctrlKey" | "shiftKey">;
+interface ShortcutConfig extends Partial<OptionalConfig> {
+    code: KeyboardEvent["code"];
+    shortcutTarget?: HTMLElement;
+}
+
+export function useKeyboardShortcuts(keymap: Record<string, ShortcutAction>) {
+    const targetElements = Array.from(document.querySelectorAll("body"));
+
+    const registerShortcuts = useCallback(() => {
+        targetElements.forEach((target) => {
+            Object.entries(keymap).forEach(([key, action]) => {
+                const modifier = key.split(/\||\+/)[0];
+                let keyCode: KeyboardEvent["code"] | undefined;
+                let ctrlKey = false;
+                let altKey = false;
+                let shiftKey = false;
+
+                if (modifier === "ctrl") {
+                    ctrlKey = true;
+                    keyCode = "Control";
+                } else if (modifier === "alt") {
+                    altKey = true;
+                    keyCode = "Alt";
+                } else if (modifier === "shift") {
+                    shiftKey = true;
+                    keyCode = "Shift";
+                }
+
+                if (!keyCode) {
+                    throw new Error(`Invalid key configuration: ${key}`);
+                }
+
+                const config: ShortcutConfig = {
+                    code: keyCode,
+                    ctrlKey,
+                    altKey,
+                    shiftKey,
+                    shortcutTarget: target,
+                };
+
+                target.addEventListener("keydown", (event: KeyboardEvent) => {
+                    if (!config.code || !config.ctrlKey || !config.altKey || !config.shiftKey) {
+                        return;
+                    }
+                    if (
+                        (config.ctrlKey && !event.ctrlKey) ||
+                        (config.altKey && !event.altKey) ||
+                        (config.shiftKey && !event.shiftKey)
+                    ) {
+                        return;
+                    }
+                    action(event);
+                });
+            });
+        });
+    }, [keymap]);
+
+    useEffect(registerShortcuts, [registerShortcuts]);
 }
