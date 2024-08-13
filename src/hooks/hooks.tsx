@@ -101,7 +101,7 @@ export function useEnhancedDispatch(config: EnhancedDispatchConfig) {
  * @param {string} fallback - Default title to use if no H1 element is found.
  * @returns {string} The dynamically generated title.
  */
-export function useDynamicTitle(
+export function useDocumentTitle(
     prefix: string = "",
     suffix: string = " - CiteEase",
     fallback: string = "CiteEase"
@@ -120,6 +120,32 @@ export function useDynamicTitle(
     }, [title]);
 
     return title;
+}
+
+/**
+ * Sets the theme color based on the passed color or the current background color of the page,
+ * and updates the `<meta name="theme-color">` tag accordingly.
+ *
+ * @param color - The desired theme color. Defaults to `undefined`, which means it will use the current background color of the page.
+ * @returns The final theme color set (either the passed color or the current background color).
+ */
+export function useMetaThemeColor(color?: string): string {
+    const [backgroundColor, setBackgroundColor] = useState<string>("");
+
+    useEffect(() => {
+        const style = window.getComputedStyle(document.documentElement);
+        setBackgroundColor(color || style.getPropertyValue("background-color"));
+    });
+
+    useEffect(() => {
+        // eslint-disable-next-line quotes
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (metaThemeColor) {
+            metaThemeColor.setAttribute("content", backgroundColor);
+        }
+    }, [backgroundColor]);
+
+    return backgroundColor;
 }
 
 export default function useOnlineStatus() {

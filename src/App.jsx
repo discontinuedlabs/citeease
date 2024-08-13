@@ -21,7 +21,7 @@ import Login from "./pages/account/Login";
 import Account from "./pages/account/Account";
 import ForgotPassword from "./pages/account/ForgotPassword";
 import firestoreDB from "./data/db/firebase/firebase";
-import { useDynamicTitle } from "./hooks/hooks.tsx";
+import { useDocumentTitle, useMetaThemeColor } from "./hooks/hooks.tsx";
 import { useToast } from "./context/ToastContext.tsx";
 import { retrieveUserData } from "./utils/dataUtils.ts";
 
@@ -30,7 +30,8 @@ export default function App() {
     const { currentUser } = useAuth();
     const dispatch = useDispatch();
     const toast = useToast();
-    useDynamicTitle();
+    useDocumentTitle();
+    useMetaThemeColor();
 
     useEffect(() => {
         dispatch(loadBibs());
