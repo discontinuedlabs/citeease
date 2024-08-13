@@ -3,7 +3,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { uid } from "../../utils/utils.ts";
-import ContextMenu from "./ContextMenu";
 import { TAG_COLOR_VALUES } from "../../data/store/slices/settingsSlice";
 
 export function Checkbox({ className, onChange, checked = false, indeterminate = false, ...rest }) {
@@ -124,6 +123,54 @@ export function List({ items = [], className, ...rest }) {
     );
 }
 
+export function Menu({ items }) {
+    const usageSubmenuId = "kjhkjhkjh";
+    const usageSubmenuAnchorId = "aOIHDA";
+
+    function toggleMenu() {
+        const menuEl = document.body.querySelector(`#${usageSubmenuId}`);
+        menuEl.open = !menuEl.open;
+    }
+
+    function renderMenuItems(menuItems) {
+        return menuItems.map((item) => {
+            if (item.subItems) {
+                return (
+                    <md-sub-menu key={uid()} menu-corner="start-end" anchor-corner="start-start">
+                        <md-menu-item slot="item" class="m-0 p-0">
+                            <div slot="headline" className="m-0 whitespace-nowrap p-0">
+                                {item.headline}
+                            </div>
+                            <Icon name="arrow_right" slot="end" />
+                        </md-menu-item>
+
+                        <md-menu slot="menu" class="m-0 p-0">
+                            {renderMenuItems(item.subItems)}
+                        </md-menu>
+                    </md-sub-menu>
+                );
+            }
+            return (
+                <md-menu-item key={uid()} onClick={item.onClick}>
+                    <div slot="headline" className="m-0 whitespace-nowrap p-0">
+                        {item.headline}
+                    </div>
+                </md-menu-item>
+            );
+        });
+    }
+
+    return (
+        <span className="relative">
+            <IconButton name="more_vert" onClick={toggleMenu} id={usageSubmenuAnchorId} />
+
+            <md-menu has-overflow id={usageSubmenuId} anchor={usageSubmenuAnchorId}>
+                {renderMenuItems(items)}
+            </md-menu>
+        </span>
+    );
+}
+
 export function TopBar({ headline, description, showBackButton = true, options }) {
     const navigate = useNavigate();
     const [isScrolled, setIsScrolled] = useState(false);
@@ -159,9 +206,9 @@ export function TopBar({ headline, description, showBackButton = true, options }
                 </div>
 
                 {options && (
-                    <ContextMenu options={options}>
+                    <Menu items={options}>
                         <IconButton name="more_vert" />
-                    </ContextMenu>
+                    </Menu>
                 )}
             </div>
             <div
@@ -216,77 +263,3 @@ export function EmptyPage({ icon = "error", title, message, actions = [] }) {
         </div>
     );
 }
-
-export function Menu({ items }) {
-    const usageSubmenuId = "kjhkjhkjh";
-    const usageSubmenuAnchorId = "aOIHDA";
-
-    function toggleMenu() {
-        const menuEl = document.body.querySelector(`#${usageSubmenuId}`);
-        menuEl.open = !menuEl.open;
-    }
-
-    function renderMenuItems(menuItems) {
-        return menuItems.map((item) => {
-            if (item.subItems) {
-                return (
-                    <md-sub-menu key={uid()} menu-corner="start-end" anchor-corner="start-start">
-                        <md-menu-item slot="item">
-                            <div slot="headline" className="whitespace-nowrap">
-                                {item.headline}
-                            </div>
-                            <Icon name="arrow_right" slot="end" />
-                        </md-menu-item>
-
-                        <md-menu slot="menu">{renderMenuItems(item.subItems)}</md-menu>
-                    </md-sub-menu>
-                );
-            }
-            return (
-                <md-menu-item key={uid()} onClick={item.onClick}>
-                    <div slot="headline" className="whitespace-nowrap">
-                        {item.headline}
-                    </div>
-                </md-menu-item>
-            );
-        });
-    }
-
-    return (
-        <span className="relative">
-            <IconButton name="more_vert" onClick={toggleMenu} id={usageSubmenuAnchorId} />
-
-            <md-menu has-overflow id={usageSubmenuId} anchor={usageSubmenuAnchorId}>
-                {renderMenuItems(items)}
-            </md-menu>
-        </span>
-    );
-}
-
-/* <md-menu has-overflow id={usageSubmenuId} anchor={usageSubmenuAnchorId}>
-    <md-menu-item>
-        <div slot="headline">Banana</div>
-    </md-menu-item>
-
-    {items.map((item) => (
-        <React.Fragment key={uid()}>
-            <md-sub-menu menu-corner="start-end" anchor-corner="start-start">
-                <md-menu-item slot="item">
-                    <div slot="headline">{item.headline}</div>
-                    {item.subItems && item.subItems.length > 0 && <md-icon slot="end">arrow_right</md-icon>}
-                </md-menu-item>
-                {item.subItems && item.subItems.length > 0 && (
-                    <md-menu slot="menu">
-                        {item.subItems.map((subItem) => (
-                            <React.Fragment key={uid()}>
-                                <md-menu-item>
-                                    <div slot="headline">{subItem.headline}</div>
-                                </md-menu-item>
-                            </React.Fragment>
-                        ))}
-                    </md-menu>
-                )}
-            </md-sub-menu>
-        </React.Fragment>
-    ))}
-</md-menu> */

@@ -392,10 +392,14 @@ export default function Bibliography() {
 
     function getConditionalOptionsWhenCitationsSelected() {
         if (checkedCitations?.length === 1) {
-            const options = [["Edit", () => openCitationForm(checkedCitations[0].content.type)]];
+            const options = [{ headline: "Edit", onClick: () => openCitationForm(checkedCitations[0].content.type) }];
 
-            if (checkedCitations[0].content.URL)
-                options.push(["Visit website", () => window.open(checkedCitations[0].content.URL, "_blank")]);
+            if (checkedCitations[0].content.URL) {
+                options.push({
+                    headline: "Visit website",
+                    onClick: () => window.open(checkedCitations[0].content.URL, "_blank"),
+                });
+            }
 
             return options;
         }
@@ -403,35 +407,39 @@ export default function Bibliography() {
     }
 
     const optionsWhenCitationsSelected = [
-        ["Copy to clipboard", handleCopy], // TODO: This should give options to choose the type of copied text: Text, HTML, or Markdown.
-        ["Export to LaTeX", () => setLaTeXWindowVisible(true)], // TODO: This should be "Export" only, and gives you more options to export to: LaTeX, HTML, Markdown, PDF, Word, or JSON.
-        ["Move", handleMove],
-        ["Duplicate", handleDuplicate],
-        ["Delete", handleDeleteSelectedCitations],
+        { headline: "Copy to clipboard", onClick: handleCopy }, // TODO: This should give options to choose the type of copied text: Text, HTML, or Markdown.
+        { headline: "Export to LaTeX", onClick: () => setLaTeXWindowVisible(true) }, // TODO: This should be "Export" only, and gives you more options to export to: LaTeX, HTML, Markdown, PDF, Word, or JSON.
+        { headline: "Move", onClick: handleMove },
+        { headline: "Duplicate", onClick: handleDuplicate },
+        { headline: "Delete", onClick: handleDeleteSelectedCitations },
     ].concat(getConditionalOptionsWhenCitationsSelected());
 
     function getConditionalOptionsWhenNothingSelected() {
         // Options for admin of collaborative bibliographies
-        if (collaborationOpened && bibliography.collab.adminId === currentUser.uid)
+        if (collaborationOpened && bibliography.collab.adminId === currentUser.uid) {
             return [
-                ["Tags", () => setTagsDialogVisible(true)],
-                ["Change style", () => setCitationStyleMenuVisible(true)],
-                ["Rename bibliography", () => setRenameWindowVisible(true)],
-                ["Change icon", () => setIconsMenuVisible(true)],
-                ["Bibliography settings", () => navigate(`/bib/${bibliography.id}/settings`)],
-                ["Close collaboration", handleCloseCollaboration],
+                { headline: "Tags", onClick: () => setTagsDialogVisible(true) },
+                { headline: "Change style", onClick: () => setCitationStyleMenuVisible(true) },
+                { headline: "Rename bibliography", onClick: () => setRenameWindowVisible(true) },
+                { headline: "Change icon", onClick: () => setIconsMenuVisible(true) },
+                { headline: "Bibliography settings", onClick: () => navigate(`/bib/${bibliography.id}/settings`) },
+                { headline: "Close collaboration", onClick: handleCloseCollaboration },
             ];
+        }
+
         // Options if bibliography not open for collaboration
-        if (!collaborationOpened)
+        if (!collaborationOpened) {
             return [
-                ["Tags", () => setTagsDialogVisible(true)],
-                ["Change style", () => setCitationStyleMenuVisible(true)],
-                ["Rename bibliography", () => setRenameWindowVisible(true)],
-                ["Change icon", () => setIconsMenuVisible(true)],
-                ["Bibliography settings", () => navigate(`/bib/${bibliography.id}/settings`)],
-                ["Open collaboration", handleOpenCollaboration],
-                ["Delete bibliography", handleDeleteBibliography],
+                { headline: "Tags", onClick: () => setTagsDialogVisible(true) },
+                { headline: "Change style", onClick: () => setCitationStyleMenuVisible(true) },
+                { headline: "Rename bibliography", onClick: () => setRenameWindowVisible(true) },
+                { headline: "Change icon", onClick: () => setIconsMenuVisible(true) },
+                { headline: "Bibliography settings", onClick: () => navigate(`/bib/${bibliography.id}/settings`) },
+                { headline: "Open collaboration", onClick: handleOpenCollaboration },
+                { headline: "Delete bibliography", onClick: handleDeleteBibliography },
             ];
+        }
+
         return [];
     }
 

@@ -49,10 +49,10 @@ export default function Home() {
                 headline="Home"
                 showBackButton={false}
                 options={[
-                    ["Settings", () => navigate("/settings")],
+                    { headline: "Settings", onClick: () => navigate("/settings") },
                     ...(currentUser
-                        ? [["Account", () => navigate("/account")]]
-                        : [["Log in", () => navigate("/login")]]),
+                        ? [{ headline: "Account", onClick: () => navigate("/account") }]
+                        : [{ headline: "Log in", onClick: () => navigate("/login") }]),
                 ]}
             />
 
