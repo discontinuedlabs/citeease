@@ -64,7 +64,7 @@ export default function Account() {
     }
 
     return (
-        <div>
+        <>
             <h1>Account</h1>
             <div>
                 <p>{currentUser?.displayName}</p>
@@ -92,6 +92,6 @@ export default function Account() {
             {updateEmailDialogVisible && <UpdateEmailDialog setIsVisible={setUpdateEmailDialogVisible} />}
             {changePasswordDialogVisible && <ChangePasswordDialog setIsVisible={setChangePasswordDialogVisible} />}
             {deleteAccountDialogVisible && <DeleteAccountDialog setIsVisible={setDeleteAccountDialogVisible} />}
-        </div>
+        </>
     );
 }

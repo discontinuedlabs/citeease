@@ -27,7 +27,7 @@ export default function ForgotPassword() {
     }
 
     return (
-        <div>
+        <>
             <h1>Forgot password</h1>
             <pre>{error}</pre>
             <form onSubmit={handleSUbmit}>
@@ -39,6 +39,6 @@ export default function ForgotPassword() {
                     Reset password
                 </button>
             </form>
-        </div>
+        </>
     );
 }

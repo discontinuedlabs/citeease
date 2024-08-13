@@ -84,7 +84,7 @@ export default function Login() {
     }
 
     return (
-        <div>
+        <>
             <div>
                 <h1>Log in</h1>
                 <pre>{error}</pre>
@@ -106,6 +106,6 @@ export default function Login() {
             <p>
                 Don&apos;t have an account? <Link to="/signup">Sign up</Link>.
             </p>
-        </div>
+        </>
     );
 }

@@ -44,7 +44,7 @@ export default function Home() {
     });
 
     return (
-        <div className="mx-auto max-w-[50rem]">
+        <div className="mx-auto min-h-screen max-w-[50rem]">
             <TopBar
                 headline="Home"
                 showBackButton={false}
