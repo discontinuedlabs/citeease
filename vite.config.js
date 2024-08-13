@@ -21,13 +21,9 @@ export default defineConfig(() => {
             eslint(),
             VitePWA({
                 registerType: "autoUpdate",
-                devOptions: {
-                    enabled: true,
-                },
-                workbox: {
-                    globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
-                    cleanupOutdatedCaches: true,
-                },
+                strategies: "injectManifest",
+                srcDir: "src",
+                filename: "service-worker.js",
             }),
         ],
     };
