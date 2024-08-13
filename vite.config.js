@@ -23,7 +23,7 @@ export default defineConfig(() => {
                 registerType: "autoUpdate",
                 strategies: "injectManifest",
                 srcDir: "src",
-                filename: "service-worker.js",
+                filename: "sw.js",
             }),
         ],
     };
