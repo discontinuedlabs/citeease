@@ -83,9 +83,18 @@ export default function App() {
                 <Route path="/collab/:bibId" element={<Bibliography />} />
                 <Route path="/bib/:bibId/settings" element={<BibliographySettings />} />
                 <Route path="/collab/:bibId/settings" element={<BibliographySettings />} />
-                <Route path="/about" element={<MarkdownPage filePath="/citeease/markdown/about.md" />} />
-                <Route path="/terms" element={<MarkdownPage filePath="/citeease/markdown/terms.md" />} />
-                <Route path="/privacy" element={<MarkdownPage filePath="/citeease/markdown/privacy.md" />} />
+                <Route
+                    path="/about"
+                    element={<MarkdownPage title="About CiteEase" filePath="/citeease/markdown/about.md" />}
+                />
+                <Route
+                    path="/terms"
+                    element={<MarkdownPage title="Terms of Use" filePath="/citeease/markdown/terms.md" />}
+                />
+                <Route
+                    path="/privacy"
+                    element={<MarkdownPage title="Privacy Policy" filePath="/citeease/markdown/privacy.md" />}
+                />
                 <Route path="*" element={<NotFoundPage />} />
             </Routes>
         </main>

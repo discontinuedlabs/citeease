@@ -3,9 +3,9 @@ import DOMPurify from "dompurify";
 import HTMLReactParser from "html-react-parser/lib/index";
 import { FixedSizeList } from "react-window";
 import { useDispatch, useSelector } from "react-redux";
-import locatorTypes from "../../assets/locatorOptions.json";
+import locatorTypes from "../../assets/json/locatorOptions.json";
 import * as citationEngine from "../../utils/citationEngine";
-import sourceTypes from "../../assets/sourceTypes.json";
+import sourceTypes from "../../assets/json/sourceTypes.json";
 import {
     addNewCitation,
     copySelectedCitations,
@@ -20,11 +20,11 @@ import ContextMenu from "../../components/ui/ContextMenu";
 import * as citationUtils from "../../utils/citationUtils.ts";
 import useOnlineStatus, { useFindBib } from "../../hooks/hooks.tsx";
 import Tag from "../../components/ui/Tag";
-import citationStyles from "../../assets/styles.json";
-import mostPopularStyles from "../../assets/mostPopularStyles.json";
+import citationStyles from "../../assets/json/styles.json";
+import mostPopularStyles from "../../assets/json/mostPopularStyles.json";
 import { uid } from "../../utils/utils.ts";
-import { Checkbox, IconButton, List, TextButton } from "../../components/ui/MaterialComponents";
-import icons from "../../assets/icons.json";
+import { Checkbox, EmptyPage, IconButton, List, TextButton } from "../../components/ui/MaterialComponents";
+import icons from "../../assets/json/icons.json";
 
 // Source types
 import ArticleJournal from "../../components/sourceTypes/ArticleJournal";
@@ -145,46 +145,53 @@ export function ReferenceEntries(props) {
             </div>
 
             {/* IMPORTANT: Entries need to be mapped by the references array because it gets sorted according to the CSL file rules, unlike the bibliography.citations array */}
-            <List
-                items={references?.map((ref) => {
-                    function getRefId() {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(ref, "text/html");
-                        return doc.querySelector("[data-csl-entry-id]").getAttribute("data-csl-entry-id");
-                    }
-                    const citation = bibliography?.citations.find((cit) => cit?.id === getRefId());
-                    const sanitizedReferences = DOMPurify.sanitize(ref);
-                    const hangingIndentationStyle = { paddingLeft: "1.5rem", textIndent: "-1.5rem" };
+            {(references?.length > 0 && (
+                <List
+                    items={references?.map((ref) => {
+                        function getRefId() {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(ref, "text/html");
+                            return doc.querySelector("[data-csl-entry-id]").getAttribute("data-csl-entry-id");
+                        }
+                        const citation = bibliography?.citations.find((cit) => cit?.id === getRefId());
+                        const sanitizedReferences = DOMPurify.sanitize(ref);
+                        const hangingIndentationStyle = { paddingLeft: "1.5rem", textIndent: "-1.5rem" };
 
-                    return {
-                        start: (
-                            <Checkbox
-                                checked={citation?.isChecked || false}
-                                onChange={() => handleEntryCheck(citation)}
-                            />
-                        ),
-                        description: (
-                            // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
-                            <div
-                                className="break-words font-cambo"
-                                onClick={() => openCitationForm(citation?.content.type, false, citation?.id)}
-                                style={
-                                    /^(apa|modern-language-association|chicago)/.test(bibliography?.style.code)
-                                        ? hangingIndentationStyle
-                                        : {}
-                                }
-                            >
-                                {HTMLReactParser(sanitizedReferences)}
-                            </div>
-                        ),
-                        style: {
-                            backgroundColor: citation?.isChecked ? "var(--md-sys-color-tertiary-container)" : "",
-                        },
-                        draggable: true, // FIXME: Only works when dragged from the edge of the list item
-                        onDragStart: handleDrag,
-                    };
-                })}
-            />
+                        return {
+                            start: (
+                                <Checkbox
+                                    checked={citation?.isChecked || false}
+                                    onChange={() => handleEntryCheck(citation)}
+                                />
+                            ),
+                            description: (
+                                // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
+                                <div
+                                    className="break-words font-cambo"
+                                    onClick={() => openCitationForm(citation?.content.type, false, citation?.id)}
+                                    style={
+                                        /^(apa|modern-language-association|chicago)/.test(bibliography?.style.code)
+                                            ? hangingIndentationStyle
+                                            : {}
+                                    }
+                                >
+                                    {HTMLReactParser(sanitizedReferences)}
+                                </div>
+                            ),
+                            style: {
+                                backgroundColor: citation?.isChecked ? "var(--md-sys-color-tertiary-container)" : "",
+                            },
+                            draggable: true, // FIXME: Only works when dragged from the edge of the list item
+                            onDragStart: handleDrag,
+                        };
+                    })}
+                />
+            )) || (
+                <EmptyPage
+                    icon="format_quote"
+                    message="No References added to this bibliography. Click the button to add a citation based on the source type."
+                />
+            )}
         </div>
     );
 }
@@ -708,6 +715,7 @@ export function IconsMenu({ onSubmit, setIsVisible }) {
                 {icons.map((icon) => {
                     return (
                         <IconButton
+                            key={uid()}
                             name={icon}
                             onClick={() => {
                                 onSubmit(icon);

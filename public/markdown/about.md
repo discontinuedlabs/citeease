@@ -1,5 +1,3 @@
-# About CiteEase
-
 **Your Open-Source Powerhouse for Citation Management**
 
 CiteEase isn't just another citation app. It's your one-stop shop for organizing your research and collaborating with others. Whether you're a student burning the midnight oil, a researcher chasing breakthroughs, or a professional juggling projects, CiteEase empowers you to streamline your workflow and conquer the citation game.

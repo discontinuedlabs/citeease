@@ -1,5 +1,3 @@
-# Privacy Policy
-
 **Effective Date: May 7, 2024**
 
 CiteEase ("we," "us," or "our") respects the privacy of our users ("you" or "your"). This Privacy Policy explains how we collect, use, disclose, and protect information that we receive from users of our citation management app (the "App").

@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading, prettier/prettier */
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { uid } from "../../utils/utils.ts";
 import { TAG_COLOR_VALUES } from "../../data/store/slices/settingsSlice";
@@ -96,7 +96,7 @@ export function TextButton({ className, onClick, children, ...rest }) {
 
 export function IconButton({ className, onClick, name, ...rest }) {
     return (
-        <md-icon-button class={className} onClick={onClick} {...rest}>
+        <md-icon-button class={` ${className}`} onClick={onClick} {...rest}>
             <md-icon>{name}</md-icon>
         </md-icon-button>
     );
@@ -107,10 +107,10 @@ export function List({ items = [], className, ...rest }) {
         <md-list class={className} {...rest}>
             {items.map((item) => {
                 if (typeof item === "string" && /divider/i.test(item)) {
-                    return <md-divider />;
+                    return <md-divider key={uid()} />;
                 }
                 return (
-                    <md-list-item {...item} type="button" onClick={item?.onClick} key={uid()}>
+                    <md-list-item class="" {...item} type="button" onClick={item?.onClick} key={uid()}>
                         {item?.start && <div slot="start">{item.start}</div>}
                         {item?.title && <div slot="headline">{item.title}</div>}
                         {item?.description && <div slot="supporting-text">{item.description}</div>}
@@ -124,12 +124,11 @@ export function List({ items = [], className, ...rest }) {
 }
 
 export function Menu({ items }) {
-    const usageSubmenuId = "kjhkjhkjh";
-    const usageSubmenuAnchorId = "aOIHDA";
+    const usageSubmenuRed = useRef();
+    const usageSubmenuAnchorId = useId().replace(/:/g, "");
 
     function toggleMenu() {
-        const menuEl = document.body.querySelector(`#${usageSubmenuId}`);
-        menuEl.open = !menuEl.open;
+        usageSubmenuRed.current.open = !usageSubmenuRed.current.open;
     }
 
     function renderMenuItems(menuItems) {
@@ -151,7 +150,7 @@ export function Menu({ items }) {
                 );
             }
             return (
-                <md-menu-item key={uid()} onClick={item.onClick}>
+                <md-menu-item class="" key={uid()} onClick={item.onClick}>
                     <div slot="headline" className="m-0 whitespace-nowrap p-0">
                         {item.headline}
                     </div>
@@ -164,7 +163,7 @@ export function Menu({ items }) {
         <span className="relative">
             <IconButton name="more_vert" onClick={toggleMenu} id={usageSubmenuAnchorId} />
 
-            <md-menu has-overflow id={usageSubmenuId} anchor={usageSubmenuAnchorId}>
+            <md-menu has-overflow ref={usageSubmenuRed} anchor={usageSubmenuAnchorId}>
                 {renderMenuItems(items)}
             </md-menu>
         </span>

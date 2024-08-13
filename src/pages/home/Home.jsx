@@ -7,7 +7,7 @@ import { addNewBib } from "../../data/store/slices/bibsSlice";
 import { useAuth } from "../../context/AuthContext";
 import { CoBibsSearchDialog } from "./HomeTools";
 import { useEnhancedDispatch } from "../../hooks/hooks.tsx";
-import { ChipSet, Fab, Icon, List, TopBar } from "../../components/ui/MaterialComponents";
+import { ChipSet, EmptyPage, Fab, Icon, List, TopBar } from "../../components/ui/MaterialComponents";
 import { timeAgo } from "../../utils/utils.ts";
 
 export default function Home() {
@@ -90,10 +90,11 @@ export default function Home() {
                     })}
                 />
             ) : (
-                <p className="mx-4">
-                    No bibliographies added yet. Click the button to create one based on citation style or to import
-                    from other softwares.
-                </p>
+                <EmptyPage
+                    icon="book_2"
+                    message="No bibliographies added yet. Click the button to create one based on citation style or to import
+                    from other softwares."
+                />
             )}
 
             <Fab

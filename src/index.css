@@ -22,7 +22,7 @@
         --md-sys-color-on-secondary-container: #211b04;
 
         --md-sys-color-tertiary: #44664d;
-        --md-sys-color-on-tertiary: #44664d;
+        --md-sys-color-on-tertiary: #ffffff;
         --md-sys-color-tertiary-container: #c6eccc;
         --md-sys-color-on-tertiary-container: #00210e;
 
@@ -87,7 +87,8 @@
     }
 
     a {
-        @apply text-secondary-800;
+        color: var(--md-sys-color-tertiary);
+        text-decoration: none;
     }
 
     ul {
@@ -96,10 +97,6 @@
 
     code {
         @apply rounded-md bg-secondary-800 px-2 py-1 text-white;
-    }
-
-    button {
-        @apply font-sans;
     }
 
     .csl-entry:has(.csl-left-margin) {
