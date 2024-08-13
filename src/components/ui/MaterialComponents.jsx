@@ -146,8 +146,10 @@ export function TopBar({ headline, description, showBackButton = true, options }
                     background: isScrolled ? "var(--md-sys-color-surface-container)" : "var(--md-sys-color-surface)",
                 }}
             >
-                <div className="flex items-center">
-                    {showBackButton && <IconButton name="arrow_back" onClick={() => navigate(-1)} />}
+                <div className="flex items-center overflow-hidden text-ellipsis whitespace-nowrap">
+                    {showBackButton && (
+                        <IconButton className="min-w-10" name="arrow_back" onClick={() => navigate(-1)} />
+                    )}
 
                     <h2
                         className={`mx-2 overflow-hidden text-ellipsis whitespace-nowrap transition duration-150 ease-in-out ${isScrolled ? "translate-y-0" : "translate-y-4 opacity-0"}`}

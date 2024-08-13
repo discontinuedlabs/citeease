@@ -20,9 +20,6 @@ export default defineConfig(() => {
             react(),
             eslint(),
             VitePWA({
-                strategies: "injectManifest",
-                srcDir: "src",
-                filename: "service-worker.js",
                 registerType: "autoUpdate",
                 devOptions: {
                     enabled: true,

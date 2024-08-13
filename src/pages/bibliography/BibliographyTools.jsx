@@ -23,7 +23,7 @@ import Tag from "../../components/ui/Tag";
 import citationStyles from "../../assets/styles.json";
 import mostPopularStyles from "../../assets/mostPopularStyles.json";
 import { uid } from "../../utils/utils.ts";
-import { Checkbox, Icon, List, OutlinedButton, TextButton } from "../../components/ui/MaterialComponents";
+import { Checkbox, IconButton, List, TextButton } from "../../components/ui/MaterialComponents";
 import icons from "../../assets/icons.json";
 
 // Source types
@@ -140,7 +140,7 @@ export function ReferenceEntries(props) {
                 )}
 
                 {checkedCitations?.length !== 0 && (
-                    <OutlinedButton onClick={openIntextCitationDialog}>In-text citation</OutlinedButton>
+                    <TextButton onClick={openIntextCitationDialog}>In-text citation</TextButton>
                 )}
             </div>
 
@@ -166,7 +166,7 @@ export function ReferenceEntries(props) {
                         description: (
                             // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
                             <div
-                                className="font-cambo"
+                                className="break-words font-cambo"
                                 onClick={() => openCitationForm(citation?.content.type, false, citation?.id)}
                                 style={
                                     /^(apa|modern-language-association|chicago)/.test(bibliography?.style.code)
@@ -707,14 +707,13 @@ export function IconsMenu({ onSubmit, setIsVisible }) {
             <div>
                 {icons.map((icon) => {
                     return (
-                        <TextButton
+                        <IconButton
+                            name={icon}
                             onClick={() => {
                                 onSubmit(icon);
                                 setIsVisible(false);
                             }}
-                        >
-                            <Icon name={icon} />
-                        </TextButton>
+                        />
                     );
                 })}
             </div>
