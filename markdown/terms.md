@@ -1,5 +1,3 @@
-# Terms of Use
-
 **Effective Date: May 7, 2024**
 
 These Terms of Use ("Terms") govern your access to and use of the CiteEase citation management application (the "App"). By accessing or using the App, you agree to be bound by these Terms.
