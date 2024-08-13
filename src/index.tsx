@@ -11,8 +11,7 @@ import ModalProvider from "./context/ModalContext.tsx";
 import ToastProvider from "./context/ToastContext.tsx";
 import ErrorBoundary from "./components/ErrorBoundary";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
         <ErrorBoundary>
             <Router>
