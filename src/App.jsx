@@ -36,6 +36,7 @@ export default function App() {
     useEffect(() => {
         dispatch(loadBibs());
         dispatch(loadSettings());
+        console.log(1);
     }, []);
 
     useEffect(() => {
