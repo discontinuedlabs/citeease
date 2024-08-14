@@ -90,7 +90,6 @@ export function getGradient(color: string, intensity: number = 10): [string, str
         const match = /^[a-zA-Z]+$/.exec(value);
         if (!match) throw new Error("Invalid color string");
         const rgbValues = TAG_COLOR_VALUES[value].match(/\d+/g)!.map((x) => parseInt(x, 10));
-        console.log(rgbValues);
         return rgbToHsla(rgbValues);
     }
 
