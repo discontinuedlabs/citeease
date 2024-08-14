@@ -2,15 +2,11 @@
 
 import { clientsClaim } from "workbox-core";
 import { ExpirationPlugin } from "workbox-expiration";
-import { precacheAndRoute, createHandlerBoundToURL, cleanupOutdatedCaches } from "workbox-precaching";
+import { precacheAndRoute, createHandlerBoundToURL } from "workbox-precaching";
 import { registerRoute } from "workbox-routing";
 import { StaleWhileRevalidate } from "workbox-strategies";
 
-self.skipWaiting();
-
 clientsClaim();
-
-cleanupOutdatedCaches();
 
 precacheAndRoute([...self.__WB_MANIFEST]);
 
@@ -40,3 +36,9 @@ registerRoute(
         plugins: [new ExpirationPlugin({ maxEntries: 50 })],
     })
 );
+
+self.addEventListener("message", (event) => {
+    if (event.data && event.data.type === "SKIP_WAITING") {
+        self.skipWaiting();
+    }
+});
