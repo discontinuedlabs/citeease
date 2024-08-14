@@ -9,12 +9,10 @@ import { NetworkFirst, StaleWhileRevalidate } from "workbox-strategies";
 self.skipWaiting();
 clientsClaim();
 
-precacheAndRoute([...self.__WB_MANIFEST]);
-
-// precacheAndRoute([...self.__WB_MANIFEST, { url: "/**", revision: "" }], {
-//     directoryIndex: `${import.meta.env.VITE_PUBLIC_URL}/index.html`,
-//     fallbackFromNetwork: true,
-// });
+precacheAndRoute([...self.__WB_MANIFEST, { url: "/**", revision: "" }], {
+    directoryIndex: `${import.meta.env.VITE_PUBLIC_URL}/index.html`,
+    fallbackFromNetwork: true,
+});
 
 const fileExtensionRegexp = /[^?/]+\.[^/]+$/;
 
