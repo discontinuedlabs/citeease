@@ -24,7 +24,6 @@ import citationStyles from "../../assets/json/styles.json";
 import mostPopularStyles from "../../assets/json/mostPopularStyles.json";
 import { uid } from "../../utils/utils.ts";
 import { Checkbox, EmptyPage, IconButton, List, TextButton } from "../../components/ui/MaterialComponents";
-import icons from "../../assets/json/icons.json";
 
 // Source types
 import ArticleJournal from "../../components/sourceTypes/ArticleJournal";
@@ -705,6 +704,8 @@ export function SmartGeneratorDialog(props) {
 }
 
 export function IconsMenu({ onSubmit, setIsVisible }) {
+    const { icons } = useSelector((state) => state.settings);
+
     return (
         <div>
             <button type="button" onClick={() => setIsVisible(false)}>

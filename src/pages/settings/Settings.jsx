@@ -1,12 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { TagsManager } from "./SettingTools";
+import { IconsManager, TagsManager } from "./SettingTools";
 import { useModal } from "../../context/ModalContext.tsx";
-import { restoreDefaultTags } from "../../data/store/slices/settingsSlice";
+import { restoreDefaultIcons, restoreDefaultTags } from "../../data/store/slices/settingsSlice";
 import { List, TopBar } from "../../components/ui/MaterialComponents";
 
 export default function Settings() {
     const tagsManagerModal = useModal();
+    const iconsManagerModal = useModal();
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -26,6 +27,21 @@ export default function Settings() {
         });
     }
 
+    function openIconsManager() {
+        iconsManagerModal.open({
+            title: "Icons Manager",
+            content: <IconsManager />,
+            actions: [
+                [
+                    "Restore default icons",
+                    () => dispatch(restoreDefaultIcons()),
+                    { closeOnClick: false, autoFocus: false },
+                ],
+                ["Cancel", () => iconsManagerModal.close(), { autoFocus: false }],
+            ],
+        });
+    }
+
     return (
         <div className="mx-auto max-w-[50rem]">
             <TopBar headline="Settings" />
@@ -33,6 +49,7 @@ export default function Settings() {
             <List
                 items={[
                     { title: "Manage tags", onClick: openTagsManager },
+                    { title: "Manage icons", onClick: openIconsManager },
                     "DIVIDER",
                     { title: "About CiteEase", onClick: () => navigate("/about") },
                     { title: "Terms of Use", onClick: () => navigate("/terms") },

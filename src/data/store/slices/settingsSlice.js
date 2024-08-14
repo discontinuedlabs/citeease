@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import db from "../../db/dexie/dexie";
+import builtinIcons from "../../../assets/json/icons.json";
 
 export const TAG_COLORS = {
     YELLOW: "yellow",
@@ -29,7 +30,7 @@ export const TAG_COLOR_VALUES = {
     [TAG_COLORS.BROWN]: "rgb(173,105,68)",
 };
 
-const PREBUILT_TAGS = [
+const BUILTIN_TAGS = [
     { label: "Completed", color: TAG_COLORS.GREEN, id: "builtin-completed" },
     { label: "In progress", color: TAG_COLORS.YELLOW, id: "builtin-inProgress" },
     { label: "Pending Review", color: TAG_COLORS.ORANGE, id: "builtin-pendingReview" },
@@ -43,7 +44,7 @@ const PREBUILT_TAGS = [
     { label: "Discontinued", color: TAG_COLORS.GRAY, id: "builtin-discontinued" },
 ];
 
-const initialState = { tags: PREBUILT_TAGS, tryingToJoinBib: null };
+const initialState = { tags: BUILTIN_TAGS, icons: builtinIcons, tryingToJoinBib: null };
 
 async function saveToIndexedDB(newState) {
     const serializedState = JSON.stringify(newState);
@@ -72,7 +73,7 @@ const settingsSlice = createSlice({
                 ...settings,
                 tags: [
                     ...(settings.tags ? settings.tags : []),
-                    ...PREBUILT_TAGS.filter((pTag) => !sTagIds.includes(pTag.id)),
+                    ...BUILTIN_TAGS.filter((pTag) => !sTagIds.includes(pTag.id)),
                 ],
             };
             saveToIndexedDB(newState);
@@ -88,6 +89,25 @@ const settingsSlice = createSlice({
             saveToIndexedDB(newState);
             return newState;
         },
+        restoreDefaultIcons: (settings) => {
+            const newState = {
+                ...settings,
+                icons: [...settings.icons, ...builtinIcons.filter((icon) => !settings.icons.includes(icon))],
+            };
+            saveToIndexedDB(newState);
+            return newState;
+        },
+        addIcon: (settings, action) => {
+            const newState = { ...settings, icons: [...settings.icons, action.payload.icon] };
+            saveToIndexedDB(newState);
+            return newState;
+        },
+        deleteIcon: (settings, action) => {
+            console.log(action);
+            const newState = { ...settings, icons: settings.icons?.filter((icon) => icon !== action.payload.icon) };
+            saveToIndexedDB(newState);
+            return newState;
+        },
         setTryingToJoinBib: (settings, action) => {
             const newState = { ...settings, tryingToJoinBib: action.payload.bibId };
             return newState;
@@ -98,11 +118,22 @@ const settingsSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
-        builder.addCase(loadFromIndexedDB.fulfilled, (state, action) => action?.payload || state);
+        builder.addCase(loadFromIndexedDB.fulfilled, (state, action) => {
+            return { ...state, ...action?.payload };
+        });
     },
 });
 
-export const { replaceAllSettings, restoreDefaultTags, addTag, deleteTag, setTryingToJoinBib, resetAllSettings } =
-    settingsSlice.actions;
+export const {
+    replaceAllSettings,
+    restoreDefaultTags,
+    addTag,
+    deleteTag,
+    restoreDefaultIcons,
+    addIcon,
+    deleteIcon,
+    setTryingToJoinBib,
+    resetAllSettings,
+} = settingsSlice.actions;
 
 export default settingsSlice.reducer;

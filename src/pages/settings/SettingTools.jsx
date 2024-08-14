@@ -4,7 +4,9 @@ import { useNavigate } from "react-router-dom";
 import {
     TAG_COLORS,
     TAG_COLOR_VALUES,
+    addIcon,
     addTag,
+    deleteIcon,
     deleteTag,
     resetAllSettings,
 } from "../../data/store/slices/settingsSlice";
@@ -14,6 +16,8 @@ import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
 import { uid } from "../../utils/utils.ts";
 import { getGradient, getTagBgColors } from "../../utils/uiUtils.ts";
 import { Button } from "../../components/ui/StyledButtons";
+import { IconButton } from "../../components/ui/MaterialComponents";
+import { useToast } from "../../context/ToastContext.tsx";
 
 export function TagsManager() {
     const settings = useSelector((state) => state.settings);
@@ -70,6 +74,64 @@ export function TagsManager() {
                             />
                         );
                     })}
+                </div>
+            </form>
+        </div>
+    );
+}
+
+export function IconsManager() {
+    const settings = useSelector((state) => state.settings);
+    console.log(settings);
+    const { icons } = settings;
+    const dispatch = useDispatch();
+    const toast = useToast();
+    const [iconName, setIconName] = useState("");
+
+    function addIconToCollection(event) {
+        event.preventDefault();
+        if (!/^\s*$/.test(iconName)) {
+            if (icons.includes(iconName)) {
+                toast.show({
+                    message: `You already have \`${iconName}\` icon`,
+                });
+            } else {
+                dispatch(addIcon({ icon: iconName }));
+                setIconName("");
+            }
+        }
+    }
+
+    return (
+        <div className="grid gap-2">
+            <div className="flex flex-wrap gap-1">
+                {icons?.map((icon) => {
+                    return (
+                        <IconButton
+                            key={uid()}
+                            name={icon}
+                            onClick={() => {
+                                dispatch(deleteIcon({ icon }));
+                            }}
+                        />
+                    );
+                })}
+            </div>
+
+            <form onSubmit={addIconToCollection}>
+                <div className="flex grid-cols-2 gap-2">
+                    <div className="rounded-md bg-white">
+                        <input
+                            type="text"
+                            placeholder="Icon name"
+                            value={iconName}
+                            onChange={(event) => setIconName(event.target.value)}
+                        />
+                    </div>
+
+                    <Button className="text-nowrap" type="submit">
+                        Add icon
+                    </Button>
                 </div>
             </form>
         </div>
