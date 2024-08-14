@@ -2,17 +2,17 @@
 
 import { clientsClaim } from "workbox-core";
 import { ExpirationPlugin } from "workbox-expiration";
-import { precacheAndRoute, createHandlerBoundToURL } from "workbox-precaching";
+import { precacheAndRoute, createHandlerBoundToURL, cleanupOutdatedCaches } from "workbox-precaching";
 import { registerRoute } from "workbox-routing";
-import { NetworkFirst, StaleWhileRevalidate } from "workbox-strategies";
+import { StaleWhileRevalidate } from "workbox-strategies";
 
 self.skipWaiting();
+
 clientsClaim();
 
-precacheAndRoute([...self.__WB_MANIFEST, { url: "/**", revision: "" }], {
-    directoryIndex: `${import.meta.env.VITE_PUBLIC_URL}/index.html`,
-    fallbackFromNetwork: true,
-});
+cleanupOutdatedCaches();
+
+precacheAndRoute([...self.__WB_MANIFEST]);
 
 const fileExtensionRegexp = /[^?/]+\.[^/]+$/;
 
@@ -27,18 +27,6 @@ registerRoute(
         return true;
     },
     createHandlerBoundToURL(`${import.meta.env.VITE_PUBLIC_URL}/index.html`)
-);
-
-registerRoute(
-    ({ url }) => url.pathname.startsWith("index"),
-    new NetworkFirst({
-        cacheName: "main-js",
-        plugins: [
-            new ExpirationPlugin({
-                maxEntries: 10,
-            }),
-        ],
-    })
 );
 
 registerRoute(
