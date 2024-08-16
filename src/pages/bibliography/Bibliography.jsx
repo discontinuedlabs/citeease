@@ -38,7 +38,7 @@ import { useToast } from "../../context/ToastContext.tsx";
 
 // TODO: The user cannot do any actions in collaborative bibliographies when they are offline
 export default function Bibliography() {
-    const bibliographies = useSelector((state) => state.bibliographies.data);
+    const { data: bibliographies, loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies);
     const bibliography = useFindBib();
     const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
     const { currentUser } = useAuth();
@@ -65,10 +65,11 @@ export default function Bibliography() {
     const [iconsMenuVisible, setIconsMenuVisible] = useState(false);
 
     useEffect(() => {
-        if (!bibliography) {
+        if (bibsLoaded && !bibliography) {
             navigate("/");
+            toast.show({ message: "No such bibliography", color: "red", icon: "error" });
         }
-    }, []);
+    }, [bibsLoaded]);
 
     useEffect(() => {
         // Prioritizes showing collab.id in the URL instead of the regular id
@@ -367,6 +368,20 @@ export default function Bibliography() {
         });
     }
 
+    async function handleLeaveCollaboration() {
+        const coBibsRef = doc(firestoreDB, "coBibs", bibliography.collab.id);
+        const newCoBib = {
+            ...bibliography,
+            collab: {
+                ...bibliography.collab,
+                collaborators: bibliography.collab.collaborators.filter((co) => co.id !== currentUser.uid),
+            },
+        };
+        await setDoc(coBibsRef, { bibliography: JSON.stringify(newCoBib) });
+        navigate("/");
+        dispatch(deleteBib({ bibliographyId: bibliography.id }));
+    }
+
     function handleDeleteBibliography() {
         modal.open({
             title: "Delete bibliography?",
@@ -412,7 +427,7 @@ export default function Bibliography() {
 
     function getConditionalOptionsWhenNothingSelected() {
         // Options for admin of collaborative bibliographies
-        if (collaborationOpened && bibliography.collab.adminId === currentUser.uid) {
+        if (collaborationOpened && bibliography?.collab?.adminId === currentUser.uid) {
             return [
                 { headline: "Tags", onClick: () => setTagsDialogVisible(true) },
                 { headline: "Change style", onClick: () => setCitationStyleMenuVisible(true) },
@@ -421,6 +436,14 @@ export default function Bibliography() {
                 { headline: "Bibliography settings", onClick: () => navigate(`/bib/${bibliography.id}/settings`) },
                 { headline: "Close collaboration", onClick: handleCloseCollaboration },
             ];
+        }
+
+        // Options for collaborators
+        if (
+            collaborationOpened &&
+            bibliography?.collab?.collaborators.some((collaborator) => collaborator.id === currentUser.uid)
+        ) {
+            return [{ headline: "Leave collaboration", onClick: handleLeaveCollaboration }];
         }
 
         // Options if bibliography not open for collaboration

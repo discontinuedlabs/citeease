@@ -1,12 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useEffect, useId, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import db from "../../data/db/firebase/firebase";
 import { useAuth } from "../../context/AuthContext";
 import { mergeWithCurrentBibs } from "../../data/store/slices/bibsSlice";
 import { useToast } from "../../context/ToastContext.tsx";
 import { useModal } from "../../context/ModalContext.tsx";
+import { useEnhancedDispatch } from "../../hooks/hooks.tsx";
 
 export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib = undefined }) {
     const { data: bibliographies, loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies);
@@ -19,7 +20,7 @@ export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib = undefined }
     const searchRef = useRef();
     const passwordRef = useRef();
     const { currentUser } = useAuth();
-    const dispatch = useDispatch();
+    const dispatch = useEnhancedDispatch();
     const toast = useToast();
     const navigate = useNavigate();
     const modal = useModal();

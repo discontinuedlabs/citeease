@@ -22,14 +22,12 @@ import Account from "./pages/account/Account";
 import ForgotPassword from "./pages/account/ForgotPassword";
 import firestoreDB from "./data/db/firebase/firebase";
 import { useDocumentTitle, useMetaThemeColor } from "./hooks/hooks.tsx";
-import { useToast } from "./context/ToastContext.tsx";
 import { retrieveUserData } from "./utils/dataUtils.ts";
 
 export default function App() {
     const { loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies); // WATCH: In some browsers, state.bibliographies may display [object Object] on subsequent renders in StrictMode
     const { currentUser } = useAuth();
     const dispatch = useDispatch();
-    const toast = useToast();
     useDocumentTitle();
     useMetaThemeColor();
 
@@ -54,11 +52,6 @@ export default function App() {
                     if (!parsedCoBib.collab.collaborators.some((co) => co.id === currentUser.uid)) {
                         // Remove the bibliography from the user's data if they were removed from it by the admin
                         dispatch(deleteBib({ bibliographyId: parsedCoBib.id }));
-                        toast.show({
-                            message: `You were removed from \`${parsedCoBib.title}\` collaborative bibliography`,
-                            icon: "group",
-                            color: "red",
-                        });
                     } else {
                         dispatch(mergeWithCurrentBibs({ bibs: [parsedCoBib] }));
                     }
