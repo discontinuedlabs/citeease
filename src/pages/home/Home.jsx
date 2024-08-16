@@ -83,13 +83,7 @@ export default function Home() {
 
                         return {
                             start: <Icon name={bib?.icon} />,
-                            title: bib?.collab?.open ? (
-                                <>
-                                    <Icon name="group" className="text-xl" /> {bib.title}
-                                </>
-                            ) : (
-                                bib.title
-                            ),
+                            title: bib.title,
                             description: `${bib.style.name.short || bib.style.name.long.replace(/\((.*?)\)/g, "")} • ${renderCitationCount(bib.citations)} • ${timeAgo(bib.dateModified)}`,
                             content: (
                                 <ChipSet
