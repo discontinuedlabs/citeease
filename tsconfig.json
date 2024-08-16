@@ -16,5 +16,5 @@
         "jsx": "preserve",
         "allowImportingTsExtensions": true
     },
-    "include": ["src", ".prettierrc", "scripts", "service-worker.js"]
+    "include": ["src", ".prettierrc", "scripts"]
 }

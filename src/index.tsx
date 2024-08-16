@@ -10,7 +10,6 @@ import { AuthProvider } from "./context/AuthContext";
 import ModalProvider from "./context/ModalContext.tsx";
 import ToastProvider from "./context/ToastContext.tsx";
 import ErrorBoundary from "./components/ErrorBoundary";
-import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
@@ -29,5 +28,3 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </ErrorBoundary>
     </React.StrictMode>
 );
-
-serviceWorkerRegistration.register();

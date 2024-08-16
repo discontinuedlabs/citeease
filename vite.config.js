@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import eslint from "vite-plugin-eslint";
+import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(() => {
     return {
@@ -13,8 +14,22 @@ export default defineConfig(() => {
         build: {
             outDir: "build",
             assetsDir: ".",
+            rollupOptions: {
+                output: {
+                    entryFileNames: "index.js",
+                    assetFileNames: "index.css",
+                },
+            },
         },
 
-        plugins: [react(), eslint()],
+        plugins: [
+            react(),
+            eslint(),
+            VitePWA({
+                devOptions: {
+                    enabled: true,
+                },
+            }),
+        ],
     };
 });
