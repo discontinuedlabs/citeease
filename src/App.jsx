@@ -45,6 +45,7 @@ export default function App() {
             dispatch(replaceAllBibs({ bibs: userData.bibliographies }));
             dispatch(replaceAllSettings({ settings: userData.settings }));
 
+            // Add the listener for the collaborative bibliographies only because they are retreived from the "coBibs" Firestore collection
             const coBibsIds = userData.bibliographies.filter((bib) => bib?.collab?.open).map((bib) => bib.collab.id);
             coBibsIds.forEach((id) => {
                 const unsubscribe = onSnapshot(doc(firestoreDB, "coBibs", id), (sDoc) => {
@@ -53,6 +54,7 @@ export default function App() {
                         // Remove the bibliography from the user's data if they were removed from it by the admin
                         dispatch(deleteBib({ bibliographyId: parsedCoBib.id }));
                     } else {
+                        // Merge it with the current ones to get the changes
                         dispatch(mergeWithCurrentBibs({ bibs: [parsedCoBib] }));
                     }
                 });

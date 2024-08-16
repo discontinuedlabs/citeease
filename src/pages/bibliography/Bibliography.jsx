@@ -369,17 +369,44 @@ export default function Bibliography() {
     }
 
     async function handleLeaveCollaboration() {
-        const coBibsRef = doc(firestoreDB, "coBibs", bibliography.collab.id);
-        const newCoBib = {
-            ...bibliography,
-            collab: {
-                ...bibliography.collab,
-                collaborators: bibliography.collab.collaborators.filter((co) => co.id !== currentUser.uid),
-            },
-        };
-        await setDoc(coBibsRef, { bibliography: JSON.stringify(newCoBib) });
-        navigate("/");
-        dispatch(deleteBib({ bibliographyId: bibliography.id }));
+        if (!isOnline && bibliography?.collab?.open) {
+            toast.show({ message: "You are offline", icon: "error", color: "red" });
+            return;
+        }
+
+        function leave() {
+            const coBibsRef = doc(firestoreDB, "coBibs", bibliography.collab.id);
+            const newCoBib = {
+                ...bibliography,
+                collab: {
+                    ...bibliography.collab,
+                    collaborators: bibliography.collab.collaborators.filter((co) => co.id !== currentUser.uid),
+                },
+            };
+
+            setDoc(coBibsRef, { bibliography: JSON.stringify(newCoBib) })
+                .then(() => {
+                    navigate("/");
+                    dispatch(deleteBib({ bibliographyId: bibliography.id }));
+                })
+                .catch((error) => {
+                    toast.show({
+                        message: `Failed to leave ${bibliography.title}. Try again later.`,
+                        icon: "error",
+                        color: "red",
+                    });
+                    console.error(error);
+                });
+        }
+
+        modal.open({
+            title: `Leave ${bibliography.title}?`,
+            message: "Are you sure you want to leave this collaborative bibliography?",
+            actions: [
+                ["Leave", leave],
+                ["Cancel", () => modal.close()],
+            ],
+        });
     }
 
     function handleDeleteBibliography() {
