@@ -89,3 +89,23 @@ export function timeAgo(dateString: string): string {
 
     return formattedTime;
 }
+
+/**
+ * Parses a URL query string into an object where keys are the names of the query parameters and values are their corresponding values.
+ *
+ * @param {string} query - The query string to parse, e.g., "key=value&anotherKey=anotherValue".
+ * @returns {Record<string, string>} An object representing the parsed query string, where each key-value pair corresponds to a query parameter and its value.
+ */
+export function parseQueryString(query: string): Record<string, string> {
+    return query
+        .replace(/^\?/, "")
+        .split("&")
+        .reduce(
+            (acc: Record<string, string>, keyValue) => {
+                const [key, value] = keyValue.split("=");
+                acc[key] = value;
+                return acc;
+            },
+            {} as Record<string, string>
+        );
+}

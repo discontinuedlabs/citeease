@@ -44,7 +44,7 @@ const BUILTIN_TAGS = [
     { label: "Discontinued", color: TAG_COLORS.GRAY, id: "builtin-discontinued" },
 ];
 
-const initialState = { tags: BUILTIN_TAGS, icons: builtinIcons, tryingToJoinBib: null };
+const initialState = { tags: BUILTIN_TAGS, icons: builtinIcons };
 
 async function saveToIndexedDB(newState) {
     const serializedState = JSON.stringify(newState);
@@ -132,7 +132,6 @@ export const {
     restoreDefaultIcons,
     addIcon,
     deleteIcon,
-    setTryingToJoinBib,
     resetAllSettings,
 } = settingsSlice.actions;
 

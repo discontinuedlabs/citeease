@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { CitationStylesMenu } from "../bibliography/BibliographyTools";
@@ -8,24 +8,36 @@ import { useAuth } from "../../context/AuthContext";
 import { CoBibsSearchDialog } from "./HomeTools";
 import { useEnhancedDispatch } from "../../hooks/hooks.tsx";
 import { ChipSet, EmptyPage, Fab, Icon, List, TopBar } from "../../components/ui/MaterialComponents";
-import { timeAgo } from "../../utils/utils.ts";
+import { parseQueryString, timeAgo } from "../../utils/utils.ts";
 
 export default function Home() {
-    const bibliographies = useSelector((state) => state.bibliographies.data);
-    const settings = useSelector((state) => state.settings);
+    const { data: bibliographies, loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies);
     const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
     const [addBibOptionsMenuVisible, setAddBibOptionsMenuVisible] = useState(false);
     const [coBibsSearchDialogVisible, setCoBibsSearchDialogVisible] = useState(false);
-    const { tryingToJoinBib } = settings;
+    const [tryingToJoinBib, setTryingToJoinBib] = useState(undefined);
     const { currentUser } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
     const dispatch = useEnhancedDispatch();
 
     useEffect(() => {
-        if (tryingToJoinBib) {
-            setCoBibsSearchDialogVisible(true);
+        if (!bibsLoaded) return;
+
+        const queryString = location.search;
+        const queryParams = parseQueryString(queryString);
+
+        navigate("/", { replace: true });
+
+        if (queryParams?.q && !/^\s*$/.test(queryParams.q)) {
+            if (bibliographies.some((bib) => bib?.collab?.id === queryParams.q)) {
+                navigate(`/collab/${queryParams.q}`);
+            } else {
+                setTryingToJoinBib(queryParams.q);
+                setCoBibsSearchDialogVisible(true);
+            }
         }
-    }, []);
+    }, [bibsLoaded]);
 
     function addNewBibWithStyle(style) {
         setCitationStyleMenuVisible(false);

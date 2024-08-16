@@ -34,7 +34,6 @@ import { useAuth } from "../../context/AuthContext";
 import firestoreDB from "../../data/db/firebase/firebase";
 import { useModal } from "../../context/ModalContext.tsx";
 import { ChipSet, Fab, Icon, TopBar } from "../../components/ui/MaterialComponents";
-import { setTryingToJoinBib } from "../../data/store/slices/settingsSlice";
 import { useToast } from "../../context/ToastContext.tsx";
 
 // TODO: The user cannot do any actions in collaborative bibliographies when they are offline
@@ -66,9 +65,6 @@ export default function Bibliography() {
     const [iconsMenuVisible, setIconsMenuVisible] = useState(false);
 
     useEffect(() => {
-        if (location.pathname.startsWith("/collab/") && bibId && !bibliography) {
-            dispatch(setTryingToJoinBib({ bibId }));
-        }
         if (!bibliography) {
             navigate("/");
         }

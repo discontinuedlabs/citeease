@@ -7,9 +7,8 @@ import { useAuth } from "../../context/AuthContext";
 import { mergeWithCurrentBibs } from "../../data/store/slices/bibsSlice";
 import { useToast } from "../../context/ToastContext.tsx";
 import { useModal } from "../../context/ModalContext.tsx";
-import { setTryingToJoinBib } from "../../data/store/slices/settingsSlice";
 
-export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib }) {
+export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib = undefined }) {
     const { data: bibliographies, loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies);
     const [searchResult, setSearchResult] = useState(null);
     const [searchLoading, setSearchLoading] = useState(false);
@@ -25,28 +24,23 @@ export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib }) {
     const navigate = useNavigate();
     const modal = useModal();
 
-    useEffect(() => {
-        if (!currentUser) {
-            modal.open({
-                showCloseIcon: false,
-                title: "Login required",
-                message: "You need to log in first to use this feature.",
-                actions: [
-                    ["Log in", () => navigate("/login"), { autoFocus: true }],
-                    [
-                        "Cancel",
-                        () => {
-                            setIsVisible(false);
-                            modal.close();
-                        },
-                    ],
+    function promptToLogin() {
+        modal.open({
+            showCloseIcon: false,
+            title: "Login required",
+            message: "You need to log in first to use this feature.",
+            actions: [
+                ["Log in", () => navigate("/login"), { autoFocus: true }],
+                [
+                    "Cancel",
+                    () => {
+                        setIsVisible(false);
+                        modal.close();
+                    },
                 ],
-            });
-
-            return undefined;
-        }
-        return undefined;
-    }, []);
+            ],
+        });
+    }
 
     async function searchForBib(bibId) {
         try {
@@ -71,22 +65,29 @@ export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib }) {
             }
         } catch (error) {
             console.error(error);
-            setSearchError(error);
+            setSearchError(error.toString());
         }
 
         setSearchLoading(false);
-        dispatch(setTryingToJoinBib({ bibId: null }));
     }
 
     useEffect(() => {
         if (tryingToJoinBib && bibsLoaded) {
-            searchForBib(tryingToJoinBib);
+            if (!currentUser) {
+                promptToLogin();
+            } else {
+                searchForBib(tryingToJoinBib);
+            }
         }
     }, [tryingToJoinBib, bibsLoaded]);
 
     async function handleSearch(event) {
         event.preventDefault();
-        searchForBib(searchRef.current.value);
+        if (!currentUser) {
+            promptToLogin();
+        } else {
+            searchForBib(searchRef.current.value);
+        }
     }
 
     async function handleJoin(event) {
@@ -122,7 +123,8 @@ export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib }) {
                 setPasswordError("The password you entered is wrong");
             }
         } catch (error) {
-            setPasswordError(error.message);
+            console.error(error);
+            setPasswordError(error.toString());
         }
         setPasswordLoading(false);
     }
