@@ -10,11 +10,6 @@ import { useAuth } from "../context/AuthContext";
 /**
  * Adds an event listener to the specified element, document, or window object.
  *
- * This custom hook allows you to attach an event listener to a target element, document, or window.
- * It uses React's `useEffect` to ensure the event listener is added after the component mounts
- * and removed when the component unmounts. The event type and callback function are passed as arguments,
- * and an optional target element can be specified. If no target is provided, the default is the window object.
- *
  * @param {string} eventType - The type of event to listen for (e.g., "click", "mouseover").
  * @param {(event: Event) => void} callback - The callback function to execute when the event occurs.
  * @param {Element | Document | Window} [element=window] - The target element, document, or window to attach the event listener to.
@@ -123,33 +118,38 @@ export function useDocumentTitle(
 }
 
 /**
- * Sets the theme color based on the passed color or the current background color of the page,
- * and updates the `<meta name="theme-color">` tag accordingly.
+ * Updates the theme color of the application dynamically based on a given color.
+ * It initializes with either a provided color or the current background color of the document.
+ * Subsequent calls allow updating the theme color to a new value.
  *
- * @param color - The desired theme color. Defaults to `undefined`, which means it will use the current background color of the page.
- * @returns The final theme color set (either the passed color or the current background color).
+ * @param {string} initialColor - The initial color value to set the theme color to. If not provided,
+ *                                it attempts to read the background color of the document root element.
+ * @returns {(newColor: string) => void} - A function that accepts a new color string and updates the theme color.
  */
-export function useMetaThemeColor(color?: string): string {
-    const [backgroundColor, setBackgroundColor] = useState<string>("");
-
-    useEffect(() => {
-        const style = window.getComputedStyle(document.documentElement);
-        setBackgroundColor(color || style.getPropertyValue("background-color"));
-    });
+export function useMetaThemeColor(initialColor: string): (newColor: string) => void {
+    const [color, setColor] = useState<string>(
+        initialColor || window.getComputedStyle(document.documentElement).getPropertyValue("background-color")
+    );
 
     useEffect(() => {
         // eslint-disable-next-line quotes
         const metaThemeColor = document.querySelector('meta[name="theme-color"]');
         if (metaThemeColor) {
-            metaThemeColor.setAttribute("content", backgroundColor);
+            metaThemeColor.setAttribute("content", color);
         }
-    }, [backgroundColor]);
+    }, [color]);
 
-    return backgroundColor;
+    return (newColor) => setColor(newColor);
 }
 
-export default function useOnlineStatus() {
-    const [online, setOnline] = useState(navigator.onLine);
+/**
+ * Tracks the online status of the application using the navigator.onLine property to determine
+ * the online status and updates it whenever the network status changes.
+ *
+ * @returns {boolean} The current online status of the application.
+ */
+export default function useOnlineStatus(): boolean {
+    const [online, setOnline] = useState<boolean>(navigator.onLine);
 
     useEventListener("online", () => setOnline(navigator.onLine));
     useEventListener("offline", () => setOnline(navigator.onLine));
@@ -157,6 +157,13 @@ export default function useOnlineStatus() {
     return online;
 }
 
+/**
+ * Delays the execution of a callback function by a specified time.
+ *
+ * @param {() => void} callback - The callback function to execute after the timeout.
+ * @param {number} ms - The delay time in milliseconds before executing the callback. Defaults to 3000ms.
+ * @returns {void} Does not return anything.
+ */
 export function useTimeout(callback: () => void, ms: number = 3000) {
     const savedCallback = useRef(callback);
 

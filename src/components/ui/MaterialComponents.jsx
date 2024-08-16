@@ -4,6 +4,7 @@ import React, { useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { uid } from "../../utils/utils.ts";
 import { TAG_COLOR_VALUES } from "../../data/store/slices/settingsSlice";
+import { useMetaThemeColor } from "../../hooks/hooks.tsx";
 
 export function Checkbox({ className, onChange, checked = false, indeterminate = false, ...rest }) {
     const ref = useRef();
@@ -173,6 +174,7 @@ export function Menu({ items }) {
 export function TopBar({ headline, description, showBackButton = true, options }) {
     const navigate = useNavigate();
     const [isScrolled, setIsScrolled] = useState(false);
+    const metaThemeColor = useMetaThemeColor();
 
     const handleScroll = () => {
         const show = window.scrollY > 50;
@@ -183,6 +185,20 @@ export function TopBar({ headline, description, showBackButton = true, options }
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
+
+    useEffect(() => {
+        if (isScrolled) {
+            const scrolledColor = window
+                .getComputedStyle(document.documentElement)
+                .getPropertyValue("--md-sys-color-surface-container");
+            metaThemeColor(scrolledColor);
+        } else {
+            const unscrolledColor = window
+                .getComputedStyle(document.documentElement)
+                .getPropertyValue("background-color");
+            metaThemeColor(unscrolledColor);
+        }
+    }, [isScrolled]);
 
     return (
         <>
