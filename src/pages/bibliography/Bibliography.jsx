@@ -35,6 +35,7 @@ import firestoreDB from "../../data/db/firebase/firebase";
 import { useModal } from "../../context/ModalContext.tsx";
 import { ChipSet, Fab, Icon, TopBar } from "../../components/ui/MaterialComponents";
 import { useToast } from "../../context/ToastContext.tsx";
+import { exportToHtml, exportToMd, exportToTxt } from "../../utils/exportUtils.ts";
 
 // TODO: The user cannot do any actions in collaborative bibliographies when they are offline
 export default function Bibliography() {
@@ -446,7 +447,36 @@ export default function Bibliography() {
 
     const optionsWhenCitationsSelected = [
         { headline: "Copy to clipboard", onClick: handleCopy }, // TODO: This should give options to choose the type of copied text: Text, HTML, or Markdown.
-        { headline: "Export to LaTeX", onClick: () => setLaTeXWindowVisible(true) }, // TODO: This should be "Export" only, and gives you more options to export to: LaTeX, HTML, Markdown, PDF, Word, or JSON.
+        {
+            headline: "Export",
+            subItems: [
+                {
+                    headline: "Plain text",
+                    onClick: () => exportToTxt(checkedCitations, bibliography.style, { fileName: bibliography.title }),
+                },
+                { headline: "LaTeX", onClick: () => setLaTeXWindowVisible(true) },
+                {
+                    headline: "HTML",
+                    onClick: () => exportToHtml(checkedCitations, bibliography.style, { fileName: bibliography.title }),
+                },
+                {
+                    headline: "Markdown",
+                    onClick: () => exportToMd(checkedCitations, bibliography.style, { fileName: bibliography.title }),
+                },
+                // {
+                //     headline: "JSON",
+                //     onClick: () => exportToJson(checkedCitations, bibliography.style, { fileName: bibliography.title }),
+                // },
+                // {
+                //     headline: "Word",
+                //     onClick: () => exportToDocx(checkedCitations, bibliography.style, { fileName: bibliography.title }),
+                // },
+                // {
+                //     headline: "PDF",
+                //     onClick: () => exportToPdf(checkedCitations, bibliography.style, { fileName: bibliography.title }),
+                // },
+            ],
+        },
         { headline: "Move", onClick: handleMove },
         { headline: "Duplicate", onClick: handleDuplicate },
         { headline: "Delete", onClick: handleDeleteSelectedCitations },

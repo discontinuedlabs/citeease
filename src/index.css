@@ -100,7 +100,7 @@
     }
 
     .csl-entry:has(.csl-left-margin) {
-        @apply mr-2 flex items-start;
+        @apply flex items-start gap-2;
     }
 
     .csl-entry > .csl-left-margin {

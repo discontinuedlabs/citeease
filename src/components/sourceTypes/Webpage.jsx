@@ -62,7 +62,7 @@ export default function Webpage(props) {
                     name="auto-filler-url"
                     placeholder="Insert a URL"
                     ref={autoFillUrlRef}
-                    value={url}
+                    value={url || ""}
                     onChange={handleUrlChange}
                 />
             </label>
@@ -79,7 +79,7 @@ export default function Webpage(props) {
                 <input
                     type="text"
                     name="title"
-                    value={content.title}
+                    value={content.title || ""}
                     placeholder="Page title"
                     onChange={(event) => updateContentField("title", event.target.value)}
                     required
@@ -91,7 +91,7 @@ export default function Webpage(props) {
                 <input
                     type="text"
                     name="website"
-                    value={content["container-title"]}
+                    value={content["container-title"] || ""}
                     placeholder="Website title"
                     onChange={(event) => updateContentField("container-title", event.target.value)}
                 />
@@ -108,7 +108,7 @@ export default function Webpage(props) {
                 <input
                     type="text"
                     name="url"
-                    value={content.URL}
+                    value={content.URL || ""}
                     placeholder="URL (link)"
                     onChange={(event) => updateContentField("URL", event.target.value)}
                     required

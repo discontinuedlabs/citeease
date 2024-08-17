@@ -329,9 +329,9 @@ export function CitationForm(props) {
     const [content, setContent] = useState(bibliography?.editedCitation?.content || {});
     const dispatch = useDispatch();
 
-    useEffect(() => {
-        setContent(bibliography?.editedCitation?.content || {});
-    }, [bibliography?.editedCitation?.content]);
+    // useEffect(() => {
+    //     setContent(bibliography?.editedCitation?.content);
+    // }, [bibliography?.editedCitation?.content]);
 
     useEffect(() => {
         dispatch(updateContentInEditedCitation({ bibliographyId: bibliography.id, content }));

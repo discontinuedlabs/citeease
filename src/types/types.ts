@@ -41,9 +41,21 @@ export type Citation = {
     isChecked?: boolean;
 };
 
+export type CitationStyle = {
+    name: {
+        long: string;
+        short: string;
+    };
+    code: string;
+    license: {
+        text: string;
+        url: string;
+    };
+};
+
 export type Bibliography = {
     title: string;
-    style: object;
+    style: CitationStyle;
     dateCreated: string;
     dateModified: string;
     id: string;
