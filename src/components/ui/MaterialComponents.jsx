@@ -124,7 +124,7 @@ export function List({ items = [], className, ...rest }) {
     );
 }
 
-export function Menu({ items }) {
+export function Menu({ items, children }) {
     const usageSubmenuRed = useRef();
     const usageSubmenuAnchorId = useId().replace(/:/g, "");
 
@@ -162,7 +162,10 @@ export function Menu({ items }) {
 
     return (
         <span className="relative">
-            <IconButton name="more_vert" onClick={toggleMenu} id={usageSubmenuAnchorId} />
+            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+            <div onClick={toggleMenu} id={usageSubmenuAnchorId}>
+                {children}
+            </div>
 
             <md-menu has-overflow ref={usageSubmenuRed} anchor={usageSubmenuAnchorId}>
                 {renderMenuItems(items)}

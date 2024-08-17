@@ -8,18 +8,19 @@ import { useAuth } from "../../context/AuthContext";
 import { CoBibsSearchDialog } from "./HomeTools";
 import { useEnhancedDispatch } from "../../hooks/hooks.tsx";
 import { ChipSet, EmptyPage, Fab, Icon, List, TopBar } from "../../components/ui/MaterialComponents";
-import { parseQueryString, timeAgo } from "../../utils/utils.ts";
+import { parseQueryString, timeAgo, uid } from "../../utils/utils.ts";
+import { useDialog } from "../../context/DialogContext";
 
 export default function Home() {
     const { data: bibliographies, loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies);
     const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
-    const [addBibOptionsMenuVisible, setAddBibOptionsMenuVisible] = useState(false);
     const [coBibsSearchDialogVisible, setCoBibsSearchDialogVisible] = useState(false);
     const [tryingToJoinBib, setTryingToJoinBib] = useState(undefined);
     const { currentUser } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useEnhancedDispatch();
+    const dialog = useDialog();
 
     useEffect(() => {
         if (!bibsLoaded) return;
@@ -104,33 +105,45 @@ export default function Home() {
             )}
 
             <Fab
+                onClick={() => {
+                    const id = uid();
+                    dialog.show({
+                        id,
+                        headline: "Add bibliography",
+                        content: (
+                            <List
+                                items={[
+                                    {
+                                        title: "Choose by citation style",
+                                        onClick: () => {
+                                            setCitationStyleMenuVisible(true);
+                                            dialog.close(id);
+                                        },
+                                    },
+                                    {
+                                        title: "Import",
+                                        onClick: () => {
+                                            navigate("/settings");
+                                            dialog.close(id);
+                                        },
+                                    },
+                                    {
+                                        title: "Search for collaborative bibliograpies",
+                                        onClick: () => {
+                                            openCoBibsSearchDialog();
+                                            dialog.close(id);
+                                        },
+                                    },
+                                ]}
+                            />
+                        ),
+                    });
+                }}
                 label="Add bibliography"
                 icon="add"
                 variant="tertiary"
                 className="fixed bottom-5 right-5"
-                onClick={() => setAddBibOptionsMenuVisible(true)}
             />
-
-            {addBibOptionsMenuVisible && (
-                <div role="dialog" aria-modal="true">
-                    <header>
-                        <h3>Add bibliography</h3>
-                        <button type="button" onClick={() => setAddBibOptionsMenuVisible(false)}>
-                            X
-                        </button>
-                    </header>
-
-                    <menu>
-                        <button type="button" onClick={() => setCitationStyleMenuVisible(true)}>
-                            Choose by citation style
-                        </button>
-                        <button type="button">Import</button>
-                        <button type="button" onClick={openCoBibsSearchDialog}>
-                            Search for collaborative bibliograpies
-                        </button>
-                    </menu>
-                </div>
-            )}
 
             {citationStyleMenuVisible && (
                 <CitationStylesMenu {...{ setCitationStyleMenuVisible, onStyleSelected: addNewBibWithStyle }} />

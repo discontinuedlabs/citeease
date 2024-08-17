@@ -1,19 +1,19 @@
 import { EmptyPage, List } from "../../components/ui/MaterialComponents";
 import { useAuth } from "../../context/AuthContext";
-import { useModal } from "../../context/ModalContext.tsx";
+import { useDialog } from "../../context/DialogContext";
 import { updateBibField } from "../../data/store/slices/bibsSlice";
 import { useEnhancedDispatch, useFindBib } from "../../hooks/hooks.tsx";
 
 export function CollaboratorsManager({ setIsVisible }) {
     const bibliography = useFindBib();
     const { currentUser } = useAuth();
-    const modal = useModal();
+    const dialog = useDialog();
     const dispatch = useEnhancedDispatch();
 
     function handleDeleteCollaborator(collaborator) {
-        modal.open({
-            title: "Delete collaborator",
-            message: `Are you sure you want to delete \`${collaborator.name}\` from this collaborative bibliography?`,
+        dialog.show({
+            headline: "Delete collaborator",
+            content: `Are you sure you want to delete \`${collaborator.name}\` from this collaborative bibliography?`,
             actions: [
                 [
                     "Delete",
@@ -31,7 +31,6 @@ export function CollaboratorsManager({ setIsVisible }) {
                             })
                         ),
                 ],
-                ["Cancel", () => modal.close()],
             ],
         });
     }

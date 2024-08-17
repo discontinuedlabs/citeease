@@ -1,34 +1,27 @@
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { IconsManager, TagsManager } from "./SettingTools";
-import { useModal } from "../../context/ModalContext.tsx";
 import { restoreDefaultIcons, restoreDefaultTags } from "../../data/store/slices/settingsSlice";
 import { List, TopBar } from "../../components/ui/MaterialComponents";
+import { useDialog } from "../../context/DialogContext";
 
 export default function Settings() {
-    const tagsManagerModal = useModal();
-    const iconsManagerModal = useModal();
+    const tagsManagerDialog = useDialog();
+    const iconsManagerDialog = useDialog();
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     function openTagsManager() {
-        tagsManagerModal.open({
+        tagsManagerDialog.show({
             title: "Tags Manager",
             content: <TagsManager />,
-            actions: [
-                [
-                    "Restore default tags",
-                    () => dispatch(restoreDefaultTags()),
-                    { closeOnClick: false, autoFocus: false },
-                ],
-                ["Cancel", () => tagsManagerModal.close(), { autoFocus: false }],
-            ],
+            actions: [["Restore default tags", () => dispatch(restoreDefaultTags())]],
             id: "tags-manager",
         });
     }
 
     function openIconsManager() {
-        iconsManagerModal.open({
+        iconsManagerDialog.show({
             title: "Icons Manager",
             content: <IconsManager />,
             actions: [
@@ -37,7 +30,6 @@ export default function Settings() {
                     () => dispatch(restoreDefaultIcons()),
                     { closeOnClick: false, autoFocus: false },
                 ],
-                ["Cancel", () => iconsManagerModal.close(), { autoFocus: false }],
             ],
         });
     }

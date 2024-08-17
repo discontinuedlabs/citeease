@@ -6,8 +6,8 @@ import db from "../../data/db/firebase/firebase";
 import { useAuth } from "../../context/AuthContext";
 import { mergeWithCurrentBibs } from "../../data/store/slices/bibsSlice";
 import { useToast } from "../../context/ToastContext.tsx";
-import { useModal } from "../../context/ModalContext.tsx";
 import { useEnhancedDispatch } from "../../hooks/hooks.tsx";
+import { useDialog } from "../../context/DialogContext";
 
 export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib = undefined }) {
     const { data: bibliographies, loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies);
@@ -23,23 +23,13 @@ export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib = undefined }
     const dispatch = useEnhancedDispatch();
     const toast = useToast();
     const navigate = useNavigate();
-    const modal = useModal();
+    const dialog = useDialog();
 
     function promptToLogin() {
-        modal.open({
-            showCloseIcon: false,
-            title: "Login required",
-            message: "You need to log in first to use this feature.",
-            actions: [
-                ["Log in", () => navigate("/login"), { autoFocus: true }],
-                [
-                    "Cancel",
-                    () => {
-                        setIsVisible(false);
-                        modal.close();
-                    },
-                ],
-            ],
+        dialog.show({
+            headline: "Login required",
+            content: "You need to log in first to use this feature.",
+            actions: [["Log in", () => navigate("/login")]],
         });
     }
 

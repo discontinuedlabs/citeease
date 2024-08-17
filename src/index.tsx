@@ -7,9 +7,9 @@ import { Provider as ReduxeProvider } from "react-redux";
 import App from "./App";
 import store from "./data/store/store.ts";
 import { AuthProvider } from "./context/AuthContext";
-import ModalProvider from "./context/ModalContext.tsx";
 import ToastProvider from "./context/ToastContext.tsx";
 import ErrorBoundary from "./components/ErrorBoundary";
+import DialogProvider from "./context/DialogContext";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
@@ -18,9 +18,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                 <AuthProvider>
                     <ReduxeProvider store={store}>
                         <ToastProvider>
-                            <ModalProvider>
+                            <DialogProvider>
                                 <App />
-                            </ModalProvider>
+                            </DialogProvider>
                         </ToastProvider>
                     </ReduxeProvider>
                 </AuthProvider>

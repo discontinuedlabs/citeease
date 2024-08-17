@@ -4,8 +4,8 @@ import { doc, setDoc } from "firebase/firestore";
 import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "../../context/AuthContext";
 import db from "../../data/db/firebase/firebase";
-import { useModal } from "../../context/ModalContext.tsx";
 import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
+import { useDialog } from "../../context/DialogContext";
 
 export default function Signup() {
     const [isLoading, setIsLoading] = useState(false);
@@ -19,7 +19,7 @@ export default function Signup() {
     const navigate = useNavigate();
     const bibliographies = useSelector((state) => state.bibliographies);
     const settings = useSelector((state) => state.settings);
-    const modal = useModal();
+    const dialog = useDialog();
     const dispatch = useDispatch();
 
     function moveLocalDataToFirestore(credintials) {
@@ -45,9 +45,9 @@ export default function Signup() {
                 );
 
                 if (bibliographies.length > 0) {
-                    modal.open({
-                        title: "Associate current data with this email?",
-                        message:
+                    dialog.show({
+                        headline: "Associate current data with this email?",
+                        content:
                             "Do you want to associate your current data with this email? Choosing 'No' will delete your current data permanently.",
                         actions: [
                             ["Yes", () => moveLocalDataToFirestore(credintials), { autoFocus: true }],

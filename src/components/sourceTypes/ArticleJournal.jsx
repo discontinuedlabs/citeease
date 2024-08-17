@@ -1,14 +1,14 @@
 import { useRef, useState } from "react";
 import * as citationUtils from "../../utils/citationUtils.ts";
 import AuthorsInput from "../form/AuthorsInput";
-import { useModal } from "../../context/ModalContext.tsx";
 import DateInput from "../form/DateInput";
+import { useDialog } from "../../context/DialogContext";
 
 export default function ArticleJournal(props) {
     const { content, setContent, handleAddReference, handleCancel } = props;
     const [doi, setDoi] = useState("");
     const autoFillDoiRef = useRef(null);
-    const modal = useModal();
+    const dialog = useDialog();
 
     async function retrieveContent(source) {
         try {
@@ -19,18 +19,16 @@ export default function ArticleJournal(props) {
             }));
         } catch (error) {
             if (!error.response && error.message === "Network Error") {
-                modal.open({
-                    title: "Network Error",
-                    message:
+                dialog.show({
+                    headline: "Network Error",
+                    content:
                         "Unable to retrieve the webpage due to network issues. Please check your internet connection and try again.",
-                    actions: [["Accept", () => modal.close()]],
                 });
             } else {
-                modal.open({
-                    title: "No results found",
-                    message:
+                dialog.show({
+                    headline: "No results found",
+                    content:
                         "Failed to retrieve information from DOI. Please check your internet connection and ensure the provided DOI is correct.",
-                    actions: [["Accept", () => modal.close()]],
                 });
             }
             console.error(error);
