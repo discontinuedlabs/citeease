@@ -61,7 +61,7 @@ export default function Book(props) {
                     type="text"
                     name="auto-filler-isbn"
                     placeholder="Insert an ISBN"
-                    value={ISBN}
+                    value={ISBN || ""}
                     ref={autoFillIsbnRef}
                     onChange={handleDoiChange}
                 />
@@ -79,7 +79,7 @@ export default function Book(props) {
                 <input
                     type="text"
                     name="title"
-                    value={content?.title}
+                    value={content?.title || ""}
                     placeholder="Book title"
                     onChange={(event) => updateContentField("title", event.target.value)}
                     required
@@ -91,7 +91,7 @@ export default function Book(props) {
                 <input
                     type="text"
                     name="publisher-place"
-                    value={content?.["publisher-place"]}
+                    value={content?.["publisher-place"] || ""}
                     placeholder="Publisher place"
                     onChange={(event) => updateContentField("publisher-place", event.target.value)}
                 />
@@ -102,7 +102,7 @@ export default function Book(props) {
                 <input
                     type="text"
                     name="publisher"
-                    value={content?.publisher}
+                    value={content?.publisher || ""}
                     placeholder="Publisher"
                     onChange={(event) => updateContentField("publisher", event.target.value)}
                 />
@@ -119,7 +119,7 @@ export default function Book(props) {
                 <input
                     type="number"
                     name="number-of-pages"
-                    value={content?.["number-of-pages"]}
+                    value={content?.["number-of-pages"] || ""}
                     placeholder="Number of pages"
                     onChange={(event) => updateContentField("number-of-pages", event.target.value)}
                 />
@@ -130,7 +130,7 @@ export default function Book(props) {
                 <input
                     type="number"
                     name="edition"
-                    value={content?.edition}
+                    value={content?.edition || ""}
                     placeholder="Edition number (exept 1)"
                     onChange={(event) => updateContentField("edition", event.target.value)}
                 />
@@ -141,7 +141,7 @@ export default function Book(props) {
                 <input
                     type="number"
                     name="original-published"
-                    value={content?.first_publish_year}
+                    value={content?.first_publish_year || ""}
                     placeholder="Original published (year)"
                     onChange={(event) => updateContentField("first_publish_year", event.target.value)}
                 />
@@ -152,7 +152,7 @@ export default function Book(props) {
                 <input
                     type="text"
                     name="isbn"
-                    value={content?.ISBN}
+                    value={content?.ISBN || ""}
                     placeholder="ISBN number"
                     onChange={(event) => updateContentField("ISBN", event.target.value)}
                 />
@@ -175,7 +175,7 @@ export default function Book(props) {
                         <input
                             type="number"
                             name="volume"
-                            value={content?.volume}
+                            value={content?.volume || ""}
                             placeholder="Volume number"
                             onChange={(event) => updateContentField("volume", event.target.value)}
                         />
@@ -186,7 +186,7 @@ export default function Book(props) {
                         <input
                             type="number"
                             name="number-of-volumes"
-                            value={content?.["number-of-volumes"]}
+                            value={content?.["number-of-volumes"] || ""}
                             placeholder="Number of volumes"
                             onChange={(event) => updateContentField("number-of-volumes", event.target.value)}
                         />
@@ -197,7 +197,7 @@ export default function Book(props) {
                         <input
                             type="text"
                             name="volume-title"
-                            value={content?.volumeTitle}
+                            value={content?.volumeTitle || ""}
                             placeholder="Volume title"
                             onChange={(event) => updateContentField("volumeTitle", event.target.value)}
                         />
@@ -222,7 +222,7 @@ export default function Book(props) {
                         <input
                             type="text"
                             name="url"
-                            value={content?.url || content?.doi}
+                            value={content?.url || content?.doi || ""}
                             placeholder="DOI/URL"
                             onChange={(event) => updateContentField("url", event.target.value)}
                         />

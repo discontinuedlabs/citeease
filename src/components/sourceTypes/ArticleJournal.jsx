@@ -62,7 +62,7 @@ export default function ArticleJournal(props) {
                     name="auto-filler-doi"
                     placeholder="Insert a DOI"
                     ref={autoFillDoiRef}
-                    value={doi}
+                    value={doi || ""}
                     onChange={handleDoiChange}
                 />
             </label>
@@ -79,7 +79,7 @@ export default function ArticleJournal(props) {
                 <input
                     type="text"
                     name="title"
-                    value={content.title}
+                    value={content.title || ""}
                     placeholder="Article title"
                     onChange={(event) => updateContentField("title", event.target.value)}
                     required
@@ -91,7 +91,7 @@ export default function ArticleJournal(props) {
                 <input
                     type="text"
                     name="journal"
-                    value={content["container-title"]}
+                    value={content["container-title"] || ""}
                     placeholder="Journal title"
                     onChange={(event) => updateContentField("container-title", event.target.value)}
                 />
@@ -102,7 +102,7 @@ export default function ArticleJournal(props) {
                 <input
                     type="number"
                     name="volume"
-                    value={content.volume}
+                    value={content.volume || ""}
                     placeholder="Enter a number"
                     onChange={(event) => updateContentField("volume", event.target.value)}
                 />
@@ -113,7 +113,7 @@ export default function ArticleJournal(props) {
                 <input
                     type="number"
                     name="issue"
-                    value={content.issue}
+                    value={content.issue || ""}
                     placeholder="Enter a number"
                     onChange={(event) => updateContentField("issue", event.target.value)}
                 />
@@ -136,7 +136,7 @@ export default function ArticleJournal(props) {
                 <input
                     type="text"
                     name="pages"
-                    value={content.page}
+                    value={content.page || ""}
                     placeholder="Page range"
                     onChange={(event) => updateContentField("page", event.target.value)}
                 />
@@ -147,7 +147,7 @@ export default function ArticleJournal(props) {
                 <input
                     type="text"
                     name="issn"
-                    value={content.ISSN}
+                    value={content.ISSN || ""}
                     placeholder="ISSN number"
                     onChange={(event) => updateContentField("ISSN", event.target.value)}
                 />
@@ -170,7 +170,7 @@ export default function ArticleJournal(props) {
                         <input
                             type="text"
                             name="doi"
-                            value={content.DOI}
+                            value={content.DOI || ""}
                             placeholder="DOI"
                             onChange={(event) => updateContentField("DOI", event.target.value)}
                         />

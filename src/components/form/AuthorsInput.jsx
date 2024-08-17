@@ -42,7 +42,7 @@ export default function AuthorsInput(props) {
                                 type="text"
                                 name="given-name"
                                 placeholder="Author's first name"
-                                value={authorEntry.given}
+                                value={authorEntry.given || ""}
                                 onChange={(event) => {
                                     updateAuthors(authorEntry.id, "given", event.target.value);
                                 }}
@@ -52,7 +52,7 @@ export default function AuthorsInput(props) {
                                 type="text"
                                 name="family-name"
                                 placeholder="Author's last name"
-                                value={authorEntry.family}
+                                value={authorEntry.family || ""}
                                 onChange={(event) => {
                                     updateAuthors(authorEntry.id, "family", event.target.value);
                                 }}
