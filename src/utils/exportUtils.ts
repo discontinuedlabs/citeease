@@ -75,22 +75,26 @@ type ExportOptions = {
  * @see ExportOptions
  */
 export async function exportToTxt(citations: Citation[], style: CitationStyle, options: ExportOptions): Promise<void> {
-    const formattedCitations: string = await citationEngine.formatBibliography(citations, style, "text");
+    try {
+        const formattedCitations: string = await citationEngine.formatBibliography(citations, style, "text");
 
-    // Create a Blob from the TXT content
-    const blob = new Blob([formattedCitations], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
+        // Create a Blob from the TXT content
+        const blob = new Blob([formattedCitations], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
 
-    // Download the file
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${options?.fileName || "references"}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+        // Download the file
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${options?.fileName || "references"}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
 
-    // Release the Blob URL to avoid memory leaks
-    setTimeout(() => URL.revokeObjectURL(url), 100);
+        // Release the Blob URL to avoid memory leaks
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+    } catch (error) {
+        console.error("Failed to export citations: ", error);
+    }
 }
 
 /**
@@ -162,35 +166,39 @@ export async function exportToTxt(citations: Citation[], style: CitationStyle, o
  * @see ExportOptions
  */
 export async function exportToHtml(citations: Citation[], style: CitationStyle, options: ExportOptions): Promise<void> {
-    const formattedCitationsArray: string[] = await citationEngine.formatBibliography(citations, style);
+    try {
+        const formattedCitationsArray: string[] = await citationEngine.formatBibliography(citations, style);
 
-    const cleanedCitations = formattedCitationsArray.map((citation) => citation.replace(/,\s*$/, "").trim());
-    const fullHtmlContent = cleanedCitations.join("");
+        const cleanedCitations = formattedCitationsArray.map((citation) => citation.replace(/,\s*$/, "").trim());
+        const fullHtmlContent = cleanedCitations.join("");
 
-    const css = `<style>
-                    .csl-entry {
-                        display: flex;
-                        align-items: flex-start;
-                        gap: 0.5rem;
-                        margin-right: 0.5rem;
-                    }
-                </style>`;
-    const finalHtmlContent = `${css}${fullHtmlContent}`;
+        const css = `<style>
+                        .csl-entry {
+                            display: flex;
+                            align-items: flex-start;
+                            gap: 0.5rem;
+                            margin-right: 0.5rem;
+                        }
+                    </style>`;
+        const finalHtmlContent = `${css}${fullHtmlContent}`;
 
-    // Create a Blob from the HTML content
-    const blob = new Blob([finalHtmlContent], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
+        // Create a Blob from the HTML content
+        const blob = new Blob([finalHtmlContent], { type: "text/html" });
+        const url = URL.createObjectURL(blob);
 
-    // Download the file
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${options?.fileName || "references"}.html`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+        // Download the file
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${options?.fileName || "references"}.html`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
 
-    // Release the Blob URL to avoid memory leaks
-    setTimeout(() => URL.revokeObjectURL(url), 100);
+        // Release the Blob URL to avoid memory leaks
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+    } catch (error) {
+        console.error("Failed to export citations: ", error);
+    }
 }
 
 /**
@@ -263,43 +271,119 @@ export async function exportToHtml(citations: Citation[], style: CitationStyle, 
  * @see ExportOptions
  */
 export async function exportToMd(citations: Citation[], style: CitationStyle, options: ExportOptions): Promise<void> {
-    const formattedCitationsArray: string[] = await citationEngine.formatBibliography(citations, style);
-    const cleanedCitations = formattedCitationsArray.map((citation) => citation.replace(/,\s*$/, "").trim());
+    try {
+        const formattedCitationsArray: string[] = await citationEngine.formatBibliography(citations, style);
+        const cleanedCitations = formattedCitationsArray.map((citation) => citation.replace(/,\s*$/, "").trim());
 
-    // Parse the HTML content into a DOM tree to remove divs with the classes ".csl-left-margin" and ".csl-right-inline"
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(cleanedCitations.join(""), "text/html");
-    doc.body.childNodes.forEach((node) => {
-        if (node.nodeType === Node.ELEMENT_NODE && "classList" in node) {
-            const entryElement = node as HTMLElement;
+        // Parse the HTML content into a DOM tree to remove divs with the classes ".csl-left-margin" and ".csl-right-inline"
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(cleanedCitations.join(""), "text/html");
+        doc.body.childNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE && "classList" in node) {
+                const entryElement = node as HTMLElement;
 
-            const leftMarginDiv = entryElement.querySelector(".csl-left-margin");
-            const rightInlineDiv = entryElement.querySelector(".csl-right-inline");
+                const leftMarginDiv = entryElement.querySelector(".csl-left-margin");
+                const rightInlineDiv = entryElement.querySelector(".csl-right-inline");
 
-            if (leftMarginDiv && rightInlineDiv) {
-                const combinedText = `${leftMarginDiv.textContent || ""} ${rightInlineDiv.textContent || ""}`;
-                leftMarginDiv.parentNode!.replaceChild(document.createTextNode(combinedText), leftMarginDiv);
-                rightInlineDiv.parentNode!.replaceChild(document.createTextNode(combinedText), rightInlineDiv);
+                if (leftMarginDiv && rightInlineDiv) {
+                    const combinedText = `${leftMarginDiv.textContent || ""} ${rightInlineDiv.textContent || ""}`;
+                    leftMarginDiv.parentNode!.replaceChild(document.createTextNode(combinedText), leftMarginDiv);
+                    rightInlineDiv.parentNode!.replaceChild(document.createTextNode(combinedText), rightInlineDiv);
+                }
             }
-        }
-    });
+        });
 
-    // Serialize the modified DOM back into a string
-    const serializer = new XMLSerializer();
-    const modifiedHtmlContent = serializer.serializeToString(doc.documentElement);
+        // Serialize the modified DOM back into a string
+        const serializer = new XMLSerializer();
+        const modifiedHtmlContent = serializer.serializeToString(doc.documentElement);
 
-    // Convert HTML to Markdown using "turndown" library
-    const turndownService = new TurndownService();
-    const markdownContent = turndownService.turndown(modifiedHtmlContent);
+        // Convert HTML to Markdown using "turndown" library
+        const turndownService = new TurndownService();
+        const markdownContent = turndownService.turndown(modifiedHtmlContent);
 
-    // Create a Blob from the Markdown content
-    const blob = new Blob([markdownContent], { type: "text/markdown" });
+        // Create a Blob from the Markdown content
+        const blob = new Blob([markdownContent], { type: "text/markdown" });
+        const url = URL.createObjectURL(blob);
+
+        // Download the file
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${options.fileName || "references"}.md`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Release the Blob URL to avoid memory leaks
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+    } catch (error) {
+        console.error("Failed to export citations: ", error);
+    }
+}
+
+/**
+ * Exports a list of citations to a JSON file, simplifying the citation structure.
+ *
+ * @param {Citation[]} citations - An array of citation objects to be formatted and exported.
+ * Each citation object should conform to the {@link Citation} interface.
+ * @returns {void} Does not return anything; instead, triggers a file download of the transformed citations in JSON format.
+ *
+ * @example
+ * // Example usage
+ * const citations = [
+ *     {
+ *         "id": "9pvrqrczWNcet5vZhoRs",
+ *         "content": {
+ *             "id": "9pvrqrczWNcet5vZhoRs",
+ *             "type": "webpage",
+ *             "author": [
+ *                 {
+ *                     "given": "Vshssv",
+ *                     "family": "Svsjsbs",
+ *                     "id": "G71YzpdF01mj99wjzDk0"
+ *                 }
+ *             ],
+ *             "title": "Svshbsys",
+ *             "container-title": "Svshsbs",
+ *             "issued": {
+ *                 "date-parts": [
+ *                     [
+ *                         2024,
+ *                         7,
+ *                         29
+ *                     ]
+ *                 ],
+ *                 "raw": "2024-7-29"
+ *             },
+ *             "URL": "Vshsbs",
+ *             "accessed": {
+ *                 "date-parts": [
+ *                     [
+ *                         2024,
+ *                         7,
+ *                         29
+ *                     ]
+ *                 ],
+ *                 "raw": "2024-7-29"
+ *             }
+ *         },
+ *         "isChecked": true
+ *     }
+ * ];
+ * exportToJson(citations);
+ *
+ * @see Citation
+ */
+export function exportToJson(citations: Citation[], options: ExportOptions): void {
+    const cleanedCitations = citations.map((citation) => citation.content);
+
+    const jsonContent = JSON.stringify(cleanedCitations, null, 2);
+    const blob = new Blob([jsonContent], { type: "application/json" });
     const url = URL.createObjectURL(blob);
 
     // Download the file
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${options.fileName || "references"}.md`;
+    link.download = `${options.fileName || "references"}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

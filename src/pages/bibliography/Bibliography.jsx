@@ -35,7 +35,7 @@ import firestoreDB from "../../data/db/firebase/firebase";
 import { useModal } from "../../context/ModalContext.tsx";
 import { ChipSet, Fab, Icon, TopBar } from "../../components/ui/MaterialComponents";
 import { useToast } from "../../context/ToastContext.tsx";
-import { exportToHtml, exportToMd, exportToTxt } from "../../utils/exportUtils.ts";
+import { exportToHtml, exportToJson, exportToMd, exportToTxt } from "../../utils/exportUtils.ts";
 
 // TODO: The user cannot do any actions in collaborative bibliographies when they are offline
 export default function Bibliography() {
@@ -463,18 +463,10 @@ export default function Bibliography() {
                     headline: "Markdown",
                     onClick: () => exportToMd(checkedCitations, bibliography.style, { fileName: bibliography.title }),
                 },
-                // {
-                //     headline: "JSON",
-                //     onClick: () => exportToJson(checkedCitations, bibliography.style, { fileName: bibliography.title }),
-                // },
-                // {
-                //     headline: "Word",
-                //     onClick: () => exportToDocx(checkedCitations, bibliography.style, { fileName: bibliography.title }),
-                // },
-                // {
-                //     headline: "PDF",
-                //     onClick: () => exportToPdf(checkedCitations, bibliography.style, { fileName: bibliography.title }),
-                // },
+                {
+                    headline: "JSON",
+                    onClick: () => exportToJson(checkedCitations, { fileName: bibliography.title }),
+                },
             ],
         },
         { headline: "Move", onClick: handleMove },
