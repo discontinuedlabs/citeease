@@ -19,7 +19,7 @@ CiteEase is a powerful and user-friendly open-source citation management app des
 
 ## Key Features
 
--   **Unlimited Usage:** No sign-in required for most functionalities, unless you want to sync data across devices, restor passwords, and collaborate.
+-   **Unlimited Usage:** No sign-in required for most functionalities, unless you want to sync data across devices, restore passwords, and collaborate.
 -   **Offline Functionality:** Work on your bibliographies seamlessly, even without an internet connection.
 -   **Drag-and-Drop Everywhere**: Effortlessly interact with your citations using intuitive drag-and-drop actions. Add references to your Word doc, delete unwanted entries, import citations or bibliographies, and export your data with a simple drag-and-drop.
 -   **Open-Source Availability:** CiteEase is open-source, with code freely available for anyone to view, modify, and share. This allows for transparency and customization to your needs.
