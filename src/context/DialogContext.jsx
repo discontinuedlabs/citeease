@@ -76,34 +76,12 @@ function Dialog({ id, headline, content, actions, close, ref }) {
 export default function DialogProvider({ children }) {
     const [dialogs, setDialogs] = useState([]);
 
-    const focusableElements = [
-        "a[href]",
-        "button",
-        "[href]",
-        "input:not([disabled])",
-        "select:not([disabled])",
-        "textarea:not([disabled])",
-        "details",
-        // eslint-disable-next-line quotes
-        '[tabindex]:not([tabindex="-1"])',
-    ];
-
     function showDialog(newDialog) {
-        const focusableElementsArray = Array.from(document.querySelectorAll(focusableElements.join(","))).map(
-            (element) => element
-        );
-        focusableElementsArray.forEach((element) => element.setAttribute("tabindex", "-1"));
-
         setDialogs((prevDialogs) => [...prevDialogs, { id: uid(), ...newDialog }]);
     }
 
     function closeDialog(id) {
         setDialogs((prevDialogs) => prevDialogs.filter((dialog) => dialog.id !== id));
-
-        const focusableElementsArray = Array.from(document.querySelectorAll(focusableElements.join(","))).map(
-            (element) => element
-        );
-        focusableElementsArray.forEach((element) => element.removeAttribute("tabindex"));
     }
 
     const contextValue = useMemo(

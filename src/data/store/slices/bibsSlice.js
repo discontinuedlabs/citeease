@@ -129,6 +129,25 @@ const bibsSlice = createSlice({
             save(newState, action.payload.currentUser);
             return newState;
         },
+        createBibFromJson: (state, action) => {
+            const newBib = {
+                title: "Untitled Bibliography",
+                style: action.payload.style,
+                dateCreated: new Date().toString(),
+                dateModified: new Date().toString(),
+                id: uid(10),
+                icon: "book_2",
+                citations: action.payload.json.map((json) => {
+                    const id = uid();
+                    return { id, content: { id, ...json }, isChecked: false };
+                }),
+                tags: [],
+            };
+            const newBibs = [...state.data, newBib];
+            const newState = { ...state, data: newBibs };
+            save(newState, action.payload.currentUser);
+            return newState;
+        },
         deleteBib: (state, action) => {
             const newBibs = state.data?.filter((bib) => bib.id !== action.payload.bibliographyId);
             const newState = { ...state, data: newBibs };
@@ -431,6 +450,7 @@ export const {
     reEnableCollabInBib,
     disableCollabInBib,
     addNewBib,
+    createBibFromJson,
     deleteBib,
     updateBibField,
     addNewCitation,

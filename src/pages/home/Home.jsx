@@ -3,13 +3,14 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { CitationStylesMenu } from "../bibliography/BibliographyTools";
 import * as citationEngine from "../../utils/citationEngine";
-import { addNewBib } from "../../data/store/slices/bibsSlice";
+import { addNewBib, createBibFromJson } from "../../data/store/slices/bibsSlice";
 import { useAuth } from "../../context/AuthContext";
 import { CoBibsSearchDialog } from "./HomeTools";
 import { useEnhancedDispatch } from "../../hooks/hooks.tsx";
 import { ChipSet, EmptyPage, Fab, Icon, List, TopBar } from "../../components/ui/MaterialComponents";
 import { parseQueryString, timeAgo, uid } from "../../utils/utils.ts";
 import { useDialog } from "../../context/DialogContext";
+import { prioritizeAvailableStyles } from "../../utils/citationUtils.ts";
 
 export default function Home() {
     const { data: bibliographies, loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies);
@@ -20,7 +21,8 @@ export default function Home() {
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useEnhancedDispatch();
-    const dialog = useDialog();
+    const AddBibDialog = useDialog();
+    const importDialog = useDialog();
 
     useEffect(() => {
         if (!bibsLoaded) return;
@@ -55,6 +57,55 @@ export default function Home() {
         const dateB = new Date(b.dateModified);
         return dateB - dateA;
     });
+
+    // FIXME: Fix the json function
+    function handleImport() {
+        const id = uid();
+
+        function handleFileChange(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (rEvent) => {
+                try {
+                    const jsonContent = JSON.parse(rEvent.target.result);
+                    const style = prioritizeAvailableStyles();
+                    dispatch(createBibFromJson({ json: jsonContent, style }));
+                    importDialog.close(id);
+                } catch (error) {
+                    console.error("Error parsing JSON", error);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        importDialog.show({
+            id,
+            headline: "Import from",
+            content: (
+                <>
+                    <input
+                        className="hidden"
+                        type="file"
+                        id="jsonFileInput"
+                        style={{ display: "none" }}
+                        onChange={handleFileChange}
+                    />
+                    <List
+                        items={[
+                            {
+                                title: "JSON file",
+                                onClick: () => {
+                                    document.getElementById("jsonFileInput").click();
+                                },
+                            },
+                        ]}
+                    />
+                </>
+            ),
+        });
+    }
 
     return (
         <div className="mx-auto min-h-screen max-w-[50rem]">
@@ -107,7 +158,7 @@ export default function Home() {
             <Fab
                 onClick={() => {
                     const id = uid();
-                    dialog.show({
+                    AddBibDialog.show({
                         id,
                         headline: "Add bibliography",
                         content: (
@@ -117,21 +168,21 @@ export default function Home() {
                                         title: "Choose by citation style",
                                         onClick: () => {
                                             setCitationStyleMenuVisible(true);
-                                            dialog.close(id);
+                                            AddBibDialog.close(id);
                                         },
                                     },
                                     {
                                         title: "Import",
                                         onClick: () => {
-                                            navigate("/settings");
-                                            dialog.close(id);
+                                            handleImport();
+                                            AddBibDialog.close(id);
                                         },
                                     },
                                     {
                                         title: "Search for collaborative bibliograpies",
                                         onClick: () => {
                                             openCoBibsSearchDialog();
-                                            dialog.close(id);
+                                            AddBibDialog.close(id);
                                         },
                                     },
                                 ]}

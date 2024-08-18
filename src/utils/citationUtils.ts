@@ -1,4 +1,4 @@
-import { DateObject, Author, Content } from "../types/types.ts";
+import { DateObject, Author, Content, CitationStyle } from "../types/types.ts";
 import { uid } from "./utils.ts";
 
 const CORS_PROXY: string = "https://corsproxy.io/?";
@@ -302,4 +302,20 @@ export async function retrieveContentFromPMID(pmid: string): Promise<Content | n
         console.error(`Failed to retrieve content from ${pmid}: ${error}`);
         return null;
     }
+}
+
+// TODO: ...
+export function prioritizeAvailableStyles(): CitationStyle {
+    const style = {
+        name: {
+            long: "American Psychological Association 7th edition",
+            short: "APA",
+        },
+        code: "apa",
+        license: {
+            text: "This work is licensed under a Creative Commons Attribution-ShareAlike 3.0 License",
+            url: "http://creativecommons.org/licenses/by-sa/3.0/",
+        },
+    };
+    return style;
 }
