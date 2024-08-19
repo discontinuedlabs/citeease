@@ -174,8 +174,8 @@ export default function Home() {
                                     {
                                         title: "Import",
                                         onClick: () => {
-                                            handleImport();
                                             AddBibDialog.close(id);
+                                            handleImport();
                                         },
                                     },
                                     {

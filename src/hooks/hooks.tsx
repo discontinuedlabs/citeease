@@ -158,23 +158,43 @@ export default function useOnlineStatus(): boolean {
 }
 
 /**
- * Delays the execution of a callback function by a specified time.
+ * Returns a function to set a timeout with a specified callback and delay.
  *
- * @param {() => void} callback - The callback function to execute after the timeout.
- * @param {number} ms - The delay time in milliseconds before executing the callback. Defaults to 3000ms.
- * @returns {void} Does not return anything.
+ * The returned function allows you to execute a callback function after a specified delay.
+ *
+ * @returns {function(callback: () => void, ms?: number): function}
+ *   A function that takes a callback to execute after a delay and an optional delay time in milliseconds.
+ *   The returned function can be called to set the timeout.
+ *
+ * @example
+ * const timeout = useTimeout();
+ *
+ * function handleClick() {
+ *     timeout(() => {
+ *         console.log('This runs after 1 second');
+ *     }, 1000);
+ * }
+ *
+ * return (
+ *     <button onClick={handleClick}>Click me</button>
+ * );
  */
-export function useTimeout(callback: () => void, ms: number = 3000) {
-    const savedCallback = useRef(callback);
+export function useTimeout() {
+    const savedCallback = useRef<() => void>();
 
-    useEffect(() => {
+    const setTimeoutCallback = (callback: () => void, ms: number = 3000) => {
         savedCallback.current = callback;
-    }, [callback]);
 
-    useEffect(() => {
-        const functionId = setTimeout(() => savedCallback.current(), ms);
+        const functionId = setTimeout(() => {
+            if (savedCallback.current) {
+                savedCallback.current();
+            }
+        }, ms);
+
         return () => clearTimeout(functionId);
-    }, []);
+    };
+
+    return setTimeoutCallback;
 }
 
 // eslint-disable-next-line no-unused-vars

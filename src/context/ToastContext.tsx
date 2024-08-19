@@ -32,8 +32,9 @@ export function useToast(): ToastContextType {
 
 function Toast({ id, message, icon, color = "#ffd60a", close }: ToastProps) {
     const [lightColor, mainColor, darkColor] = getGradient(color);
+    const setTimeout = useTimeout();
 
-    useTimeout(() => close(id), 10000);
+    setTimeout(() => close(id), 10000);
 
     return (
         <div
