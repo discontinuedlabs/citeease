@@ -2,6 +2,10 @@ import TurndownService from "turndown";
 import { Citation, CitationStyle } from "../types/types.ts";
 import * as citationEngine from "./citationEngine";
 
+function getDefaultName(fileName) {
+    return fileName.trim() || "References";
+}
+
 type ExportOptions = {
     fileName?: string;
 };
@@ -85,7 +89,7 @@ export async function exportToTxt(citations: Citation[], style: CitationStyle, o
         // Download the file
         const link = document.createElement("a");
         link.href = url;
-        link.download = `${options?.fileName || "references"}.txt`;
+        link.download = `${getDefaultName(options.fileName)}.txt`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -189,7 +193,7 @@ export async function exportToHtml(citations: Citation[], style: CitationStyle, 
         // Download the file
         const link = document.createElement("a");
         link.href = url;
-        link.download = `${options?.fileName || "references"}.html`;
+        link.download = `${getDefaultName(options.fileName)}.html`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -308,7 +312,7 @@ export async function exportToMd(citations: Citation[], style: CitationStyle, op
         // Download the file
         const link = document.createElement("a");
         link.href = url;
-        link.download = `${options.fileName || "references"}.md`;
+        link.download = `${getDefaultName(options.fileName)}.md`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -383,7 +387,7 @@ export function exportToJson(citations: Citation[], options: ExportOptions): voi
     // Download the file
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${options.fileName || "references"}.json`;
+    link.download = `${getDefaultName(options.fileName)}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

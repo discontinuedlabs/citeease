@@ -131,15 +131,16 @@ const bibsSlice = createSlice({
         },
         createBibFromJson: (state, action) => {
             const newBib = {
-                title: "Untitled Bibliography",
+                title: action.payload?.fileName || "Untitled Bibliography",
                 style: action.payload.style,
                 dateCreated: new Date().toString(),
                 dateModified: new Date().toString(),
                 id: uid(10),
                 icon: "book_2",
                 citations: action.payload.json.map((json) => {
-                    const id = uid();
-                    return { id, content: { id, ...json }, isChecked: false };
+                    const newId = uid();
+                    const newCitation = { id: newId, content: { ...json, id: newId }, isChecked: false }; // id should be replaced with a new one because it might be exported from the same user
+                    return newCitation;
                 }),
                 tags: [],
             };

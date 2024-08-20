@@ -67,17 +67,18 @@ export default function Home() {
             if (!file) return;
 
             const reader = new FileReader();
+            reader.readAsText(file);
             reader.onload = (rEvent) => {
                 try {
+                    const fileName = file.name?.replace(".json", "");
                     const jsonContent = JSON.parse(rEvent.target.result);
                     const style = prioritizeAvailableStyles();
-                    dispatch(createBibFromJson({ json: jsonContent, style }));
+                    dispatch(createBibFromJson({ json: jsonContent, style, fileName }));
                     importDialog.close(id);
                 } catch (error) {
                     console.error("Error parsing JSON", error);
                 }
             };
-            reader.readAsText(file);
         }
 
         importDialog.show({

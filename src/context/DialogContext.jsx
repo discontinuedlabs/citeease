@@ -52,6 +52,7 @@ function Dialog({ id, headline, content, actions, close }) {
                     actions.map((action) => {
                         return (
                             <TextButton
+                                key={uid()}
                                 onClick={() => {
                                     action[1]();
                                     handleClose();
