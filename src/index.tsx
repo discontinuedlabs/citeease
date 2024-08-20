@@ -9,7 +9,7 @@ import store from "./data/store/store.ts";
 import { AuthProvider } from "./context/AuthContext";
 import ToastProvider from "./context/ToastContext.tsx";
 import ErrorBoundary from "./components/ErrorBoundary";
-import DialogProvider from "./context/DialogContext";
+import DialogProvider from "./context/DialogContext.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>

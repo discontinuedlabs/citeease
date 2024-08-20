@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { IconsManager, TagsManager } from "./SettingTools";
 import { restoreDefaultIcons, restoreDefaultTags } from "../../data/store/slices/settingsSlice";
 import { List, TopBar } from "../../components/ui/MaterialComponents";
-import { useDialog } from "../../context/DialogContext";
+import { useDialog } from "../../context/DialogContext.tsx";
 
 export default function Settings() {
     const tagsManagerDialog = useDialog();
@@ -15,7 +15,10 @@ export default function Settings() {
         tagsManagerDialog.show({
             title: "Tags Manager",
             content: <TagsManager />,
-            actions: [["Restore default tags", () => dispatch(restoreDefaultTags())]],
+            actions: [
+                ["Restore default tags", () => dispatch(restoreDefaultTags())],
+                ["Cancel", () => tagsManagerDialog.close()],
+            ],
             id: "tags-manager",
         });
     }
@@ -30,6 +33,7 @@ export default function Settings() {
                     () => dispatch(restoreDefaultIcons()),
                     { closeOnClick: false, autoFocus: false },
                 ],
+                ["Cancel", () => iconsManagerDialog.close()],
             ],
         });
     }

@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "../../context/AuthContext";
 import db from "../../data/db/firebase/firebase";
 import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
-import { useDialog } from "../../context/DialogContext";
+import { useDialog } from "../../context/DialogContext.tsx";
 
 export default function Signup() {
     const [isLoading, setIsLoading] = useState(false);

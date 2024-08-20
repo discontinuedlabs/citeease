@@ -44,7 +44,7 @@ function Dialog({ id, headline, content, actions, close }) {
                     {headline}
                 </div>
             )}
-            <form slot="content" id="form-id" method="dialog">
+            <form slot="content" id={`form-${id}`} method="dialog">
                 {content}
             </form>
             <div className="p-5" slot="actions">
@@ -57,7 +57,7 @@ function Dialog({ id, headline, content, actions, close }) {
                                     action[1]();
                                     handleClose();
                                 }}
-                                form="form-id"
+                                form={`form-${id}`}
                             >
                                 {action[0]}
                             </TextButton>
@@ -72,6 +72,8 @@ function Dialog({ id, headline, content, actions, close }) {
 export default function DialogProvider({ children }) {
     const [dialogs, setDialogs] = useState([]);
     const setTimeout = useTimeout();
+
+    console.log(dialogs);
 
     function showDialog(newDialog) {
         setDialogs((prevDialogs) => [...prevDialogs, { id: uid(), ...newDialog }]);

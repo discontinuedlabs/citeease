@@ -7,7 +7,7 @@ import { useAuth } from "../../context/AuthContext";
 import { mergeWithCurrentBibs } from "../../data/store/slices/bibsSlice";
 import { useToast } from "../../context/ToastContext.tsx";
 import { useEnhancedDispatch } from "../../hooks/hooks.tsx";
-import { useDialog } from "../../context/DialogContext";
+import { useDialog } from "../../context/DialogContext.tsx";
 
 export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib = undefined }) {
     const { data: bibliographies, loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies);
@@ -29,7 +29,10 @@ export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib = undefined }
         dialog.show({
             headline: "Login required",
             content: "You need to log in first to use this feature.",
-            actions: [["Log in", () => navigate("/login")]],
+            actions: [
+                ["Cancel", () => dialog.close()],
+                ["Log in", () => navigate("/login")],
+            ],
         });
     }
 

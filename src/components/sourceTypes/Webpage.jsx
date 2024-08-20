@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import * as citationUtils from "../../utils/citationUtils.ts";
 import DateInput from "../form/DateInput";
 import AuthorsInput from "../form/AuthorsInput";
-import { useDialog } from "../../context/DialogContext";
+import { useDialog } from "../../context/DialogContext.tsx";
 
 export default function Webpage(props) {
     const { content, setContent, handleAddReference, handleCancel } = props;
@@ -23,12 +23,14 @@ export default function Webpage(props) {
                     headline: "Network Error",
                     content:
                         "Unable to retrieve the webpage due to network issues. Please check your internet connection and try again.",
+                    actions: [["Ok", () => dialog.close()]],
                 });
             } else {
                 dialog.open({
                     headline: "No results found",
                     content:
                         "Failed to retrieve information from DOI. Please check your internet connection and ensure the provided DOI is correct.",
+                    actions: [["Ok", () => dialog.close()]],
                 });
             }
             console.error(error);

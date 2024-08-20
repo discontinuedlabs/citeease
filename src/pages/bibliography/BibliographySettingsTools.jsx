@@ -1,6 +1,6 @@
 import { EmptyPage, List } from "../../components/ui/MaterialComponents";
 import { useAuth } from "../../context/AuthContext";
-import { useDialog } from "../../context/DialogContext";
+import { useDialog } from "../../context/DialogContext.tsx";
 import { updateBibField } from "../../data/store/slices/bibsSlice";
 import { useEnhancedDispatch, useFindBib } from "../../hooks/hooks.tsx";
 
@@ -15,6 +15,7 @@ export function CollaboratorsManager({ setIsVisible }) {
             headline: "Delete collaborator",
             content: `Are you sure you want to delete \`${collaborator.name}\` from this collaborative bibliography?`,
             actions: [
+                ["Cancel", () => dialog.close()],
                 [
                     "Delete",
                     () =>
