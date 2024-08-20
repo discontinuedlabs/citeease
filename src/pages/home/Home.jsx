@@ -88,6 +88,7 @@ export default function Home() {
                     <input
                         className="hidden"
                         type="file"
+                        accept=".json"
                         id="jsonFileInput"
                         style={{ display: "none" }}
                         onChange={handleFileChange}
@@ -174,8 +175,8 @@ export default function Home() {
                                     {
                                         title: "Import",
                                         onClick: () => {
-                                            AddBibDialog.close(id);
                                             handleImport();
+                                            AddBibDialog.close(id);
                                         },
                                     },
                                     {

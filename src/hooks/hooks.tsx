@@ -197,6 +197,22 @@ export function useTimeout() {
     return setTimeoutCallback;
 }
 
+// export function useTheme() {
+//     const [theme, setTheme] = useState("light");
+
+//     useEffect(() => {
+//         const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+//         function handleChange(event) {
+//             setTheme(event.matches ? "dark" : "light");
+//         }
+
+//         mediaQuery.addEventListener("change", handleChange);
+//         return () => mediaQuery.removeEventListener("change", handleChange);
+//     }, []);
+
+//     return theme;
+// }
+
 // eslint-disable-next-line no-unused-vars
 type ShortcutAction = (event: KeyboardEvent) => void;
 type OptionalConfig = Pick<KeyboardEvent, "altKey" | "ctrlKey" | "shiftKey">;

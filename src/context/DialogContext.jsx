@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { TextButton } from "../components/ui/MaterialComponents";
 import { uid } from "../utils/utils.ts";
+import { useTimeout } from "../hooks/hooks.tsx";
 
 const DialogContext = createContext(undefined);
 
@@ -14,26 +15,8 @@ export function useDialog() {
     return context;
 }
 
-function Dialog({ id, headline, content, actions, close, ref }) {
+function Dialog({ id, headline, content, actions, close }) {
     const dialogRef = useRef(null);
-
-    useEffect(() => {
-        const handleKeyDown = (event) => {
-            if (event.key === "Escape") {
-                close(id);
-            }
-        };
-        document.addEventListener("keydown", handleKeyDown);
-        return () => {
-            document.removeEventListener("keydown", handleKeyDown);
-        };
-    }, [close, id]);
-
-    useEffect(() => {
-        if (ref) {
-            ref.current = dialogRef.current;
-        }
-    }, [ref]);
 
     function handleClose() {
         if (dialogRef.current) {
@@ -42,8 +25,20 @@ function Dialog({ id, headline, content, actions, close, ref }) {
         }
     }
 
+    useEffect(() => {
+        function handleKeyDown(event) {
+            if (event.key === "Escape") {
+                handleClose();
+            }
+        }
+        document.addEventListener("keydown", handleKeyDown);
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [close, id]);
+
     return (
-        <md-dialog open ref={dialogRef}>
+        <md-dialog open id={id} ref={dialogRef}>
             {headline && (
                 <div className="p-5" slot="headline">
                     {headline}
@@ -75,19 +70,24 @@ function Dialog({ id, headline, content, actions, close, ref }) {
 
 export default function DialogProvider({ children }) {
     const [dialogs, setDialogs] = useState([]);
+    const setTimeout = useTimeout();
 
     function showDialog(newDialog) {
         setDialogs((prevDialogs) => [...prevDialogs, { id: uid(), ...newDialog }]);
     }
 
     function closeDialog(id) {
-        setDialogs((prevDialogs) => prevDialogs.filter((dialog) => dialog.id !== id));
+        const targetDialog = document.getElementById(id);
+        targetDialog.close();
+        setTimeout(() => {
+            setDialogs((prevDialogs) => prevDialogs.filter((dialog) => dialog.id !== id));
+        }, 1000);
     }
 
     const contextValue = useMemo(
         () => ({
             show: showDialog,
-            close: closeDialog,
+            close: (id) => closeDialog(id),
         }),
         []
     );
@@ -103,7 +103,7 @@ export default function DialogProvider({ children }) {
                         headline={dialog.headline}
                         content={dialog.content}
                         actions={dialog.actions}
-                        close={() => closeDialog(dialog.id)}
+                        close={closeDialog}
                     />
                 ))}
         </DialogContext.Provider>
