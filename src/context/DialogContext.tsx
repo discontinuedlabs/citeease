@@ -64,16 +64,20 @@ export function useDialog(): DialogContextType {
 }
 
 function Dialog({ id, headline, content, actions, close }: DialogProps) {
-    function handleClose() {
-        const dialog = document.getElementById(id) as HTMLDialogElement;
-        dialog?.close();
-        close(id);
+    const setTimeout = useTimeout();
+
+    function handleClose(dId) {
+        const dialog = document.getElementById(dId) as HTMLDialogElement;
+        setTimeout(() => {
+            dialog?.close();
+            close(dId);
+        }, 1000); // PATCH: Duct tape fix. Not pretty, but works for now.
     }
 
     useEffect(() => {
         function handleKeyDown(event: KeyboardEvent) {
             if (event.key === "Escape") {
-                handleClose();
+                handleClose(id);
             }
         }
         document.addEventListener("keydown", handleKeyDown);
@@ -100,7 +104,7 @@ function Dialog({ id, headline, content, actions, close }: DialogProps) {
                             key={uid()}
                             onClick={() => {
                                 action[1]();
-                                handleClose();
+                                handleClose(id);
                             }}
                             form={`form-${id}`}
                         >
