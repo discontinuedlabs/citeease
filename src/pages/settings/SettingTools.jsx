@@ -13,7 +13,7 @@ import {
 import Tag from "../../components/ui/Tag";
 import { useAuth } from "../../context/AuthContext";
 import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
-import { uid } from "../../utils/utils.ts";
+import { uid } from "../../utils/utils.tsx";
 import { getGradient, getTagBgColors } from "../../utils/uiUtils.ts";
 import { Button } from "../../components/ui/StyledButtons";
 import { IconButton } from "../../components/ui/MaterialComponents";

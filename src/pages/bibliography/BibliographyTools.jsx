@@ -1,6 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
 import DOMPurify from "dompurify";
-import HTMLReactParser from "html-react-parser/lib/index";
 import { FixedSizeList } from "react-window";
 import { useDispatch, useSelector } from "react-redux";
 import locatorTypes from "../../assets/json/locatorOptions.json";
@@ -22,7 +21,7 @@ import useOnlineStatus, { useFindBib } from "../../hooks/hooks.tsx";
 import Tag from "../../components/ui/Tag";
 import citationStyles from "../../assets/json/styles.json";
 import mostPopularStyles from "../../assets/json/mostPopularStyles.json";
-import { uid } from "../../utils/utils.ts";
+import { parseHtmlToJsx, uid } from "../../utils/utils.tsx";
 import { Checkbox, EmptyPage, IconButton, List, TextButton } from "../../components/ui/MaterialComponents";
 
 // Source types
@@ -174,7 +173,7 @@ export function ReferenceEntries(props) {
                                             : {}
                                     }
                                 >
-                                    {HTMLReactParser(sanitizedReferences)}
+                                    {parseHtmlToJsx(sanitizedReferences)}
                                 </div>
                             ),
                             style: {
@@ -230,7 +229,7 @@ export function IntextCitationDialog(props) {
 
     return (
         <div>
-            <div className="font-cambo">{HTMLReactParser(intextCitation)}</div>
+            <div className="font-cambo">{parseHtmlToJsx(intextCitation)}</div>
             <button type="button" onClick={() => setIsVisible(false)}>
                 X
             </button>
@@ -697,7 +696,7 @@ export function SmartGeneratorDialog(props) {
             <button type="button" onClick={() => setIsVisible(false)}>
                 X
             </button>
-            <div>{HTMLReactParser(references)}</div>
+            <div>{parseHtmlToJsx(references)}</div>
             <button type="button">Accept</button>
         </div>
     );

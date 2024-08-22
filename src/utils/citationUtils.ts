@@ -1,5 +1,5 @@
 import { DateObject, Author, Content, CitationStyle } from "../types/types.ts";
-import { uid } from "./utils.ts";
+import { uid } from "./utils.tsx";
 
 const CORS_PROXY: string = "https://corsproxy.io/?";
 

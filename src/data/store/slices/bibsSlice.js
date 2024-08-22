@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { doc, setDoc } from "firebase/firestore";
 import firestoreDB from "../../db/firebase/firebase";
 import dexieDB from "../../db/dexie/dexie";
-import { uid } from "../../../utils/utils.ts";
+import { uid } from "../../../utils/utils.tsx";
 
 const initialState = { data: [], loadedFromIndexedDB: false };
 

@@ -8,7 +8,7 @@ import { useAuth } from "../../context/AuthContext";
 import { CoBibsSearchDialog } from "./HomeTools";
 import { useEnhancedDispatch } from "../../hooks/hooks.tsx";
 import { ChipSet, EmptyPage, Fab, Icon, List, TopBar } from "../../components/ui/MaterialComponents";
-import { parseQueryString, timeAgo, uid } from "../../utils/utils.ts";
+import { parseQueryString, timeAgo, uid } from "../../utils/utils.tsx";
 import { useDialog } from "../../context/DialogContext.tsx";
 import { prioritizeAvailableStyles } from "../../utils/citationUtils.ts";
 

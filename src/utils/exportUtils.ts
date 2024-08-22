@@ -1,6 +1,6 @@
-import TurndownService from "turndown";
 import { Citation, CitationStyle } from "../types/types.ts";
 import * as citationEngine from "./citationEngine";
+import { htmlToMarkdown } from "./utils.tsx";
 
 function getDefaultName(fileName) {
     return fileName.trim() || "References";
@@ -301,9 +301,8 @@ export async function exportToMd(citations: Citation[], style: CitationStyle, op
         const serializer = new XMLSerializer();
         const modifiedHtmlContent = serializer.serializeToString(doc.documentElement);
 
-        // Convert HTML to Markdown using "turndown" library
-        const turndownService = new TurndownService();
-        const markdownContent = turndownService.turndown(modifiedHtmlContent);
+        // Convert HTML to Markdown
+        const markdownContent = htmlToMarkdown(modifiedHtmlContent);
 
         // Create a Blob from the Markdown content
         const blob = new Blob([markdownContent], { type: "text/markdown" });

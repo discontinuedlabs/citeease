@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import ReactMarkdown from "react-markdown";
 import { TopBar } from "../components/ui/MaterialComponents";
+import { markdownToHtml, parseHtmlToJsx } from "../utils/utils.tsx";
 
 export default function MarkdownPage({ title, filePath }) {
     const [content, setContent] = useState("");
@@ -9,7 +9,8 @@ export default function MarkdownPage({ title, filePath }) {
         async function fetchContent() {
             const response = await fetch(filePath);
             const text = await response.text();
-            setContent(text);
+            const htmlContent = markdownToHtml(text);
+            setContent(htmlContent);
         }
         fetchContent();
     }, [filePath]);
@@ -17,7 +18,7 @@ export default function MarkdownPage({ title, filePath }) {
     return (
         <div className="mx-auto max-w-[50rem]">
             <TopBar headline={title} />
-            <ReactMarkdown className="p-4">{content}</ReactMarkdown>
+            <div className="px-4">{parseHtmlToJsx(content)}</div>
         </div>
     );
 }

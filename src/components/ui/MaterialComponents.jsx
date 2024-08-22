@@ -2,7 +2,7 @@
 
 import React, { useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { uid } from "../../utils/utils.ts";
+import { uid } from "../../utils/utils.tsx";
 import { TAG_COLOR_VALUES } from "../../data/store/slices/settingsSlice";
 import { useMetaThemeColor } from "../../hooks/hooks.tsx";
 

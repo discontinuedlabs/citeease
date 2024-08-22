@@ -412,7 +412,7 @@ export default function Bibliography() {
     function handleDeleteBibliography() {
         dialog.show({
             headline: "Delete bibliography?",
-            continue:
+            content:
                 "You'll no longer see this bibliography in your list. This will also delete related work and citations.",
             actions: [
                 ["Cancel", () => dialog.close()],

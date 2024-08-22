@@ -1,4 +1,4 @@
-import { uid } from "../../utils/utils.ts";
+import { uid } from "../../utils/utils.tsx";
 
 export default function AuthorsInput(props) {
     const { content, setContent } = props;
