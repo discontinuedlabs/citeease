@@ -18,7 +18,7 @@ export default function MarkdownPage({ title, filePath }) {
     return (
         <div className="mx-auto max-w-[50rem]">
             <TopBar headline={title} />
-            <div className="pe-4 ps-4">{parseHtmlToJsx(content)}</div>
+            <div style={{ paddingInline: "1rem" }}>{parseHtmlToJsx(content)}</div>
         </div>
     );
 }

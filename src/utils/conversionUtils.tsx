@@ -97,11 +97,12 @@ export function markdownToHtml(markdown: string): string {
     markdown = markdown.replace(/^## (.*$)/gim, "<h2>$1</h2>");
     markdown = markdown.replace(/^# (.*$)/gim, "<h1>$1</h1>");
 
-    // Replace Markdown bold with HTML <strong>
-    markdown = markdown.replace(/\*\*(.*?)\*\*/gim, "<strong>$1</strong>");
+    // Replace Markdown bold with HTML <b>
+    markdown = markdown.replace(/\*\*(.*?)\*\*/gim, "<b>$1</b>");
 
-    // Replace Markdown emphasis with HTML <em>
-    markdown = markdown.replace(/\*(.*?)\*/gim, "<em>$1</em>");
+    // Replace Markdown emphasis with HTML <i>
+    markdown = markdown.replace(/\*(.*?)\*/gim, "<i>$1</i>");
+    markdown = markdown.replace(/_(.*?)_/gim, "<i>$1</i>");
 
     // Replace Markdown links with HTML <a>
     markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2">$1</a>');
@@ -141,30 +142,22 @@ export function markdownToHtml(markdown: string): string {
 /* eslint-enable no-param-reassign, quotes */
 
 /**
- * Parses an HTML string and returns a DocumentFragment.
+ * Parses an HTML string and returns the content of the <body> element.
  *
  * @param {string} htmlString - The HTML string to be parsed.
- * @returns {DocumentFragment} A DocumentFragment containing the content of the parsed HTML string.
+ * @returns {HTMLElement} An HTMLElement containing the content from the HTML string.
  */
-export function parseHtmlString(htmlString: string): DocumentFragment {
+export function parseHtmlString(htmlString: string): HTMLElement {
     const parser = new DOMParser();
 
     const doc = parser.parseFromString(htmlString, "text/html");
 
-    // Remove the <head> element
     const { head } = doc;
     if (head) {
         head.remove();
     }
 
-    // Create a DocumentFragment to hold the content
-    const fragment = document.createDocumentFragment();
-    const bodyContent = doc.body;
-    while (bodyContent.firstChild) {
-        fragment.appendChild(bodyContent.firstChild);
-    }
-
-    return fragment;
+    return doc.body;
 }
 
 /**
@@ -177,12 +170,8 @@ export function parseHtmlString(htmlString: string): DocumentFragment {
  * @param {string} htmlString - The HTML string to be converted to JSX.
  * @returns {React.ReactNode} - A React node representing the parsed HTML.
  */
-/* eslint-disable indent */
+/* eslint-disable indent, react/jsx-props-no-spreading */
 export function parseHtmlToJsx(htmlString: string): React.ReactNode {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlString, "text/html");
-    const rootElement = doc.body;
-
     function traverseNodes(node: ChildNode | HTMLElement): React.ReactNode {
         if (node.nodeType === Node.TEXT_NODE) {
             return (node as Text).textContent;
@@ -190,53 +179,144 @@ export function parseHtmlToJsx(htmlString: string): React.ReactNode {
 
         const children = Array.from(node.childNodes).map((childNode) => traverseNodes(childNode));
 
+        const element = node as HTMLElement;
+        const props: React.HTMLProps<HTMLElement> = {};
+
+        Array.from(element.attributes).forEach((attr) => {
+            props[attr.name] = attr.value;
+        });
+
+        console.log(node.nodeName);
+
         switch (node.nodeName) {
             case "P":
-                return <p key={uid()}>{children}</p>;
+                return (
+                    <p key={uid()} {...(props as React.HTMLProps<HTMLParagraphElement>)}>
+                        {children}
+                    </p>
+                );
+
+            case "DIV":
+                return (
+                    <div key={uid()} {...(props as React.HTMLProps<HTMLDivElement>)}>
+                        {children}
+                    </div>
+                );
+
             case "H1":
-                return <h1 key={uid()}>{children}</h1>;
+                return (
+                    <h1 key={uid()} {...(props as React.HTMLProps<HTMLHeadingElement>)}>
+                        {children}
+                    </h1>
+                );
             case "H2":
-                return <h2 key={uid()}>{children}</h2>;
+                return (
+                    <h2 key={uid()} {...(props as React.HTMLProps<HTMLHeadingElement>)}>
+                        {children}
+                    </h2>
+                );
             case "H3":
-                return <h3 key={uid()}>{children}</h3>;
+                return (
+                    <h3 key={uid()} {...(props as React.HTMLProps<HTMLHeadingElement>)}>
+                        {children}
+                    </h3>
+                );
             case "H4":
-                return <h4 key={uid()}>{children}</h4>;
+                return (
+                    <h4 key={uid()} {...(props as React.HTMLProps<HTMLHeadingElement>)}>
+                        {children}
+                    </h4>
+                );
             case "H5":
-                return <h5 key={uid()}>{children}</h5>;
+                return (
+                    <h5 key={uid()} {...(props as React.HTMLProps<HTMLHeadingElement>)}>
+                        {children}
+                    </h5>
+                );
             case "H6":
-                return <h6 key={uid()}>{children}</h6>;
+                return (
+                    <h6 key={uid()} {...(props as React.HTMLProps<HTMLHeadingElement>)}>
+                        {children}
+                    </h6>
+                );
             case "UL":
-                return <ul key={uid()}>{children}</ul>;
+                return (
+                    <ul key={uid()} {...(props as React.HTMLProps<HTMLUListElement>)}>
+                        {children}
+                    </ul>
+                );
             case "OL":
-                return <ol key={uid()}>{children}</ol>;
+                return (
+                    <ol key={uid()} {...(props as React.OlHTMLAttributes<HTMLOListElement>)}>
+                        {children}
+                    </ol>
+                );
             case "LI":
-                return <li key={uid()}>{children}</li>;
+                return (
+                    <li key={uid()} {...(props as React.HTMLProps<HTMLLIElement>)}>
+                        {children}
+                    </li>
+                );
             case "BLOCKQUOTE":
-                return <blockquote key={uid()}>{children}</blockquote>;
+                return (
+                    <blockquote key={uid()} {...(props as React.HTMLProps<HTMLQuoteElement>)}>
+                        {children}
+                    </blockquote>
+                );
             case "PRE":
-                return <pre key={uid()}>{children}</pre>;
+                return (
+                    <pre key={uid()} {...(props as React.HTMLProps<HTMLPreElement>)}>
+                        {children}
+                    </pre>
+                );
             case "CODE":
-                return <code key={uid()}>{children}</code>;
+                return (
+                    <code key={uid()} {...(props as React.HTMLProps<HTMLElement>)}>
+                        {children}
+                    </code>
+                );
+            case "B":
+                return (
+                    <b key={uid()} {...(props as React.HTMLProps<HTMLElement>)}>
+                        {children}
+                    </b>
+                );
             case "STRONG":
-                return <strong key={uid()}>{children}</strong>;
+                return (
+                    <strong key={uid()} {...(props as React.HTMLProps<HTMLElement>)}>
+                        {children}
+                    </strong>
+                );
+            case "I":
+                return (
+                    <i key={uid()} {...(props as React.HTMLProps<HTMLElement>)}>
+                        {children}
+                    </i>
+                );
             case "EM":
-                return <em key={uid()}>{children}</em>;
+                return (
+                    <em key={uid()} {...(props as React.HTMLProps<HTMLEmbedElement>)}>
+                        {children}
+                    </em>
+                );
             case "A":
                 return (
-                    <a key={uid()} href={(node as HTMLAnchorElement).href}>
+                    <a key={uid()} {...(props as React.HTMLProps<HTMLAnchorElement>)}>
                         {children}
                     </a>
                 );
             case "IMG":
-                return <img key={uid()} src={(node as HTMLImageElement).src} alt={(node as HTMLImageElement).alt} />;
+                return <img key={uid()} alt="" {...(props as React.ImgHTMLAttributes<HTMLImageElement>)} />;
             default:
                 return children;
         }
     }
 
-    return traverseNodes(rootElement);
+    const element = parseHtmlString(htmlString);
+    console.log(element);
+    return traverseNodes(element);
 }
-/* eslint-enable indent */
+/* eslint-enable indent, react/jsx-props-no-spreading */
 
 /**
  * Converts a CSL-JSON object to a BibJSON object.
