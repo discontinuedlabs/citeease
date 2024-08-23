@@ -1,116 +1,7 @@
 import React from "react";
-
-/**
- * Generates a unique identifier of a specified length.
- *
- * This function creates a unique ID by generating a sequence of characters from a predefined alphabet.
- * It uses a pool of random bytes to select characters from the alphabet, ensuring uniqueness.
- *
- * @param {number} length - The desired length of the unique ID.
- * @returns {string} A unique identifier of the specified length.
- */
-export function uid(length: number = 20): string {
-    const POOL_SIZE_MULTIPLIER = 128;
-    const ALLOWED_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
-
-    let pool: Uint8Array | undefined;
-    let poolOffset: number = 0;
-
-    function refillRandomValuePool(byteCount: number): void {
-        if (!pool || pool.length < byteCount) {
-            pool = new Uint8Array(POOL_SIZE_MULTIPLIER * byteCount);
-            window.crypto.getRandomValues(pool);
-            poolOffset = 0;
-        } else if (poolOffset + byteCount > pool.length) {
-            window.crypto.getRandomValues(pool.subarray(poolOffset, poolOffset + byteCount));
-            poolOffset = 0;
-        }
-        poolOffset += byteCount;
-    }
-
-    refillRandomValuePool(length);
-
-    let uniqueId: string = "";
-    for (let index = 0; index < length; index += 1) {
-        if (!pool) {
-            throw new Error("Pool is unexpectedly undefined.");
-        }
-        uniqueId += ALLOWED_CHARS[pool[index + poolOffset] % ALLOWED_CHARS.length];
-    }
-    return uniqueId;
-}
-
-/**
- * Calculates the relative time from the given date to now.
- *
- * @param dateString - The date string to calculate the time difference from. This should be a valid ISO 8601 date string.
- * @returns A string representing the time elapsed since the given date in a human-readable format.
- */
-export function timeAgo(dateString: string): string {
-    const now = new Date();
-    const then = new Date(dateString);
-
-    const diffInSeconds = Math.floor((now.getTime() - then.getTime()) / 1000);
-
-    let formattedTime: string;
-
-    if (diffInSeconds < 60) {
-        // Less than a minute
-        formattedTime = "just now";
-    } else if (diffInSeconds < 3600) {
-        // Less than an hour
-        formattedTime = `${Math.floor(diffInSeconds / 60)} ${
-            Math.floor(diffInSeconds / 60) === 1 ? "minute" : "minutes"
-        } ago`;
-    } else if (diffInSeconds < 86400) {
-        // Less than 24 hours
-        formattedTime = `${Math.floor(diffInSeconds / 3600)} ${
-            Math.floor(diffInSeconds / 3600) === 1 ? "hour" : "hours"
-        } ago`;
-    } else if (diffInSeconds < 604800) {
-        // Less than a week
-        formattedTime = `${Math.floor(diffInSeconds / 86400)} ${
-            Math.floor(diffInSeconds / 86400) === 1 ? "day" : "days"
-        } ago`;
-    } else if (diffInSeconds < 1209600) {
-        // More than a week but less than two weeks
-        formattedTime = `${Math.floor(diffInSeconds / 604800)} ${
-            Math.floor(diffInSeconds / 604800) === 1 ? "week" : "weeks"
-        } ago`;
-    } else if (diffInSeconds < 31536000) {
-        // More than two weeks but less than a year
-        formattedTime = `${then.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
-    } else {
-        // More than a year
-        formattedTime = `${then.toLocaleDateString(undefined, {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-        })}`;
-    }
-
-    return formattedTime;
-}
-
-/**
- * Parses a URL query string into an object where keys are the names of the query parameters and values are their corresponding values.
- *
- * @param {string} query - The query string to parse, e.g., "key=value&anotherKey=anotherValue".
- * @returns {Record<string, string>} An object representing the parsed query string, where each key-value pair corresponds to a query parameter and its value.
- */
-export function parseQueryString(query: string): Record<string, string> {
-    return query
-        .replace(/^\?/, "")
-        .split("&")
-        .reduce(
-            (acc: Record<string, string>, keyValue) => {
-                const [key, value] = keyValue.split("=");
-                acc[key] = value;
-                return acc;
-            },
-            {} as Record<string, string>
-        );
-}
+import { BibJson, CslJson } from "../types/types.ts";
+import { uid } from "./utils.ts";
+import { createDateObject } from "./citationUtils.ts";
 
 /**
  * Converts an HTML string to a Markdown-formatted string.
@@ -345,5 +236,250 @@ export function parseHtmlToJsx(htmlString: string): React.ReactNode {
 
     return traverseNodes(rootElement);
 }
+/* eslint-enable indent */
 
+/**
+ * Converts a CSL-JSON object to a BibJSON object.
+ *
+ * @param {CslJson} cslJson - The CSL-JSON object to be converted.
+ * @returns {BibJson} - The resulting BibJSON object containing bibliographic data in BibJSON format.
+ */
+export function cslToBibJSON(cslJson: CslJson): BibJson {
+    const bibJson: BibJson = {};
+
+    // Title and subtitle
+    if (cslJson.title) bibJson.title = cslJson.title;
+    if (cslJson.subtitle) bibJson.subtitle = cslJson.subtitle;
+
+    // Authors
+    if (cslJson.author) {
+        bibJson.author = cslJson.author.map((author) => {
+            let name = "";
+            if (author.given) name += `${author.given} `;
+            if (author.family) name += author.family;
+            return { name: name.trim(), firstname: author.given, lastname: author.family };
+        });
+    }
+
+    // Editors
+    if (cslJson.editor) {
+        bibJson.editor = cslJson.editor.map((editor) => {
+            let name = "";
+            if (editor.given) name += `${editor.given} `;
+            if (editor.family) name += editor.family;
+            return { name: name.trim(), firstname: editor.given, lastname: editor.family };
+        });
+    }
+
+    // Translators
+    if (cslJson.translator) {
+        bibJson.translator = cslJson.translator.map((translator) => {
+            let name = "";
+            if (translator.given) name += `${translator.given} `;
+            if (translator.family) name += translator.family;
+            return { name: name.trim(), firstname: translator.given, lastname: translator.family };
+        });
+    }
+
+    // Date issued (year)
+    if (cslJson.issued && cslJson.issued["date-parts"] && cslJson.issued["date-parts"][0]) {
+        bibJson.year = cslJson.issued["date-parts"][0][0].toString();
+    }
+
+    // Date accessed
+    if (cslJson.accessed && cslJson.accessed["date-parts"] && cslJson.accessed["date-parts"][0]) {
+        bibJson.accessed = cslJson.accessed["date-parts"][0].join("-");
+    }
+
+    // Publisher
+    if (cslJson.publisher) bibJson.publisher = cslJson.publisher;
+    if (cslJson["publisher-place"]) bibJson.pubplace = cslJson["publisher-place"];
+
+    // Journal title
+    if (cslJson["container-title"]) bibJson.journal = cslJson["container-title"];
+
+    // Volume, issue, and page range
+    if (cslJson.volume) bibJson.volume = cslJson.volume;
+    if (cslJson.issue) bibJson.issue = cslJson.issue;
+    if (cslJson.page) bibJson.pages = cslJson.page;
+
+    // Identifiers (DOI, ISBN, ISSN)
+    bibJson.identifier = [];
+    if (cslJson.DOI) (bibJson.identifier as object[]).push({ type: "doi", id: cslJson.DOI });
+    if (cslJson.ISBN) (bibJson.identifier as object[]).push({ type: "isbn", id: cslJson.ISBN });
+    if (cslJson.ISSN) (bibJson.identifier as object[]).push({ type: "issn", id: cslJson.ISSN });
+
+    // URL
+    if (cslJson.URL) {
+        bibJson.link = [{ url: cslJson.URL }];
+    }
+
+    // Type mapping
+    const typeMapping = {
+        book: "Book",
+        "article-journal": "Journal Article",
+        chapter: "Book Chapter",
+        thesis: "Thesis",
+        report: "Report",
+        "paper-conference": "Conference Paper",
+        webpage: "Web Page",
+        manuscript: "Manuscript",
+        "magazine-article": "Magazine Article",
+        "newspaper-article": "Newspaper Article",
+    };
+    bibJson.type = cslJson.type && typeMapping[cslJson.type] ? typeMapping[cslJson.type] : "Misc";
+
+    // Keywords
+    if (cslJson.keyword) {
+        bibJson.keywords = Array.isArray(cslJson.keyword) ? cslJson.keyword.join(", ") : cslJson.keyword;
+    }
+
+    // Abstract
+    if (cslJson.abstract) {
+        bibJson.abstract = cslJson.abstract;
+    }
+
+    // Language
+    if (cslJson.language) bibJson.language = cslJson.language;
+
+    return bibJson;
+}
+
+/**
+ * Converts a BibJSON object to a CSL-JSON object.
+ *
+ * @param {BibJson} bibJson - The BibJSON object to be converted.
+ * @returns {CslJson} - The resulting CSL-JSON object containing bibliographic data in CSL-JSON format.
+ */
+/* eslint-disable indent */
+export function bibToCslJSON(bibJson: BibJson): CslJson {
+    const cslJson: CslJson = {};
+
+    // Title and subtitle
+    if (bibJson.title) cslJson.title = bibJson.title;
+    if (bibJson.subtitle) cslJson.subtitle = bibJson.subtitle;
+
+    // Authors
+    if (bibJson.author) {
+        cslJson.author = bibJson.author.map((author) => {
+            const nameParts = author.name.split(" ");
+            const family = nameParts.pop(); // Assume the last part is the family name
+            const given = nameParts.join(" ");
+            return {
+                given: given || "",
+                family: family || "",
+            };
+        });
+    }
+
+    // Editors
+    if (bibJson.editor) {
+        cslJson.editor = bibJson.editor.map((editor) => {
+            const nameParts = editor.name.split(" ");
+            const family = nameParts.pop();
+            const given = nameParts.join(" ");
+            return {
+                given: given || "",
+                family: family || "",
+            };
+        });
+    }
+
+    // Translators
+    if (bibJson.translator) {
+        cslJson.translator = bibJson.translator.map((translator) => {
+            const nameParts = translator.name.split(" ");
+            const family = nameParts.pop();
+            const given = nameParts.join(" ");
+            return {
+                given: given || "",
+                family: family || "",
+            };
+        });
+    }
+
+    // Date issued
+    if (bibJson.year) {
+        cslJson.issued = createDateObject(Number(bibJson.year));
+    }
+
+    // Date accessed
+    if (bibJson.accessed) {
+        cslJson.accessed = createDateObject(Number(bibJson.accessed.split("-").map((part) => part)));
+    }
+
+    // Publisher and place
+    if (bibJson.publisher) cslJson.publisher = bibJson.publisher;
+    if (bibJson.pubplace) cslJson["publisher-place"] = bibJson.pubplace;
+
+    // Journal title
+    if (bibJson.journal) cslJson["container-title"] = bibJson.journal;
+
+    // Volume, issue, and pages
+    if (bibJson.volume) cslJson.volume = bibJson.volume;
+    if (bibJson.issue) cslJson.issue = bibJson.issue;
+    if (bibJson.pages) cslJson.page = bibJson.pages;
+
+    // Identifiers (DOI, ISBN, ISSN, PMID, PMCID)
+    if (bibJson.identifier) {
+        bibJson.identifier.forEach((id) => {
+            switch (id.type.toLowerCase()) {
+                case "doi":
+                    cslJson.DOI = id.id;
+                    break;
+                case "isbn":
+                    cslJson.ISBN = id.id;
+                    break;
+                case "issn":
+                    cslJson.ISSN = id.id;
+                    break;
+                case "pmid":
+                    cslJson.PMID = id.id;
+                    break;
+                case "pmcid":
+                    cslJson.PMCID = id.id;
+                    break;
+                default:
+                    console.log(`Unhandled identifier type: ${id.type}`);
+                    break;
+            }
+        });
+    }
+
+    // URL
+    if (bibJson.link && bibJson.link.length > 0) {
+        cslJson.URL = bibJson.link[0].url;
+    }
+
+    // Type mapping
+    const typeMapping = {
+        Book: "book",
+        "Journal Article": "article-journal",
+        "Book Chapter": "chapter",
+        Thesis: "thesis",
+        Report: "report",
+        "Conference Paper": "paper-conference",
+        "Web Page": "webpage",
+        Manuscript: "manuscript",
+        "Magazine Article": "magazine-article",
+        "Newspaper Article": "newspaper-article",
+        Misc: "misc",
+    };
+    cslJson.type = bibJson.type && typeMapping[bibJson.type] ? typeMapping[bibJson.type] : "misc";
+
+    // Keywords
+    if (bibJson.keywords) {
+        cslJson.keyword = bibJson.keywords.split(",").map((kw) => kw.trim());
+    }
+
+    // Abstract
+    if (bibJson.abstract) {
+        cslJson.abstract = bibJson.abstract;
+    }
+
+    // Language
+    if (bibJson.language) cslJson.language = bibJson.language;
+
+    return cslJson;
+}
 /* eslint-enable indent */

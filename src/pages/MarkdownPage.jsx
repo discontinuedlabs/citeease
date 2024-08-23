@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { TopBar } from "../components/ui/MaterialComponents";
-import { markdownToHtml, parseHtmlToJsx } from "../utils/utils.tsx";
+import { markdownToHtml, parseHtmlToJsx } from "../utils/conversionUtils.tsx";
 
 export default function MarkdownPage({ title, filePath }) {
     const [content, setContent] = useState("");
@@ -18,7 +18,7 @@ export default function MarkdownPage({ title, filePath }) {
     return (
         <div className="mx-auto max-w-[50rem]">
             <TopBar headline={title} />
-            <div className="px-4">{parseHtmlToJsx(content)}</div>
+            <div className="pe-4 ps-4">{parseHtmlToJsx(content)}</div>
         </div>
     );
 }

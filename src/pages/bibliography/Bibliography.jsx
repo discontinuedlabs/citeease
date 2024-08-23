@@ -34,7 +34,7 @@ import { useAuth } from "../../context/AuthContext";
 import firestoreDB from "../../data/db/firebase/firebase";
 import { ChipSet, Fab, Icon, TopBar } from "../../components/ui/MaterialComponents";
 import { useToast } from "../../context/ToastContext.tsx";
-import { exportToHtml, exportToJson, exportToMd, exportToTxt } from "../../utils/exportUtils.ts";
+import { exportToBibJson, exportToCslJson, exportToHtml, exportToMd, exportToTxt } from "../../utils/exportUtils.ts";
 import { useDialog } from "../../context/DialogContext.tsx";
 
 // TODO: The user cannot do any actions in collaborative bibliographies when they are offline
@@ -463,7 +463,16 @@ export default function Bibliography() {
                 },
                 {
                     headline: "JSON",
-                    onClick: () => exportToJson(checkedCitations, { fileName: bibliography.title }),
+                    subItems: [
+                        {
+                            headline: "CSL-JSON",
+                            onClick: () => exportToCslJson(checkedCitations, { fileName: bibliography.title }),
+                        },
+                        {
+                            headline: "BibJSON",
+                            onClick: () => exportToBibJson(checkedCitations, { fileName: bibliography.title }),
+                        },
+                    ],
                 },
             ],
         },

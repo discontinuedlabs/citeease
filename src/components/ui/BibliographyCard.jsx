@@ -1,4 +1,4 @@
-import { timeAgo, uid } from "../../utils/utils.tsx";
+import { timeAgo, uid } from "../../utils/utils.ts";
 import Tag from "./Tag";
 import { Icon } from "./MaterialComponents";
 

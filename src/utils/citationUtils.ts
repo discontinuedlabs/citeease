@@ -1,5 +1,5 @@
-import { DateObject, Author, Content, CitationStyle } from "../types/types.ts";
-import { uid } from "./utils.tsx";
+import { DateObject, Author, CslJson, CitationStyle } from "../types/types.ts";
+import { uid } from "./utils.ts";
 
 const CORS_PROXY: string = "https://corsproxy.io/?";
 
@@ -87,7 +87,7 @@ export function recognizeIdentifierType(string: string): string | undefined {
     return undefined;
 }
 
-export async function retrieveContentFromURL(url: string): Promise<Content | null> {
+export async function retrieveContentFromURL(url: string): Promise<CslJson | null> {
     function extractAuthors(doc: Document): Author[] {
         let authors: string[] = [];
 
@@ -159,7 +159,7 @@ export async function retrieveContentFromURL(url: string): Promise<Content | nul
     }
 }
 
-export async function retrieveContentFromDOI(doi: string): Promise<Content | null> {
+export async function retrieveContentFromDOI(doi: string): Promise<CslJson | null> {
     if (!doi) return null;
 
     try {
@@ -197,7 +197,7 @@ export async function retrieveContentFromDOI(doi: string): Promise<Content | nul
     }
 }
 
-export async function retrieveContentFromISBN(isbn: string): Promise<Content | null> {
+export async function retrieveContentFromISBN(isbn: string): Promise<CslJson | null> {
     if (!isbn) return null;
 
     try {
@@ -226,7 +226,7 @@ export async function retrieveContentFromISBN(isbn: string): Promise<Content | n
     }
 }
 
-export async function retrieveContentFromPMCID(pmcid: string): Promise<Content | null> {
+export async function retrieveContentFromPMCID(pmcid: string): Promise<CslJson | null> {
     if (!pmcid) return null;
 
     try {
@@ -265,7 +265,7 @@ export async function retrieveContentFromPMCID(pmcid: string): Promise<Content |
     }
 }
 
-export async function retrieveContentFromPMID(pmid: string): Promise<Content | null> {
+export async function retrieveContentFromPMID(pmid: string): Promise<CslJson | null> {
     if (!pmid) return null;
 
     try {

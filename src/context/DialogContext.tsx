@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useMemo, useState, ReactNode } from "react";
 import { TextButton } from "../components/ui/MaterialComponents";
-import { uid } from "../utils/utils.tsx";
+import { uid } from "../utils/utils.ts";
 import { useTimeout } from "../hooks/hooks.tsx";
 
 declare global {

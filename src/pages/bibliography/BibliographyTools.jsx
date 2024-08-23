@@ -21,7 +21,8 @@ import useOnlineStatus, { useFindBib } from "../../hooks/hooks.tsx";
 import Tag from "../../components/ui/Tag";
 import citationStyles from "../../assets/json/styles.json";
 import mostPopularStyles from "../../assets/json/mostPopularStyles.json";
-import { parseHtmlToJsx, uid } from "../../utils/utils.tsx";
+import { uid } from "../../utils/utils.ts";
+import { parseHtmlToJsx } from "../../utils/conversionUtils.tsx";
 import { Checkbox, EmptyPage, IconButton, List, TextButton } from "../../components/ui/MaterialComponents";
 
 // Source types

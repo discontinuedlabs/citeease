@@ -11,22 +11,28 @@ export type Author = {
     id?: string;
 };
 
-export type Content = {
+export type CslJson = {
     id?: string;
     type?: string;
     title?: string;
+    subtitle?: string;
     author?: Author[];
+    editor?: Author[];
+    translator?: Author[];
+    keyword?: string[];
+    abstract?: string;
+    language?: string;
     "container-title"?: string;
     publisher?: string;
     accessed?: DateObject;
     issued?: DateObject;
     URL?: string;
     DOI?: string;
-    ISBN?: number;
-    ISSN?: number;
-    PMID?: number;
-    PMCID?: number;
-    issue?: number;
+    ISBN?: number | string;
+    ISSN?: number | string;
+    PMID?: number | string;
+    PMCID?: number | string;
+    issue?: number | string;
     page?: string | number;
     "publisher-place"?: string;
     source?: string;
@@ -37,7 +43,7 @@ export type Content = {
 
 export type Citation = {
     id: string;
-    content: Content;
+    content: CslJson;
     isChecked?: boolean;
 };
 
@@ -70,4 +76,29 @@ export type Bibliography = {
         changelog: [];
         password: string;
     };
+};
+
+export type BibJson = {
+    title?: string;
+    subtitle?: string;
+    author?: { name: string }[];
+    editor?: { name: string }[];
+    translator?: { name: string }[];
+    year?: string;
+    accessed?: string;
+    publisher?: string;
+    pubplace?: string;
+    journal?: string;
+    volume?: number | string;
+    issue?: number | string;
+    pages?: number | string;
+    identifier?: {
+        type: string;
+        id: string;
+    }[];
+    link?: { url: string }[];
+    type?: string;
+    keywords?: string;
+    abstract?: string;
+    language?: string;
 };

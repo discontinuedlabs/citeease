@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { uid } from "../../utils/utils.tsx";
+import { uid } from "../../utils/utils.ts";
 import { SoftButton } from "./StyledButtons";
 
 export default function ContextMenu({ options, children, direction = "down" }) {

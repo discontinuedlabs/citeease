@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props, no-unused-vars, react/no-children-prop */
 
 import React, { createContext, useContext, useMemo, useState } from "react";
-import { uid } from "../utils/utils.tsx";
+import { uid } from "../utils/utils.ts";
 import { Icon } from "../components/ui/MaterialComponents";
 import { getGradient } from "../utils/uiUtils.ts";
 import { SoftButton } from "../components/ui/StyledButtons";

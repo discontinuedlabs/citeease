@@ -1,6 +1,6 @@
 import { Citation, CitationStyle } from "../types/types.ts";
 import * as citationEngine from "./citationEngine";
-import { htmlToMarkdown } from "./utils.tsx";
+import { cslToBibJSON, htmlToMarkdown } from "./conversionUtils.tsx";
 
 function getDefaultName(fileName) {
     return fileName.trim() || "References";
@@ -376,8 +376,27 @@ export async function exportToMd(citations: Citation[], style: CitationStyle, op
  *
  * @see Citation
  */
-export function exportToJson(citations: Citation[], options: ExportOptions): void {
+export function exportToCslJson(citations: Citation[], options: ExportOptions): void {
     const cleanedCitations = citations.map((citation) => citation.content);
+
+    const jsonContent = JSON.stringify(cleanedCitations, null, 2);
+    const blob = new Blob([jsonContent], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    // Download the file
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${getDefaultName(options.fileName)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Release the Blob URL to avoid memory leaks
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+}
+
+export function exportToBibJson(citations: Citation[], options: ExportOptions): void {
+    const cleanedCitations = citations.map((citation) => cslToBibJSON(citation.content));
 
     const jsonContent = JSON.stringify(cleanedCitations, null, 2);
     const blob = new Blob([jsonContent], { type: "application/json" });
