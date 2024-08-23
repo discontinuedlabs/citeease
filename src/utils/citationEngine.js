@@ -112,9 +112,7 @@ export async function formatLaTeX(citations, latexFormat = "bibtex") {
     config.format.useIdAsLabel = false; // Use the entry ID as the label instead of generating one.
 
     try {
-        const contentArray = createContentArray(citations);
-        const cite = await Cite.async(contentArray);
-
+        const cite = await Cite.async(citations);
         return cite.format(latexFormat);
     } catch (error) {
         console.error(error);

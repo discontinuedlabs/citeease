@@ -363,50 +363,6 @@ export function CitationForm(props) {
     return <div className="citation-window">{CITATION_COMPONENTS[content.type]}</div>;
 }
 
-export function LaTeXDialog(props) {
-    const { setLaTeXWindowVisible: setIsVisible } = props;
-    const [bibtexString, setBibtexString] = useState("");
-    const [biblatexString, setBiblatexString] = useState("");
-    const [bibTxtString, setBibTxtString] = useState("");
-    const [displayedLatex, setDisplayedLatex] = useState(bibtexString);
-    const bibliography = useFindBib();
-    const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
-
-    useEffect(() => {
-        async function formatLaTeX() {
-            setBibtexString(await citationEngine.formatLaTeX(checkedCitations, "bibtex"));
-            setBiblatexString(await citationEngine.formatLaTeX(checkedCitations, "biblatex"));
-            setBibTxtString(await citationEngine.formatLaTeX(checkedCitations, "bibtxt"));
-        }
-        formatLaTeX();
-    }, [checkedCitations]);
-
-    return (
-        <div className="fixed left-0 top-0 h-screen w-screen bg-overlay-500">
-            <div className="left-1/2 top-1/2 max-h-[80vh] min-h-[70vh] w-[50rem] translate-x-[-50%] translate-y-[-50%] bg-white">
-                <div className="flex">
-                    <div className="flex">
-                        <button type="button" onClick={() => setDisplayedLatex(bibtexString)}>
-                            BibTex
-                        </button>
-                        <button type="button" onClick={() => setDisplayedLatex(biblatexString)}>
-                            BibLaTeX
-                        </button>
-                        <button type="button" onClick={() => setDisplayedLatex(bibTxtString)}>
-                            BibTXT
-                        </button>
-                    </div>
-                    <button type="button" onClick={() => setIsVisible(false)}>
-                        X
-                    </button>
-                </div>
-
-                <div className="whitespace-pre-wrap">{displayedLatex || bibtexString}</div>
-            </div>
-        </div>
-    );
-}
-
 export function MoveDialog(props) {
     const { setMoveWindowVisible: setIsVisible } = props;
     const bibliographies = useSelector((state) => state.bibliographies.data);

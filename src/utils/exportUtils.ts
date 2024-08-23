@@ -10,6 +10,22 @@ type ExportOptions = {
     fileName?: string;
 };
 
+type LatexFormats = "bibtex" | "biblatex" | "bibtxt";
+
+function downloadFile(content: string, filename: string, mimeType: string): void {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+}
+
 /**
  * Exports a list of citations to a TXT file, applying a specified citation style.
  *
@@ -23,6 +39,8 @@ type ExportOptions = {
  *
  * @returns {Promise<void>} A promise that resolves once the TXT file has been downloaded.
  * Note: This function triggers a file download and does not return the file content.
+ *
+ * @throws {Error} - If the plain text formatting fails, an error is logged to the console.
  *
  * @example
  * // Example usage
@@ -81,21 +99,7 @@ type ExportOptions = {
 export async function exportToTxt(citations: Citation[], style: CitationStyle, options: ExportOptions): Promise<void> {
     try {
         const formattedCitations: string = await citationEngine.formatBibliography(citations, style, "text");
-
-        // Create a Blob from the TXT content
-        const blob = new Blob([formattedCitations], { type: "text/plain" });
-        const url = URL.createObjectURL(blob);
-
-        // Download the file
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `${getDefaultName(options.fileName)}.txt`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Release the Blob URL to avoid memory leaks
-        setTimeout(() => URL.revokeObjectURL(url), 100);
+        downloadFile(formattedCitations, `${getDefaultName(options.fileName)}.txt`, "text/plain");
     } catch (error) {
         console.error("Failed to export citations: ", error);
     }
@@ -114,6 +118,8 @@ export async function exportToTxt(citations: Citation[], style: CitationStyle, o
  *
  * @returns {Promise<void>} A promise that resolves once the HTML file has been downloaded.
  * Note: This function triggers a file download and does not return the file content.
+ *
+ * @throws {Error} - If the HTML formatting fails, an error is logged to the console.
  *
  * @example
  * // Example usage
@@ -172,7 +178,6 @@ export async function exportToTxt(citations: Citation[], style: CitationStyle, o
 export async function exportToHtml(citations: Citation[], style: CitationStyle, options: ExportOptions): Promise<void> {
     try {
         const formattedCitationsArray: string[] = await citationEngine.formatBibliography(citations, style);
-
         const cleanedCitations = formattedCitationsArray.map((citation) => citation.replace(/,\s*$/, "").trim());
         const fullHtmlContent = cleanedCitations.join("");
 
@@ -186,20 +191,7 @@ export async function exportToHtml(citations: Citation[], style: CitationStyle, 
                     </style>`;
         const finalHtmlContent = `${css}${fullHtmlContent}`;
 
-        // Create a Blob from the HTML content
-        const blob = new Blob([finalHtmlContent], { type: "text/html" });
-        const url = URL.createObjectURL(blob);
-
-        // Download the file
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `${getDefaultName(options.fileName)}.html`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Release the Blob URL to avoid memory leaks
-        setTimeout(() => URL.revokeObjectURL(url), 100);
+        downloadFile(finalHtmlContent, `${getDefaultName(options.fileName)}.html`, "text/html");
     } catch (error) {
         console.error("Failed to export citations: ", error);
     }
@@ -219,6 +211,8 @@ export async function exportToHtml(citations: Citation[], style: CitationStyle, 
  *
  * @returns {Promise<void>} A promise that resolves once the Markdown file has been downloaded.
  * Note: This function triggers a file download and does not return the file content.
+ *
+ * @throws {Error} - If the Markdown formatting fails, an error is logged to the console.
  *
  * @example
  * // Example usage
@@ -279,7 +273,7 @@ export async function exportToMd(citations: Citation[], style: CitationStyle, op
         const formattedCitationsArray: string[] = await citationEngine.formatBibliography(citations, style);
         const cleanedCitations = formattedCitationsArray.map((citation) => citation.replace(/,\s*$/, "").trim());
 
-        // Parse the HTML content into a DOM tree to remove divs with the classes ".csl-left-margin" and ".csl-right-inline"
+        // Parse the HTML content into a DOM tree to remove unwanted elements
         const parser = new DOMParser();
         const doc = parser.parseFromString(cleanedCitations.join(""), "text/html");
         doc.body.childNodes.forEach((node) => {
@@ -297,37 +291,23 @@ export async function exportToMd(citations: Citation[], style: CitationStyle, op
             }
         });
 
-        // Serialize the modified DOM back into a string
+        // Serialize the modified DOM back into a string and convert HTML to Markdown
         const serializer = new XMLSerializer();
         const modifiedHtmlContent = serializer.serializeToString(doc.documentElement);
-
-        // Convert HTML to Markdown
         const markdownContent = htmlToMarkdown(modifiedHtmlContent);
 
-        // Create a Blob from the Markdown content
-        const blob = new Blob([markdownContent], { type: "text/markdown" });
-        const url = URL.createObjectURL(blob);
-
-        // Download the file
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `${getDefaultName(options.fileName)}.md`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Release the Blob URL to avoid memory leaks
-        setTimeout(() => URL.revokeObjectURL(url), 100);
+        downloadFile(markdownContent, `${getDefaultName(options.fileName)}.md`, "text/markdown");
     } catch (error) {
         console.error("Failed to export citations: ", error);
     }
 }
 
 /**
- * Exports a list of citations to a JSON file, simplifying the citation structure.
+ * Exports a list of citations to a JSON file formatted for CSL-JSON.
  *
  * @param {Citation[]} citations - An array of citation objects to be formatted and exported.
  * Each citation object should conform to the {@link Citation} interface.
+ * @param {ExportOptions} options - The options for exporting the file, including the file name.
  * @returns {void} Does not return anything; instead, triggers a file download of the transformed citations in JSON format.
  *
  * @example
@@ -378,38 +358,143 @@ export async function exportToMd(citations: Citation[], style: CitationStyle, op
  */
 export function exportToCslJson(citations: Citation[], options: ExportOptions): void {
     const cleanedCitations = citations.map((citation) => citation.content);
-
     const jsonContent = JSON.stringify(cleanedCitations, null, 2);
-    const blob = new Blob([jsonContent], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-
-    // Download the file
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${getDefaultName(options.fileName)}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    // Release the Blob URL to avoid memory leaks
-    setTimeout(() => URL.revokeObjectURL(url), 100);
+    downloadFile(jsonContent, `${getDefaultName(options.fileName)}.json`, "application/json");
 }
 
+/**
+ * Exports a list of citations to a JSON file formatted for BibJSON.
+ *
+ * @param {Citation[]} citations - An array of citation objects to be formatted and exported.
+ * Each citation object should conform to the {@link Citation} interface.
+ * @param {ExportOptions} options - The options for exporting the file, including the file name.
+ * @returns {void} Does not return anything; instead, triggers a file download of the transformed citations in JSON format.
+ *
+ * @example
+ * // Example usage
+ * const citations = [
+ *     {
+ *         "id": "9pvrqrczWNcet5vZhoRs",
+ *         "content": {
+ *             "id": "9pvrqrczWNcet5vZhoRs",
+ *             "type": "webpage",
+ *             "author": [
+ *                 {
+ *                     "given": "Vshssv",
+ *                     "family": "Svsjsbs",
+ *                     "id": "G71YzpdF01mj99wjzDk0"
+ *                 }
+ *             ],
+ *             "title": "Svshbsys",
+ *             "container-title": "Svshsbs",
+ *             "issued": {
+ *                 "date-parts": [
+ *                     [
+ *                         2024,
+ *                         7,
+ *                         29
+ *                     ]
+ *                 ],
+ *                 "raw": "2024-7-29"
+ *             },
+ *             "URL": "Vshsbs",
+ *             "accessed": {
+ *                 "date-parts": [
+ *                     [
+ *                         2024,
+ *                         7,
+ *                         29
+ *                     ]
+ *                 ],
+ *                 "raw": "2024-7-29"
+ *             }
+ *         },
+ *         "isChecked": true
+ *     }
+ * ];
+ * exportToBibJson(citations);
+ *
+ * @see Citation
+ */
 export function exportToBibJson(citations: Citation[], options: ExportOptions): void {
     const cleanedCitations = citations.map((citation) => cslToBibJSON(citation.content));
-
     const jsonContent = JSON.stringify(cleanedCitations, null, 2);
-    const blob = new Blob([jsonContent], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
+    downloadFile(jsonContent, `${getDefaultName(options.fileName)}.json`, "application/json");
+}
 
-    // Download the file
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${getDefaultName(options.fileName)}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    // Release the Blob URL to avoid memory leaks
-    setTimeout(() => URL.revokeObjectURL(url), 100);
+/**
+ * Exports a list of citations to a JSON file formatted for BibJSON.
+ *
+ * @param {Citation[]} citations - An array of citation objects to be formatted and exported.
+ * Each citation object should conform to the {@link Citation} interface.
+ * @param {LatexFormats} format - The format for the LaTeX file. Can be "bibtex", "biblatex" or "bibtxt".
+ * @param {ExportOptions} options - The options for exporting the file, including the file name.
+ * @returns {Promise<void>} - A promise that resolves when the export is complete.
+ *
+ * @throws {Error} - If the LaTeX formatting fails, an error is logged to the console.
+ *
+ * @example
+ * // Example usage
+ * const citations = [
+ *     {
+ *         "id": "9pvrqrczWNcet5vZhoRs",
+ *         "content": {
+ *             "id": "9pvrqrczWNcet5vZhoRs",
+ *             "type": "webpage",
+ *             "author": [
+ *                 {
+ *                     "given": "Vshssv",
+ *                     "family": "Svsjsbs",
+ *                     "id": "G71YzpdF01mj99wjzDk0"
+ *                 }
+ *             ],
+ *             "title": "Svshbsys",
+ *             "container-title": "Svshsbs",
+ *             "issued": {
+ *                 "date-parts": [
+ *                     [
+ *                         2024,
+ *                         7,
+ *                         29
+ *                     ]
+ *                 ],
+ *                 "raw": "2024-7-29"
+ *             },
+ *             "URL": "Vshsbs",
+ *             "accessed": {
+ *                 "date-parts": [
+ *                     [
+ *                         2024,
+ *                         7,
+ *                         29
+ *                     ]
+ *                 ],
+ *                 "raw": "2024-7-29"
+ *             }
+ *         },
+ *         "isChecked": true
+ *     }
+ * ];
+ * exportToLatex(citations, "bibtex");
+ *
+ * @see Citation
+ */
+export async function exportToLatex(
+    citations: Citation[],
+    format: LatexFormats,
+    options: ExportOptions
+): Promise<void> {
+    try {
+        const cleanedCitations = citations.map((citation) => citation.content);
+        const latex = await citationEngine.formatLaTeX(cleanedCitations, format);
+        const content = typeof latex === "string" ? latex : JSON.stringify(latex, null, 2);
+        const mimeType = format === "bibtxt" ? "text/plain" : "text/x-bibtex";
+        downloadFile(
+            content,
+            `${getDefaultName(options.fileName)}.${format === "bibtxt" ? "bibtxt" : "bib"}`,
+            mimeType
+        );
+    } catch (error) {
+        console.error("Failed to export citations: ", error);
+    }
 }

@@ -8,7 +8,6 @@ import {
     ReferenceEntries,
     MoveDialog,
     CitationForm,
-    LaTeXDialog,
     RenameDialog,
     AddCitationMenu,
     SmartGeneratorDialog,
@@ -34,7 +33,14 @@ import { useAuth } from "../../context/AuthContext";
 import firestoreDB from "../../data/db/firebase/firebase";
 import { ChipSet, Fab, Icon, TopBar } from "../../components/ui/MaterialComponents";
 import { useToast } from "../../context/ToastContext.tsx";
-import { exportToBibJson, exportToCslJson, exportToHtml, exportToMd, exportToTxt } from "../../utils/exportUtils.ts";
+import {
+    exportToBibJson,
+    exportToCslJson,
+    exportToHtml,
+    exportToLatex,
+    exportToMd,
+    exportToTxt,
+} from "../../utils/exportUtils.ts";
 import { useDialog } from "../../context/DialogContext.tsx";
 
 // TODO: The user cannot do any actions in collaborative bibliographies when they are offline
@@ -56,7 +62,6 @@ export default function Bibliography() {
     const [intextCitationDialogVisible, setIntextCitationDialogVisible] = useState(false);
     const [citationFormVisible, setCitationFormVisible] = useState(false);
     const [addCitationMenuVisible, setAddCitationMenuVisible] = useState(false);
-    const [LaTeXWindowVisible, setLaTeXWindowVisible] = useState(false);
     const [moveWindowVisible, setMoveWindowVisible] = useState(false);
     const [renameWindowVisible, setRenameWindowVisible] = useState(false);
     const [smartGeneratorDialogVisible, setSmartGeneratorDialogVisible] = useState(false);
@@ -452,7 +457,32 @@ export default function Bibliography() {
                     headline: "Plain text",
                     onClick: () => exportToTxt(checkedCitations, bibliography.style, { fileName: bibliography.title }),
                 },
-                { headline: "LaTeX", onClick: () => setLaTeXWindowVisible(true) },
+                {
+                    headline: "LaTeX",
+                    subItems: [
+                        {
+                            headline: "BibTex",
+                            onClick: () =>
+                                exportToLatex(checkedCitations, "bibtex", {
+                                    fileName: bibliography.title,
+                                }),
+                        },
+                        {
+                            headline: "BibLaTeX",
+                            onClick: () =>
+                                exportToLatex(checkedCitations, "biblatex", {
+                                    fileName: bibliography.title,
+                                }),
+                        },
+                        {
+                            headline: "BibTXT",
+                            onClick: () =>
+                                exportToLatex(checkedCitations, "bibtxt", {
+                                    fileName: bibliography.title,
+                                }),
+                        },
+                    ],
+                },
                 {
                     headline: "HTML",
                     onClick: () => exportToHtml(checkedCitations, bibliography.style, { fileName: bibliography.title }),
@@ -585,8 +615,6 @@ export default function Bibliography() {
                     }}
                 />
             )}
-
-            {LaTeXWindowVisible && <LaTeXDialog {...{ setLaTeXWindowVisible }} />}
 
             {moveWindowVisible && <MoveDialog {...{ setMoveWindowVisible }} />}
 
