@@ -105,7 +105,7 @@ export function IconButton({ className, onClick, name, ...rest }) {
 
 export function List({ items = [], className, ...rest }) {
     return (
-        <md-list class={className} {...rest}>
+        <md-list class={`-z-1 ${className}`} {...rest}>
             {items.map((item) => {
                 if (typeof item === "string" && /divider/i.test(item)) {
                     return <md-divider key={uid()} />;
