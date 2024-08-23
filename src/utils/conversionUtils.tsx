@@ -186,8 +186,6 @@ export function parseHtmlToJsx(htmlString: string): React.ReactNode {
             props[attr.name] = attr.value;
         });
 
-        console.log(node.nodeName);
-
         switch (node.nodeName) {
             case "P":
                 return (
@@ -313,7 +311,6 @@ export function parseHtmlToJsx(htmlString: string): React.ReactNode {
     }
 
     const element = parseHtmlString(htmlString);
-    console.log(element);
     return traverseNodes(element);
 }
 /* eslint-enable indent, react/jsx-props-no-spreading */
