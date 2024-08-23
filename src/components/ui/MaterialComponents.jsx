@@ -206,7 +206,7 @@ export function TopBar({ headline, description, showBackButton = true, options }
     return (
         <>
             <div
-                className="sticky top-0 z-10 flex h-12 items-center justify-between px-2 py-8"
+                className="sticky top-0 z-[1] flex h-12 items-center justify-between px-2 py-8"
                 style={{
                     background: isScrolled ? "var(--md-sys-color-surface-container)" : "var(--md-sys-color-surface)",
                 }}
