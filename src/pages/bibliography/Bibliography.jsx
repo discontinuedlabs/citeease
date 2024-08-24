@@ -488,7 +488,10 @@ export default function Bibliography() {
             subItems: [
                 {
                     headline: "Plain text",
-                    onClick: () => exportToTxt(checkedCitations, bibliography.style, { fileName: bibliography.title }),
+                    onClick: () =>
+                        exportToTxt(checkedCitations, bibliography.style, bibliography?.locale, {
+                            fileName: bibliography.title,
+                        }),
                 },
                 {
                     headline: "LaTeX",
@@ -518,11 +521,17 @@ export default function Bibliography() {
                 },
                 {
                     headline: "HTML",
-                    onClick: () => exportToHtml(checkedCitations, bibliography.style, { fileName: bibliography.title }),
+                    onClick: () =>
+                        exportToHtml(checkedCitations, bibliography.style, bibliography?.locale, {
+                            fileName: bibliography.title,
+                        }),
                 },
                 {
                     headline: "Markdown",
-                    onClick: () => exportToMd(checkedCitations, bibliography.style, { fileName: bibliography.title }),
+                    onClick: () =>
+                        exportToMd(checkedCitations, bibliography.style, bibliography?.locale, {
+                            fileName: bibliography.title,
+                        }),
                 },
                 {
                     headline: "JSON",

@@ -96,9 +96,14 @@ function downloadFile(content: string, filename: string, mimeType: string): void
  * @see CitationStyle
  * @see ExportOptions
  */
-export async function exportToTxt(citations: Citation[], style: CitationStyle, options: ExportOptions): Promise<void> {
+export async function exportToTxt(
+    citations: Citation[],
+    style: CitationStyle,
+    locale: string,
+    options: ExportOptions
+): Promise<void> {
     try {
-        const formattedCitations: string = await citationEngine.formatBibliography(citations, style, "text");
+        const formattedCitations: string = await citationEngine.formatBibliography(citations, style, "text", locale);
         downloadFile(formattedCitations, `${getDefaultName(options.fileName)}.txt`, "text/plain");
     } catch (error) {
         console.error("Failed to export citations: ", error);
@@ -175,9 +180,19 @@ export async function exportToTxt(citations: Citation[], style: CitationStyle, o
  * @see CitationStyle
  * @see ExportOptions
  */
-export async function exportToHtml(citations: Citation[], style: CitationStyle, options: ExportOptions): Promise<void> {
+export async function exportToHtml(
+    citations: Citation[],
+    style: CitationStyle,
+    locale: string,
+    options: ExportOptions
+): Promise<void> {
     try {
-        const formattedCitationsArray: string[] = await citationEngine.formatBibliography(citations, style);
+        const formattedCitationsArray: string[] = await citationEngine.formatBibliography(
+            citations,
+            style,
+            "html",
+            locale
+        );
         const cleanedCitations = formattedCitationsArray.map((citation) => citation.replace(/,\s*$/, "").trim());
         const fullHtmlContent = cleanedCitations.join("");
 
@@ -268,9 +283,19 @@ export async function exportToHtml(citations: Citation[], style: CitationStyle, 
  * @see CitationStyle
  * @see ExportOptions
  */
-export async function exportToMd(citations: Citation[], style: CitationStyle, options: ExportOptions): Promise<void> {
+export async function exportToMd(
+    citations: Citation[],
+    style: CitationStyle,
+    locale: string,
+    options: ExportOptions
+): Promise<void> {
     try {
-        const formattedCitationsArray: string[] = await citationEngine.formatBibliography(citations, style);
+        const formattedCitationsArray: string[] = await citationEngine.formatBibliography(
+            citations,
+            style,
+            "html",
+            locale
+        );
         const cleanedCitations = formattedCitationsArray.map((citation) => citation.replace(/,\s*$/, "").trim());
 
         // Parse the HTML content into a DOM tree to remove unwanted elements

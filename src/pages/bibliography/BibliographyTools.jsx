@@ -161,7 +161,19 @@ export function ReferenceEntries(props) {
                         }
                         const citation = bibliography?.citations.find((cit) => cit?.id === getRefId());
                         const sanitizedReferences = DOMPurify.sanitize(ref);
-                        const hangingIndentationStyle = { paddingLeft: "1.5rem", textIndent: "-1.5rem" };
+
+                        function getDirValue() {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(sanitizedReferences, "text/html");
+                            const dirElement = doc.querySelector("div[dir]");
+                            return dirElement.getAttribute("dir");
+                        }
+
+                        const hangingIndentationStyle = {
+                            paddingInlineStart: getDirValue() === "ltr" ? "1.5rem" : "",
+                            paddingInlineEnd: getDirValue() === "rtl" ? "1.5rem" : "",
+                            textIndent: "-1.5rem",
+                        };
 
                         return {
                             start: (
