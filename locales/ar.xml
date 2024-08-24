@@ -1,0 +1,554 @@
+<?xml version="1.0" encoding="utf-8"?>
+<locale xmlns="http://purl.org/net/xbiblio/csl" version="1.0" xml:lang="ar">
+    <info>
+        <rights license="http://creativecommons.org/licenses/by-sa/3.0/">
+            هذا العمل مرخص بموجب رخصة المشاع الإبداعي: النسبة-الترخيص بالمثل 3.0
+        </rights>
+        <updated>
+            2024-08-23T00:00:00+00:00
+        </updated>
+    </info>
+    <style-options punctuation-in-quote="true" leading-noise-words="ال" name-as-sort-order="ar" />
+    <date form="text">
+        <date-part name="year" suffix=" " />
+        <date-part name="month" suffix=" " />
+        <date-part name="day" />
+    </date>
+    <date form="numeric">
+        <date-part name="year" suffix="/" />
+        <date-part name="month" form="numeric-leading-zeros" suffix="/" />
+        <date-part name="day" form="numeric-leading-zeros" />
+    </date>
+    <terms>
+        <term name="radio-broadcast">
+            إذاعة
+        </term>
+        <term name="television-broadcast">
+            بث تلفزيوني
+        </term>
+        <term name="podcast">
+            بودكاست
+        </term>
+        <term name="instant-message">
+            رسالة فورية
+        </term>
+        <term name="email">
+            بريد إلكتروني
+        </term>
+        <term name="number-of-volumes">
+            <single>
+                مجلد
+            </single>
+            <multiple>
+                مجلدات
+            </multiple>
+        </term>
+        <term name="accessed">
+            تم الوصول إليه
+        </term>
+        <term name="and">
+            و
+        </term>
+        <term name="and" form="symbol">
+            &amp;
+        </term>
+        <term name="and others">
+            وآخرون
+        </term>
+        <term name="anonymous">
+            مجهول
+        </term>
+        <term name="anonymous" form="short">
+            مجهول
+        </term>
+        <term name="at">
+            في
+        </term>
+        <term name="available at">
+            متاح على
+        </term>
+        <term name="by">
+            بواسطة
+        </term>
+        <term name="circa">
+            حوالي
+        </term>
+        <term name="circa" form="short">
+            حوالي
+        </term>
+        <term name="cited">
+            تم الاستشهاد به
+        </term>
+        <term name="edition">
+            <single>
+                طبعة
+            </single>
+            <multiple>
+                طبعات
+            </multiple>
+        </term>
+        <term name="edition" form="short">
+            طبعة
+        </term>
+        <term name="et-al">
+            وآخرون
+        </term>
+        <term name="forthcoming">
+            قادم
+        </term>
+        <term name="from">
+            من
+        </term>
+        <term name="ibid">
+            نفس المرجع
+        </term>
+        <term name="in">
+            في
+        </term>
+        <term name="in press">
+            قيد الطباعة
+        </term>
+        <term name="internet">
+            الإنترنت
+        </term>
+        <term name="interview">
+            مقابلة
+        </term>
+        <term name="letter">
+            رسالة
+        </term>
+        <term name="no date">
+            بدون تاريخ
+        </term>
+        <term name="no date" form="short">
+            ب.ت.
+        </term>
+        <term name="online">
+            على الإنترنت
+        </term>
+        <term name="presented at">
+            تم تقديمه في
+        </term>
+        <term name="reference">
+            <single>
+                مرجع
+            </single>
+            <multiple>
+                مراجع
+            </multiple>
+        </term>
+        <term name="reference" form="short">
+            <single>
+                مرجع
+            </single>
+            <multiple>
+                مراجع
+            </multiple>
+        </term>
+        <term name="retrieved">
+            تم استرداده
+        </term>
+        <term name="scale">
+            مقياس
+        </term>
+        <term name="version">
+            إصدار
+        </term>
+
+        <!-- ANNO DOMINI; BEFORE CHRIST -->
+        <term name="ad">
+            م
+        </term>
+        <term name="bc">
+            ق.م
+        </term>
+
+        <!-- PUNCTUATION -->
+        <term name="open-quote">
+            “
+        </term>
+        <term name="close-quote">
+            ”
+        </term>
+        <term name="open-inner-quote">
+            ‘
+        </term>
+        <term name="close-inner-quote">
+            ’
+        </term>
+        <term name="page-range-delimiter">
+            –
+        </term>
+
+        <!-- ORDINALS -->
+        <term name="ordinal">
+            th
+        </term>
+        <term name="ordinal-01">
+            st
+        </term>
+        <term name="ordinal-02">
+            nd
+        </term>
+        <term name="ordinal-03">
+            rd
+        </term>
+        <term name="ordinal-11">
+            th
+        </term>
+        <term name="ordinal-12">
+            th
+        </term>
+        <term name="ordinal-13">
+            th
+        </term>
+
+        <!-- LONG ORDINALS -->
+        <term name="long-ordinal-01">
+            الأول
+        </term>
+        <term name="long-ordinal-02">
+            الثاني
+        </term>
+        <term name="long-ordinal-03">
+            الثالث
+        </term>
+        <term name="long-ordinal-04">
+            الرابع
+        </term>
+        <term name="long-ordinal-05">
+            الخامس
+        </term>
+        <term name="long-ordinal-06">
+            السادس
+        </term>
+        <term name="long-ordinal-07">
+            السابع
+        </term>
+        <term name="long-ordinal-08">
+            الثامن
+        </term>
+        <term name="long-ordinal-09">
+            التاسع
+        </term>
+        <term name="long-ordinal-10">
+            العاشر
+        </term>
+
+        <!-- LONG LOCATOR FORMS -->
+        <term name="book">
+            <single>
+                كتاب
+            </single>
+            <multiple>
+                كتب
+            </multiple>
+        </term>
+        <term name="chapter">
+            <single>
+                فصل
+            </single>
+            <multiple>
+                فصول
+            </multiple>
+        </term>
+        <term name="column">
+            <single>
+                عمود
+            </single>
+            <multiple>
+                أعمدة
+            </multiple>
+        </term>
+        <term name="figure">
+            <single>
+                شكل
+            </single>
+            <multiple>
+                أشكال
+            </multiple>
+        </term>
+        <term name="folio">
+            <single>
+                فوليوم
+            </single>
+            <multiple>
+                فوليومات
+            </multiple>
+        </term>
+        <term name="issue">
+            <single>
+                عدد
+            </single>
+            <multiple>
+                أعداد
+            </multiple>
+        </term>
+        <term name="line">
+            <single>
+                خط
+            </single>
+            <multiple>
+                خطوط
+            </multiple>
+        </term>
+        <term name="note">
+            <single>
+                ملاحظة
+            </single>
+            <multiple>
+                ملاحظات
+            </multiple>
+        </term>
+        <term name="opus">
+            <single>
+                أوبوس
+            </single>
+            <multiple>
+                أوبوسات
+            </multiple>
+        </term>
+        <term name="page">
+            <single>
+                صفحة
+            </single>
+            <multiple>
+                صفحات
+            </multiple>
+        </term>
+        <term name="paragraph">
+            <single>
+                فقرة
+            </single>
+            <multiple>
+                فقرات
+            </multiple>
+        </term>
+        <term name="part">
+            <single>
+                جزء
+            </single>
+            <multiple>
+                أجزاء
+            </multiple>
+        </term>
+        <term name="section">
+            <single>
+                قسم
+            </single>
+            <multiple>
+                أقسام
+            </multiple>
+        </term>
+        <term name="sub verbo">
+            <single>
+                تحت الكلمة
+            </single>
+            <multiple>
+                تحت الكلمات
+            </multiple>
+        </term>
+        <term name="verse">
+            <single>
+                آية
+            </single>
+            <multiple>
+                آيات
+            </multiple>
+        </term>
+        <term name="volume">
+            <single>
+                مجلد
+            </single>
+            <multiple>
+                مجلدات
+            </multiple>
+        </term>
+
+        <!-- SHORT LOCATOR FORMS -->
+        <term name="book" form="short">
+            ك.
+        </term>
+        <term name="chapter" form="short">
+            فصل
+        </term>
+        <term name="column" form="short">
+            عمود
+        </term>
+        <term name="figure" form="short">
+            شكل
+        </term>
+        <term name="folio" form="short">
+            ف.
+        </term>
+        <term name="issue" form="short">
+            عدد
+        </term>
+        <term name="line" form="short">
+            خط
+        </term>
+        <term name="note" form="short">
+            مل.
+        </term>
+        <term name="opus" form="short">
+            أو.
+        </term>
+        <term name="page" form="short">
+            <single>
+                ص.
+            </single>
+            <multiple>
+                صص.
+            </multiple>
+        </term>
+        <term name="paragraph" form="short">
+            فقرة
+        </term>
+        <term name="part" form="short">
+            ج.
+        </term>
+        <term name="section" form="short">
+            ق.
+        </term>
+        <term name="sub verbo" form="short">
+            <single>
+                ت.ك.
+            </single>
+            <multiple>
+                ت.ك.
+            </multiple>
+        </term>
+        <term name="verse" form="short">
+            <single>
+                آية
+            </single>
+            <multiple>
+                آيات
+            </multiple>
+        </term>
+        <term name="volume" form="short">
+            <single>
+                م.
+            </single>
+            <multiple>
+                م.
+            </multiple>
+        </term>
+
+        <!-- SYMBOL LOCATOR FORMS -->
+        <term name="paragraph" form="symbol">
+            <single>¶</single>
+            <multiple>¶¶</multiple>
+        </term>
+        <term name="section" form="symbol">
+            <single>§</single>
+            <multiple>§§</multiple>
+        </term>
+
+        <!-- LONG ROLE FORMS -->
+        <term name="director">
+            <single>مخرج</single>
+            <multiple>مخرجون</multiple>
+        </term>
+        <term name="editor">
+            <single>محرر</single>
+            <multiple>محررون</multiple>
+        </term>
+        <term name="editorial-director">
+            <single>محرر</single>
+            <multiple>محررون</multiple>
+        </term>
+        <term name="illustrator">
+            <single>رسام</single>
+            <multiple>رسامون</multiple>
+        </term>
+        <term name="translator">
+            <single>مترجم</single>
+            <multiple>مترجمون</multiple>
+        </term>
+        <term name="editortranslator">
+            <single>محرر &amp; مترجم</single>
+            <multiple>محررون &amp; مترجمون</multiple>
+        </term>
+
+        <!-- SHORT ROLE FORMS -->
+        <term name="director" form="short">
+            <single>مخر.</single>
+            <multiple>مخر.</multiple>
+        </term>
+        <term name="editor" form="short">
+            <single>محر.</single>
+            <multiple>محر.</multiple>
+        </term>
+        <term name="editorial-director" form="short">
+            <single>محر.</single>
+            <multiple>محر.</multiple>
+        </term>
+        <term name="illustrator" form="short">
+            <single>رس.</single>
+            <multiple>رس.</multiple>
+        </term>
+        <term name="translator" form="short">
+            <single>متر.</single>
+            <multiple>متر.</multiple>
+        </term>
+        <term name="editortranslator" form="short">
+            <single>محر. &amp; متر.</single>
+            <multiple>محر. &amp; متر.</multiple>
+        </term>
+
+        <!-- VERB ROLE FORMS -->
+        <term name="director" form="verb">أخرجه</term>
+        <term name="editor" form="verb">حرره</term>
+        <term name="editorial-director" form="verb">حرره</term>
+        <term name="illustrator" form="verb">رسمه</term>
+        <term name="interviewer" form="verb">أجرى المقابلة</term>
+        <term name="recipient" form="verb">إلى</term>
+        <term name="reviewed-author" form="verb">بواسطة</term>
+        <term name="translator" form="verb">ترجمه</term>
+        <term name="editortranslator" form="verb">حرره &amp; ترجمه</term>
+
+        <!-- SHORT VERB ROLE FORMS -->
+        <term name="container-author" form="verb-short">بواسطة</term>
+        <term name="director" form="verb-short">مخر.</term>
+        <term name="editor" form="verb-short">محر.</term>
+        <term name="editorial-director" form="verb-short">محر.</term>
+        <term name="illustrator" form="verb-short">رس.</term>
+        <term name="translator" form="verb-short">متر.</term>
+        <term name="editortranslator" form="verb-short">محر. &amp; متر.</term>
+
+        <!-- LONG MONTH FORMS -->
+        <term name="month-01">يناير</term>
+        <term name="month-02">فبراير</term>
+        <term name="month-03">مارس</term>
+        <term name="month-04">أبريل</term>
+        <term name="month-05">مايو</term>
+        <term name="month-06">يونيو</term>
+        <term name="month-07">يوليو</term>
+        <term name="month-08">أغسطس</term>
+        <term name="month-09">سبتمبر</term>
+        <term name="month-10">أكتوبر</term>
+        <term name="month-11">نوفمبر</term>
+        <term name="month-12">ديسمبر</term>
+
+        <!-- SHORT MONTH FORMS -->
+        <term name="month-01" form="short">ينا.</term>
+        <term name="month-02" form="short">فبرا.</term>
+        <term name="month-03" form="short">مار.</term>
+        <term name="month-04" form="short">أبر.</term>
+        <term name="month-05" form="short">مايو</term>
+        <term name="month-06" form="short">يون.</term>
+        <term name="month-07" form="short">يول.</term>
+        <term name="month-08" form="short">أغس.</term>
+        <term name="month-09" form="short">سبت.</term>
+        <term name="month-10" form="short">أكت.</term>
+        <term name="month-11" form="short">نوف.</term>
+        <term name="month-12" form="short">ديس.</term>
+
+        <!-- SEASONS -->
+        <term name="season-01">الربيع</term>
+        <term name="season-02">الصيف</term>
+        <term name="season-03">الخريف</term>
+        <term name="season-04">الشتاء</term>
+    </terms>
+</locale>
