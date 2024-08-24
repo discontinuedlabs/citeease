@@ -50,7 +50,7 @@
             و
         </term>
         <term name="and" form="symbol">
-            &amp;
+            و
         </term>
         <term name="and others">
             وآخرون
@@ -467,8 +467,8 @@
             <multiple>مترجمون</multiple>
         </term>
         <term name="editortranslator">
-            <single>محرر &amp; مترجم</single>
-            <multiple>محررون &amp; مترجمون</multiple>
+            <single>محرر ومترجم</single>
+            <multiple>محررون ومترجمون</multiple>
         </term>
 
         <!-- SHORT ROLE FORMS -->
@@ -493,8 +493,8 @@
             <multiple>متر.</multiple>
         </term>
         <term name="editortranslator" form="short">
-            <single>محر. &amp; متر.</single>
-            <multiple>محر. &amp; متر.</multiple>
+            <single>محر. ومتر.</single>
+            <multiple>محر. ومتر.</multiple>
         </term>
 
         <!-- VERB ROLE FORMS -->
@@ -506,7 +506,7 @@
         <term name="recipient" form="verb">إلى</term>
         <term name="reviewed-author" form="verb">بواسطة</term>
         <term name="translator" form="verb">ترجمه</term>
-        <term name="editortranslator" form="verb">حرره &amp; ترجمه</term>
+        <term name="editortranslator" form="verb">حرره وترجمه</term>
 
         <!-- SHORT VERB ROLE FORMS -->
         <term name="container-author" form="verb-short">بواسطة</term>
@@ -515,7 +515,7 @@
         <term name="editorial-director" form="verb-short">محر.</term>
         <term name="illustrator" form="verb-short">رس.</term>
         <term name="translator" form="verb-short">متر.</term>
-        <term name="editortranslator" form="verb-short">محر. &amp; متر.</term>
+        <term name="editortranslator" form="verb-short">محر. ومتر.</term>
 
         <!-- LONG MONTH FORMS -->
         <term name="month-01">يناير</term>
