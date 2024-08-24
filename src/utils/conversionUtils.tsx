@@ -183,7 +183,11 @@ export function parseHtmlToJsx(htmlString: string): React.ReactNode {
         const props: React.HTMLProps<HTMLElement> = {};
 
         Array.from(element.attributes).forEach((attr) => {
-            props[attr.name] = attr.value;
+            if (attr.name === "class") {
+                props.className = attr.value;
+            } else {
+                props[attr.name] = attr.value;
+            }
         });
 
         switch (node.nodeName) {
@@ -304,7 +308,7 @@ export function parseHtmlToJsx(htmlString: string): React.ReactNode {
                     </a>
                 );
             case "IMG":
-                return <img key={uid()} alt="" {...(props as React.ImgHTMLAttributes<HTMLImageElement>)} />;
+                return <img key={uid()} alt={props.alt} {...(props as React.ImgHTMLAttributes<HTMLImageElement>)} />;
             default:
                 return children;
         }

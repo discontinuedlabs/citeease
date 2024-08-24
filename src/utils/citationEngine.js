@@ -79,24 +79,42 @@ function splitContentArray(formattedCitations) {
     return divArray;
 }
 
-export async function formatBibliography(citations, bibStyle, format = "html") {
+function retreiveLocale(lang) {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", `${import.meta.env.VITE_PUBLIC_URL}/locales/${lang}.xml`, false);
+    xhr.send(null);
+    return xhr.responseText;
+}
+
+export async function formatBibliography(citations, bibStyle, format = "html", lang = "en-US") {
     try {
         const cslFile = await getCslFile(bibStyle);
+        const locale = retreiveLocale(lang);
         const contentArray = createContentArray(citations);
 
         const config = plugins.config.get("@csl");
         config.templates.add(bibStyle?.code, cslFile);
+        config.locales.add("ar", locale);
 
         if (!cslFile) {
             return null;
         }
 
         const cite = await Cite.async(contentArray);
-        const formattedCitations = cite.format("bibliography", {
+        let formattedCitations = cite.format("bibliography", {
             format,
             template: bibStyle?.code,
-            lang: "en-US",
+            lang,
         });
+
+        const textDirection = /^(ar|he|fa|ur)/.test(lang) ? "rtl" : "ltr";
+
+        if (format === "html") {
+            formattedCitations = formattedCitations.replace(
+                /class="csl-entry"/g,
+                `class="csl-entry" dir="${textDirection}"`
+            );
+        }
 
         return format === "html" ? splitContentArray(formattedCitations) : formattedCitations;
     } catch (error) {
@@ -120,18 +138,15 @@ export async function formatLaTeX(citations, latexFormat = "bibtex") {
     }
 }
 
-export async function formatIntextCitation(citations, bibStyle, format = "html") {
+export async function formatIntextCitation(citations, bibStyle, format = "html", lang = "en-US") {
     if (!citations) return null;
 
     try {
         const citIds = citations.map((cit) => cit.id);
 
         const citeprocSys = {
-            retrieveLocale(lang) {
-                const xhr = new XMLHttpRequest();
-                xhr.open("GET", `${process.env.PUBLIC_URL}/locales/${lang}.xml`, false);
-                xhr.send(null);
-                return xhr.responseText;
+            retrieveLocale() {
+                return retreiveLocale(lang);
             },
             retrieveItem: (id) => citations.find((cit) => id === cit.id),
         };

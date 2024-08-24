@@ -72,7 +72,9 @@ export function ReferenceEntries(props) {
         async function formatBibliography() {
             const formattedCitations = await citationEngine.formatBibliography(
                 bibliography?.citations,
-                bibliography?.style
+                bibliography?.style,
+                "html",
+                bibliography?.locale
             );
             setReferences(formattedCitations);
         }
@@ -82,7 +84,12 @@ export function ReferenceEntries(props) {
     useEffect(() => {
         // Used for the handleDrag function because event.dataTransfer.setData("text/html", sanitizedInnerHTML) doesn't wait
         async function formatSelectedCitations() {
-            const formattedCitations = await citationEngine.formatBibliography(checkedCitations, bibliography?.style);
+            const formattedCitations = await citationEngine.formatBibliography(
+                checkedCitations,
+                bibliography?.style,
+                "html",
+                bibliography?.locale
+            );
             formattedSelectedCitationsRef.current = formattedCitations;
         }
         formatSelectedCitations();
@@ -207,7 +214,8 @@ export function IntextCitationDialog(props) {
             const formattedIntextCitation = await citationEngine.formatIntextCitation(
                 citationsForIntext,
                 bibliography?.style,
-                "html"
+                "html",
+                bibliography?.locale
             );
             setIntextCitation(DOMPurify.sanitize(formattedIntextCitation));
         }
@@ -636,7 +644,9 @@ export function SmartGeneratorDialog(props) {
         async function formatBibliography() {
             const formattedCitation = await citationEngine.formatBibliography(
                 contentsArray.map((content) => ({ content })),
-                bibliography.style
+                bibliography.style,
+                "html",
+                bibliography?.locale
             );
             const sanitizedReference = DOMPurify.sanitize(formattedCitation);
             setReferences(sanitizedReference);

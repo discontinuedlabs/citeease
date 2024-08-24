@@ -31,7 +31,7 @@ import {
 import useOnlineStatus, { useEnhancedDispatch, useFindBib, useKeyboardShortcuts } from "../../hooks/hooks.tsx";
 import { useAuth } from "../../context/AuthContext";
 import firestoreDB from "../../data/db/firebase/firebase";
-import { ChipSet, Fab, Icon, TopBar } from "../../components/ui/MaterialComponents";
+import { ChipSet, Fab, Icon, List, TopBar } from "../../components/ui/MaterialComponents";
 import { useToast } from "../../context/ToastContext.tsx";
 import {
     exportToBibJson,
@@ -42,6 +42,8 @@ import {
     exportToTxt,
 } from "../../utils/exportUtils.ts";
 import { useDialog } from "../../context/DialogContext.tsx";
+import locales from "../../assets/json/locales.json";
+import { uid } from "../../utils/utils.ts";
 
 // TODO: The user cannot do any actions in collaborative bibliographies when they are offline
 export default function Bibliography() {
@@ -432,6 +434,37 @@ export default function Bibliography() {
         });
     }
 
+    function handleChangeLocale() {
+        const dialogId = uid();
+        dialog.show({
+            id: dialogId,
+            headline: "Change locale",
+            content: (
+                <List
+                    items={locales.map((locale) => {
+                        return {
+                            title: `${locale.code} (${locale.label})`,
+                            onClick: () => {
+                                dispatch(
+                                    updateBibField({
+                                        bibliographyId: bibliography.id,
+                                        key: "locale",
+                                        value: locale.code,
+                                    })
+                                );
+                                dialog.close(dialogId);
+                            },
+                        };
+                    })}
+                />
+            ),
+            actions: [
+                ["Manage locales", () => navigate("/settings")],
+                ["Cancel", () => dialog.close()],
+            ],
+        });
+    }
+
     function getConditionalOptionsWhenCitationsSelected() {
         if (checkedCitations?.length === 1) {
             const options = [{ headline: "Edit", onClick: () => openCitationForm(checkedCitations[0].content.type) }];
@@ -516,9 +549,10 @@ export default function Bibliography() {
         if (collaborationOpened && bibliography?.collab?.adminId === currentUser.uid) {
             return [
                 { headline: "Tags", onClick: () => setTagsDialogVisible(true) },
-                { headline: "Change style", onClick: () => setCitationStyleMenuVisible(true) },
                 { headline: "Rename bibliography", onClick: () => setRenameWindowVisible(true) },
                 { headline: "Change icon", onClick: () => setIconsMenuVisible(true) },
+                { headline: "Change style", onClick: () => setCitationStyleMenuVisible(true) },
+                { headline: "Change locale", onClick: handleChangeLocale },
                 { headline: "Bibliography settings", onClick: () => navigate(`/bib/${bibliography.id}/settings`) },
                 { headline: "Close collaboration", onClick: handleCloseCollaboration },
             ];
