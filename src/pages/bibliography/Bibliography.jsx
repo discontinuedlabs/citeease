@@ -570,9 +570,10 @@ export default function Bibliography() {
         if (!collaborationOpened) {
             return [
                 { headline: "Tags", onClick: () => setTagsDialogVisible(true) },
-                { headline: "Change style", onClick: () => setCitationStyleMenuVisible(true) },
                 { headline: "Rename bibliography", onClick: () => setRenameWindowVisible(true) },
                 { headline: "Change icon", onClick: () => setIconsMenuVisible(true) },
+                { headline: "Change style", onClick: () => setCitationStyleMenuVisible(true) },
+                { headline: "Change locale", onClick: handleChangeLocale },
                 { headline: "Bibliography settings", onClick: () => navigate(`/bib/${bibliography.id}/settings`) },
                 { headline: "Open collaboration", onClick: handleOpenCollaboration },
                 { headline: "Delete bibliography", onClick: handleDeleteBibliography },
