@@ -19,7 +19,22 @@ module.exports = {
                     "Helvetica Neue",
                     "sans-serif",
                 ],
-                cambo: ["Cambo", "serif"],
+                cambo: [
+                    "Cambo",
+                    "Amiri",
+                    "Poppins",
+                    "system-ui",
+                    "-apple-system",
+                    "BlinkMacSystemFont",
+                    "Segoe UI",
+                    "Roboto",
+                    "Oxygen",
+                    "Ubuntu",
+                    "Cantarell",
+                    "Open Sans",
+                    "Helvetica Neue",
+                    "sans-serif",
+                ],
             },
             colors: {
                 primary: {
