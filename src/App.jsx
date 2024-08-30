@@ -24,6 +24,10 @@ import firestoreDB from "./data/db/firebase/firebase";
 import { useDocumentTitle, useMetaThemeColor } from "./hooks/hooks.tsx";
 import { retrieveUserData } from "./utils/dataUtils.ts";
 
+// NEEDS OPTIMIZATION:
+// Include the most used styles in the styles.json, and the rest should be downloaded when needed only
+// React.lazy()?
+
 export default function App() {
     const { loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies); // WATCH: In some browsers, state.bibliographies may display [object Object] on subsequent renders in StrictMode
     const { currentUser } = useAuth();

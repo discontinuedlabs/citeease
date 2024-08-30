@@ -6,7 +6,6 @@ module.exports = {
         extend: {
             fontFamily: {
                 sans: [
-                    "Poppins",
                     "system-ui",
                     "-apple-system",
                     "BlinkMacSystemFont",
@@ -22,7 +21,6 @@ module.exports = {
                 cambo: [
                     "Cambo",
                     "Amiri",
-                    "Poppins",
                     "system-ui",
                     "-apple-system",
                     "BlinkMacSystemFont",
