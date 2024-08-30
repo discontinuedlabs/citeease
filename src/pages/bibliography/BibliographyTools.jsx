@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
-import DOMPurify from "dompurify";
 import { FixedSizeList } from "react-window";
 import { useDispatch, useSelector } from "react-redux";
+import DOMPurify from "../../utils/purify";
 import locatorTypes from "../../assets/json/locatorOptions.json";
 import * as citationEngine from "../../utils/citationEngine";
 import sourceTypes from "../../assets/json/sourceTypes.json";

@@ -1,8 +1,8 @@
 import { Cite, plugins } from "@citation-js/core";
 import "@citation-js/plugin-csl";
 import "@citation-js/plugin-bibtex";
-import DOMPurify from "dompurify";
 import CSL from "citeproc";
+import DOMPurify from "./purify";
 import db from "../data/db/dexie/dexie";
 
 function saveLocalSCLFiles(CslFiles) {
