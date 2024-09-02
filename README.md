@@ -9,8 +9,8 @@
 
 - [What is CiteEase?](#what-is-citeease)
 - [Key Features](#key-features)
-- [Getting Started](#getting-started)
 - [Upcoming Features (to-do)](#upcoming-features-to-do)
+- [Getting Started](#getting-started)
 - [Contributing](#contributing)
 - [Reporting Issues](#reporting-issues)
 - [Testing](#testing)
@@ -40,10 +40,6 @@ CiteEase is a powerful and user-friendly open-source citation management app des
     -   Open collaboration on bibliographies using a unique identifier and password.
     -   Collaborate with others in real-time, allowing everyone to add, modify, or delete citations within a shared bibliography.
 
-## Getting Started
-
-To get up and running with CiteEase, follow the instructions in our [GETTING_STARTED.md](GETTING_STARTED.md) file.
-
 ## Upcoming Features (to-do)
 
 - [ ] Integration with popular reference managers (Zotero, Mendeley, EndNote).
@@ -52,6 +48,10 @@ To get up and running with CiteEase, follow the instructions in our [GETTING_STA
 - [ ] CSL file manager to create, customize, and manage citation styles (including update checks and adding new ones).
 - [ ] Raw JSON Entry mode for advanced users to input citation data directly into predefined JSON structures (e.g., CSL-JSON, BibJSON).
 - [ ] Custom Source Templates feature allowing users to create, export, and import personalized citation templates beyond the standard options (book, webpage, journal article, etc.).
+
+## Getting Started
+
+To get up and running with CiteEase, follow the instructions in our [GETTING_STARTED.md](GETTING_STARTED.md) file.
 
 ## Contributing
 
