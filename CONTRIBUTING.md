@@ -42,7 +42,7 @@ We’re excited that you’re interested in contributing to CiteEase! Whether yo
 
 ### 7. Submit a Pull Request
 
-- Open a pull request (PR) from your forked repository’s branch to the `main` branch of this repository. In your PR description, provide details about the changes you made and why.
+- Open a pull request (PR) from your forked repository’s branch to the `main` branch of this repository. In your PR description, please use the provided [Pull Request Template](PULL_REQUEST_TEMPLATE.md) to ensure that all necessary information is included. 
 
 ### 8. Review Process
 
@@ -50,7 +50,7 @@ We’re excited that you’re interested in contributing to CiteEase! Whether yo
 
 ## Reporting Issues
 
-If you encounter any issues or have suggestions for improvements, please [open an issue](https://github.com/discontinuedlabs/citeease/issues). Include as much detail as possible to help us understand and address the problem.
+If you encounter any issues or have suggestions for improvements, please [open an issue](https://github.com/discontinuedlabs/citeease/issues) and use the provided [Issue Template](ISSUE_TEMPLATE.md). Include as much detail as possible to help us understand and address the problem.
 
 ## Code of Conduct
 
