@@ -2,16 +2,23 @@
 
 **Welcome to CiteEase, an open-source Progressive Web App (PWA) for managing citations and collaborating on bibliographies.**
 
+## Badges
+
+![Build Status](https://img.shields.io/github/actions/workflow/status/discontinuedlabs/citeease/build.yml)
+![License](https://img.shields.io/github/license/discontinuedlabs/citeease)
+
 ## Table of Contents
 
--   [What is CiteEase?](#what-is-citeease)
--   [Key Features](#key-features)
--   [Upcoming Features (to-do)](#upcoming-features-to-do)
--   [Getting Started](#getting-started)
--   [Testing](#testing)
--   [Contributing](#contributing)
--   [License](#license)
--   [Contact](#contact)
+- [What is CiteEase?](#what-is-citeease)
+- [Key Features](#key-features)
+- [Getting Started](#getting-started)
+- [Upcoming Features (to-do)](#upcoming-features-to-do)
+- [Contributing](#contributing)
+- [Reporting Issues](#reporting-issues)
+- [Testing](#testing)
+- [License](#license)
+- [Contact](#contact)
+- [Acknowledgments](#acknowledgments)
 
 ## What is CiteEase?
 
@@ -35,6 +42,10 @@ CiteEase is a powerful and user-friendly open-source citation management app des
     -   Open collaboration on bibliographies using a unique identifier and password.
     -   Collaborate with others in real-time, allowing everyone to add, modify, or delete citations within a shared bibliography.
 
+## Getting Started
+
+To get up and running with CiteEase, follow the instructions in our [GETTING_STARTED.md](GETTING_STARTED.md) file.
+
 ## Upcoming Features (to-do)
 
 - [ ] Integration with popular reference managers (Zotero, Mendeley, EndNote).
@@ -44,53 +55,17 @@ CiteEase is a powerful and user-friendly open-source citation management app des
 - [ ] Raw JSON Entry mode for advanced users to input citation data directly into predefined JSON structures (e.g., CSL-JSON, BibJSON).
 - [ ] Custom Source Templates feature allowing users to create, export, and import personalized citation templates beyond the standard options (book, webpage, journal article, etc.).
 
-## Getting Started
+## Contributing
 
-### Prerequisites
+We actively welcome contributions from the community! To get started, please see our [CONTRIBUTING.md](CONTRIBUTING.md) file and use the provided [Pull Request Template](PULL_REQUEST_TEMPLATE.md) when submitting changes.
 
--   **Docker:** Ensure Docker is installed on your system. You can download it from the official website: [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop).
+## Reporting Issues
 
-### Building and Running the Application
-
-1. **Clone the Repository:**
-
-    ```bash
-    git clone https://github.com/discontinuedlabs/citeease.git
-    ```
-
-2. **Navigate to the Project Directory:**
-
-    ```bash
-    cd citeease
-    ```
-
-3. **Build the Docker Image:**
-
-    The Dockerfile in this repository uses `node:18-alpine` as the base image. To build the Docker image, use the following command:
-
-    ```bash
-    docker build -t <image-name> .
-    ```
-
-    Replace `<image-name>` with a name that suits your preference for the Docker image.
-
-    Note: Make sure that Docker Desktop is running on your machine. You can check this by looking at the system tray for the Docker icon.
-
-4. **Run the Docker Container:**
-
-    ```bash
-    docker run -p 3000:3000 <image-name>
-    ```
-
-Now you can access the app at `http://localhost:3000`.
+If you encounter any issues or have suggestions for improvements, please [open an issue](https://github.com/discontinuedlabs/citeease/issues) and use the provided [Issue Template](ISSUE_TEMPLATE.md) to help us understand and address the problem.
 
 ## Testing
 
 Rigorous testing is essential for ensuring the quality and stability of any application. We acknowledge its importance and plan to incorporate a comprehensive testing suite in the future. Currently, however, automated testing is not actively implemented in this project.
-
-## Contributing
-
-While we don't actively seek contributions, we appreciate your interest. If you encounter issues or have suggestions, please feel free to open an issue.
 
 ## License
 
@@ -99,5 +74,12 @@ CiteEase is licensed under the MIT License. See the [LICENSE](LICENSE) file for 
 ## Contact
 
 For inquiries or more information, you can reach out to us at [discontinuedlabs@gmail.com](mailto:discontinuedlabs@gmail.com).
+
+## Acknowledgments
+
+- CiteEase uses CSL style files from [Citation Style Language Styles](https://github.com/citation-style-language/styles), which are licensed under the [Creative Commons Attribution-ShareAlike 3.0 Unported License](https://creativecommons.org/licenses/by-sa/3.0/).
+- XML locales files are sourced from [Citation Style Language Locales](https://github.com/citation-style-language/locales), also licensed under the [Creative Commons Attribution-ShareAlike 3.0 Unported License](https://creativecommons.org/licenses/by-sa/3.0/).
+
+We extend our gratitude to these projects for providing essential resources that enhance the functionality and versatility of CiteEase.
 
 **We hope you find CiteEase to be a valuable tool for your research endeavors!**
