@@ -80,7 +80,7 @@
         "serve": "vite preview",
         "test": "jest",
         "lint": "eslint .",
-        "lint:fix": "npx eslint --fix .",
+        "lint:fix": "eslint --fix .",
         "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css}\"",
         "coverage": "npm test --coverage --watchAll --collectCoverageFrom='src/**/*.{js,ts,jsx,tsx}'"
     },
