@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { Location, useLocation, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Bibliography } from "../types/types.ts";
 import { RootState } from "../data/store/store.ts";
@@ -42,13 +42,19 @@ type RouteParams = {
  *
  * @param {RouteParams} params - Object containing the ID of the bibliography entry to find.
  * @param {string} [params.bibId] - The ID of the bibliography entry to find.
- * @returns {Bibliography | undefined} The found bibliography entry or undefined if not found.
+ * @returns {Bibliography | null} The found bibliography entry or undefined if not found.
  */
-export function useFindBib(): Bibliography | undefined {
-    const { bibId }: RouteParams = useParams<RouteParams>();
+export function useFindBib(): Bibliography | null {
+    let { bibId }: RouteParams = useParams<RouteParams>();
+    const location: Location = useLocation();
+
+    if (!bibId) {
+        bibId = location.pathname.match(/\/(bib|collab)\/([^/]+)/)?.[2];
+    }
+
     const bibliographies: Bibliography[] = useSelector((state: RootState) => state.bibliographies.data);
     const bibliography = bibliographies?.find((bib) => bib.id === bibId || bib?.collab?.id === bibId);
-    return bibliography;
+    return bibliography ? bibliography : null; // eslint-disable-line no-unneeded-ternary
 }
 
 type EnhancedDispatchConfig = {

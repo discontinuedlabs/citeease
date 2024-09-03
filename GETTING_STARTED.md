@@ -6,7 +6,7 @@ Welcome to CiteEase! This guide will help you set up and run the application on 
 
 Before you start, ensure you have the following installed:
 
-- **Docker:** Download and install Docker from [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop).
+-   **Docker:** Download and install Docker from [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop).
 
 ## Building and Running the Application
 
@@ -48,7 +48,7 @@ Follow these steps to get CiteEase up and running:
 
 If you encounter issues during setup, check the following:
 
-- Ensure Docker is running properly on your system.
-- Verify that you have correctly followed all the steps.
+-   Ensure Docker is running properly on your system.
+-   Verify that you have correctly followed all the steps.
 
 For further assistance, please [open an issue](https://github.com/discontinuedlabs/citeease/issues) and use the provided [Issue Template](ISSUE_TEMPLATE.md) or contact us at [discontinuedlabs@gmail.com](mailto:discontinuedlabs@gmail.com).

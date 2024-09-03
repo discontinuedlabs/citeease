@@ -1,7 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
-import "@material/web/all";
 import { HashRouter as Router } from "react-router-dom";
 import { Provider as ReduxeProvider } from "react-redux";
 import App from "./App";
@@ -10,6 +8,26 @@ import { AuthProvider } from "./context/AuthContext";
 import ToastProvider from "./context/ToastContext.tsx";
 import ErrorBoundary from "./components/ErrorBoundary";
 import DialogProvider from "./context/DialogContext.tsx";
+
+import "./index.css";
+import "@material/web/button/filled-button";
+import "@material/web/button/text-button";
+import "@material/web/checkbox/checkbox";
+import "@material/web/chips/assist-chip";
+import "@material/web/chips/chip-set";
+import "@material/web/chips/input-chip";
+import "@material/web/dialog/dialog";
+import "@material/web/divider/divider";
+import "@material/web/fab/fab";
+import "@material/web/field/filled-field";
+import "@material/web/icon/icon";
+import "@material/web/iconbutton/icon-button";
+import "@material/web/list/list";
+import "@material/web/list/list-item";
+import "@material/web/menu/menu";
+import "@material/web/menu/menu-item";
+import "@material/web/menu/sub-menu";
+import "@material/web/textfield/filled-text-field";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>

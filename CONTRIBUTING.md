@@ -6,11 +6,11 @@ We’re excited that you’re interested in contributing to CiteEase! Whether yo
 
 ### 1. Fork the Repository
 
-- Click the "Fork" button at the top right of this page to create a copy of this repository in your GitHub account.
+-   Click the "Fork" button at the top right of this page to create a copy of this repository in your GitHub account.
 
 ### 2. Create a Branch
 
-- Create a new branch with a descriptive name for your feature or bug fix.
+-   Create a new branch with a descriptive name for your feature or bug fix.
 
     ```bash
     git checkout -b feature/add-new-feature
@@ -18,15 +18,15 @@ We’re excited that you’re interested in contributing to CiteEase! Whether yo
 
 ### 3. Make Your Changes
 
-- Implement your changes in the code. Be sure to follow the coding style used in the project.
+-   Implement your changes in the code. Be sure to follow the coding style used in the project.
 
 ### 4. Test Your Changes
 
-- Run the application and test your changes thoroughly to ensure they work as expected.
+-   Run the application and test your changes thoroughly to ensure they work as expected.
 
 ### 5. Commit Your Changes
 
-- Write clear and concise commit messages.
+-   Write clear and concise commit messages.
 
     ```bash
     git commit -m "Add feature X"
@@ -34,7 +34,7 @@ We’re excited that you’re interested in contributing to CiteEase! Whether yo
 
 ### 6. Push to Your Fork
 
-- Push your changes to your forked repository.
+-   Push your changes to your forked repository.
 
     ```bash
     git push origin feature/add-new-feature
@@ -42,11 +42,11 @@ We’re excited that you’re interested in contributing to CiteEase! Whether yo
 
 ### 7. Submit a Pull Request
 
-- Open a pull request (PR) from your forked repository’s branch to the `main` branch of this repository. In your PR description, please use the provided [Pull Request Template](PULL_REQUEST_TEMPLATE.md) to ensure that all necessary information is included. 
+-   Open a pull request (PR) from your forked repository’s branch to the `main` branch of this repository. In your PR description, please use the provided [Pull Request Template](PULL_REQUEST_TEMPLATE.md) to ensure that all necessary information is included.
 
 ### 8. Review Process
 
-- Your pull request will be reviewed by the project maintainers. They might request changes or provide feedback. Be prepared to make updates as necessary.
+-   Your pull request will be reviewed by the project maintainers. They might request changes or provide feedback. Be prepared to make updates as necessary.
 
 ## Reporting Issues
 

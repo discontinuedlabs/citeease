@@ -196,7 +196,7 @@ export default function Home() {
                 }}
                 label="Add bibliography"
                 icon="add"
-                variant="tertiary"
+                variant="primary"
                 className="fixed bottom-5 right-5"
             />
 

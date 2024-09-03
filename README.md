@@ -7,16 +7,16 @@
 
 ## Table of Contents
 
-- [What is CiteEase?](#what-is-citeease)
-- [Key Features](#key-features)
-- [Upcoming Features (to-do)](#upcoming-features-to-do)
-- [Getting Started](#getting-started)
-- [Contributing](#contributing)
-- [Reporting Issues](#reporting-issues)
-- [Testing](#testing)
-- [License](#license)
-- [Contact](#contact)
-- [Acknowledgments](#acknowledgments)
+-   [What is CiteEase?](#what-is-citeease)
+-   [Key Features](#key-features)
+-   [Upcoming Features (to-do)](#upcoming-features-to-do)
+-   [Getting Started](#getting-started)
+-   [Contributing](#contributing)
+-   [Reporting Issues](#reporting-issues)
+-   [Testing](#testing)
+-   [License](#license)
+-   [Contact](#contact)
+-   [Acknowledgments](#acknowledgments)
 
 ## What is CiteEase?
 
@@ -42,12 +42,12 @@ CiteEase is a powerful and user-friendly open-source citation management app des
 
 ## Upcoming Features (to-do)
 
-- [ ] Integration with popular reference managers (Zotero, Mendeley, EndNote).
-- [ ] Version control to track changes and revert to previous versions (local for privacy).
-- [ ] Advanced search with filters and Boolean operators for specific fields.
-- [ ] CSL file manager to create, customize, and manage citation styles (including update checks and adding new ones).
-- [ ] Raw JSON Entry mode for advanced users to input citation data directly into predefined JSON structures (e.g., CSL-JSON, BibJSON).
-- [ ] Custom Source Templates feature allowing users to create, export, and import personalized citation templates beyond the standard options (book, webpage, journal article, etc.).
+-   [ ] Integration with popular reference managers (Zotero, Mendeley, EndNote).
+-   [ ] Version control to track changes and revert to previous versions (local for privacy).
+-   [ ] Advanced search with filters and Boolean operators for specific fields.
+-   [ ] CSL file manager to create, customize, and manage citation styles (including update checks and adding new ones).
+-   [ ] Raw JSON Entry mode for advanced users to input citation data directly into predefined JSON structures (e.g., CSL-JSON, BibJSON).
+-   [ ] Custom Source Templates feature allowing users to create, export, and import personalized citation templates beyond the standard options (book, webpage, journal article, etc.).
 
 ## Getting Started
 
@@ -75,8 +75,8 @@ For inquiries or more information, you can reach out to us at [discontinuedlabs@
 
 ## Acknowledgments
 
-- CiteEase uses CSL style files from [Citation Style Language Styles](https://github.com/citation-style-language/styles), which are licensed under the [Creative Commons Attribution-ShareAlike 3.0 Unported License](https://creativecommons.org/licenses/by-sa/3.0/).
-- XML locales files are sourced from [Citation Style Language Locales](https://github.com/citation-style-language/locales), also licensed under the [Creative Commons Attribution-ShareAlike 3.0 Unported License](https://creativecommons.org/licenses/by-sa/3.0/).
+-   CiteEase uses CSL style files from [Citation Style Language Styles](https://github.com/citation-style-language/styles), which are licensed under the [Creative Commons Attribution-ShareAlike 3.0 Unported License](https://creativecommons.org/licenses/by-sa/3.0/).
+-   XML locales files are sourced from [Citation Style Language Locales](https://github.com/citation-style-language/locales), also licensed under the [Creative Commons Attribution-ShareAlike 3.0 Unported License](https://creativecommons.org/licenses/by-sa/3.0/).
 
 We extend our gratitude to these projects for providing essential resources that enhance the functionality and versatility of CiteEase.
 

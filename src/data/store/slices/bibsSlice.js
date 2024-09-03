@@ -166,6 +166,23 @@ const bibsSlice = createSlice({
             save(newState, action.payload.currentUser);
             return newState;
         },
+        addCitationsToBib: (state, action) => {
+            console.log(action);
+            const newBibs = state.data.map((bib) => {
+                if (bib.id === action.payload.bibId) {
+                    return {
+                        ...bib,
+                        citations: [...bib.citations, ...action.payload.citations],
+                        dateModified: new Date().toString(),
+                    };
+                }
+                return bib;
+            });
+
+            const newState = { ...state, data: newBibs };
+            save(newState, action.payload.currentUser);
+            return newState;
+        },
         addNewCitation: (state, action) => {
             const newBibs = state.data.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
@@ -454,6 +471,7 @@ export const {
     createBibFromJson,
     deleteBib,
     updateBibField,
+    addCitationsToBib,
     addNewCitation,
     editCitation,
     updateContentInEditedCitation,

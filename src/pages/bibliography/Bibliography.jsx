@@ -10,7 +10,6 @@ import {
     CitationForm,
     RenameDialog,
     AddCitationMenu,
-    SmartGeneratorDialog,
     CitationStylesMenu,
     TagsDialog,
     IdAndPasswordDialogVisible,
@@ -63,13 +62,10 @@ export default function Bibliography() {
     const [idAndPasswordDialogVisible, setIdAndPasswordDialogVisible] = useState(false);
     const [intextCitationDialogVisible, setIntextCitationDialogVisible] = useState(false);
     const [citationFormVisible, setCitationFormVisible] = useState(false);
-    const [addCitationMenuVisible, setAddCitationMenuVisible] = useState(false);
     const [moveWindowVisible, setMoveWindowVisible] = useState(false);
     const [renameWindowVisible, setRenameWindowVisible] = useState(false);
-    const [smartGeneratorDialogVisible, setSmartGeneratorDialogVisible] = useState(false);
     const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
     const [tagsDialogVisible, setTagsDialogVisible] = useState(false);
-    const [searchByIdentifiersInput, setSearchByIdentifiersInput] = useState("");
     const [iconsMenuVisible, setIconsMenuVisible] = useState(false);
 
     useEffect(() => {
@@ -109,17 +105,17 @@ export default function Bibliography() {
         else if (checkedCitationsIds.length === 1)
             dispatch(editCitation({ bibliographyId: bibliography.id, citationId: checkedCitationsIds[0] }));
         setCitationFormVisible(true);
-        setAddCitationMenuVisible(false);
     }
 
-    function handleSearchByIdentifiers(input) {
-        if (!isOnline && bibliography?.collab?.open) {
-            toast.show({ message: "You are offline", icon: "error", color: "red" });
-            return;
-        }
-
-        setSearchByIdentifiersInput(input);
-        setSmartGeneratorDialogVisible(true);
+    function openAddCitationMenu() {
+        dialog.show({
+            id: "open-citation-menu",
+            headline: "Add citation",
+            content: (
+                <AddCitationMenu openCitationForm={openCitationForm} close={() => dialog.close("open-citation-menu")} />
+            ),
+            actions: [["Cancel", () => dialog.close()]],
+        });
     }
 
     function addTagToBib(tag) {
@@ -150,14 +146,6 @@ export default function Bibliography() {
                 value: bibliography.tags.filter((prevTag) => prevTag.id !== tag.id),
             })
         );
-    }
-
-    function handleImportCitation() {
-        if (!isOnline && bibliography?.collab?.open) {
-            toast.show({ message: "You are offline", icon: "error", color: "red" });
-            return undefined;
-        }
-        return undefined;
     }
 
     async function handleCopy() {
@@ -555,7 +543,7 @@ export default function Bibliography() {
 
     function getConditionalOptionsWhenNothingSelected() {
         // Options for admin of collaborative bibliographies
-        if (collaborationOpened && bibliography?.collab?.adminId === currentUser.uid) {
+        if (collaborationOpened && bibliography?.collab?.adminId === currentUser?.uid) {
             return [
                 { headline: "Tags", onClick: () => setTagsDialogVisible(true) },
                 { headline: "Rename bibliography", onClick: () => setRenameWindowVisible(true) },
@@ -570,7 +558,7 @@ export default function Bibliography() {
         // Options for collaborators
         if (
             collaborationOpened &&
-            bibliography?.collab?.collaborators.some((collaborator) => collaborator.id === currentUser.uid)
+            bibliography?.collab?.collaborators.some((collaborator) => collaborator.id === currentUser?.uid)
         ) {
             return [{ headline: "Leave collaboration", onClick: handleLeaveCollaboration }];
         }
@@ -666,27 +654,6 @@ export default function Bibliography() {
                 <RenameDialog {...{ title: bibliography?.title, setRenameWindowVisible, handleRename }} />
             )}
 
-            {smartGeneratorDialogVisible && searchByIdentifiersInput.length && (
-                <SmartGeneratorDialog
-                    {...{
-                        searchByIdentifiersInput,
-                        setSmartGeneratorDialogVisible,
-                    }}
-                />
-            )}
-
-            {addCitationMenuVisible && (
-                // TODO: Since the openCitationForm is passed to this component, make the handleSearchByIdentifiers and handleImportCitation inside it
-                <AddCitationMenu
-                    {...{
-                        setAddCitationMenuVisible,
-                        openCitationForm,
-                        handleSearchByIdentifiers,
-                        handleImportCitation,
-                    }}
-                />
-            )}
-
             {tagsDialogVisible && (
                 <TagsDialog {...{ setTagsDialogVisible, onTagAdded: addTagToBib, onTagRemoved: removeTagFromBib }} />
             )}
@@ -707,9 +674,9 @@ export default function Bibliography() {
             <Fab
                 label="Add citation"
                 icon="add"
-                variant="tertiary"
+                variant="primary"
                 className="fixed bottom-5 right-5"
-                onClick={() => setAddCitationMenuVisible(true)}
+                onClick={openAddCitationMenu}
             />
         </div>
     );
