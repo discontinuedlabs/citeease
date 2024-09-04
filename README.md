@@ -1,6 +1,8 @@
 # CiteEase: Open-Source Citation Management App
 
 ![Build Status](https://img.shields.io/github/actions/workflow/status/discontinuedlabs/citeease/build.yml)
+![Test Status](https://img.shields.io/github/actions/workflow/status/discontinuedlabs/citeease/test.yml)
+![Lint Status](https://img.shields.io/github/actions/workflow/status/discontinuedlabs/citeease/lint.yml)
 ![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)
 ![License](https://img.shields.io/github/license/discontinuedlabs/citeease)
 
