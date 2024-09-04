@@ -1,6 +1,7 @@
 # CiteEase: Open-Source Citation Management App
 
 ![Build Status](https://img.shields.io/github/actions/workflow/status/discontinuedlabs/citeease/build.yml)
+![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)
 ![License](https://img.shields.io/github/license/discontinuedlabs/citeease)
 
 **Welcome to CiteEase, an open-source Progressive Web App (PWA) for managing citations and collaborating on bibliographies.**
