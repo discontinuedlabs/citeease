@@ -1,0 +1,55 @@
+name: Bring Your Own Badge
+
+on:
+  workflow_call:
+    inputs:
+      name:
+        description: 'Badge Name'
+        required: true
+      label:
+        description: 'Label Text'
+        required: true
+      icon:
+        description: 'Icon Name'
+        required: true
+      status:
+        description: 'Status Content'
+        required: true
+      color:
+        description: 'Color Code'
+        required: false
+        default: 'green'
+      github_token:
+        description: 'GitHub Token'
+        required: false
+        default: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  create_badges:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Bring Your Own Badge
+        uses: RubbaBoy/BYOB@v1.3.0
+        with:
+          NAME: ${{ github.event.inputs.name }}
+          LABEL: ${{ github.event.inputs.label }}
+          ICON: ${{ github.event.inputs.icon }}
+          STATUS: ${{ github.event.inputs.status }}
+          COLOR: ${{ github.event.inputs.color }}
+          GITHUB_TOKEN: ${{ github.event.inputs.github_token }}
+
+      - name: Save All Badge Images
+        uses: actions/download-artifact@v2
+        with:
+          name: badge-images
+          path: badges.zip
+
+      - name: Upload Badge Images to GitHub
+        uses: peaceiris/actions-upload-artifact@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          artifact-name: badge-images
+          upload-type: zip
+          upload-path: badges.zip
+          description: 'Multiple Badges'
+          branch: main
