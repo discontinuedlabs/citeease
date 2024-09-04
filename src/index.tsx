@@ -28,6 +28,7 @@ import "@material/web/menu/menu";
 import "@material/web/menu/menu-item";
 import "@material/web/menu/sub-menu";
 import "@material/web/textfield/filled-text-field";
+import "@material/web/progress/circular-progress";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>

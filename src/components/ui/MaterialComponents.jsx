@@ -6,6 +6,14 @@ import { uid } from "../../utils/utils.ts";
 import { TAG_COLOR_VALUES } from "../../data/store/slices/settingsSlice";
 import { useMetaThemeColor } from "../../hooks/hooks.tsx";
 
+export function ProgressIndicator({ className, ...rest }) {
+    return (
+        <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
+            <md-circular-progress four-color indeterminate class={className} {...rest} />
+        </div>
+    );
+}
+
 export function Checkbox({ className, onChange, checked = false, indeterminate = false, ...rest }) {
     const ref = useRef();
 

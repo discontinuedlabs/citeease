@@ -70,7 +70,7 @@ export default function App() {
     }, [currentUser, bibsLoaded]);
 
     return (
-        <main className="min-h-screen font-sans">
+        <main className="relative min-h-screen font-sans">
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/signup" element={<Signup />} />
