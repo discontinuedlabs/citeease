@@ -75,9 +75,6 @@ For inquiries or more information, you can reach out to us at [discontinuedlabs@
 
 ## Acknowledgments
 
--   CiteEase uses CSL style files from [Citation Style Language Styles](https://github.com/citation-style-language/styles), which are licensed under the [Creative Commons Attribution-ShareAlike 3.0 Unported License](https://creativecommons.org/licenses/by-sa/3.0/).
--   XML locales files are sourced from [Citation Style Language Locales](https://github.com/citation-style-language/locales), also licensed under the [Creative Commons Attribution-ShareAlike 3.0 Unported License](https://creativecommons.org/licenses/by-sa/3.0/).
-
-We extend our gratitude to these projects for providing essential resources that enhance the functionality and versatility of CiteEase.
+CiteEase utilizes CSL style files from [Citation Style Language Styles](https://github.com/citation-style-language/styles) and XML locales files from [Citation Style Language Locales](https://github.com/citation-style-language/locales), both of which are licensed under the [Creative Commons Attribution-ShareAlike 3.0 Unported License](https://creativecommons.org/licenses/by-sa/3.0/). We extend our gratitude to these projects for providing essential resources that enhance the functionality and versatility of CiteEase.
 
 **We hope you find CiteEase to be a valuable tool for your research endeavors!**
