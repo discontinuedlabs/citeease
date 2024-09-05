@@ -5,7 +5,6 @@ on: [push, pull_request]
 jobs:
     test:
         runs-on: ubuntu-latest
-        continue-on-error: true
 
         steps:
             - name: Checkout code
@@ -28,4 +27,5 @@ jobs:
               run: npm install
 
             - name: Run tests
+              if: always()
               run: npm run test
