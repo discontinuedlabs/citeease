@@ -54,8 +54,6 @@
         --md-sys-color-shadow: #000000;
         --md-sys-color-scrim: #000000;
 
-        --md-list-item-container-shape: 25px;
-
         background-color: var(--md-sys-color-surface);
         color: var(--md-sys-color-on-surface);
     }
@@ -143,6 +141,10 @@
 
     code {
         @apply rounded-md bg-secondary-800 px-2 py-1 text-white;
+    }
+
+    md-filled-text-field {
+        resize: none;
     }
 
     .csl-entry:has(.csl-left-margin) {

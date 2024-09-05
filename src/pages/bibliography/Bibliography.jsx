@@ -108,13 +108,12 @@ export default function Bibliography() {
     }
 
     function openAddCitationMenu() {
+        const id = uid();
         dialog.show({
-            id: "open-citation-menu",
+            id,
             headline: "Add citation",
-            content: (
-                <AddCitationMenu openCitationForm={openCitationForm} close={() => dialog.close("open-citation-menu")} />
-            ),
-            actions: [["Cancel", () => dialog.close()]],
+            content: <AddCitationMenu openCitationForm={openCitationForm} close={() => dialog.close(id)} />,
+            actions: [["Cancel", () => dialog.close(id)]],
         });
     }
 

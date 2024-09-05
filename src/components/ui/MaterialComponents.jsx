@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading, prettier/prettier */
 
-import React, { useEffect, useId, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { uid } from "../../utils/utils.ts";
 import { TAG_COLOR_VALUES } from "../../data/store/slices/settingsSlice";
@@ -13,6 +13,36 @@ export function ProgressIndicator({ className, ...rest }) {
         </div>
     );
 }
+
+export const TextField = forwardRef(function TextField(props, ref) {
+    const { className, label, prefixText, suffixText, errorText, supportingText, error = false, ...rest } = props;
+    if (error)
+        // Simply adding "error={false}" doesn't fix the problem
+        return (
+            <md-filled-text-field
+                ref={ref}
+                class={className}
+                label={label}
+                prefix-text={prefixText}
+                suffix-text={suffixText}
+                supporting-text={supportingText}
+                error={error}
+                error-text={errorText}
+                {...rest}
+            />
+        );
+    return (
+        <md-filled-text-field
+            ref={ref}
+            class={className}
+            label={label}
+            prefix-text={prefixText}
+            suffix-text={suffixText}
+            supporting-text={supportingText}
+            {...rest}
+        />
+    );
+});
 
 export function Checkbox({ className, onChange, checked = false, indeterminate = false, ...rest }) {
     const ref = useRef();
@@ -63,25 +93,25 @@ export function Fab({ label, icon, className, onClick, ...rest }) {
     );
 }
 
-export function FilledButton({ className, onClick, children, ...rest }) {
+export function FilledButton({ className, onClick, type = "button", children, ...rest }) {
     return (
-        <md-filled-button class={`p-2 font-sans ${className}`} onClick={onClick} {...rest}>
+        <md-filled-button type={type} class={`p-2 font-sans ${className}`} onClick={onClick} {...rest}>
             {children}
         </md-filled-button>
     );
 }
 
-export function TextButton({ className, onClick, children, ...rest }) {
+export function TextButton({ className, onClick, type = "button", children, ...rest }) {
     return (
-        <md-text-button class={`p-2 font-sans ${className}`} onClick={onClick} {...rest}>
+        <md-text-button type={type} class={`p-2 font-sans ${className}`} onClick={onClick} {...rest}>
             {children}
         </md-text-button>
     );
 }
 
-export function IconButton({ className, onClick, name, ...rest }) {
+export function IconButton({ className, onClick, type = "button", name, ...rest }) {
     return (
-        <md-icon-button class={` ${className}`} onClick={onClick} {...rest}>
+        <md-icon-button type={type} class={` ${className}`} onClick={onClick} {...rest}>
             <md-icon>{name}</md-icon>
         </md-icon-button>
     );
@@ -249,7 +279,7 @@ export function ChipSet({ chips = [], removable = false, className, ...rest }) {
 
 export function EmptyPage({ icon = "error", title, message, actions = [] }) {
     return (
-        <div className="flex h-full w-full items-center justify-center p-5 font-sans">
+        <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center p-5 font-sans">
             <div className="text-center">
                 <Icon style={{ color: "var(--md-sys-color-outline)" }} className="h-32 w-32 text-9xl" name={icon} />
                 {title && <h3>{title}</h3>}

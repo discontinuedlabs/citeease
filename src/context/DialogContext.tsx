@@ -66,12 +66,12 @@ export function useDialog(): DialogContextType {
 function Dialog({ id, headline, content, actions, close }: DialogProps) {
     const setTimeout = useTimeout();
 
-    function handleClose(dId) {
+    function handleClose(dId: string) {
         const dialog = document.getElementById(dId) as HTMLDialogElement;
         setTimeout(() => {
             dialog?.close();
             close(dId);
-        }, 1000); // PATCH: Duct tape fix. Not pretty, but works for now.
+        }, 1000); // PATCH: Duct tape fix for getting the animation before closing.
     }
 
     useEffect(() => {

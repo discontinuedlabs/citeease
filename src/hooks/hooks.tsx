@@ -124,6 +124,42 @@ export function useDocumentTitle(
 }
 
 /**
+ * Returns the current device theme ("dark" or "light") based on the system preferences.
+ *
+ * @param {CallableFunction} [onChangeCallback] - Optional callback function to be executed when the theme changes.
+ * @returns {"dark" | "light"} The current device theme.
+ *
+ * @example
+ * // Usage
+ * const theme = useDeviceTheme((isDarkMode) => {
+ *     console.log(isDarkMode ? "Dark mode is enabled" : "Light mode is enabled");
+ * });
+ * console.log("Current theme:", theme);
+ */
+export function useDeviceTheme(onChangeCallback: CallableFunction = () => undefined): "dark" | "light" {
+    const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+        const handleChange = () => {
+            setIsDarkMode(mediaQuery.matches);
+            onChangeCallback(mediaQuery.matches);
+        };
+
+        handleChange();
+
+        mediaQuery.addEventListener("change", handleChange);
+
+        return () => {
+            mediaQuery.removeEventListener("change", handleChange);
+        };
+    }, [onChangeCallback]);
+
+    return isDarkMode ? "dark" : "light";
+}
+
+/**
  * Updates the theme color of the application dynamically based on a given color.
  * It initializes with either a provided color or the current background color of the document.
  * Subsequent calls allow updating the theme color to a new value.
@@ -136,14 +172,14 @@ export function useMetaThemeColor(initialColor: string): (newColor: string) => v
     const [color, setColor] = useState<string>(
         initialColor || window.getComputedStyle(document.documentElement).getPropertyValue("background-color")
     );
+    const currentDeviceTheme = useDeviceTheme();
 
     useEffect(() => {
-        // eslint-disable-next-line quotes
-        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]'); // eslint-disable-line quotes
         if (metaThemeColor) {
             metaThemeColor.setAttribute("content", color);
         }
-    }, [color]);
+    }, [color, currentDeviceTheme]);
 
     return (newColor) => setColor(newColor);
 }

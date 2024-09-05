@@ -15,7 +15,6 @@ import {
     updateContentInEditedCitation,
 } from "../../data/store/slices/bibsSlice";
 import BibliographyCard from "../../components/ui/BibliographyCard";
-import ContextMenu from "../../components/ui/ContextMenu";
 import * as citationUtils from "../../utils/citationUtils.ts";
 import useOnlineStatus, { useEnhancedDispatch, useFindBib } from "../../hooks/hooks.tsx";
 import Tag from "../../components/ui/Tag";
@@ -23,7 +22,15 @@ import citationStyles from "../../assets/json/styles.json";
 import mostPopularStyles from "../../assets/json/mostPopularStyles.json";
 import { uid } from "../../utils/utils.ts";
 import { parseHtmlToJsx } from "../../utils/conversionUtils.tsx";
-import { Checkbox, EmptyPage, IconButton, List, TextButton } from "../../components/ui/MaterialComponents";
+import {
+    Checkbox,
+    EmptyPage,
+    FilledButton,
+    IconButton,
+    List,
+    TextButton,
+    TextField,
+} from "../../components/ui/MaterialComponents";
 
 // Source types
 import ArticleJournal from "../../components/sourceTypes/ArticleJournal";
@@ -423,6 +430,7 @@ export function AddCitationMenu({ openCitationForm, close }) {
     const dialog = useDialog();
     const dispatch = useEnhancedDispatch();
     const acceptedCitationsRef = useRef([]);
+    const [errorMessage, setErrorMessage] = useState();
 
     function handleAcceptCitations() {
         console.warn(acceptedCitationsRef.current); // This will now log the latest state
@@ -430,12 +438,22 @@ export function AddCitationMenu({ openCitationForm, close }) {
     }
 
     function startSmartGenerator(input) {
+        setErrorMessage();
+
         if (!isOnline) {
-            toast.show({ message: "You are offline", icon: "error", color: "red" });
+            setErrorMessage("You are offline.");
             return;
         }
 
+        if (/\s*/.test(input)) {
+            setErrorMessage("You can't generate citations with empty strings.");
+            return;
+        }
+
+        close();
+        const id = uid();
         dialog.show({
+            id,
             headline: "Smart generator",
             content: (
                 <SmartGenerator
@@ -446,7 +464,7 @@ export function AddCitationMenu({ openCitationForm, close }) {
                 />
             ),
             actions: [
-                ["Cancel", () => dialog.close()],
+                ["Cancel", () => dialog.close(id)],
                 ["Accept", handleAcceptCitations],
             ],
         });
@@ -460,30 +478,47 @@ export function AddCitationMenu({ openCitationForm, close }) {
         return undefined;
     }
 
-    return (
-        <div className="p-4">
-            <div>
-                <small>Experimental</small>
-                <label htmlFor="search-by-identifiers">
-                    Search by URL, DOI, ISBN, or PubMed and PMC identifiers:
-                    <textarea
-                        ref={identifierRef}
-                        name="search-by-identifiers"
-                        placeholder="Search by unique identifiers..."
-                    />
-                </label>
+    function showSourceTypes() {
+        close();
+        const id = uid();
+        dialog.show({
+            id,
+            headline: "Choose the type of your source",
+            content: (
+                <List
+                    items={Object.values(sourceTypes).map((entry) => ({
+                        title: entry.label,
+                        onClick: () => {
+                            dialog.close(id);
+                            openCitationForm(entry.code, true);
+                        },
+                    }))}
+                />
+            ),
+            actions: [["Cancel", () => dialog.close(id)]],
+        });
+    }
 
-                <small>You can list all the identifiers at the same time.</small>
-                <button
-                    type="button"
-                    onClick={() => {
-                        close();
-                        startSmartGenerator(identifierRef.current.value);
-                    }}
-                >
+    return (
+        <div className="px-4">
+            <form onSubmit={(event) => event.preventDefault()}>
+                <TextField
+                    error={Boolean(errorMessage)}
+                    errorText={errorMessage}
+                    className="mb-2 w-full"
+                    onChange={() => setErrorMessage()}
+                    label="Search by unique identifiers"
+                    placeholder={`https://example.com\nhttps://doi.org/xxxx\nPMID: 12345678`} // eslint-disable-line quotes
+                    supportingText="You can list all the identifiers at the same time."
+                    rows="3"
+                    type="textarea"
+                    ref={identifierRef}
+                />
+
+                <FilledButton className="mb-1 w-full" onClick={() => startSmartGenerator(identifierRef.current.value)}>
                     Generate citations
-                </button>
-            </div>
+                </FilledButton>
+            </form>
 
             {/* <search>
                 <input type="text" name="search-by-title" placeholder="Search by title..." />
@@ -492,19 +527,13 @@ export function AddCitationMenu({ openCitationForm, close }) {
                 </button>
             </search> */}
 
-            <button type="button" onClick={handleImportCitation}>
-                Import citation
-            </button>
+            <TextButton className="mb-1 w-full" onClick={handleImportCitation}>
+                Import citations
+            </TextButton>
 
-            <ContextMenu
-                options={Object.values(sourceTypes).map((entry) => [
-                    entry.label,
-                    () => openCitationForm(entry.code, true),
-                ])}
-                direction="up"
-            >
+            <TextButton onClick={showSourceTypes} className="w-full">
                 Choose source type
-            </ContextMenu>
+            </TextButton>
         </div>
     );
 }

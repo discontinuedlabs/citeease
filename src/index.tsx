@@ -10,6 +10,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import DialogProvider from "./context/DialogContext.tsx";
 
 import "./index.css";
+// import "@material/web/all";
 import "@material/web/button/filled-button";
 import "@material/web/button/text-button";
 import "@material/web/checkbox/checkbox";
