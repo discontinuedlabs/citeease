@@ -1,9 +1,9 @@
-name: Lint
+name: Test
 
 on: [push, pull_request]
 
 jobs:
-    lint:
+    test:
         runs-on: ubuntu-latest
 
         steps:
@@ -23,8 +23,8 @@ jobs:
               with:
                   node-version: 20
 
-            - name: Install Dependencies
+            - name: Install dependencies
               run: npm install
 
-            - name: Lint
-              run: npm run lint
+            - name: Run tests
+              run: npm run test
