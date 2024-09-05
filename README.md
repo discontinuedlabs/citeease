@@ -5,8 +5,7 @@
 [![Lint](https://github.com/discontinuedlabs/citeease/actions/workflows/lint.yml/badge.svg)](https://github.com/discontinuedlabs/citeease/actions/workflows/lint.yml)
 ![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)
 ![License](https://img.shields.io/github/license/discontinuedlabs/citeease)
-![Contributions Welcome](https://byob.yarr.is/discontinuedlabs/citeease/contributions-welcome)
-![License](https://byob.yarr.is/discontinuedlabs/citeease/license)
+![BYOB Badge](https://github.com/discontinuedlabs/citeease/actions/workflows/byob.yml/badge.svg)
 
 **Welcome to CiteEase, an open-source Progressive Web App (PWA) for managing citations and collaborating on bibliographies.**
 
