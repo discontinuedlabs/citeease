@@ -1,0 +1,31 @@
+name: Bring Your Own Badge
+
+on:
+    schedule:
+        - cron: "0 0 * * *"
+
+jobs:
+    byob:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: peter-evans/create-badges@v1
+              with:
+                  github_token: ${{secrets.GITHUB_TOKEN}}
+                  badges: |
+                      [
+                        {
+                          "label": "Contributions Welcome",
+                          "message": "Contributions welcome!",
+                          "type": "text"
+                        },
+                        {
+                          "label": "License",
+                          "message": "${{steps.get-license.outputs.license}}",
+                          "type": "text"
+                        }
+                      ]
+                  get-license: |
+                      - name: Get License
+                        id: get-license
+                        run: echo "::set-output name=license::$(cat LICENSE)"
