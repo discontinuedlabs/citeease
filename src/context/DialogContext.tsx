@@ -66,7 +66,7 @@ export function useDialog(): DialogContextType {
 function Dialog({ id, headline, content, actions, close }: DialogProps) {
     const setTimeout = useTimeout();
 
-    function handleClose(dId: string) {
+    function handleClose(dId) {
         const dialog = document.getElementById(dId) as HTMLDialogElement;
         setTimeout(() => {
             dialog?.close();
