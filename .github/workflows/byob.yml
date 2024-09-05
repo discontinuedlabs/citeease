@@ -1,65 +1,34 @@
-name: Create Badge
+name: BYOB
 
 on:
-    push:
-        branches: [main]
+    schedule:
+        - cron: "*/5 * * * *"
 
 jobs:
-    create-badge:
+    badge_job:
         runs-on: ubuntu-latest
-
         steps:
-            - uses: actions/checkout@v3
-
-            - name: Set up Python
-              uses: actions/setup-python@v3
+            - name: Bring Your Own Badge
+              uses: RubbaBoy/BYOB@v1.3.0
               with:
-                  python-version: "3.x"
+                  NAME: contributions-welcome
+                  LABEL: "Contributions Welcome"
+                  ICON: "github"
+                  STATUS: "Contributions welcome"
+                  COLOR: green
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Install dependencies
+            - name: Read LICENSE file
+              id: license
               run: |
-                  python -m pip install --upgrade pip
-                  pip install shields.io
+                  echo "::set-env name=LICENSE_CONTENT::$(cat ${GITHUB_WORKSPACE}/LICENSE)"
 
-            - name: Generate badge
-              run: |
-                  import os
-                  from shields.io import Badge
-
-                  # Get license content
-                  with open('.gitattributes') as f:
-                      license_content = f.read()
-
-                  # Create static badge
-                  static_badge = Badge(
-                      label="Contributions welcome",
-                      message="Contributions welcome!",
-                      color="green"
-                  )
-
-                  # Create dynamic badge
-                  dynamic_badge = Badge(
-                      label="License",
-                      message=license_content,
-                      color="blue"
-                  )
-
-                  # Save badges as SVG files
-                  static_badge.save("static_badge.svg")
-                  dynamic_badge.save("dynamic_badge.svg")
-
-            - name: Update README.md
-              run: |
-                  echo "# License\n\n$(cat .gitattributes)" >> README.md
-                  echo "\n[![Static Badge](static_badge.svg)](https://github.com/discontinuedlabs/citeease/blob/main/static_badge.svg)" >> README.md
-                  echo "\n[![Dynamic Badge](dynamic_badge.svg)](https://github.com/discontinuedlabs/citeease/blob/main/dynamic_badge.svg)" >> README.md
-
-            - name: Commit changes
-              env:
-                  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-              run: |
-                  git config --local user.email "action@github.com"
-                  git config --local user.name "GitHub Action"
-                  git add .
-                  git commit -m "Update README with badge"
-                  git push
+            - name: Bring Your Own Badge
+              uses: RubbaBoy/BYOB@v1.3.0
+              with:
+                  NAME: license
+                  LABEL: "License"
+                  ICON: "license"
+                  STATUS: ${{ env.LICENSE_CONTENT | truncate:50 }}
+                  COLOR: blue
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
