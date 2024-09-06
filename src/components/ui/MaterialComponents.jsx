@@ -101,7 +101,7 @@ export function FilledButton({ className, onClick, type = "button", children, ..
     );
 }
 
-export function TextButton({ className, onClick, type = "button", children, ...rest }) {
+export function TextButton({ className = "", onClick, type = "button", children, ...rest }) {
     return (
         <md-text-button type={type} class={`p-2 font-sans ${className}`} onClick={onClick} {...rest}>
             {children}

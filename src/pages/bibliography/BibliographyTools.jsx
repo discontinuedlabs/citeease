@@ -445,7 +445,7 @@ export function AddCitationMenu({ openCitationForm, close }) {
             return;
         }
 
-        if (/\s*/.test(input)) {
+        if (/^\s*$/.test(input)) {
             setErrorMessage("You can't generate citations with empty strings.");
             return;
         }
@@ -515,7 +515,7 @@ export function AddCitationMenu({ openCitationForm, close }) {
                     ref={identifierRef}
                 />
 
-                <FilledButton className="mb-1 w-full" onClick={() => startSmartGenerator(identifierRef.current.value)}>
+                <FilledButton className="mb-3 w-full" onClick={() => startSmartGenerator(identifierRef.current.value)}>
                     Generate citations
                 </FilledButton>
             </form>
@@ -527,7 +527,7 @@ export function AddCitationMenu({ openCitationForm, close }) {
                 </button>
             </search> */}
 
-            <TextButton className="mb-1 w-full" onClick={handleImportCitation}>
+            <TextButton className="mb-2 w-full" onClick={handleImportCitation}>
                 Import citations
             </TextButton>
 

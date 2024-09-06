@@ -39,55 +39,52 @@ export function uid(length: number = 20): string {
 }
 
 /**
- * Calculates the relative time from the given date to now.
+ * Returns a human-readable relative time string indicating how long ago (or in the future) a given date is,
+ * compared to the current date and time.
  *
- * @param dateString - The date string to calculate the time difference from. This should be a valid ISO 8601 date string.
- * @returns A string representing the time elapsed since the given date in a human-readable format.
+ * @param {string} dateString - The date in ISO string format or any parsable date format.
+ * @param {Intl.RelativeTimeFormatStyle} [style="long"] - Optional. The style of the relative time format.
+ *     Can be "long", "short", or "narrow". Defaults to "long".
+ * @returns {string} - A human-readable string describing the relative time (e.g., "3 days ago", "in 2 months").
+ *
+ * @example
+ * // Returns something like "3 days ago" or "in 2 months"
+ * timeAgo("2023-09-01T12:00:00Z");
+ *
+ * @example
+ * // With short style format: "3d ago"
+ * timeAgo("2023-09-01T12:00:00Z", "short");
  */
-export function timeAgo(dateString: string): string {
+export function timeAgo(dateString: string, style: Intl.RelativeTimeFormatStyle = "long"): string {
     const now = new Date();
     const then = new Date(dateString);
 
-    const diffInSeconds = Math.floor((now.getTime() - then.getTime()) / 1000);
+    const formatter = new Intl.RelativeTimeFormat(undefined, {
+        numeric: "auto",
+        style,
+    });
 
-    let formattedTime: string;
+    const DIVISIONS = [
+        { amount: 60, name: "seconds" },
+        { amount: 60, name: "minutes" },
+        { amount: 24, name: "hours" },
+        { amount: 7, name: "days" },
+        { amount: 4.34524, name: "weeks" },
+        { amount: 12, name: "months" },
+        { amount: Number.POSITIVE_INFINITY, name: "years" },
+    ];
 
-    if (diffInSeconds < 60) {
-        // Less than a minute
-        formattedTime = "just now";
-    } else if (diffInSeconds < 3600) {
-        // Less than an hour
-        formattedTime = `${Math.floor(diffInSeconds / 60)} ${
-            Math.floor(diffInSeconds / 60) === 1 ? "minute" : "minutes"
-        } ago`;
-    } else if (diffInSeconds < 86400) {
-        // Less than 24 hours
-        formattedTime = `${Math.floor(diffInSeconds / 3600)} ${
-            Math.floor(diffInSeconds / 3600) === 1 ? "hour" : "hours"
-        } ago`;
-    } else if (diffInSeconds < 604800) {
-        // Less than a week
-        formattedTime = `${Math.floor(diffInSeconds / 86400)} ${
-            Math.floor(diffInSeconds / 86400) === 1 ? "day" : "days"
-        } ago`;
-    } else if (diffInSeconds < 1209600) {
-        // More than a week but less than two weeks
-        formattedTime = `${Math.floor(diffInSeconds / 604800)} ${
-            Math.floor(diffInSeconds / 604800) === 1 ? "week" : "weeks"
-        } ago`;
-    } else if (diffInSeconds < 31536000) {
-        // More than two weeks but less than a year
-        formattedTime = `${then.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
-    } else {
-        // More than a year
-        formattedTime = `${then.toLocaleDateString(undefined, {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-        })}`;
+    let duration = (then.getTime() - now.getTime()) / 1000;
+
+    for (let i = 0; i < DIVISIONS.length; i += 1) {
+        const division = DIVISIONS[i];
+        if (Math.abs(duration) < division.amount) {
+            return formatter.format(Math.round(duration), division.name as Intl.RelativeTimeFormatUnit);
+        }
+        duration /= division.amount;
     }
 
-    return formattedTime;
+    return "now";
 }
 
 /**

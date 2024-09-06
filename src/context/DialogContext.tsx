@@ -68,10 +68,10 @@ function Dialog({ id, headline, content, actions, close }: DialogProps) {
 
     function handleClose(dId) {
         const dialog = document.getElementById(dId) as HTMLDialogElement;
+        dialog?.close();
         setTimeout(() => {
-            dialog?.close();
             close(dId);
-        }, 1000); // PATCH: Duct tape fix for getting the animation before closing.
+        }, 1000); // PATCH: Duct tape fix to show the closign animation before removing it from the dialogs array.
     }
 
     useEffect(() => {
