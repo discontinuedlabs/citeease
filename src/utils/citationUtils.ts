@@ -3,14 +3,20 @@ import { uid } from "./utils.ts";
 
 const CORS_PROXY: string = "https://corsproxy.io/?";
 
-/* eslint-disable quotes, @typescript-eslint/no-explicit-any */
-
-// TODO: Needs review
-export function createDateObject(yearOrDate: Date | number, month?: number, day?: number): DateObject | undefined {
-    if (yearOrDate === undefined) return undefined;
+/**
+ * Creates a `DateObject` containing `date-parts`. If a full date (year, month, day) is provided, it also
+ * includes `raw`, `date_time`, and `timestamp` properties.
+ *
+ * @param {Date | number} yearOrDate - A `Date` object or a year as a number.
+ * @param {number} [month] - The month (1-12), optional if `yearOrDate` is a `number`.
+ * @param {number} [day] - The day of the month, optional if `yearOrDate` is a `number`.
+ * @returns {DateObject} An object containing `date-parts`. If a full date (year, month, day) is provided,
+ * it also includes `raw`, `date_time`, and `timestamp` properties.
+ */
+export function createDateObject(yearOrDate: Date | number, month?: number, day?: number): DateObject {
     let year: number;
-    let adjustedMonth: number;
-    let adjustedDay: number;
+    let adjustedMonth: number | undefined;
+    let adjustedDay: number | undefined;
 
     if (yearOrDate instanceof Date) {
         year = yearOrDate.getFullYear();
@@ -18,28 +24,62 @@ export function createDateObject(yearOrDate: Date | number, month?: number, day?
         adjustedDay = yearOrDate.getDate();
     } else {
         year = yearOrDate;
-        adjustedMonth = month ?? 1;
-        adjustedDay = day ?? 1;
+        adjustedMonth = month ?? undefined;
+        adjustedDay = day ?? undefined;
     }
 
     const dateParts: number[] = [year];
-    if (adjustedMonth !== undefined) {
+
+    if (adjustedMonth) {
         dateParts.push(adjustedMonth);
-        if (adjustedDay !== undefined) {
+
+        if (adjustedDay) {
             dateParts.push(adjustedDay);
         }
     }
 
-    const newDate = new Date(year, adjustedMonth, adjustedDay);
-
-    return {
+    const dateObject: Record<string, unknown> = {
         "date-parts": [dateParts],
-        raw: `${newDate.getFullYear()}-${newDate.getMonth()}-${newDate.getDate()}`,
-        // date_time: newDate.toISOString(),
-        // timestamp: newDate.getTime(),
     };
+
+    // Only add "raw", "date_time", and "timestamp" if year, month, and day are all defined
+    if (adjustedMonth && adjustedDay) {
+        const newDate = new Date(year, adjustedMonth - 1, adjustedDay);
+        dateObject.raw = `${newDate.getFullYear()}-${newDate.getMonth() + 1}-${newDate.getDate()}`;
+        dateObject.date_time = newDate.toISOString();
+        dateObject.timestamp = newDate.getTime();
+    }
+
+    return dateObject;
 }
 
+/**
+ * `TODO`: Include these properties:
+ *
+ * ```js
+ * author: [
+ *     {
+ *         given: "Vincent",
+ *         "non-dropping-particle": "van",
+ *         family: "Gogh"
+ *     },
+ *     {
+ *         given: "Alexander",
+ *         "dropping-particle": "von",
+ *         family: "Humboldt"
+ *     },
+ *     {
+ *             literal: "International Business Machines"
+ *     },
+ *     {
+ *             family: "King",
+ *             given: "Martin Luther",
+ *             suffix:"Jr., Ph.D.",
+ *             dropping-particle:"Rev."
+ *     }
+ * ]
+ * ```
+ */
 export function createAuthorsArray(authors: string[]): Author[] {
     if (!authors) return [];
     const result: Author[] = authors.map((author) => {
@@ -52,7 +92,40 @@ export function createAuthorsArray(authors: string[]): Author[] {
     return result;
 }
 
-export function recognizeIdentifierType(string: string): string | undefined {
+type IdentifierType = "url" | "doi" | "pmcid" | "pmid" | "isbn";
+
+/**
+ * Recognizes the type of identifier from a given string.
+ * The function can identify URLs, DOIs, PMCIDs, PMIDs, and ISBNs.
+ * If the identifier string is preceded by an explicit type prefix (e.g., "URL:", "doi:", "pmid:"),
+ * the function will return an array containing the type and the cleaned string with the prefix removed.
+ * If no explicit prefix is found, the function will perform pattern matching based on known formats.
+ *
+ * @param {string} string - The input string to be checked for identifier type.
+ * @returns {[IdentifierType, string] | undefined} - Returns an array where the first element is the
+ * identifier type ("url", "doi", "pmcid", "pmid", "isbn"), and the second element is the cleaned identifier
+ * string (with any prefix removed). Returns `undefined` if no valid identifier type is detected.
+ */
+export function recognizeIdentifierType(string: string): [IdentifierType, string] | undefined {
+    const trimmedString = string.trim().toLowerCase();
+
+    // Check for explicit identifier type prefixes and clean the string
+    if (trimmedString.toLowerCase().startsWith("url:")) {
+        return ["url", trimmedString.slice(4).trim()];
+    }
+    if (trimmedString.toLowerCase().startsWith("doi:")) {
+        return ["doi", trimmedString.slice(4).trim()];
+    }
+    if (trimmedString.toLowerCase().startsWith("pmcid:")) {
+        return ["pmcid", trimmedString.slice(6).trim()];
+    }
+    if (trimmedString.toLowerCase().startsWith("pmid:")) {
+        return ["pmid", trimmedString.slice(5).trim()];
+    }
+    if (trimmedString.toLowerCase().startsWith("isbn:")) {
+        return ["isbn", trimmedString.slice(5).trim()];
+    }
+
     const urlPattern = /(https?:\/\/[^\s]+)/g;
     const doiPatterns = [
         /^\s*(https?:\/\/(?:dx\.)?doi\.org\/(10.\d{4,9}\/[-._;()/:A-Z0-9[\]<>]+))\s*$/i,
@@ -62,31 +135,35 @@ export function recognizeIdentifierType(string: string): string | undefined {
         /\b10\.\d{4,9}[-.\w]+\b/i,
     ];
     const pmcidPattern = /^PMC\d+$/i;
-    const pmidPatern = /^pmid:\s*\d+$/i;
+    const pmidPattern = /^\d{1,9}$/;
     const isbnPatterns = [
         /^(97[89])(?:-\d+){0,2}|\d{10}\s?|\d{13}\s?$|((97[89])?\d{9}\s?)(\d{5})$/,
         /^10\.(978|979)\.\d{2,8}\/\d{2,7}$/,
         /^(978|979)\d{10}$/,
-        /^\d{10}$/,
     ];
 
-    if (urlPattern.test(string)) return "url";
+    // Perform regex-based identification if no explicit prefix is found
+    if (doiPatterns.some((doiPattern) => doiPattern.test(string))) return ["doi", string.trim()]; // Check for DOI patterns first because a DOI may also be a URL, but with a more specific format
 
-    if (doiPatterns.some((doiPattern) => doiPattern.test(string.replace(/doi:\s*/gi, "")))) {
-        return "doi";
-    }
+    if (urlPattern.test(string)) return ["url", string.trim()];
 
-    if (pmcidPattern.test(string.replace(/pmcid:\s*/g, ""))) return "pmcid";
+    if (pmcidPattern.test(string)) return ["pmcid", string.trim()];
 
-    if (pmidPatern.test(string.replace(/\s+/g, ""))) return "pmid";
+    if (pmidPattern.test(string)) return ["pmid", string.trim()];
 
-    if (isbnPatterns.some((isbnPattern) => isbnPattern.test(string.replace(/-|\s+/g, "")))) {
-        return "isbn";
-    }
+    if (isbnPatterns.some((isbnPattern) => isbnPattern.test(string.replace(/-|\s+/g, ""))))
+        return ["isbn", string.trim()];
 
     return undefined;
 }
 
+/**
+ * Retrieves content from a given URL and extracts metadata for a web page.
+ *
+ * @param {string} url - The URL of the web page to retrieve.
+ * @returns {Promise<CslJson | null>} A promise that resolves to a `CslJson` object containing the extracted metadata, or `null` if an error occurs.
+ */
+/* eslint-disable quotes */
 export async function retrieveContentFromURL(url: string): Promise<CslJson | null> {
     function extractAuthors(doc: Document): Author[] {
         let authors: string[] = [];
@@ -158,15 +235,22 @@ export async function retrieveContentFromURL(url: string): Promise<CslJson | nul
         return null;
     }
 }
+/* eslint-enable quotes */
 
+/**
+ * Retrieves content from the CrossRef API using a DOI and returns metadata about the publication.
+ *
+ * @param {string} doi - The DOI of the publication to retrieve.
+ * @returns {Promise<CslJson | null>} A promise that resolves to a `CslJson` object containing the publication metadata, or `null` if an error occurs.
+ */
 export async function retrieveContentFromDOI(doi: string): Promise<CslJson | null> {
     if (!doi) return null;
 
     try {
-        const cleanedDoi = doi.replace(/doi:\s*/gi, "");
-        const response = await fetch(`${CORS_PROXY}https://api.crossref.org/works/${cleanedDoi}`);
+        const response = await fetch(`${CORS_PROXY}https://api.crossref.org/works/${doi}`);
 
-        const data: { message: any } = await response.json();
+        const data: { message: Record<string, never> } = await response.json();
+        console.log(data);
         const { message } = data;
 
         return {
@@ -186,7 +270,7 @@ export async function retrieveContentFromDOI(doi: string): Promise<CslJson | nul
             online: true,
             type: message.type === "journal-article" ? "article-journal" : message.type,
             accessed: createDateObject(new Date()),
-            author: message.author.map((author: Author[]) => ({
+            author: (message.author as Author[]).map((author) => ({
                 ...author,
                 id: uid(),
             })),
@@ -197,6 +281,12 @@ export async function retrieveContentFromDOI(doi: string): Promise<CslJson | nul
     }
 }
 
+/**
+ * Retrieves content from the Open Library API using an ISBN and returns metadata about the book.
+ *
+ * @param {string} isbn - The ISBN of the book to retrieve.
+ * @returns {Promise<CslJson | null>} A promise that resolves to a `CslJson` object containing the book metadata, or `null` if an error occurs.
+ */
 export async function retrieveContentFromISBN(isbn: string): Promise<CslJson | null> {
     if (!isbn) return null;
 
@@ -205,7 +295,7 @@ export async function retrieveContentFromISBN(isbn: string): Promise<CslJson | n
             `https://openlibrary.org/search.json?q=isbn:${isbn}&mode=everything&fields=*,editions`
         );
 
-        const data: { docs: any } = await response.json();
+        const data: { docs: object } = await response.json();
         const docs = data?.docs[0];
         const edition = docs?.editions?.docs[0];
 
@@ -226,16 +316,21 @@ export async function retrieveContentFromISBN(isbn: string): Promise<CslJson | n
     }
 }
 
+/**
+ * Retrieves content from the NCBI PMC API using a PMCID and returns metadata about the publication.
+ *
+ * @param {string} pmcid - The PMCID of the publication to retrieve.
+ * @returns {Promise<CslJson | null>} A promise that resolves to a `CslJson` object containing the publication metadata, or `null` if an error occurs.
+ */
 export async function retrieveContentFromPMCID(pmcid: string): Promise<CslJson | null> {
     if (!pmcid) return null;
 
     try {
-        const cleanedPmcid = pmcid.replace(/pmcid:\s*|PMC|\s*/gi, "");
         const response = await fetch(
-            `${CORS_PROXY}https://api.ncbi.nlm.nih.gov/lit/ctxp/v1/pmc/?format=csl&id=${cleanedPmcid}`
+            `${CORS_PROXY}https://api.ncbi.nlm.nih.gov/lit/ctxp/v1/pmc/?format=csl&id=${pmcid}`
         );
 
-        const data: any = await response.json();
+        const data: Record<string, never> = await response.json();
 
         return {
             DOI: data?.DOI,
@@ -254,7 +349,7 @@ export async function retrieveContentFromPMCID(pmcid: string): Promise<CslJson |
             volume: data?.volume,
             online: true,
             accessed: createDateObject(new Date()),
-            author: data?.author?.map((author: Author[]) => ({
+            author: (data?.author as Author[]).map((author) => ({
                 ...author,
                 id: uid(),
             })),
@@ -265,16 +360,21 @@ export async function retrieveContentFromPMCID(pmcid: string): Promise<CslJson |
     }
 }
 
+/**
+ * Retrieves content from the NCBI PubMed API using a PMID and returns metadata about the publication.
+ *
+ * @param {string} pmid - The PMID of the publication to retrieve.
+ * @returns {Promise<CslJson | null>} A promise that resolves to a `CslJson` object containing the publication metadata, or `null` if an error occurs.
+ */
 export async function retrieveContentFromPMID(pmid: string): Promise<CslJson | null> {
     if (!pmid) return null;
 
     try {
-        const cleanedPmid = pmid.replace(/pmid:\s*|\s*/gi, "");
         const response = await fetch(
-            `${CORS_PROXY}https://api.ncbi.nlm.nih.gov/lit/ctxp/v1/pubmed/?format=csl&id=${cleanedPmid}`
+            `${CORS_PROXY}https://api.ncbi.nlm.nih.gov/lit/ctxp/v1/pubmed/?format=csl&id=${pmid}`
         );
 
-        const data: any = await response.json();
+        const data: Record<string, never> = await response.json();
 
         return {
             DOI: data?.DOI,
@@ -293,7 +393,7 @@ export async function retrieveContentFromPMID(pmid: string): Promise<CslJson | n
             volume: data?.volume,
             online: true,
             accessed: createDateObject(new Date()),
-            author: data?.author?.map((author: Author[]) => ({
+            author: (data?.author as Author[]).map((author) => ({
                 ...author,
                 id: uid(),
             })),

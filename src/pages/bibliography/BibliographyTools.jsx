@@ -26,7 +26,9 @@ import {
     Checkbox,
     EmptyPage,
     FilledButton,
+    Icon,
     IconButton,
+    LinearProgress,
     List,
     TextButton,
     TextField,
@@ -291,50 +293,57 @@ export function IntextCitationDialog(props) {
     );
 }
 
-// FIXME: Handle errors. It should't cut the for loop when something returns an error
+// TODO: The "Accept" button should be "Stop" when it's still processing. And the checkboxes aren't present until it finishes the process
 export function SmartGenerator({ input, setAcceptedCitations }) {
     const bibliography = useFindBib();
     const [references, setReferences] = useState([]);
-    const [inputArray, setInputArray] = useState(input.split(/\n+/));
+    const [inputArray, setInputArray] = useState(
+        input.split(/\n+/).map((line) => [line.replace(/^[-*\d]+[.)-]?\s*/, ""), uid()])
+    );
     const [newCitations, setNewCitations] = useState([]);
+    const totalIdentifiers = input.split(/\n+/).length;
 
     useEffect(() => {
         async function generateCitation() {
             let content;
-            const identifier = inputArray[0];
+            const identifier = inputArray[0][0];
 
             /* eslint-disable indent */
-            switch (citationUtils.recognizeIdentifierType(identifier)) {
+            const [identifierType, cleanedIdentifier] = citationUtils.recognizeIdentifierType(identifier);
+            switch (identifierType) {
                 case "url":
-                    content = await citationUtils.retrieveContentFromURL(identifier);
+                    content = await citationUtils.retrieveContentFromURL(cleanedIdentifier);
                     break;
                 case "doi":
-                    content = await citationUtils.retrieveContentFromDOI(identifier);
+                    content = await citationUtils.retrieveContentFromDOI(cleanedIdentifier);
                     break;
                 case "pmcid":
-                    content = await citationUtils.retrieveContentFromPMCID(identifier);
+                    content = await citationUtils.retrieveContentFromPMCID(cleanedIdentifier);
                     break;
                 case "pmid":
-                    content = await citationUtils.retrieveContentFromPMID(identifier);
+                    content = await citationUtils.retrieveContentFromPMID(cleanedIdentifier);
                     break;
                 case "isbn":
-                    content = await citationUtils.retrieveContentFromISBN(identifier);
+                    content = await citationUtils.retrieveContentFromISBN(cleanedIdentifier);
                     break;
                 default:
-                    return null;
+                    content = undefined;
             }
             /* eslint-enable indent */
 
             if (content) {
-                setInputArray((prevInputArray) => prevInputArray.slice(1));
-                const newId = uid();
                 setNewCitations((prevNewCitations) => [
                     ...prevNewCitations,
-                    { id: newId, content: { ...content, id: newId }, isChecked: true },
+                    { id: inputArray[0][1], content: { ...content, id: inputArray[0][1] }, isChecked: true },
                 ]);
             } else {
-                console.error(`Couldn't find the content of the identifier ${identifier}`);
+                setNewCitations((prevNewCitations) => [
+                    ...prevNewCitations,
+                    { id: inputArray[0][1], status: "failed", content, identifier: cleanedIdentifier },
+                ]);
             }
+
+            setInputArray((prevInputArray) => prevInputArray.slice(1));
 
             return undefined;
         }
@@ -351,7 +360,7 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
     useEffect(() => {
         async function formatBibliography() {
             const formattedCitations = await citationEngine.formatBibliography(
-                newCitations,
+                newCitations.filter((cit) => cit?.status === undefined || !cit.status === "failed"),
                 bibliography.style,
                 "html",
                 bibliography?.locale
@@ -359,7 +368,7 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
             setReferences(formattedCitations);
         }
         formatBibliography();
-        setAcceptedCitations(newCitations.filter((cit) => cit.isChecked));
+        setAcceptedCitations(newCitations.filter((cit) => cit?.isChecked));
     }, [newCitations]);
 
     function handleCheckboxOnChange(id) {
@@ -374,51 +383,60 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
     }
 
     return (
-        <List
-            items={references?.map((ref) => {
-                const sanitizedReference = DOMPurify.sanitize(ref);
+        <>
+            <p className="mt-0 px-4">{`Processing identifiers: ${totalIdentifiers}/${totalIdentifiers - inputArray.length}`}</p>
+            <LinearProgress value={(totalIdentifiers - inputArray.length) / totalIdentifiers} />
+            <List
+                items={newCitations.map((cit) => {
+                    function getRefId(ref) {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(ref, "text/html");
+                        return doc.querySelector("[data-csl-entry-id]").getAttribute("data-csl-entry-id");
+                    }
 
-                function getRefId() {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(ref, "text/html");
-                    return doc.querySelector("[data-csl-entry-id]").getAttribute("data-csl-entry-id");
-                }
+                    const reference = references.find((ref) => getRefId(ref) === cit.id);
 
-                function getDirValue() {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(sanitizedReference, "text/html");
-                    const dirElement = doc.querySelector("div[dir]");
-                    return dirElement.getAttribute("dir");
-                }
+                    // Show the identifier in the list even if it fails.
+                    if (!reference) {
+                        return {
+                            description: `Could't find content for this identifier: ${cit.identifier}`,
+                            start: <Icon name="error" style={{ color: "var(--md-sys-color-error)" }} />,
+                        };
+                    }
 
-                const hangingIndentationStyle = {
-                    paddingInlineStart: getDirValue() === "ltr" ? "1.5rem" : "",
-                    paddingInlineEnd: getDirValue() === "rtl" ? "1.5rem" : "",
-                    textIndent: "-1.5rem",
-                };
+                    const sanitizedReference = DOMPurify.sanitize(reference);
 
-                return {
-                    description: (
-                        <div
-                            className="break-words font-cambo"
-                            style={
-                                /^(apa|modern-language-association|chicago)/.test(bibliography?.style.code)
-                                    ? hangingIndentationStyle
-                                    : {}
-                            }
-                        >
-                            {parseHtmlToJsx(sanitizedReference)}
-                        </div>
-                    ),
-                    start: (
-                        <Checkbox
-                            checked={newCitations.find((cit) => cit.id === getRefId()).isChecked}
-                            onChange={() => handleCheckboxOnChange(getRefId())}
-                        />
-                    ),
-                };
-            })}
-        />
+                    function getDirValue() {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(sanitizedReference, "text/html");
+                        const dirElement = doc.querySelector("div[dir]");
+                        return dirElement.getAttribute("dir");
+                    }
+
+                    const hangingIndentationStyle = {
+                        paddingInlineStart: getDirValue() === "ltr" ? "1.5rem" : "",
+                        paddingInlineEnd: getDirValue() === "rtl" ? "1.5rem" : "",
+                        textIndent: "-1.5rem",
+                    };
+
+                    return {
+                        description: (
+                            <div
+                                className="break-words font-cambo"
+                                style={
+                                    /^(apa|modern-language-association|chicago)/.test(bibliography?.style.code)
+                                        ? hangingIndentationStyle
+                                        : {}
+                                }
+                            >
+                                {parseHtmlToJsx(sanitizedReference)}
+                            </div>
+                        ),
+                        start: <Checkbox checked={cit.isChecked} onChange={() => handleCheckboxOnChange(cit.id)} />,
+                    };
+                })}
+            />
+        </>
     );
 }
 
@@ -433,7 +451,6 @@ export function AddCitationMenu({ openCitationForm, close }) {
     const [errorMessage, setErrorMessage] = useState();
 
     function handleAcceptCitations() {
-        console.warn(acceptedCitationsRef.current); // This will now log the latest state
         dispatch(addCitationsToBib({ bibId: bibliography.id, citations: acceptedCitationsRef.current }));
     }
 
@@ -464,7 +481,7 @@ export function AddCitationMenu({ openCitationForm, close }) {
                 />
             ),
             actions: [
-                ["Cancel", () => dialog.close(id)],
+                ["Cancel", () => dialog.close()],
                 ["Accept", handleAcceptCitations],
             ],
         });
@@ -495,13 +512,17 @@ export function AddCitationMenu({ openCitationForm, close }) {
                     }))}
                 />
             ),
-            actions: [["Cancel", () => dialog.close(id)]],
+            actions: [["Cancel", () => dialog.close()]],
         });
     }
 
     return (
         <div className="px-4">
-            <form onSubmit={(event) => event.preventDefault()}>
+            <form
+                style={{ border: "solid 1px var(--md-sys-color-outline-variant)" }}
+                className="mb-4 rounded-lg p-4"
+                onSubmit={(event) => event.preventDefault()}
+            >
                 <TextField
                     error={Boolean(errorMessage)}
                     errorText={errorMessage}
@@ -515,7 +536,7 @@ export function AddCitationMenu({ openCitationForm, close }) {
                     ref={identifierRef}
                 />
 
-                <FilledButton className="mb-3 w-full" onClick={() => startSmartGenerator(identifierRef.current.value)}>
+                <FilledButton className="w-full" onClick={() => startSmartGenerator(identifierRef.current.value)}>
                     Generate citations
                 </FilledButton>
             </form>
@@ -527,7 +548,7 @@ export function AddCitationMenu({ openCitationForm, close }) {
                 </button>
             </search> */}
 
-            <TextButton className="mb-2 w-full" onClick={handleImportCitation}>
+            <TextButton className="mb-1 w-full" onClick={handleImportCitation}>
                 Import citations
             </TextButton>
 
@@ -635,7 +656,7 @@ export function MoveDialog(props) {
                         <div onClick={() => handleSelect(bib.id)}>
                             <BibliographyCard
                                 bibliography={bib}
-                                styles={{ backgroundColor: bib.id in selectedBibliographyIds ? "red" : "unset" }}
+                                style={{ backgroundColor: bib.id in selectedBibliographyIds ? "red" : "unset" }}
                             />
                         </div>
                     );
@@ -685,6 +706,8 @@ export function RenameDialog(props) {
     );
 }
 
+// TODO: Include the most used styles in the styles.json, and the rest should be downloaded when needed only.
+//       Then the package "react-window" can be safely removed because this is the only component that uses it.
 export function CitationStylesMenu(props) {
     const { setCitationStyleMenuVisible: setIsVisible, onStyleSelected } = props;
     const [styles, setStyles] = useState(citationStyles);
@@ -756,7 +779,8 @@ export function CitationStylesMenu(props) {
 
             <search>
                 <form>
-                    <input
+                    <TextField
+                        label="Search for citation styles"
                         type="search"
                         name="citation-style-search-input"
                         placeholder="Find style by name..."

@@ -113,7 +113,7 @@ export default function Bibliography() {
             id,
             headline: "Add citation",
             content: <AddCitationMenu openCitationForm={openCitationForm} close={() => dialog.close(id)} />,
-            actions: [["Cancel", () => dialog.close(id)]],
+            actions: [["Cancel", () => dialog.close()]],
         });
     }
 

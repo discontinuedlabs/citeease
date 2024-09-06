@@ -6,12 +6,14 @@ import { uid } from "../../utils/utils.ts";
 import { TAG_COLOR_VALUES } from "../../data/store/slices/settingsSlice";
 import { useMetaThemeColor } from "../../hooks/hooks.tsx";
 
-export function ProgressIndicator({ className, ...rest }) {
-    return (
-        <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
-            <md-circular-progress four-color indeterminate class={className} {...rest} />
-        </div>
-    );
+export function CircularProgress({ className, value, ...rest }) {
+    if (!value) return <md-circular-progress four-color indeterminate class={className} {...rest} />;
+    return <md-circular-progress value={value} class={className} {...rest} />;
+}
+
+export function LinearProgress({ className, value, ...rest }) {
+    if (!value) return <md-linear-progress four-color indeterminate class={className} {...rest} />;
+    return <md-linear-progress value={value} class={className} {...rest} />;
 }
 
 export const TextField = forwardRef(function TextField(props, ref) {

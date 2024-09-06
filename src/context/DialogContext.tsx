@@ -93,9 +93,9 @@ function Dialog({ id, headline, content, actions, close }: DialogProps) {
                     {headline}
                 </div>
             )}
-            <form slot="content" id={`form-${id}`} method="dialog">
+            <div slot="content">
                 {(typeof content === "string" && <div className="px-5">{content}</div>) || content}
-            </form>
+            </div>
             <div className="p-5" slot="actions">
                 {actions &&
                     actions.map((action) => (
@@ -106,7 +106,6 @@ function Dialog({ id, headline, content, actions, close }: DialogProps) {
                                 action[1]();
                                 handleClose(id);
                             }}
-                            form={`form-${id}`}
                         >
                             {action[0]}
                         </TextButton>
