@@ -233,7 +233,7 @@ export function TopBar({ headline, description, showBackButton = true, options }
                     )}
 
                     <h2
-                        className={`mx-2 overflow-hidden text-ellipsis whitespace-nowrap transition duration-150 ease-in-out ${isScrolled ? "translate-y-0" : "translate-y-4 opacity-0"}`}
+                        className={`mx-2 overflow-hidden text-ellipsis whitespace-nowrap text-xl font-normal transition duration-150 ease-in-out ${isScrolled ? "translate-y-0" : "translate-y-4 opacity-0"}`}
                     >
                         {headline}
                     </h2>
@@ -246,12 +246,12 @@ export function TopBar({ headline, description, showBackButton = true, options }
                 )}
             </div>
             <div
-                className="p-4 pt-8"
+                className="p-4 pt-10"
                 style={{
                     background: isScrolled ? "var(--md-sys-color-surface-container)" : "var(--md-sys-color-surface)",
                 }}
             >
-                <h1 className="m-0 text-3xl font-medium">{headline}</h1>
+                <h1 className="m-0 text-3xl font-normal">{headline}</h1>
                 <div>{description}</div>
             </div>
         </>
