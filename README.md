@@ -58,7 +58,7 @@ To get up and running with CiteEase, follow the instructions in our [GETTING_STA
 
 ## Contributing
 
-We actively welcome contributions from the community! To get started, please see our [CONTRIBUTING.md](CONTRIBUTING.md) file and use the provided [Pull Request Template](PULL_REQUEST_TEMPLATE.md) when submitting changes.
+We actively welcome contributions from the community! To get started, please see our [CONTRIBUTING.md](CONTRIBUTING.md) file and use the provided [Pull Request Template](.github/PULL_REQUEST_TEMPLATE.md) when submitting changes.
 
 ## Reporting Issues
 
