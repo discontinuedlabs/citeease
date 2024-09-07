@@ -26,6 +26,7 @@ import {
     enableCollabInBib,
     reEnableCollabInBib,
     disableCollabInBib,
+    uncheckAllCitations,
 } from "../../data/store/slices/bibsSlice";
 import useOnlineStatus, { useEnhancedDispatch, useFindBib, useKeyboardShortcuts } from "../../hooks/hooks.tsx";
 import { useAuth } from "../../context/AuthContext";
@@ -69,9 +70,12 @@ export default function Bibliography() {
     const [iconsMenuVisible, setIconsMenuVisible] = useState(false);
 
     useEffect(() => {
-        if (bibsLoaded && !bibliography) {
+        if (!bibsLoaded) return;
+        if (!bibliography) {
             navigate("/");
             toast.show({ message: "No such bibliography", color: "red", icon: "error" });
+        } else {
+            dispatch(uncheckAllCitations({ bibId: bibliography.id }));
         }
     }, [bibsLoaded]);
 
@@ -206,15 +210,16 @@ export default function Bibliography() {
         if (checkedCitations.length !== 0) {
             dialog.show({
                 headline: `Delete ${checkedCitations?.length === 1 ? "citation" : "citations"}?`,
+                icon: "delete",
                 content: `Are you sure you want to delete ${
                     checkedCitations?.length === 1 ? "this citation" : "these citations"
                 }?`,
                 actions: [
-                    ["Cancel", () => dialog.close()],
                     [
                         "Delete",
                         () => dispatch(deleteSelectedCitations({ bibliographyId: bibliography?.id, checkedCitations })),
                     ],
+                    ["Cancel", () => dialog.close(), { type: "filled" }],
                 ],
             });
         }
@@ -353,11 +358,12 @@ export default function Bibliography() {
 
         dialog.show({
             headline: "Close collaboration?",
+            icon: "group_off",
             content:
                 "This will remove all collaborators, permanently delete the collaboration history, and revoke access foe all contributors. The bibliography will be removed from their list of accessible bibliographies. Are you sure you want to proceed? Collaboration can be opened anytime if needed.",
             actions: [
-                ["Cancel", () => dialog.close()],
                 ["Close collaboration", closeCollaboration],
+                ["Cancel", () => dialog.close(), { type: "filled" }],
             ],
         });
     }
@@ -395,10 +401,11 @@ export default function Bibliography() {
 
         dialog.show({
             headline: `Leave ${bibliography.title}?`,
+            icon: "logout",
             content: "Are you sure you want to leave this collaborative bibliography?",
             actions: [
-                ["Cancel", () => dialog.close()],
                 ["Leave", leave],
+                ["Cancel", () => dialog.close(), { type: "filled" }],
             ],
         });
     }
@@ -406,10 +413,10 @@ export default function Bibliography() {
     function handleDeleteBibliography() {
         dialog.show({
             headline: "Delete bibliography?",
+            icon: "delete",
             content:
                 "You'll no longer see this bibliography in your list. This will also delete related work and citations.",
             actions: [
-                ["Cancel", () => dialog.close()],
                 [
                     "Delete",
                     () => {
@@ -417,6 +424,7 @@ export default function Bibliography() {
                         dispatch(deleteBib({ bibliographyId: bibliography.id }));
                     },
                 ],
+                ["Cancel", () => dialog.close(), { type: "filled" }],
             ],
         });
     }

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars, @typescript-eslint/no-namespace */
 
 import React, { createContext, useContext, useEffect, useMemo, useState, ReactNode } from "react";
-import { TextButton } from "../components/ui/MaterialComponents";
+import { FilledButton, Icon, TextButton } from "../components/ui/MaterialComponents";
 import { uid } from "../utils/utils.ts";
 import { useTimeout } from "../hooks/hooks.tsx";
 
@@ -15,11 +15,17 @@ declare global {
     }
 }
 
+type ActionOptions = {
+    type?: "text" | "filled";
+    closeOnClick?: boolean;
+};
+
 type DialogProps = {
     id: string;
     headline?: ReactNode;
+    icon?: string;
     content: ReactNode;
-    actions?: [string, () => void][];
+    actions?: [string, () => void, ActionOptions][];
     close: (id: string) => void;
 };
 
@@ -63,7 +69,7 @@ export function useDialog(): DialogContextType {
     return context;
 }
 
-function Dialog({ id, headline, content, actions, close }: DialogProps) {
+function Dialog({ id, headline, icon, content, actions, close }: DialogProps) {
     const setTimeout = useTimeout();
 
     function handleClose(dId) {
@@ -93,23 +99,41 @@ function Dialog({ id, headline, content, actions, close }: DialogProps) {
                     {headline}
                 </div>
             )}
+            {icon && <Icon name={icon} />}
             <div slot="content">
                 {(typeof content === "string" && <div className="px-5">{content}</div>) || content}
             </div>
             <div className="p-5" slot="actions">
                 {actions &&
-                    actions.map((action) => (
-                        <TextButton
-                            className=""
-                            key={uid()}
-                            onClick={() => {
-                                action[1]();
-                                handleClose(id);
-                            }}
-                        >
-                            {action[0]}
-                        </TextButton>
-                    ))}
+                    actions.map((action) => {
+                        const options = action[2];
+                        if (options?.type === "filled") {
+                            return (
+                                <FilledButton
+                                    className="px-5"
+                                    key={uid()}
+                                    onClick={() => {
+                                        action[1]();
+                                        if (options?.closeOnClick !== false) handleClose(id);
+                                    }}
+                                >
+                                    {action[0]}
+                                </FilledButton>
+                            );
+                        }
+                        return (
+                            <TextButton
+                                className="px-3"
+                                key={uid()}
+                                onClick={() => {
+                                    action[1]();
+                                    if (options?.closeOnClick !== false) handleClose(id);
+                                }}
+                            >
+                                {action[0]}
+                            </TextButton>
+                        );
+                    })}
             </div>
         </md-dialog>
     );
@@ -163,6 +187,7 @@ export default function DialogProvider({ children }: DialogProviderProps) {
                         key={dialog.id}
                         id={dialog.id}
                         headline={dialog.headline}
+                        icon={dialog.icon}
                         content={dialog.content}
                         actions={dialog.actions}
                         close={closeDialog}

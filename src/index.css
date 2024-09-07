@@ -54,6 +54,8 @@
         --md-sys-color-shadow: #000000;
         --md-sys-color-scrim: #000000;
 
+        --md-list-container-color: transparent;
+
         background-color: var(--md-sys-color-surface);
         color: var(--md-sys-color-on-surface);
     }

@@ -168,23 +168,23 @@ export default function Home() {
                             <List
                                 items={[
                                     {
-                                        title: "Choose by citation style",
+                                        title: "Create bibliography by citation style",
                                         onClick: () => {
                                             setCitationStyleMenuVisible(true);
                                             AddBibDialog.close(id);
                                         },
                                     },
                                     {
-                                        title: "Import",
+                                        title: "Join collaborative bibliography",
                                         onClick: () => {
-                                            handleImport();
+                                            openCoBibsSearchDialog();
                                             AddBibDialog.close(id);
                                         },
                                     },
                                     {
-                                        title: "Search for collaborative bibliograpies",
+                                        title: "Import from file",
                                         onClick: () => {
-                                            openCoBibsSearchDialog();
+                                            handleImport();
                                             AddBibDialog.close(id);
                                         },
                                     },

@@ -166,8 +166,24 @@ const bibsSlice = createSlice({
             save(newState, action.payload.currentUser);
             return newState;
         },
+        uncheckAllCitations: (state, action) => {
+            // TODO: isChecked should't be part of the saved citations
+            const newBibs = state.data?.map((bib) => {
+                if (bib.id === action.payload.bibId) {
+                    return {
+                        ...bib,
+                        citations: bib.citations.map((cit) => {
+                            return { ...cit, isChecked: false };
+                        }),
+                    };
+                }
+                return bib;
+            });
+            const newState = { ...state, data: newBibs };
+            save(newState);
+            return newState;
+        },
         addCitationsToBib: (state, action) => {
-            console.log(action);
             const newBibs = state.data.map((bib) => {
                 if (bib.id === action.payload.bibId) {
                     return {
@@ -471,6 +487,7 @@ export const {
     createBibFromJson,
     deleteBib,
     updateBibField,
+    uncheckAllCitations,
     addCitationsToBib,
     addNewCitation,
     editCitation,

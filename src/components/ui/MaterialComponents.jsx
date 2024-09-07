@@ -6,18 +6,18 @@ import { uid } from "../../utils/utils.ts";
 import { TAG_COLOR_VALUES } from "../../data/store/slices/settingsSlice";
 import { useMetaThemeColor } from "../../hooks/hooks.tsx";
 
-export function CircularProgress({ className, value, ...rest }) {
+export function CircularProgress({ className = "", value, ...rest }) {
     if (!value) return <md-circular-progress four-color indeterminate class={className} {...rest} />;
     return <md-circular-progress value={value} class={className} {...rest} />;
 }
 
-export function LinearProgress({ className, value, ...rest }) {
+export function LinearProgress({ className = "", value, ...rest }) {
     if (!value) return <md-linear-progress four-color indeterminate class={className} {...rest} />;
     return <md-linear-progress value={value} class={className} {...rest} />;
 }
 
 export const TextField = forwardRef(function TextField(props, ref) {
-    const { className, label, prefixText, suffixText, errorText, supportingText, error = false, ...rest } = props;
+    const { className = "", label, prefixText, suffixText, errorText, supportingText, error = false, ...rest } = props;
     if (error)
         // Simply adding "error={false}" doesn't fix the problem
         return (
@@ -46,7 +46,7 @@ export const TextField = forwardRef(function TextField(props, ref) {
     );
 });
 
-export function Checkbox({ className, onChange, checked = false, indeterminate = false, ...rest }) {
+export function Checkbox({ className = "", onChange, checked = false, indeterminate = false, ...rest }) {
     const ref = useRef();
 
     useEffect(() => {
@@ -62,7 +62,7 @@ export function Checkbox({ className, onChange, checked = false, indeterminate =
     return <md-checkbox ref={ref} class={nClass} touch-target="wrapper" {...rest} />;
 }
 
-export function Icon({ name, className, ...rest }) {
+export function Icon({ name, className = "", ...rest }) {
     return (
         <md-icon slot="icon" {...rest} class={`align-middle ${className}`}>
             {name}
@@ -70,11 +70,11 @@ export function Icon({ name, className, ...rest }) {
     );
 }
 
-export function Fab({ label, icon, className, onClick, ...rest }) {
+export function Fab({ label, icon, className = "", onClick, ...rest }) {
     const [isScrolled, setIsScrolled] = useState(false);
 
     const handleScroll = () => {
-        const show = window.scrollY > 50;
+        const show = window.scrollY > 60;
         setIsScrolled(show);
     };
 
@@ -95,7 +95,7 @@ export function Fab({ label, icon, className, onClick, ...rest }) {
     );
 }
 
-export function FilledButton({ className, onClick, type = "button", children, ...rest }) {
+export function FilledButton({ className = "", onClick, type = "button", children, ...rest }) {
     return (
         <md-filled-button type={type} class={`p-2 font-sans ${className}`} onClick={onClick} {...rest}>
             {children}
@@ -111,7 +111,7 @@ export function TextButton({ className = "", onClick, type = "button", children,
     );
 }
 
-export function IconButton({ className, onClick, type = "button", name, ...rest }) {
+export function IconButton({ className = "", onClick, type = "button", name, ...rest }) {
     return (
         <md-icon-button type={type} class={` ${className}`} onClick={onClick} {...rest}>
             <md-icon>{name}</md-icon>
@@ -119,7 +119,7 @@ export function IconButton({ className, onClick, type = "button", name, ...rest 
     );
 }
 
-export function List({ items = [], className, ...rest }) {
+export function List({ items = [], className = "", ...rest }) {
     return (
         <md-list class={className} {...rest}>
             {items.map((item) => {
@@ -196,7 +196,7 @@ export function TopBar({ headline, description, showBackButton = true, options }
     const metaThemeColor = useMetaThemeColor();
 
     const handleScroll = () => {
-        const show = window.scrollY > 50;
+        const show = window.scrollY > 60;
         setIsScrolled(show);
     };
 
@@ -246,19 +246,19 @@ export function TopBar({ headline, description, showBackButton = true, options }
                 )}
             </div>
             <div
-                className="p-4"
+                className="p-4 pt-8"
                 style={{
                     background: isScrolled ? "var(--md-sys-color-surface-container)" : "var(--md-sys-color-surface)",
                 }}
             >
-                <h1 className="m-0">{headline}</h1>
+                <h1 className="m-0 text-3xl font-medium">{headline}</h1>
                 <div>{description}</div>
             </div>
         </>
     );
 }
 
-export function ChipSet({ chips = [], removable = false, className, ...rest }) {
+export function ChipSet({ chips = [], removable = false, className = "", ...rest }) {
     return (
         <md-chip-set class={className} {...rest}>
             {chips.map((chip) => {

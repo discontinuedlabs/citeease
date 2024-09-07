@@ -399,7 +399,12 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
                     // Show the identifier in the list even if it fails.
                     if (!reference) {
                         return {
-                            description: `Could't find content for this identifier: ${cit.identifier}`,
+                            description: (
+                                <div
+                                    style={{ color: "var(--md-sys-color-error)" }}
+                                    className="font-bold"
+                                >{`Could't find content for this identifier: ${cit.identifier}`}</div>
+                            ),
                             start: <Icon name="error" style={{ color: "var(--md-sys-color-error)" }} />,
                         };
                     }
@@ -432,7 +437,12 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
                                 {parseHtmlToJsx(sanitizedReference)}
                             </div>
                         ),
-                        start: <Checkbox checked={cit.isChecked} onChange={() => handleCheckboxOnChange(cit.id)} />,
+                        start:
+                            inputArray.length === 0 ? (
+                                <Checkbox checked={cit.isChecked} onChange={() => handleCheckboxOnChange(cit.id)} />
+                            ) : (
+                                ""
+                            ),
                     };
                 })}
             />
@@ -468,6 +478,7 @@ export function AddCitationMenu({ openCitationForm, close }) {
         }
 
         close();
+
         const id = uid();
         dialog.show({
             id,
@@ -489,6 +500,14 @@ export function AddCitationMenu({ openCitationForm, close }) {
 
     function handleImportCitation() {
         if (!isOnline && bibliography?.collab?.open) {
+            toast.show({ message: "You are offline", icon: "error", color: "red" });
+            return undefined;
+        }
+        return undefined;
+    }
+
+    function handleSearchByTitle() {
+        if (!isOnline) {
             toast.show({ message: "You are offline", icon: "error", color: "red" });
             return undefined;
         }
@@ -541,19 +560,16 @@ export function AddCitationMenu({ openCitationForm, close }) {
                 </FilledButton>
             </form>
 
-            {/* <search>
-                <input type="text" name="search-by-title" placeholder="Search by title..." />
-                <button type="button" onClick={handleSearchByTitle}>
-                    Search
-                </button>
-            </search> */}
-
             <TextButton className="mb-1 w-full" onClick={handleImportCitation}>
-                Import citations
+                Search by title
             </TextButton>
 
-            <TextButton onClick={showSourceTypes} className="w-full">
-                Choose source type
+            <TextButton className="mb-1 w-full" onClick={showSourceTypes}>
+                Create citation by source type
+            </TextButton>
+
+            <TextButton className="w-full" onClick={handleSearchByTitle}>
+                Import from file
             </TextButton>
         </div>
     );
