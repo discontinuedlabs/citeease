@@ -50,7 +50,7 @@ We’re excited that you’re interested in contributing to CiteEase! Whether yo
 
 ## Reporting Issues
 
-If you encounter any issues or have suggestions for improvements, please [open an issue](https://github.com/discontinuedlabs/citeease/issues) and use the provided [Issue Template](ISSUE_TEMPLATE.md). Include as much detail as possible to help us understand and address the problem.
+If you encounter any issues or have suggestions for improvements, [please open an issue](https://github.com/discontinuedlabs/citeease/issues/new/choose) and include as much detail as possible to help us understand and address the problem.
 
 ## Code of Conduct
 
