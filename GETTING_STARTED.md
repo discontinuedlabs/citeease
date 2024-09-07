@@ -51,4 +51,4 @@ If you encounter issues during setup, check the following:
 -   Ensure Docker is running properly on your system.
 -   Verify that you have correctly followed all the steps.
 
-For further assistance, please [open an issue](https://github.com/discontinuedlabs/citeease/issues) and use the provided [Issue Template](ISSUE_TEMPLATE.md) or contact us at [discontinuedlabs@gmail.com](mailto:discontinuedlabs@gmail.com).
+For further assistance, please [open an issue](https://github.com/discontinuedlabs/citeease/issues/new/choose) and include as much detail as possible to help us understand and address the problem or contact us at [discontinuedlabs@gmail.com](mailto:discontinuedlabs@gmail.com).
