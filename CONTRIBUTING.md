@@ -42,7 +42,7 @@ We’re excited that you’re interested in contributing to CiteEase! Whether yo
 
 ### 7. Submit a Pull Request
 
--   Open a pull request (PR) from your forked repository’s branch to the `main` branch of this repository. In your PR description, please use the provided [Pull Request Template](PULL_REQUEST_TEMPLATE.md) to ensure that all necessary information is included.
+-   Open a pull request (PR) from your forked repository’s branch to the `main` branch of this repository. In your PR description, please use the provided [Pull Request Template](.github/PULL_REQUEST_TEMPLATE.md) to ensure that all necessary information is included.
 
 ### 8. Review Process
 
