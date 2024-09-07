@@ -15,8 +15,8 @@ Please describe the steps to test the changes.
 
 ## Checklist
 
--   [ ] I have read the [contributing guidelines](CONTRIBUTING.md).
--   [ ] My code follows the project's [coding style](STYLE_GUIDE.md).
+-   [ ] I have read the [contributing guidelines](../CONTRIBUTING.md).
+-   [ ] My code follows the project's [coding style](../STYLE_GUIDE.md).
 -   [ ] I have tested my changes locally.
 -   [ ] I have added appropriate tests if applicable.
 
