@@ -1,10 +1,10 @@
 # CiteEase: Open-Source Citation Management App
 
-[![Build](https://github.com/discontinuedlabs/citeease/actions/workflows/build.yml/badge.svg)](https://github.com/discontinuedlabs/citeease/actions/workflows/build.yml)
-[![Test](https://github.com/discontinuedlabs/citeease/actions/workflows/test.yml/badge.svg)](https://github.com/discontinuedlabs/citeease/actions/workflows/test.yml)
-[![Lint](https://github.com/discontinuedlabs/citeease/actions/workflows/lint.yml/badge.svg)](https://github.com/discontinuedlabs/citeease/actions/workflows/lint.yml)
-![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)
-![License](https://img.shields.io/github/license/discontinuedlabs/citeease)
+![build status](https://img.shields.io/github/actions/workflow/status/discontinuedlabs/citeease/build.yml?label=build)
+![test status](https://img.shields.io/badge/test-pending-yellow)
+![lint status](https://img.shields.io/github/actions/workflow/status/discontinuedlabs/citeease/lint.yml?label=lint)
+![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)
+![license](https://img.shields.io/github/license/discontinuedlabs/citeease)
 
 **Welcome to CiteEase, an open-source Progressive Web App (PWA) for managing citations and collaborating on bibliographies.**
 
@@ -58,11 +58,16 @@ To get up and running with CiteEase, follow the instructions in our [GETTING_STA
 
 ## Contributing
 
-We actively welcome contributions from the community! To get started, please see our [CONTRIBUTING.md](CONTRIBUTING.md) file and use the provided [Pull Request Template](PULL_REQUEST_TEMPLATE.md) when submitting changes.
+We actively welcome contributions from the community! To get started, please see our [CONTRIBUTING.md](CONTRIBUTING.md) file and use the provided [Pull Request Template](.github/PULL_REQUEST_TEMPLATE.md) when submitting changes.
 
 ## Reporting Issues
 
-If you encounter any issues or have suggestions for improvements, please [open an issue](https://github.com/discontinuedlabs/citeease/issues) and use the provided [Issue Template](ISSUE_TEMPLATE.md) to help us understand and address the problem.
+If you encounter any issues or have suggestions for new features, you can use the following templates:
+
+- For **bug reports**, please [open a bug issue](https://github.com/discontinuedlabs/citeease/issues/new?template=bug.yml) and provide as much detail as possible.
+- For **feature requests**, please [open a feature request](https://github.com/discontinuedlabs/citeease/issues/new?template=feature.yml) and describe your idea and its use case.
+
+Alternatively, you can visit our [Discussions page](https://github.com/discontinuedlabs/citeease/discussions) for questions, ideas, or general support.
 
 ## Testing
 
