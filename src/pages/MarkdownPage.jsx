@@ -30,9 +30,12 @@ export default function MarkdownPage({ title, filePath }) {
     return (
         <div className="bottom-0 left-0 right-0 top-0 mx-auto max-w-[50rem]">
             <TopBar headline={title} />
-            {(!online && !content && <EmptyPage title="You are offline!" />) || (loading && <CircularProgress />) || (
-                <div className="px-4">{parseHtmlToJsx(content)}</div>
-            )}
+            {(!online && !content && <EmptyPage title="You are offline!" />) ||
+                (loading && (
+                    <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
+                        <CircularProgress />
+                    </div>
+                )) || <div className="px-4">{parseHtmlToJsx(content)}</div>}
         </div>
     );
 }

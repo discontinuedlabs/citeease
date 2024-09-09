@@ -108,12 +108,12 @@
     }
 
     ::selection {
-        background-color: var(--md-sys-color-primary-container);
         color: var(--md-sys-color-on-primary-container);
+        background-color: var(--md-sys-color-primary-container);
     }
 
     * {
-        @apply box-border break-words p-0;
+        @apply box-border break-words;
         -webkit-tap-highlight-color: transparent;
         transition: box-shadow ease-out 0.1s;
     }
@@ -128,25 +128,28 @@
     h2,
     h3,
     h4,
-    p,
-    ul {
+    h5,
+    h6 {
         @apply font-medium;
     }
 
     a {
-        text-decoration: none;
+        @apply no-underline;
     }
 
-    ul {
-        @apply ms-10;
+    div {
+        @apply p-0;
     }
 
-    code {
-        @apply rounded-md bg-secondary-800 px-2 py-1 text-white;
+    code,
+    pre {
+        @apply rounded-md px-2 py-1 text-sm;
+        color: var(--md-sys-color-on-secondary);
+        background-color: var(--md-sys-color-secondary);
     }
 
     md-filled-text-field {
-        resize: none;
+        @apply resize-none;
     }
 
     .csl-entry:has(.csl-left-margin) {

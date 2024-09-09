@@ -111,16 +111,22 @@ export function markdownToHtml(markdown: string): string {
     markdown = markdown.replace(/!\[(.*?)\]\((.*?)\)/gim, '<img src="$2" alt="$1" />');
 
     // Replace Markdown unordered lists with HTML <ul> and <li>
-    markdown = markdown.replace(/^\s*-\s+(.*$)/gim, "<li>$1</li>");
-    markdown = markdown.replace(/<\/li>\n<li>/gim, "</li><li>");
-    markdown = markdown.replace(/<li>(.*?)<\/li>/gim, "<ul><li>$1</li></ul>");
-    markdown = markdown.replace(/<\/ul>\n<ul>/gim, "");
+    markdown = markdown.replace(/(?:^\s*-\s+.*$\n?)+/gim, (match) => {
+        const items = match
+            .trim()
+            .split("\n")
+            .map((line) => `${line.replace(/^\s*-\s+/, "<li>")}</li>`);
+        return `<ul>${items.join("")}</ul>`;
+    });
 
     // Replace Markdown ordered lists with HTML <ol> and <li>
-    markdown = markdown.replace(/^\s*\d+\.\s+(.*$)/gim, "<li>$1</li>");
-    markdown = markdown.replace(/<\/li>\n<li>/gim, "</li><li>");
-    markdown = markdown.replace(/<li>(.*?)<\/li>/gim, "<ol><li>$1</li></ol>");
-    markdown = markdown.replace(/<\/ol>\n<ol>/gim, "");
+    markdown = markdown.replace(/(?:^\s*\d+\.\s+.*$\n?)+/gim, (match) => {
+        const items = match
+            .trim()
+            .split("\n")
+            .map((line) => `${line.replace(/^\s*\d+\.\s+/, "<li>")}</li>`);
+        return `<ol>${items.join("")}</ol>`;
+    });
 
     // Replace Markdown blockquotes with HTML <blockquote>
     markdown = markdown.replace(/^\s*>\s+(.*$)/gim, "<blockquote>$1</blockquote>");
@@ -132,7 +138,7 @@ export function markdownToHtml(markdown: string): string {
     markdown = markdown.replace(/```([\s\S]*?)```/gim, "<pre><code>$1</code></pre>");
 
     // Replace Markdown paragraphs with HTML <p>
-    markdown = markdown.replace(/^\s*(.*[^\n])\n+/gim, "<p>$1</p>");
+    markdown = markdown.replace(/^(?!\s*<\/?\w+[^>]*>)(.+)$/gm, "<p>$1</p>");
 
     // Trim leading and trailing whitespace
     markdown = markdown.trim();

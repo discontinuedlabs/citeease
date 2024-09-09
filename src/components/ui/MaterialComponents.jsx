@@ -6,6 +6,10 @@ import { uid } from "../../utils/utils.ts";
 import { TAG_COLOR_VALUES } from "../../data/store/slices/settingsSlice";
 import { useMetaThemeColor } from "../../hooks/hooks.tsx";
 
+export function Divider({ className = "", ...rest }) {
+    return <md-divider class={className} {...rest} />;
+}
+
 export function CircularProgress({ className = "", value, ...rest }) {
     if (!value) return <md-circular-progress four-color indeterminate class={className} {...rest} />;
     return <md-circular-progress value={value} class={className} {...rest} />;
@@ -124,7 +128,7 @@ export function List({ items = [], className = "", ...rest }) {
         <md-list class={className} {...rest}>
             {items.map((item) => {
                 if (typeof item === "string" && /divider/i.test(item)) {
-                    return <md-divider key={uid()} />;
+                    return <Divider key={uid()} />;
                 }
                 return (
                     <md-list-item class="" {...item} type="button" onClick={item?.onClick} key={uid()}>

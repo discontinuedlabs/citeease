@@ -92,7 +92,7 @@ export function createAuthorsArray(authors: string[]): Author[] {
     return result;
 }
 
-type IdentifierType = "url" | "doi" | "pmcid" | "pmid" | "isbn";
+type IdentifierType = "URL" | "DOI" | "PMCID" | "PMID" | "ISBN" | "undefined";
 
 /**
  * Recognizes the type of identifier from a given string.
@@ -102,59 +102,48 @@ type IdentifierType = "url" | "doi" | "pmcid" | "pmid" | "isbn";
  * If no explicit prefix is found, the function will perform pattern matching based on known formats.
  *
  * @param {string} string - The input string to be checked for identifier type.
- * @returns {[IdentifierType, string] | undefined} - Returns an array where the first element is the
+ * @returns {[IdentifierType, string]} - Returns an array where the first element is the
  * identifier type ("url", "doi", "pmcid", "pmid", "isbn"), and the second element is the cleaned identifier
- * string (with any prefix removed). Returns `undefined` if no valid identifier type is detected.
+ * string (with any prefix removed). Returns "undefined" as the first element if no valid identifier type is detected.
  */
-export function recognizeIdentifierType(string: string): [IdentifierType, string] | undefined {
+export function recognizeIdentifierType(string: string): [IdentifierType, string] {
     const trimmedString = string.trim().toLowerCase();
 
     // Check for explicit identifier type prefixes and clean the string
-    if (trimmedString.toLowerCase().startsWith("url:")) {
-        return ["url", trimmedString.slice(4).trim()];
+    if (trimmedString.startsWith("url:")) {
+        return ["URL", string.slice(4).trim()];
     }
-    if (trimmedString.toLowerCase().startsWith("doi:")) {
-        return ["doi", trimmedString.slice(4).trim()];
+    if (trimmedString.startsWith("doi:")) {
+        return ["DOI", string.slice(4).trim()];
     }
-    if (trimmedString.toLowerCase().startsWith("pmcid:")) {
-        return ["pmcid", trimmedString.slice(6).trim()];
+    if (trimmedString.startsWith("pmcid:")) {
+        return ["PMCID", string.slice(6).trim()];
     }
-    if (trimmedString.toLowerCase().startsWith("pmid:")) {
-        return ["pmid", trimmedString.slice(5).trim()];
+    if (trimmedString.startsWith("pmid:")) {
+        return ["PMID", string.slice(5).trim()];
     }
-    if (trimmedString.toLowerCase().startsWith("isbn:")) {
-        return ["isbn", trimmedString.slice(5).trim()];
+    if (trimmedString.startsWith("isbn:")) {
+        return ["ISBN", string.slice(5).trim()];
     }
 
-    const urlPattern = /(https?:\/\/[^\s]+)/g;
-    const doiPatterns = [
-        /^\s*(https?:\/\/(?:dx\.)?doi\.org\/(10.\d{4,9}\/[-._;()/:A-Z0-9[\]<>]+))\s*$/i,
-        /^\s*((?:dx\.)?doi\.org\/(10.\d{4,9}\/[-._;()/:A-Z0-9[\]<>]+))\s*$/i,
-        /^\s*(10.\d{4,9}\/[-._;()/:A-Z0-9[\]<>]+)\s*$/i,
-        /^10.\d{4,9}\/[-._;()/:A-Z0-9[\]<>]+$/i,
-        /\b10\.\d{4,9}[-.\w]+\b/i,
-    ];
-    const pmcidPattern = /^PMC\d+$/i;
-    const pmidPattern = /^\d{1,9}$/;
-    const isbnPatterns = [
-        /^(97[89])(?:-\d+){0,2}|\d{10}\s?|\d{13}\s?$|((97[89])?\d{9}\s?)(\d{5})$/,
-        /^10\.(978|979)\.\d{2,8}\/\d{2,7}$/,
-        /^(978|979)\d{10}$/,
-    ];
+    const urlPattern = /^(https?:\/\/)[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]+$/;
+    const doiPattern = /^((https?:\/\/)?(?:dx\.)?doi\.org\/)?10\.\d{4,9}\/[-._;()/:a-zA-Z0-9]+$/;
+    const pmcidPattern = /^PMC\d+$/;
+    const pmidPattern = /^\d{7,10}$/;
+    const isbnPattern = /^(97[89])\d{9}(\d|X)$/;
 
     // Perform regex-based identification if no explicit prefix is found
-    if (doiPatterns.some((doiPattern) => doiPattern.test(string))) return ["doi", string.trim()]; // Check for DOI patterns first because a DOI may also be a URL, but with a more specific format
+    if (doiPattern.test(string)) return ["DOI", string.trim()]; // Check for DOI patterns first because a DOI may also be a URL, but with a more specific format
 
-    if (urlPattern.test(string)) return ["url", string.trim()];
+    if (urlPattern.test(string)) return ["URL", string.trim()];
 
-    if (pmcidPattern.test(string)) return ["pmcid", string.trim()];
+    if (pmcidPattern.test(string)) return ["PMCID", string.trim()];
 
-    if (pmidPattern.test(string)) return ["pmid", string.trim()];
+    if (pmidPattern.test(string)) return ["PMID", string.trim()];
 
-    if (isbnPatterns.some((isbnPattern) => isbnPattern.test(string.replace(/-|\s+/g, ""))))
-        return ["isbn", string.trim()];
+    if (isbnPattern.test(string.replace(/-/g, ""))) return ["ISBN", string.trim()];
 
-    return undefined;
+    return ["undefined", string.replace(/\w+:/, "").trim()];
 }
 
 /**
@@ -250,7 +239,6 @@ export async function retrieveContentFromDOI(doi: string): Promise<CslJson | nul
         const response = await fetch(`${CORS_PROXY}https://api.crossref.org/works/${doi}`);
 
         const data: { message: Record<string, never> } = await response.json();
-        console.log(data);
         const { message } = data;
 
         return {

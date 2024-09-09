@@ -24,6 +24,7 @@ import { uid } from "../../utils/utils.ts";
 import { parseHtmlToJsx } from "../../utils/conversionUtils.tsx";
 import {
     Checkbox,
+    Divider,
     EmptyPage,
     FilledButton,
     Icon,
@@ -298,7 +299,7 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
     const bibliography = useFindBib();
     const [references, setReferences] = useState([]);
     const [inputArray, setInputArray] = useState(
-        input.split(/\n+/).map((line) => [line.replace(/^[-*\d]+[.)-]?\s*/, ""), uid()])
+        input.split(/\n+/).map((line) => [line.replace(/^(-|\*|\d+[.)-])?\s+/, ""), uid()])
     );
     const [newCitations, setNewCitations] = useState([]);
     const totalIdentifiers = input.split(/\n+/).length;
@@ -311,19 +312,19 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
             /* eslint-disable indent */
             const [identifierType, cleanedIdentifier] = citationUtils.recognizeIdentifierType(identifier);
             switch (identifierType) {
-                case "url":
+                case "URL":
                     content = await citationUtils.retrieveContentFromURL(cleanedIdentifier);
                     break;
-                case "doi":
+                case "DOI":
                     content = await citationUtils.retrieveContentFromDOI(cleanedIdentifier);
                     break;
-                case "pmcid":
+                case "PMCID":
                     content = await citationUtils.retrieveContentFromPMCID(cleanedIdentifier);
                     break;
-                case "pmid":
+                case "PMID":
                     content = await citationUtils.retrieveContentFromPMID(cleanedIdentifier);
                     break;
-                case "isbn":
+                case "ISBN":
                     content = await citationUtils.retrieveContentFromISBN(cleanedIdentifier);
                     break;
                 default:
@@ -331,17 +332,16 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
             }
             /* eslint-enable indent */
 
-            if (content) {
-                setNewCitations((prevNewCitations) => [
-                    ...prevNewCitations,
-                    { id: inputArray[0][1], content: { ...content, id: inputArray[0][1] }, isChecked: true },
-                ]);
-            } else {
-                setNewCitations((prevNewCitations) => [
-                    ...prevNewCitations,
-                    { id: inputArray[0][1], status: "failed", content, identifier: cleanedIdentifier },
-                ]);
-            }
+            setNewCitations((prevNewCitations) => [
+                ...prevNewCitations,
+                {
+                    id: inputArray[0][1],
+                    content: content ? { ...content, id: inputArray[0][1] } : undefined,
+                    isChecked: Boolean(content),
+                    identifier: cleanedIdentifier,
+                    identifierType,
+                },
+            ]);
 
             setInputArray((prevInputArray) => prevInputArray.slice(1));
 
@@ -360,7 +360,7 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
     useEffect(() => {
         async function formatBibliography() {
             const formattedCitations = await citationEngine.formatBibliography(
-                newCitations.filter((cit) => cit?.status === undefined || !cit.status === "failed"),
+                newCitations.filter((cit) => cit.content !== undefined),
                 bibliography.style,
                 "html",
                 bibliography?.locale
@@ -384,7 +384,10 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
 
     return (
         <>
-            <p className="mt-0 px-4">{`Processing identifiers: ${totalIdentifiers}/${totalIdentifiers - inputArray.length}`}</p>
+            <div className="mb-4 flex justify-between px-4">
+                <p className="m-0">Processing identifiers</p>
+                <p className="m-0">{`${totalIdentifiers}/${totalIdentifiers - inputArray.length}`}</p>
+            </div>
             <LinearProgress value={(totalIdentifiers - inputArray.length) / totalIdentifiers} />
             <List
                 items={newCitations.map((cit) => {
@@ -406,6 +409,7 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
                                 >{`Could't find content for this identifier: ${cit.identifier}`}</div>
                             ),
                             start: <Icon name="error" style={{ color: "var(--md-sys-color-error)" }} />,
+                            end: <code>{cit.identifierType}</code>,
                         };
                     }
 
@@ -443,6 +447,7 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
                             ) : (
                                 ""
                             ),
+                        end: <code>{cit.identifierType}</code>,
                     };
                 })}
             />
@@ -537,11 +542,7 @@ export function AddCitationMenu({ openCitationForm, close }) {
 
     return (
         <div className="px-4">
-            <form
-                style={{ border: "solid 1px var(--md-sys-color-outline-variant)" }}
-                className="mb-4 rounded-lg p-4"
-                onSubmit={(event) => event.preventDefault()}
-            >
+            <form onSubmit={(event) => event.preventDefault()}>
                 <TextField
                     error={Boolean(errorMessage)}
                     errorText={errorMessage}
@@ -559,6 +560,8 @@ export function AddCitationMenu({ openCitationForm, close }) {
                     Generate citations
                 </FilledButton>
             </form>
+
+            <Divider className="my-4" />
 
             <TextButton className="mb-1 w-full" onClick={handleImportCitation}>
                 Search by title
