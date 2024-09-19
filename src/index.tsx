@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { HashRouter as Router } from "react-router-dom";
+import { BrowserRouter as Router } from "react-router-dom";
 import { Provider as ReduxeProvider } from "react-redux";
 import App from "./App";
 import store from "./data/store/store.ts";
@@ -37,7 +37,7 @@ import "@material/web/select/select-option";
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
         <ErrorBoundary>
-            <Router>
+            <Router basename="/citeease">
                 <AuthProvider>
                     <ReduxeProvider store={store}>
                         <ToastProvider>
