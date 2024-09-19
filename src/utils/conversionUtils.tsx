@@ -370,7 +370,7 @@ export function cslToBibJSON(cslJson: CslJson): BibJson {
 
     // Date issued (year)
     if (cslJson.issued && cslJson.issued["date-parts"] && cslJson.issued["date-parts"][0]) {
-        bibJson.year = cslJson.issued["date-parts"][0][0].toString();
+        bibJson.year = cslJson.issued["date-parts"][0][0]?.toString();
     }
 
     // Date accessed

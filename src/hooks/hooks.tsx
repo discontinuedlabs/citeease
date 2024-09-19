@@ -190,7 +190,7 @@ export function useMetaThemeColor(initialColor: string): (newColor: string) => v
  *
  * @returns {boolean} The current online status of the application.
  */
-export default function useOnlineStatus(): boolean {
+export function useOnlineStatus(): boolean {
     const [online, setOnline] = useState<boolean>(navigator.onLine);
 
     useEventListener("online", () => setOnline(navigator.onLine));
@@ -239,23 +239,6 @@ export function useTimeout() {
     return setTimeoutCallback;
 }
 
-// export function useTheme() {
-//     const [theme, setTheme] = useState("light");
-
-//     useEffect(() => {
-//         const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-//         function handleChange(event) {
-//             setTheme(event.matches ? "dark" : "light");
-//         }
-
-//         mediaQuery.addEventListener("change", handleChange);
-//         return () => mediaQuery.removeEventListener("change", handleChange);
-//     }, []);
-
-//     return theme;
-// }
-
-// eslint-disable-next-line no-unused-vars
 type ShortcutAction = (event: KeyboardEvent) => void;
 type OptionalConfig = Pick<KeyboardEvent, "altKey" | "ctrlKey" | "shiftKey">;
 interface ShortcutConfig extends Partial<OptionalConfig> {
@@ -316,4 +299,45 @@ export function useKeyboardShortcuts(keymap: Record<string, ShortcutAction>) {
     }, [keymap]);
 
     useEffect(registerShortcuts, [registerShortcuts]);
+}
+
+const keyMap = {
+    enter: "Enter",
+    ctrl: "Control",
+    meta: "Meta",
+    shift: "Shift",
+    alt: "Alt",
+    tab: "Tab",
+    escape: "Escape",
+};
+
+function parseKeyCombination(keyCombination) {
+    const keys = keyCombination.split("+").map((key) => keyMap[key.toLowerCase()] || key);
+    return new Set(keys);
+}
+
+/* eslint-disable no-restricted-syntax */
+export function useKeyDown() {
+    return useCallback(
+        (keyActions) => (event) => {
+            for (const [keyCombination, callback] of keyActions) {
+                const keySet = parseKeyCombination(keyCombination);
+
+                const isMatch = Array.from(keySet).every((key) => {
+                    if (key === "Control" && event.ctrlKey) return true;
+                    if (key === "Meta" && event.metaKey) return true;
+                    if (key === "Shift" && event.shiftKey) return true;
+                    if (key === "Alt" && event.altKey) return true;
+                    return event.key === key;
+                });
+
+                if (isMatch) {
+                    event.preventDefault();
+                    callback();
+                    break;
+                }
+            }
+        },
+        []
+    );
 }

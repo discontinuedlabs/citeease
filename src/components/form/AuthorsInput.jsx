@@ -1,4 +1,5 @@
 import { uid } from "../../utils/utils.ts";
+import { FilledButton, TextField } from "../ui/MaterialComponents";
 
 export default function AuthorsInput(props) {
     const { content, setContent } = props;
@@ -31,40 +32,38 @@ export default function AuthorsInput(props) {
     }
 
     return (
-        <div className="author-inputs-container">
+        <>
             {content &&
                 content.author &&
-                content.author.map((authorEntry) => (
+                content.author.map((authorEntry, index) => (
                     <div key={authorEntry.id}>
-                        <label htmlFor="given-name family-name">
-                            Author
-                            <input
-                                type="text"
-                                name="given-name"
-                                placeholder="Author's first name"
-                                value={authorEntry.given || ""}
-                                onChange={(event) => {
-                                    updateAuthors(authorEntry.id, "given", event.target.value);
-                                }}
-                                autoComplete="false"
-                            />
-                            <input
-                                type="text"
-                                name="family-name"
-                                placeholder="Author's last name"
-                                value={authorEntry.family || ""}
-                                onChange={(event) => {
-                                    updateAuthors(authorEntry.id, "family", event.target.value);
-                                }}
-                                autoComplete="false"
-                            />
-                        </label>
+                        Author
+                        <TextField
+                            type="text"
+                            name={`given-name-${index}`}
+                            label="First name"
+                            placeholder="Author's first name"
+                            value={authorEntry.given || ""}
+                            onChange={(event) => {
+                                updateAuthors(authorEntry.id, "given", event.target.value);
+                            }}
+                            autoComplete="false"
+                        />
+                        <TextField
+                            type="text"
+                            name={`family-name-${index}`}
+                            label="Last name"
+                            placeholder="Author's last name"
+                            value={authorEntry.family || ""}
+                            onChange={(event) => {
+                                updateAuthors(authorEntry.id, "family", event.target.value);
+                            }}
+                            autoComplete="false"
+                        />
                     </div>
                 ))}
 
-            <button type="button" onClick={handleAddAuthor}>
-                Add author
-            </button>
-        </div>
+            <FilledButton onClick={handleAddAuthor}>Add author</FilledButton>
+        </>
     );
 }

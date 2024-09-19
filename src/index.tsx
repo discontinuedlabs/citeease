@@ -31,6 +31,8 @@ import "@material/web/menu/sub-menu";
 import "@material/web/textfield/filled-text-field";
 import "@material/web/progress/circular-progress";
 import "@material/web/progress/linear-progress";
+import "@material/web/select/outlined-select";
+import "@material/web/select/select-option";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>

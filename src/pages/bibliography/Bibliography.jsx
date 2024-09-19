@@ -1,10 +1,9 @@
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import * as citationEngine from "../../utils/citationEngine";
 import {
-    IntextCitationDialog,
     ReferenceEntries,
     MoveDialog,
     CitationForm,
@@ -17,18 +16,17 @@ import {
 } from "./BibliographyTools";
 import {
     addNewBibAndMoveSelectedCitations,
-    addNewCitation,
     deleteBib,
     deleteSelectedCitations,
     duplicateSelectedCitations,
-    editCitation,
     updateBibField,
     enableCollabInBib,
     reEnableCollabInBib,
     disableCollabInBib,
     uncheckAllCitations,
+    updateCitation,
 } from "../../data/store/slices/bibsSlice";
-import useOnlineStatus, { useEnhancedDispatch, useFindBib, useKeyboardShortcuts } from "../../hooks/hooks.tsx";
+import { useEnhancedDispatch, useFindBib, useKeyboardShortcuts, useOnlineStatus } from "../../hooks/hooks.tsx";
 import { useAuth } from "../../context/AuthContext";
 import firestoreDB from "../../data/db/firebase/firebase";
 import { ChipSet, Fab, Icon, List, TopBar } from "../../components/ui/MaterialComponents";
@@ -44,6 +42,7 @@ import {
 import { useDialog } from "../../context/DialogContext.tsx";
 import locales from "../../assets/json/locales.json";
 import { uid } from "../../utils/utils.ts";
+import * as citationUtils from "../../utils/citationUtils.ts";
 
 // TODO: The user cannot do any actions in collaborative bibliographies when they are offline
 export default function Bibliography() {
@@ -58,11 +57,10 @@ export default function Bibliography() {
     const location = useLocation();
     const isOnline = useOnlineStatus();
     const toast = useToast();
+    const citationFormRef = useRef();
 
     const [collaborationOpened, setCollaborationOpened] = useState(bibliography?.collab?.open);
     const [idAndPasswordDialogVisible, setIdAndPasswordDialogVisible] = useState(false);
-    const [intextCitationDialogVisible, setIntextCitationDialogVisible] = useState(false);
-    const [citationFormVisible, setCitationFormVisible] = useState(false);
     const [moveWindowVisible, setMoveWindowVisible] = useState(false);
     const [renameWindowVisible, setRenameWindowVisible] = useState(false);
     const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
@@ -89,26 +87,56 @@ export default function Bibliography() {
         }
     }, [bibId, bibliography?.collab?.open, location.pathname]);
 
-    function openIntextCitationDialog() {
-        setIntextCitationDialogVisible(true);
+    // FIXME: This passes the new content in the dispatch but it doesnt update the bibliographies state
+    function updateContent(id) {
+        const targetCitation = bibliography.citations.find((cit) => cit.content.id === id);
+        let newContent = {};
+
+        if (targetCitation && citationFormRef?.current) {
+            newContent = citationUtils.getContentFromForm(citationFormRef.current);
+        }
+
+        dispatch(
+            updateCitation({
+                bibId: bibliography.id,
+                citation: {
+                    ...targetCitation,
+                    content: {
+                        ...targetCitation.content,
+                        ...newContent,
+                    },
+                },
+            })
+        );
     }
 
-    function openCitationForm(sourceType, isNew = false, specificId = "") {
+    function openCitationForm(id = undefined, sourceType = "webpage") {
         if (!isOnline && bibliography?.collab?.open) {
             toast.show({ message: "You are offline", icon: "error", color: "red" });
             return;
         }
 
-        const checkedCitationsIds = [...(specificId ? [specificId] : [])];
-        bibliography?.citations.forEach((cit) => {
-            if (cit.isChecked) {
-                checkedCitationsIds.push(cit.id);
-            }
+        let targetCitation;
+
+        const checkedCitationsIds = bibliography?.citations.filter((cit) => cit.isChecked).map((cit) => cit.id);
+
+        if (id) {
+            targetCitation = bibliography.citations.find((cit) => cit.content.id === id);
+        } else if (checkedCitationsIds.length === 1) {
+            targetCitation = bibliography.citations.find((cit) => cit.content.id === checkedCitationsIds[0]);
+        } else {
+            const newId = uid();
+            targetCitation = { id: newId, content: { id: newId, type: sourceType }, isChecked: false };
+        }
+
+        dialog.show({
+            title: "Citation form",
+            content: <CitationForm content={targetCitation.content} ref={citationFormRef} />,
+            actions: [
+                ["Cancel", () => dialog.close()],
+                ["Add reference", () => updateContent(targetCitation.content.id)],
+            ],
         });
-        if (isNew) dispatch(addNewCitation({ bibliographyId: bibliography.id, sourceType }));
-        else if (checkedCitationsIds.length === 1)
-            dispatch(editCitation({ bibliographyId: bibliography.id, citationId: checkedCitationsIds[0] }));
-        setCitationFormVisible(true);
     }
 
     function openAddCitationMenu() {
@@ -462,7 +490,7 @@ export default function Bibliography() {
 
     function getConditionalOptionsWhenCitationsSelected() {
         if (checkedCitations?.length === 1) {
-            const options = [{ headline: "Edit", onClick: () => openCitationForm(checkedCitations[0].content.type) }];
+            const options = [{ headline: "Edit", onClick: () => openCitationForm(checkedCitations[0].content.id) }];
 
             if (checkedCitations[0].content.URL) {
                 options.push({
@@ -608,6 +636,9 @@ export default function Bibliography() {
             <TopBar
                 icon={bibliography?.icon}
                 headline={bibliography?.title}
+                options={[
+                    ...(checkedCitations?.length !== 0 ? optionsWhenCitationsSelected : optionsWhenNothingSelected),
+                ]}
                 description={
                     <>
                         <>
@@ -621,23 +652,9 @@ export default function Bibliography() {
                         />
                     </>
                 }
-                options={[
-                    ...(checkedCitations?.length !== 0 ? optionsWhenCitationsSelected : optionsWhenNothingSelected),
-                ]}
             />
 
-            <ReferenceEntries
-                {...{
-                    openCitationForm,
-                    openIntextCitationDialog,
-                }}
-            />
-
-            {intextCitationDialogVisible && checkedCitations.length !== 0 && (
-                <IntextCitationDialog {...{ setIntextCitationDialogVisible }} />
-            )}
-
-            {citationFormVisible && bibliography?.editedCitation && <CitationForm {...{ setCitationFormVisible }} />}
+            <ReferenceEntries openCitationForm={openCitationForm} />
 
             {citationStyleMenuVisible && (
                 <CitationStylesMenu

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { EmptyPage, CircularProgress, TopBar } from "../components/ui/MaterialComponents";
 import { markdownToHtml, parseHtmlToJsx } from "../utils/conversionUtils.tsx";
-import useOnlineStatus from "../hooks/hooks.tsx";
+import { useOnlineStatus } from "../hooks/hooks.tsx";
 
 export default function MarkdownPage({ title, filePath }) {
     const [content, setContent] = useState();

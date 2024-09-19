@@ -21,9 +21,25 @@ export function LinearProgress({ className = "", value, ...rest }) {
 }
 
 export const TextField = forwardRef(function TextField(props, ref) {
-    const { className = "", label, prefixText, suffixText, errorText, supportingText, error = false, ...rest } = props;
+    const {
+        className = "",
+        label,
+        onChange,
+        prefixText,
+        suffixText,
+        errorText,
+        supportingText,
+        error = false,
+        ...rest
+    } = props;
+
+    function handleInput(event) {
+        if (onChange) {
+            onChange(event);
+        }
+    }
+
     if (error)
-        // Simply adding "error={false}" doesn't fix the problem
         return (
             <md-filled-text-field
                 ref={ref}
@@ -34,6 +50,7 @@ export const TextField = forwardRef(function TextField(props, ref) {
                 supporting-text={supportingText}
                 error={error}
                 error-text={errorText}
+                onInput={handleInput}
                 {...rest}
             />
         );
@@ -45,19 +62,35 @@ export const TextField = forwardRef(function TextField(props, ref) {
             prefix-text={prefixText}
             suffix-text={suffixText}
             supporting-text={supportingText}
+            onInput={handleInput}
             {...rest}
         />
     );
 });
 
-export function Checkbox({ className = "", onChange, checked = false, indeterminate = false, ...rest }) {
+export function Checkbox({
+    className = "",
+    onChange = () => undefined,
+    onInput = () => undefined,
+    checked = false,
+    indeterminate = false,
+    ...rest
+}) {
     const ref = useRef();
 
     useEffect(() => {
-        ref?.current?.addEventListener("change", onChange);
+        const currentRef = ref.current;
+        if (currentRef) {
+            currentRef.addEventListener("change", onChange);
+            currentRef.addEventListener("input", onInput);
+        }
 
-        // eslint-disable-next-line consistent-return
-        return () => ref?.current?.removeEventListener("change", onChange);
+        return () => {
+            if (currentRef) {
+                currentRef.removeEventListener("change", onChange);
+                currentRef.removeEventListener("input", onInput);
+            }
+        };
     }, []);
 
     const nClass = `m-0 align-middle ${className}`;
@@ -101,7 +134,7 @@ export function Fab({ label, icon, className = "", onClick, ...rest }) {
 
 export function FilledButton({ className = "", onClick, type = "button", children, ...rest }) {
     return (
-        <md-filled-button type={type} class={`p-2 font-sans ${className}`} onClick={onClick} {...rest}>
+        <md-filled-button type={type} class={`px-6 py-2 font-sans ${className}`} onClick={onClick} {...rest}>
             {children}
         </md-filled-button>
     );
@@ -109,7 +142,7 @@ export function FilledButton({ className = "", onClick, type = "button", childre
 
 export function TextButton({ className = "", onClick, type = "button", children, ...rest }) {
     return (
-        <md-text-button type={type} class={`p-2 font-sans ${className}`} onClick={onClick} {...rest}>
+        <md-text-button type={type} class={`px-6 py-2 font-sans ${className}`} onClick={onClick} {...rest}>
             {children}
         </md-text-button>
     );
@@ -144,12 +177,45 @@ export function List({ items = [], className = "", ...rest }) {
     );
 }
 
-export function Menu({ items, children }) {
-    const usageSubmenuRed = useRef();
+// FIXME: ...
+export const Select = forwardRef(function Select(props, ref) {
+    const { options, onChange, ...rest } = props;
+    const internalRef = useRef();
+
+    useEffect(() => {
+        const selectRef = ref || internalRef;
+
+        selectRef?.current?.addEventListener("change", onChange);
+
+        return () => selectRef?.current?.removeEventListener("change", onChange);
+    }, [onChange, ref]);
+
+    return (
+        <md-outlined-select ref={ref || internalRef} {...rest}>
+            {options.map((option) => {
+                if (internalRef.current?.value === option.value) {
+                    return (
+                        <md-select-option key={option.value} selected value={option.value}>
+                            <div slot="headline">{option.headline}</div>
+                        </md-select-option>
+                    );
+                }
+                return (
+                    <md-select-option key={option.value} value={option.value}>
+                        <div slot="headline">{option.headline}</div>
+                    </md-select-option>
+                );
+            })}
+        </md-outlined-select>
+    );
+});
+
+export function Menu({ items, className, children, ...rest }) {
+    const usageSubmenuRef = useRef();
     const usageSubmenuAnchorId = useId().replace(/:/g, "");
 
     function toggleMenu() {
-        usageSubmenuRed.current.open = !usageSubmenuRed.current.open;
+        usageSubmenuRef.current.open = !usageSubmenuRef.current.open;
     }
 
     function renderMenuItems(menuItems) {
@@ -187,7 +253,7 @@ export function Menu({ items, children }) {
                 {children}
             </div>
 
-            <md-menu has-overflow ref={usageSubmenuRed} anchor={usageSubmenuAnchorId}>
+            <md-menu class={className} has-overflow ref={usageSubmenuRef} anchor={usageSubmenuAnchorId} {...rest}>
                 {renderMenuItems(items)}
             </md-menu>
         </span>

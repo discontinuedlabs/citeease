@@ -10,10 +10,11 @@ const CORS_PROXY: string = "https://corsproxy.io/?";
  * @param {Date | number} yearOrDate - A `Date` object or a year as a number.
  * @param {number} [month] - The month (1-12), optional if `yearOrDate` is a `number`.
  * @param {number} [day] - The day of the month, optional if `yearOrDate` is a `number`.
- * @returns {DateObject} An object containing `date-parts`. If a full date (year, month, day) is provided,
+ * @returns {DateObject | undefined} An object containing `date-parts` or `undefined`. If a full date (year, month, day) is provided,
  * it also includes `raw`, `date_time`, and `timestamp` properties.
  */
-export function createDateObject(yearOrDate: Date | number, month?: number, day?: number): DateObject {
+export function createDateObject(yearOrDate: Date | number, month?: number, day?: number): DateObject | undefined {
+    if (!yearOrDate) return undefined;
     let year: number;
     let adjustedMonth: number | undefined;
     let adjustedDay: number | undefined;
@@ -45,7 +46,7 @@ export function createDateObject(yearOrDate: Date | number, month?: number, day?
     // Only add "raw", "date_time", and "timestamp" if year, month, and day are all defined
     if (adjustedMonth && adjustedDay) {
         const newDate = new Date(year, adjustedMonth - 1, adjustedDay);
-        dateObject.raw = `${newDate.getFullYear()}-${newDate.getMonth() + 1}-${newDate.getDate()}`;
+        [dateObject.raw] = newDate.toISOString().split("T");
         dateObject.date_time = newDate.toISOString();
         dateObject.timestamp = newDate.getTime();
     }
@@ -60,34 +61,47 @@ export function createDateObject(yearOrDate: Date | number, month?: number, day?
  * author: [
  *     {
  *         given: "Vincent",
- *         "non-dropping-particle": "van",
- *         family: "Gogh"
+ *         "non-dropping-particle": "van", 👈
+ *         family: "Gogh",
  *     },
  *     {
  *         given: "Alexander",
- *         "dropping-particle": "von",
- *         family: "Humboldt"
+ *         "dropping-particle": "von", 👈
+ *         family: "Humboldt",
  *     },
  *     {
- *             literal: "International Business Machines"
+ *             literal: "International Business Machines",
  *     },
  *     {
  *             family: "King",
  *             given: "Martin Luther",
- *             suffix:"Jr., Ph.D.",
- *             dropping-particle:"Rev."
- *     }
- * ]
+ *             suffix:"Jr., Ph.D.", 👈
+ *             dropping-particle:"Rev.",
+ *     },
+ * ];
  * ```
  */
-export function createAuthorsArray(authors: string[]): Author[] {
-    if (!authors) return [];
-    const result: Author[] = authors.map((author) => {
-        const names = author.split(/\s+/);
-        const given = names.shift() || "";
-        const family = names.join(" ");
-        return { given, family, id: uid() };
-    });
+export function createAuthorsArray(authors: string[] | Record<string, string | undefined>): Author[] {
+    const result: Author[] = [];
+
+    if (Array.isArray(authors)) {
+        // Handle authors as an array of strings
+        authors.forEach((author) => {
+            const names = author.split(/\s+/);
+            const given = names.shift() || "";
+            const family = names.join(" ");
+            result.push({ given, family, id: uid() });
+        });
+    } else {
+        // Handle authors as an object with "given-name-x" and "family-name-x"
+        let index = 0;
+        while (`given-name-${index}` in authors && `family-name-${index}` in authors) {
+            const given = authors[`given-name-${index}`] || "";
+            const family = authors[`family-name-${index}`] || "";
+            result.push({ given, family, id: uid() });
+            index += 1;
+        }
+    }
 
     return result;
 }
@@ -143,7 +157,7 @@ export function recognizeIdentifierType(string: string): [IdentifierType, string
 
     if (isbnPattern.test(string.replace(/-/g, ""))) return ["ISBN", string.trim()];
 
-    return ["undefined", string.replace(/\w+:/, "").trim()];
+    return ["undefined", string.trim()];
 }
 
 /**
@@ -390,6 +404,48 @@ export async function retrieveContentFromPMID(pmid: string): Promise<CslJson | n
         console.error(`Failed to retrieve content from ${pmid}: ${error}`);
         return null;
     }
+}
+
+/**
+ * Extracts content from an HTML form and returns it as a CslJson object.
+ *
+ * @param {HTMLFormElement} form - The HTML form element from which data is extracted.
+ * @returns {CslJson} - The extracted form data as a `CslJson` object.
+ */
+export function getContentFromForm(form: HTMLFormElement): CslJson {
+    const data = new FormData(form);
+    const dataObject = Object.fromEntries(data.entries()) as Record<string, string | undefined>;
+
+    const { URL, DOI, ISSN, PMCID, PMID, ISBN, issue, online, page, title, volume, publisher } = dataObject;
+
+    const content = {
+        title,
+        page,
+        issue,
+        volume,
+        URL,
+        DOI,
+        ISSN,
+        PMCID,
+        PMID,
+        ISBN,
+        publisher,
+        issued: createDateObject(
+            Number(dataObject["issued-year"]),
+            Number(dataObject["issued-month"]),
+            Number(dataObject["issued-day"])
+        ),
+        accessed: createDateObject(
+            Number(dataObject["accessed-year"]),
+            Number(dataObject["accessed-month"]),
+            Number(dataObject["accessed-day"])
+        ),
+        author: createAuthorsArray(dataObject),
+        "container-title": (dataObject["container-title"] as string) || undefined,
+        online: online === "on",
+    };
+
+    return content;
 }
 
 // TODO: ...

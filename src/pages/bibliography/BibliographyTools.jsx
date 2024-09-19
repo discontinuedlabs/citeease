@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { forwardRef, useEffect, useId, useRef, useState } from "react";
 import { FixedSizeList } from "react-window";
 import { useDispatch, useSelector } from "react-redux";
 import DOMPurify from "../../utils/purify";
@@ -11,12 +11,10 @@ import {
     handleMasterEntriesCheckbox,
     moveSelectedCitations,
     toggleEntryCheckbox,
-    updateCitation,
-    updateContentInEditedCitation,
 } from "../../data/store/slices/bibsSlice";
 import BibliographyCard from "../../components/ui/BibliographyCard";
 import * as citationUtils from "../../utils/citationUtils.ts";
-import useOnlineStatus, { useEnhancedDispatch, useFindBib } from "../../hooks/hooks.tsx";
+import { useEnhancedDispatch, useFindBib, useOnlineStatus } from "../../hooks/hooks.tsx";
 import Tag from "../../components/ui/Tag";
 import citationStyles from "../../assets/json/styles.json";
 import mostPopularStyles from "../../assets/json/mostPopularStyles.json";
@@ -31,16 +29,17 @@ import {
     IconButton,
     LinearProgress,
     List,
+    Select,
     TextButton,
     TextField,
 } from "../../components/ui/MaterialComponents";
+import { useToast } from "../../context/ToastContext.tsx";
+import { useDialog } from "../../context/DialogContext.tsx";
 
 // Source types
 import ArticleJournal from "../../components/sourceTypes/ArticleJournal";
 import Webpage from "../../components/sourceTypes/Webpage";
 import Book from "../../components/sourceTypes/Book";
-import { useToast } from "../../context/ToastContext.tsx";
-import { useDialog } from "../../context/DialogContext.tsx";
 
 const MASTER_CHECKBOX_STATES = {
     CHECKED: "checked", // All reference entries are checked
@@ -50,14 +49,117 @@ const MASTER_CHECKBOX_STATES = {
 
 const DEFAULT_LOCATOR = locatorTypes.page;
 
+export const CitationForm = forwardRef(function CitationForm(props, ref) {
+    const { content } = props;
+
+    const citationControlProps = {
+        content,
+        ref: ref, // eslint-disable-line object-shorthand
+    };
+
+    /* eslint-disable react/jsx-props-no-spreading */
+    const CITATION_COMPONENTS = {
+        [sourceTypes.articleJournal.code]: <ArticleJournal {...citationControlProps} />,
+        [sourceTypes.book.code]: <Book {...citationControlProps} />,
+        [sourceTypes.webpage.code]: <Webpage {...citationControlProps} />,
+    };
+    /* eslint-enable react/jsx-props-no-spreading */
+
+    return CITATION_COMPONENTS[content.type];
+});
+
+export function IntextCitationDialog() {
+    const bibliography = useFindBib();
+    const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
+    const [intextCitation, setIntextCitation] = useState("");
+    const [citationsForIntext, setCitationsForIntext] = useState(checkedCitations.map((cit) => cit.content));
+
+    useEffect(() => {
+        async function formatIntextCitation() {
+            const formattedIntextCitation = await citationEngine.formatIntextCitation(
+                citationsForIntext,
+                bibliography?.style,
+                "html",
+                bibliography?.locale
+            );
+            setIntextCitation(DOMPurify.sanitize(formattedIntextCitation));
+        }
+        formatIntextCitation();
+    }, [citationsForIntext, bibliography?.style]);
+
+    function updateContentField(citId, key, value) {
+        setCitationsForIntext((prevCitationsForIntext) =>
+            prevCitationsForIntext.map((content) => {
+                if (content.id === citId && content[key] !== value) {
+                    return {
+                        ...content,
+                        [key]: value,
+                    };
+                }
+                return content;
+            })
+        );
+    }
+
+    return (
+        <div className="px-4">
+            <h3>Example</h3>
+            <p className="font-cambo">{parseHtmlToJsx(intextCitation)}</p>
+
+            <Divider />
+
+            <h3>Locators</h3>
+            <p>
+                When citing a particular section of a source, indicate its specific location, such as a page number or
+                time marker.
+            </p>
+            {citationsForIntext.map((cit) => (
+                <div key={cit.id}>
+                    <h4 className="mb-1 overflow-hidden text-ellipsis whitespace-nowrap">
+                        {cit?.title || (cit?.author.length !== 0 && cit?.issued)
+                            ? `${cit?.author[0]?.family} (${cit?.issued["date-parts"][0][0]})`
+                            : cit?.DOI || cit?.URL || cit?.ISBN || cit?.ISSN}
+                    </h4>
+
+                    <div className="flex w-full">
+                        <Select
+                            value={cit?.label || DEFAULT_LOCATOR.code}
+                            options={Object.values(locatorTypes).map((option) => ({
+                                headline: option.name,
+                                value: option.code,
+                            }))}
+                            onChange={(event) =>
+                                updateContentField(cit.id, "label", locatorTypes[event.target.value].code)
+                            }
+                            className="flex-1"
+                        />
+                        <TextField
+                            label={locatorTypes[cit.label]?.name || DEFAULT_LOCATOR.name}
+                            name="intext-locator"
+                            type="text"
+                            placeholder={locatorTypes[cit.label]?.placeholder || DEFAULT_LOCATOR.placeholder}
+                            value={cit?.locator}
+                            onChange={(event) => updateContentField(cit.id, "locator", event.target.value)}
+                            className="flex-1"
+                        />
+                    </div>
+
+                    <small>{locatorTypes[cit.label]?.def || DEFAULT_LOCATOR.def}</small>
+                </div>
+            ))}
+        </div>
+    );
+}
+
 export function ReferenceEntries(props) {
-    const { openCitationForm, openIntextCitationDialog } = props;
+    const { openCitationForm } = props;
     const bibliography = useFindBib();
     const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
     const [references, setReferences] = useState([]);
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
-    const dispatch = useDispatch();
+    const dispatch = useEnhancedDispatch();
     const formattedSelectedCitationsRef = useRef([]);
+    const dialog = useDialog();
 
     useEffect(() => {
         function updateMasterCheckboxState() {
@@ -114,6 +216,14 @@ export function ReferenceEntries(props) {
         dispatch(toggleEntryCheckbox({ bibliographyId: bibliography.id, citationId: citationId.id }));
     }
 
+    function openIntextCitationDialog() {
+        dialog.show({
+            headline: "In-text citation",
+            content: <IntextCitationDialog />,
+            actions: [["Cancel", () => dialog.close()]],
+        });
+    }
+
     async function handleDrag(event) {
         const isCtrlKeyDown = event.ctrlKey;
 
@@ -149,11 +259,16 @@ export function ReferenceEntries(props) {
         <div>
             <div className="flex items-center justify-between gap-4 p-4">
                 {bibliography?.citations.length !== 0 && (
-                    <Checkbox
-                        indeterminate={masterCheckboxState === MASTER_CHECKBOX_STATES.INDETERMINATE}
-                        checked={masterCheckboxState === MASTER_CHECKBOX_STATES.CHECKED}
-                        onChange={handleMasterCheck}
-                    />
+                    <TextButton onClick={handleMasterCheck}>
+                        <Checkbox
+                            indeterminate={masterCheckboxState === MASTER_CHECKBOX_STATES.INDETERMINATE}
+                            checked={masterCheckboxState === MASTER_CHECKBOX_STATES.CHECKED}
+                            onChange={handleMasterCheck}
+                            onInput={handleMasterCheck}
+                            className="me-2"
+                        />
+                        {masterCheckboxState !== MASTER_CHECKBOX_STATES.CHECKED ? "Select all" : " Deselect all"}
+                    </TextButton>
                 )}
 
                 {checkedCitations?.length !== 0 && (
@@ -197,7 +312,7 @@ export function ReferenceEntries(props) {
                                 // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
                                 <div
                                     className="break-words font-cambo"
-                                    onClick={() => openCitationForm(citation?.content.type, false, citation?.id)}
+                                    onClick={() => openCitationForm(citation.content.id)}
                                     style={
                                         /^(apa|modern-language-association|chicago)/.test(bibliography?.style.code)
                                             ? hangingIndentationStyle
@@ -225,84 +340,22 @@ export function ReferenceEntries(props) {
     );
 }
 
-export function IntextCitationDialog(props) {
-    const { setIntextCitationDialogVisible: setIsVisible } = props;
-    const bibliography = useFindBib();
-    const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
-    const [intextCitation, setIntextCitation] = useState("");
-    const [citationsForIntext, setCitationsForIntext] = useState(checkedCitations.map((cit) => cit.content));
-
-    useEffect(() => {
-        async function formatIntextCitation() {
-            const formattedIntextCitation = await citationEngine.formatIntextCitation(
-                citationsForIntext,
-                bibliography?.style,
-                "html",
-                bibliography?.locale
-            );
-            setIntextCitation(DOMPurify.sanitize(formattedIntextCitation));
-        }
-        formatIntextCitation();
-    }, [citationsForIntext, bibliography?.style]);
-
-    function updateContentField(citId, key, value) {
-        setCitationsForIntext((prevCitationsForIntext) =>
-            prevCitationsForIntext.map((content) => {
-                if (content.id === citId) {
-                    return {
-                        ...content,
-                        [key]: value,
-                    };
-                }
-                return content;
-            })
-        );
-    }
-
-    return (
-        <div>
-            <div className="font-cambo">{parseHtmlToJsx(intextCitation)}</div>
-            <button type="button" onClick={() => setIsVisible(false)}>
-                X
-            </button>
-            {citationsForIntext.map((cit) => (
-                <div key={uid()}>
-                    <div>{cit.title || `${cit.author[0].family} ${cit.issued["date-parts"].join(" ")}`}</div>
-
-                    <select
-                        value={cit?.label || DEFAULT_LOCATOR.code}
-                        onChange={(event) => updateContentField(cit.id, "label", locatorTypes[event.target.value].code)}
-                    >
-                        {Object.values(locatorTypes).map((option) => (
-                            <option key={uid()} value={option.code}>
-                                {option.name}
-                            </option>
-                        ))}
-                    </select>
-
-                    <input
-                        name="intext-locator"
-                        type="text"
-                        placeholder={locatorTypes[cit.label]?.placeholder || DEFAULT_LOCATOR.placeholder}
-                        value={citationsForIntext?.locator}
-                        onChange={(event) => updateContentField(cit.id, "locator", event.target.value)}
-                    />
-                    <small>{locatorTypes[cit.label]?.def || DEFAULT_LOCATOR.def}</small>
-                </div>
-            ))}
-        </div>
-    );
-}
-
-// TODO: The "Accept" button should be "Stop" when it's still processing. And the checkboxes aren't present until it finishes the process
+/**
+ * **TODO**:
+ * - [ ] `Accept` button should be `Stop` when it's still processing.
+ * - [ ] Checkboxes shouldn't be present until it processing identifiers.
+ * - [ ] Add quick options directly in the `SmartGenerator` component such as `Copy` and `Move`.
+ */
 export function SmartGenerator({ input, setAcceptedCitations }) {
     const bibliography = useFindBib();
     const [references, setReferences] = useState([]);
     const [inputArray, setInputArray] = useState(
-        input.split(/\n+/).map((line) => [line.replace(/^(-|\*|\d+[.)-])?\s+/, ""), uid()])
+        input.split(/\n+/).map((line) => [line.replace(/^(-|\*|\d+[.)-])?\s+/, "").trim(), uid()])
     );
     const [newCitations, setNewCitations] = useState([]);
     const totalIdentifiers = input.split(/\n+/).length;
+    const dialog = useDialog();
+    const citationFormRef = useRef();
 
     useEffect(() => {
         async function generateCitation() {
@@ -332,16 +385,17 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
             }
             /* eslint-enable indent */
 
-            setNewCitations((prevNewCitations) => [
-                ...prevNewCitations,
-                {
+            setNewCitations((prevNewCitations) => {
+                const newCitation = {
                     id: inputArray[0][1],
                     content: content ? { ...content, id: inputArray[0][1] } : undefined,
                     isChecked: Boolean(content),
                     identifier: cleanedIdentifier,
                     identifierType,
-                },
-            ]);
+                };
+                const updatedCitations = prevNewCitations.filter((citation) => citation.id !== newCitation.id);
+                return [...updatedCitations, newCitation];
+            });
 
             setInputArray((prevInputArray) => prevInputArray.slice(1));
 
@@ -367,6 +421,7 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
             );
             setReferences(formattedCitations);
         }
+
         formatBibliography();
         setAcceptedCitations(newCitations.filter((cit) => cit?.isChecked));
     }, [newCitations]);
@@ -383,12 +438,27 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
     }
 
     return (
-        <>
+        <div className="relative">
             <div className="mb-4 flex justify-between px-4">
                 <p className="m-0">Processing identifiers</p>
                 <p className="m-0">{`${totalIdentifiers}/${totalIdentifiers - inputArray.length}`}</p>
             </div>
             <LinearProgress value={(totalIdentifiers - inputArray.length) / totalIdentifiers} />
+            <div
+                className="sticky top-0 z-10"
+                style={{ backgroundColor: "var(--md-sys-color-surface-container-high)" }}
+            >
+                <div className="flex justify-start p-2">
+                    <div className="p-2">
+                        <Checkbox />
+                    </div>
+                    <IconButton name="content_copy" />
+                    <IconButton name="open_with" /* move */ />
+                    <IconButton name="ios_share" /* export */ />
+                    <TextButton className="ml-auto">In-text citation</TextButton>
+                </div>
+                <Divider />
+            </div>
             <List
                 items={newCitations.map((cit) => {
                     function getRefId(ref) {
@@ -399,20 +469,25 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
 
                     const reference = references.find((ref) => getRefId(ref) === cit.id);
 
-                    // Show the identifier in the list even if it fails.
+                    // Show the identifier the failed identifer
                     if (!reference) {
+                        const errorMessage =
+                            cit.identifierType === "undefined"
+                                ? `Unable to determine the type of the identifier: "${cit.identifier}". Please check if the identifier is valid or properly formatted.`
+                                : `No content found for the identifier: "${cit.identifier}". Verify the identifier or try a different one.`;
+
                         return {
                             description: (
-                                <div
-                                    style={{ color: "var(--md-sys-color-error)" }}
-                                    className="font-bold"
-                                >{`Could't find content for this identifier: ${cit.identifier}`}</div>
+                                <div style={{ color: "var(--md-sys-color-error)" }} className="font-bold">
+                                    {errorMessage}
+                                </div>
                             ),
                             start: <Icon name="error" style={{ color: "var(--md-sys-color-error)" }} />,
                             end: <code>{cit.identifierType}</code>,
                         };
                     }
 
+                    // show the successful identifier
                     const sanitizedReference = DOMPurify.sanitize(reference);
 
                     function getDirValue() {
@@ -428,7 +503,27 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
                         textIndent: "-1.5rem",
                     };
 
+                    function updateContent(id) {
+                        setNewCitations((prevNewCitations) => {
+                            return prevNewCitations.map((nCit) => {
+                                if (nCit.id === id && citationFormRef?.current) {
+                                    const newContent = citationUtils.getContentFromForm(citationFormRef.current);
+
+                                    return {
+                                        ...nCit,
+                                        content: {
+                                            ...nCit.content,
+                                            ...newContent,
+                                        },
+                                    };
+                                }
+                                return nCit;
+                            });
+                        });
+                    }
+
                     return {
+                        /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
                         description: (
                             <div
                                 className="break-words font-cambo"
@@ -437,6 +532,16 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
                                         ? hangingIndentationStyle
                                         : {}
                                 }
+                                onClick={() => {
+                                    dialog.show({
+                                        headline: "Edit citation",
+                                        content: <CitationForm ref={citationFormRef} content={cit.content} />,
+                                        actions: [
+                                            ["Cancel", () => dialog.close()],
+                                            ["Apply", () => updateContent(cit.id)],
+                                        ],
+                                    });
+                                }}
                             >
                                 {parseHtmlToJsx(sanitizedReference)}
                             </div>
@@ -448,16 +553,17 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
                                 ""
                             ),
                         end: <code>{cit.identifierType}</code>,
+                        /* eslint-enable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
                     };
                 })}
             />
-        </>
+        </div>
     );
 }
 
 export function AddCitationMenu({ openCitationForm, close }) {
     const bibliography = useFindBib();
-    const identifierRef = useRef();
+    const identifiersInputRef = useRef();
     const isOnline = useOnlineStatus();
     const toast = useToast();
     const dialog = useDialog();
@@ -490,7 +596,7 @@ export function AddCitationMenu({ openCitationForm, close }) {
             headline: "Smart generator",
             content: (
                 <SmartGenerator
-                    input={input}
+                    input={input.trim()}
                     setAcceptedCitations={(citations) => {
                         acceptedCitationsRef.current = citations;
                     }}
@@ -531,7 +637,7 @@ export function AddCitationMenu({ openCitationForm, close }) {
                         title: entry.label,
                         onClick: () => {
                             dialog.close(id);
-                            openCitationForm(entry.code, true);
+                            openCitationForm(undefined, entry.code);
                         },
                     }))}
                 />
@@ -553,10 +659,15 @@ export function AddCitationMenu({ openCitationForm, close }) {
                     supportingText="You can list all the identifiers at the same time."
                     rows="3"
                     type="textarea"
-                    ref={identifierRef}
+                    ref={identifiersInputRef}
+                    onKeyDown={(event) => {
+                        if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+                            startSmartGenerator(identifiersInputRef.current.value);
+                        }
+                    }}
                 />
 
-                <FilledButton className="w-full" onClick={() => startSmartGenerator(identifierRef.current.value)}>
+                <FilledButton className="w-full" onClick={() => startSmartGenerator(identifiersInputRef.current.value)}>
                     Generate citations
                 </FilledButton>
             </form>
@@ -576,42 +687,6 @@ export function AddCitationMenu({ openCitationForm, close }) {
             </TextButton>
         </div>
     );
-}
-
-export function CitationForm(props) {
-    const { setCitationFormVisible: setIsVisible } = props;
-    const bibliography = useFindBib();
-    const [content, setContent] = useState(bibliography?.editedCitation?.content || {});
-    const dispatch = useDispatch();
-
-    useEffect(() => {
-        dispatch(updateContentInEditedCitation({ bibliographyId: bibliography.id, content }));
-    }, [content]);
-
-    function handleAddReference(event) {
-        event.preventDefault();
-        dispatch(updateCitation({ bibliographyId: bibliography.id, editedCitation: bibliography?.editedCitation }));
-        setIsVisible(false);
-    }
-
-    function handleCancel() {
-        setIsVisible(false);
-    }
-
-    const citationControlProps = {
-        content,
-        setContent,
-        handleAddReference,
-        handleCancel,
-    };
-
-    const CITATION_COMPONENTS = {
-        [sourceTypes.articleJournal.code]: ArticleJournal(citationControlProps),
-        [sourceTypes.book.code]: Book(citationControlProps),
-        [sourceTypes.webpage.code]: Webpage(citationControlProps),
-    };
-
-    return <div className="citation-window">{CITATION_COMPONENTS[content.type]}</div>;
 }
 
 export function MoveDialog(props) {

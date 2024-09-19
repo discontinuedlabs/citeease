@@ -244,53 +244,23 @@ const bibsSlice = createSlice({
             save(newState, action.payload.currentUser);
             return newState;
         },
-        editCitation: (state, action) => {
-            const newBibs = state.data?.map((bib) => {
-                if (bib.id === action.payload.bibliographyId) {
-                    const targetCitation = bib.citations.find((cit) => cit.id === action.payload.citationId);
-                    return {
-                        ...bib,
-                        editedCitation: { ...targetCitation },
-                    };
-                }
-                return bib;
-            });
-            const newState = { ...state, data: newBibs };
-            save(newState, action.payload.currentUser);
-            return newState;
-        },
-        updateContentInEditedCitation: (state, action) => {
-            const newBibs = state.data?.map((bib) => {
-                if (bib.id === action.payload.bibliographyId) {
-                    return {
-                        ...bib,
-                        editedCitation: { ...bib.editedCitation, content: action.payload.content },
-                        dateModified: new Date().toString(),
-                    };
-                }
-                return bib;
-            });
-            const newState = { ...state, data: newBibs };
-            save(newState, action.payload.currentUser);
-            return newState;
-        },
         updateCitation: (state, action) => {
             const newBibs = state.data.map((bib) => {
-                if (bib.id === action.payload.bibliographyId) {
-                    const citationIndex = bib.citations.findIndex((cit) => cit.id === action.payload.editedCitation.id);
+                if (bib.id === action.payload.bibId) {
+                    const citationIndex = bib.citations.findIndex((cit) => cit.id === action.payload.citation.id);
                     let updatedCitations;
 
                     if (citationIndex !== -1) {
                         // If the citation exists, update it
                         updatedCitations = bib.citations.map((cit, index) => {
                             if (index === citationIndex) {
-                                return { ...cit, ...action.payload.editedCitation, isChecked: false };
+                                return { ...cit, ...action.payload.citation };
                             }
                             return cit;
                         });
                     } else {
                         // If the citation doesn't exist, add it to the rest of bibliography.citations array
-                        updatedCitations = [...bib.citations, action.payload.editedCitation];
+                        updatedCitations = [...bib.citations, action.payload.citation];
                     }
 
                     return {
@@ -490,8 +460,6 @@ export const {
     uncheckAllCitations,
     addCitationsToBib,
     addNewCitation,
-    editCitation,
-    updateContentInEditedCitation,
     updateCitation,
     toggleEntryCheckbox,
     handleMasterEntriesCheckbox,

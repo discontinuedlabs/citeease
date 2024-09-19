@@ -1,57 +1,63 @@
-import * as sourceTypeUtils from "../../utils/citationUtils.ts";
+import { forwardRef } from "react";
+import { TextField } from "../ui/MaterialComponents";
 
-export default function DateInput(props) {
-    const { content, setContent, dateKey, ariaLabelledby } = props;
+// TODO: Make the month a select component that also includes seasons
+const DateInput = forwardRef(function DateInput(props, ref) {
+    const { value = [], onChange, name, className, ...rest } = props;
 
-    function handleDateChange(key, value) {
-        const newDate = {
-            year: content[dateKey]?.["date-parts"][0][0],
-            month: content[dateKey]?.["date-parts"][0][1],
-            day: content[dateKey]?.["date-parts"][0][2],
+    function handleChange(type) {
+        return (event) => {
+            console.log(type);
+            const newValue = [...value];
+            const newVal = event.target.value ? parseInt(event.target.value, 10) : "";
+
+            if (type === "year") {
+                newValue[0] = newVal;
+            } else if (type === "month") {
+                newValue[1] = newVal;
+            } else if (type === "day") {
+                newValue[2] = newVal;
+            }
+
+            onChange(newValue);
         };
-        newDate[key] = value;
-        setContent((prevContent) => ({
-            ...prevContent,
-            [dateKey]: sourceTypeUtils.createDateObject(newDate.year, newDate.month, newDate.day),
-        }));
     }
 
-    function setToToday() {
-        setContent((prevContent) => ({
-            ...prevContent,
-            [dateKey]: sourceTypeUtils.createDateObject(new Date()),
-        }));
-    }
-
+    /* eslint-disable react/jsx-props-no-spreading */
     return (
-        <div className="date-inputs-container" aria-labelledby={ariaLabelledby}>
-            <input
+        <div ref={ref} name={name} {...rest} className={`flex gap-1 ${className}`}>
+            <TextField
                 type="number"
-                value={content[dateKey]?.["date-parts"]?.[0]?.[0] || ""}
+                value={value?.[0] || ""}
                 min="1"
                 max={new Date().getFullYear()}
+                name={`${name}-year`}
+                label="Year"
                 placeholder="YYYY"
-                onChange={(event) => handleDateChange("year", event.target.value)}
+                onChange={() => handleChange("year")}
             />
-            <input
+            <TextField
                 type="number"
-                value={content[dateKey]?.["date-parts"]?.[0]?.[1] || ""}
+                value={value?.[1] || ""}
                 min="1"
                 max="12"
+                name={`${name}-month`}
+                label="Month"
                 placeholder="MM"
-                onChange={(event) => handleDateChange("month", event.target.value)}
+                onChange={() => handleChange("month")}
             />
-            <input
+            <TextField
                 type="number"
-                value={content[dateKey]?.["date-parts"]?.[0]?.[2] || ""}
+                value={value?.[2] || ""}
                 min="1"
                 max="31"
+                label="Day"
+                name={`${name}-day`}
                 placeholder="DD"
-                onChange={(event) => handleDateChange("day", event.target.value)}
+                onChange={() => handleChange("day")}
             />
-            <button type="button" onClick={setToToday}>
-                Today
-            </button>
         </div>
     );
-}
+});
+
+export default DateInput;

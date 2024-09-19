@@ -514,11 +514,7 @@ export async function exportToLatex(
         const latex = await citationEngine.formatLaTeX(cleanedCitations, format);
         const content = typeof latex === "string" ? latex : JSON.stringify(latex, null, 2);
         const mimeType = format === "bibtxt" ? "text/plain" : "text/x-bibtex";
-        downloadFile(
-            content,
-            `${getDefaultName(options.fileName)}.${format === "bibtxt" ? "bibtxt" : "bib"}`,
-            mimeType
-        );
+        downloadFile(content, `${getDefaultName(options.fileName)}.${format === "bibtxt" ? "txt" : "bib"}`, mimeType);
     } catch (error) {
         console.error("Failed to export citations: ", error);
     }

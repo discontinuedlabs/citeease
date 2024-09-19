@@ -1,11 +1,13 @@
-import { useRef, useState } from "react";
+import { forwardRef, useRef, useState } from "react";
 import * as citationUtils from "../../utils/citationUtils.ts";
 import AuthorsInput from "../form/AuthorsInput";
 import DateInput from "../form/DateInput";
 import { useDialog } from "../../context/DialogContext.tsx";
+import { Checkbox, Divider, FilledButton, TextField } from "../ui/MaterialComponents";
 
-export default function ArticleJournal(props) {
-    const { content, setContent, handleAddReference, handleCancel } = props;
+const ArticleJournal = forwardRef(function ArticleJournal(props, ref) {
+    const { content: passedContant } = props;
+    const [content, setContent] = useState(passedContant);
     const [doi, setDoi] = useState("");
     const autoFillDoiRef = useRef(null);
     const dialog = useDialog();
@@ -53,141 +55,126 @@ export default function ArticleJournal(props) {
     }
 
     return (
-        <form className="citation-form" onSubmit={handleAddReference}>
-            <p>Insert the DOI here to fill the fields automatically:</p>
-            <label htmlFor="auto-filler-doi">
-                DOI
-                <input
-                    type="text"
-                    name="auto-filler-doi"
-                    placeholder="Insert a DOI"
-                    ref={autoFillDoiRef}
-                    value={doi || ""}
-                    onChange={handleDoiChange}
-                />
-            </label>
+        <form onSubmit={(event) => event.preventDefault()} ref={ref}>
+            <TextField
+                className="w-full"
+                label="Insert a DOI to fill the fields automatically"
+                type="text"
+                name="auto-filler-doi"
+                placeholder="https://doi.org/xxxx"
+                ref={autoFillDoiRef}
+                value={doi || ""}
+                onChange={handleDoiChange}
+            />
 
-            <button type="button" onClick={handleFillIn}>
+            <FilledButton className="w-full" type="button" onClick={handleFillIn}>
                 Fill in
-            </button>
+            </FilledButton>
+
+            <Divider />
 
             <p>Or enter the article details manually:</p>
-            <AuthorsInput content={content} setContent={setContent} />
+            <AuthorsInput name="author" content={content} setContent={setContent} />
 
-            <label htmlFor="title">
-                Article title
-                <input
-                    type="text"
-                    name="title"
-                    value={content.title || ""}
-                    placeholder="Article title"
-                    onChange={(event) => updateContentField("title", event.target.value)}
-                    required
-                />
-            </label>
+            <TextField
+                label="Article title"
+                type="text"
+                name="title"
+                value={content.title || ""}
+                placeholder="Article title"
+                onChange={(event) => updateContentField("title", event.target.value)}
+                required
+            />
 
-            <label htmlFor="journal">
-                Journal title
-                <input
-                    type="text"
-                    name="journal"
-                    value={content["container-title"] || ""}
-                    placeholder="Journal title"
-                    onChange={(event) => updateContentField("container-title", event.target.value)}
-                />
-            </label>
+            <TextField
+                label="Journal title"
+                type="text"
+                name="container-title"
+                value={content["container-title"] || ""}
+                placeholder="Journal title"
+                onChange={(event) => updateContentField("container-title", event.target.value)}
+            />
 
-            <label htmlFor="volume">
-                Volume
-                <input
-                    type="number"
-                    name="volume"
-                    value={content.volume || ""}
-                    placeholder="Enter a number"
-                    onChange={(event) => updateContentField("volume", event.target.value)}
-                />
-            </label>
+            <TextField
+                label="Volume"
+                type="number"
+                name="volume"
+                value={content.volume || ""}
+                placeholder="Enter a number"
+                onChange={(event) => updateContentField("volume", event.target.value)}
+            />
 
-            <label htmlFor="issue">
-                Issue
-                <input
-                    type="number"
-                    name="issue"
-                    value={content.issue || ""}
-                    placeholder="Enter a number"
-                    onChange={(event) => updateContentField("issue", event.target.value)}
-                />
-            </label>
+            <TextField
+                label="Issue"
+                type="number"
+                name="issue"
+                value={content.issue || ""}
+                placeholder="Enter a number"
+                onChange={(event) => updateContentField("issue", event.target.value)}
+            />
 
             {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-            <label htmlFor="publication-date">
+            <label htmlFor="issued">
                 Publication date
                 <DateInput
-                    name="publication-date"
-                    content={content}
-                    setContent={setContent}
-                    dateKey="issued"
-                    aria-labelledby="publication-date-label"
+                    name="issued"
+                    value={content?.issued?.["date-parts"][0]}
+                    onChange={(newValue) => updateContentField("issued", citationUtils.createDateObject(...newValue))}
                 />
             </label>
 
-            <label htmlFor="pages">
-                Pages
-                <input
-                    type="text"
-                    name="pages"
-                    value={content.page || ""}
-                    placeholder="Page range"
-                    onChange={(event) => updateContentField("page", event.target.value)}
-                />
-            </label>
+            <TextField
+                label="Pages"
+                type="text"
+                name="page"
+                value={content?.page || ""}
+                placeholder="Page range"
+                onChange={(event) => updateContentField("page", event.target.value)}
+            />
 
-            <label htmlFor="issn">
-                ISSN
-                <input
-                    type="text"
-                    name="issn"
-                    value={content.ISSN || ""}
-                    placeholder="ISSN number"
-                    onChange={(event) => updateContentField("ISSN", event.target.value)}
-                />
-            </label>
+            <TextField
+                label="ISSN"
+                type="text"
+                name="ISSN"
+                value={content?.ISSN || ""}
+                placeholder="ISSN number"
+                onChange={(event) => updateContentField("ISSN", event.target.value)}
+            />
 
-            <label htmlFor="online">
+            <div>
                 Accessed online?
-                <input
-                    type="checkbox"
+                <Checkbox
                     name="online"
-                    checked={content.online}
+                    checked={content?.online || content?.online === "on"}
                     onChange={(event) => updateContentField("online", event.target.value)}
                 />
-            </label>
+            </div>
 
             {content.online && (
                 <>
-                    <label htmlFor="doi">
-                        DOI
-                        <input
-                            type="text"
-                            name="doi"
-                            value={content.DOI || ""}
-                            placeholder="DOI"
-                            onChange={(event) => updateContentField("DOI", event.target.value)}
-                        />
-                    </label>
+                    <TextField
+                        label="DOI"
+                        type="text"
+                        name="DOI"
+                        value={content?.DOI || ""}
+                        placeholder="DOI"
+                        onChange={(event) => updateContentField("DOI", event.target.value)}
+                    />
 
-                    {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-                    <label htmlFor="access-date">
+                    <div>
                         Access date
-                        <DateInput name="access-date" content={content} setContent={setContent} dateKey="accessed" />
-                    </label>
+                        <DateInput
+                            name="accessed"
+                            value={content?.accessed?.["date-parts"][0]}
+                            onChange={(newValue) =>
+                                updateContentField("accessed", citationUtils.createDateObject(...newValue))
+                            }
+                        />
+                    </div>
                 </>
             )}
-
-            <button type="submit">Add reference</button>
-            <button type="button" onClick={handleCancel}>
-                Cancel
-            </button>
         </form>
     );
-}
+});
+
+export default ArticleJournal;

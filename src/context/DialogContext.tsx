@@ -10,6 +10,7 @@ declare global {
         interface IntrinsicElements {
             "md-dialog": React.DetailedHTMLProps<React.HTMLAttributes<HTMLDialogElement>, HTMLDialogElement> & {
                 open?: boolean;
+                class?: string;
             };
         }
     }
@@ -110,7 +111,6 @@ function Dialog({ id, headline, icon, content, actions, close }: DialogProps) {
                         if (options?.type === "filled") {
                             return (
                                 <FilledButton
-                                    className="px-5"
                                     key={uid()}
                                     onClick={() => {
                                         action[1]();
@@ -123,7 +123,6 @@ function Dialog({ id, headline, icon, content, actions, close }: DialogProps) {
                         }
                         return (
                             <TextButton
-                                className="px-3"
                                 key={uid()}
                                 onClick={() => {
                                     action[1]();
@@ -158,16 +157,25 @@ export default function DialogProvider({ children }: DialogProviderProps) {
     const [dialogs, setDialogs] = useState<DialogProps[]>([]);
     const setTimeout = useTimeout();
 
-    function closeDialog(id: string) {
-        const targetDialog = document.getElementById(id) as HTMLDialogElement;
-        targetDialog?.close();
-        setTimeout(() => {
-            setDialogs((prevDialogs) => prevDialogs.filter((dialog) => dialog.id !== id));
-        }, 1000);
+    function removeHiddenDialogs(): void {
+        setDialogs((prevDialogs) => {
+            return prevDialogs.filter((dialog) => {
+                const dialogElement = document.getElementById(dialog.id) as HTMLDialogElement;
+                // Keep the dialog if it's still open, otherwise remove it
+                return dialogElement?.open;
+            });
+        });
     }
 
-    function showDialog(newDialog: Omit<DialogProps, "id" | "close">) {
+    function closeDialog(id: string): void {
+        const targetDialog = document.getElementById(id) as HTMLDialogElement;
+        targetDialog?.close();
+        setTimeout(removeHiddenDialogs, 1000);
+    }
+
+    function showDialog(newDialog: Omit<DialogProps, "id" | "close">): void {
         setDialogs((prevDialogs) => [...prevDialogs, { id: uid(), close: closeDialog, ...newDialog }]);
+        setTimeout(removeHiddenDialogs, 1000);
     }
 
     const contextValue = useMemo(
