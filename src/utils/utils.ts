@@ -7,7 +7,7 @@
  * @param {number} length - The desired length of the unique ID.
  * @returns {string} A unique identifier of the specified length.
  */
-export function uid(length: number = 20): string {
+export function uid(length: number = 16): string {
     const POOL_SIZE_MULTIPLIER = 128;
     const ALLOWED_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
 
