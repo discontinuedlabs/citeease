@@ -4,7 +4,7 @@
  * This function creates a unique ID by generating a sequence of characters from a predefined alphabet.
  * It uses a pool of random bytes to select characters from the alphabet, ensuring uniqueness.
  *
- * @param {number} length - The desired length of the unique ID.
+ * @param {number} [length=16] - The desired length of the unique ID.
  * @returns {string} A unique identifier of the specified length.
  */
 export function uid(length: number = 16): string {
