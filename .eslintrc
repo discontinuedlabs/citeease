@@ -31,7 +31,13 @@
             "version": "detect",
         },
     },
-    "ignorePatterns": ["tailwind.config.js", "postcss.config.js", "vite.config.js", "DialogContext.jsx"],
+    "ignorePatterns": [
+        "tailwind.config.js",
+        "postcss.config.js",
+        "vite.config.js",
+        "service-worker.js",
+        "DialogContext.jsx",
+    ],
     "rules": {
         "indent": ["warn", 4],
         "quotes": ["warn", "double"],

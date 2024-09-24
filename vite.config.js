@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import eslint from "vite-plugin-eslint";
-import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(() => {
     return {
@@ -9,7 +8,7 @@ export default defineConfig(() => {
             port: 3000,
         },
 
-        base: "/citeease",
+        base: "/citeease/",
 
         build: {
             outDir: "build",
@@ -22,14 +21,6 @@ export default defineConfig(() => {
             },
         },
 
-        plugins: [
-            react(),
-            eslint(),
-            VitePWA({
-                devOptions: {
-                    enabled: true,
-                },
-            }),
-        ],
+        plugins: [react(), eslint()],
     };
 });

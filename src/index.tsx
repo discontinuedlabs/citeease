@@ -31,13 +31,13 @@ import "@material/web/menu/sub-menu";
 import "@material/web/textfield/filled-text-field";
 import "@material/web/progress/circular-progress";
 import "@material/web/progress/linear-progress";
-import "@material/web/select/outlined-select";
+import "@material/web/select/filled-select";
 import "@material/web/select/select-option";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
         <ErrorBoundary>
-            <Router basename="/citeease">
+            <Router basename="/citeease/">
                 <AuthProvider>
                     <ReduxeProvider store={store}>
                         <ToastProvider>
@@ -51,3 +51,16 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </ErrorBoundary>
     </React.StrictMode>
 );
+
+if ("serviceWorker" in navigator) {
+    const publicUrl = import.meta.env.VITE_PUBLIC_URL;
+
+    navigator.serviceWorker
+        .register(`${publicUrl}/service-worker.js`, { scope: `${publicUrl}/` })
+        .then((registration) => {
+            console.log("Service Worker registered with scope:", registration.scope);
+        })
+        .catch((error) => {
+            console.error("Service Worker registration failed:", error);
+        });
+}
