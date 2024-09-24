@@ -4,7 +4,7 @@
 ![test status](https://img.shields.io/badge/test-pending-yellow)
 ![lint status](https://img.shields.io/github/actions/workflow/status/discontinuedlabs/citeease/lint.yml?label=lint)
 ![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)
-![license](https://img.shields.io/github/license/discontinuedlabs/citeease)
+![license](https://img.shields.io/github/license/discontinuedlabs/citeease?color=9c0000)
 
 **Welcome to CiteEase, an open-source Progressive Web App (PWA) for managing citations and collaborating on bibliographies.**
 
