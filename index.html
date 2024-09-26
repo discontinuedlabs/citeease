@@ -10,10 +10,10 @@
         />
         <title>CiteEase: Your Citation Companion</title>
 
-        <link rel="manifest" href="/citeease/manifest.json" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/citeease/images/favicons/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/citeease/images/favicons/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/citeease/images/favicons/favicon-16x16.png" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/images/favicons/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/images/favicons/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/images/favicons/favicon-16x16.png" />
         <meta name="theme-color" content="#ffffff" />
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -27,21 +27,16 @@
         <script type="text/javascript">
             // MIT License
             // https://github.com/rafgraph/spa-github-pages
-            (function (location) {
-                if (location.search.startsWith("/")) {
-                    var decodedUrl = location.search
+            (function (l) {
+                if (l.search[1] === "/") {
+                    var decoded = l.search
                         .slice(1)
                         .split("&")
-                        .map(function (part) {
-                            return part.replace(/~and~/g, "&");
+                        .map(function (s) {
+                            return s.replace(/~and~/g, "&");
                         })
                         .join("?");
-
-                    window.history.replaceState(
-                        null,
-                        null,
-                        location.pathname.slice(0, -1) + decodedUrl + location.hash
-                    );
+                    window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
                 }
             })(window.location);
         </script>

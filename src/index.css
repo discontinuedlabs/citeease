@@ -143,7 +143,7 @@
 
     code,
     pre {
-        @apply rounded-md px-2 py-1 text-sm;
+        @apply break-words rounded-md px-2 py-1 text-sm;
         color: var(--md-sys-color-on-secondary);
         background-color: var(--md-sys-color-secondary);
     }

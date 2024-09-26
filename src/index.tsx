@@ -8,6 +8,7 @@ import { AuthProvider } from "./context/AuthContext";
 import ToastProvider from "./context/ToastContext.tsx";
 import ErrorBoundary from "./components/ErrorBoundary";
 import DialogProvider from "./context/DialogContext.tsx";
+import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 
 import "./index.css";
 // import "@material/web/all";
@@ -51,16 +52,4 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </ErrorBoundary>
     </React.StrictMode>
 );
-
-if ("serviceWorker" in navigator) {
-    const publicUrl = import.meta.env.VITE_PUBLIC_URL;
-
-    navigator.serviceWorker
-        .register(`${publicUrl}/service-worker.js`, { scope: `${publicUrl}/` })
-        .then((registration) => {
-            console.log("Service Worker registered with scope:", registration.scope);
-        })
-        .catch((error) => {
-            console.error("Service Worker registration failed:", error);
-        });
-}
+serviceWorkerRegistration.register();
