@@ -6,10 +6,9 @@ import { createDateObject } from "./citationUtils.ts";
 /**
  * Converts an HTML string to a Markdown-formatted string.
  *
- * This function handles the conversion of various HTML tags,
- * including those with attributes, into their Markdown equivalents.
- * It supports headings, paragraphs, emphasis, strong text, links,
- * images, lists, blockquotes, inline code, and code blocks.
+ * Note: This is a basic function designed to meet the specific needs of
+ * CiteEase. It is not comprehensive and should not be considered a
+ * replacement for full-fledged HTML-to-markdown libraries.
  *
  * @param {string} html - The HTML string to convert to Markdown.
  * @returns {string} The converted Markdown string.
@@ -76,9 +75,9 @@ export function htmlToMarkdown(html: string): string {
 /**
  * Converts a Markdown string to an HTML-formatted string.
  *
- * This function handles the conversion of various Markdown elements,
- * including headers, bold and emphasis text, links, images, lists,
- * blockquotes, code blocks, and paragraphs into their HTML equivalents.
+ * Note: This is a basic function designed to meet the specific needs of
+ * CiteEase. It is not comprehensive and should not be considered a
+ * replacement for full-fledged markdown-to-HTML libraries.
  *
  * @param {string} markdown - The Markdown string to convert to HTML.
  * @returns {string} The converted HTML string.

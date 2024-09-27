@@ -4,7 +4,7 @@
 ![test status](https://img.shields.io/badge/test-pending-yellow)
 ![lint status](https://img.shields.io/github/actions/workflow/status/discontinuedlabs/citeease/lint.yml?label=lint)
 ![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)
-![license](https://img.shields.io/github/license/discontinuedlabs/citeease)
+![license](https://img.shields.io/github/license/discontinuedlabs/citeease?color=crimson)
 
 **Welcome to CiteEase, an open-source Progressive Web App (PWA) for managing citations and collaborating on bibliographies.**
 
@@ -54,11 +54,11 @@ CiteEase is a powerful and user-friendly open-source citation management app des
 
 ## Getting Started
 
-To get up and running with CiteEase, follow the instructions in our [GETTING_STARTED.md](GETTING_STARTED.md) file.
+To get up and running with CiteEase, follow the instructions in our [GETTING_STARTED.md](.github/GETTING_STARTED.md) file.
 
 ## Contributing
 
-We actively welcome contributions from the community! To get started, please see our [CONTRIBUTING.md](CONTRIBUTING.md) file and use the provided [Pull Request Template](.github/PULL_REQUEST_TEMPLATE.md) when submitting changes.
+We actively welcome contributions from the community! To get started, please see our [CONTRIBUTING.md](.github/CONTRIBUTING.md) file and use the provided [Pull Request Template](.github/PULL_REQUEST_TEMPLATE.md) when submitting changes.
 
 ## Reporting Issues
 
