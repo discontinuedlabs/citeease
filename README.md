@@ -8,24 +8,24 @@
 
 **Welcome to CiteEase, an open-source Progressive Web App (PWA) for managing citations and collaborating on bibliographies.**
 
-## Table of Contents
+## 📋 Table of Contents
 
--   [What is CiteEase?](#what-is-citeease)
--   [Key Features](#key-features)
--   [Upcoming Features (to-do)](#upcoming-features-to-do)
--   [Getting Started](#getting-started)
--   [Contributing](#contributing)
--   [Reporting Issues](#reporting-issues)
--   [Testing](#testing)
--   [License](#license)
--   [Contact](#contact)
--   [Acknowledgments](#acknowledgments)
+-   [What is CiteEase?](#-what-is-citeease)
+-   [Key Features](#-key-features)
+-   [Upcoming Features (to-do)](#-upcoming-features-to-do)
+-   [Getting Started](#-getting-started)
+-   [Contributing](#-contributing)
+-   [Reporting Issues](#-reporting-issues)
+-   [Testing](#-testing)
+-   [License](#-license)
+-   [Contact](#-contact)
+-   [Acknowledgments](#-acknowledgments)
 
-## What is CiteEase?
+## 📖 What is CiteEase?
 
 CiteEase is a powerful and user-friendly open-source citation management app designed for students, researchers, and anyone who values efficiency and organization.
 
-## Key Features
+## ✨ Key Features
 
 -   **Unlimited Usage:** No sign-in required for most functionalities, unless you want to sync data across devices, restore passwords, and collaborate.
 -   **Offline Functionality:** Work on your bibliographies seamlessly, even without an internet connection.
@@ -43,7 +43,7 @@ CiteEase is a powerful and user-friendly open-source citation management app des
     -   Open collaboration on bibliographies using a unique identifier and password.
     -   Collaborate with others in real-time, allowing everyone to add, modify, or delete citations within a shared bibliography.
 
-## Upcoming Features (to-do)
+## 📅 Upcoming Features (to-do)
 
 -   [ ] Integration with popular reference managers (Zotero, Mendeley, EndNote).
 -   [ ] Version control to track changes and revert to previous versions (local for privacy).
@@ -52,15 +52,15 @@ CiteEase is a powerful and user-friendly open-source citation management app des
 -   [ ] Raw JSON Entry mode for advanced users to input citation data directly into predefined JSON structures (e.g., CSL-JSON, BibJSON).
 -   [ ] Custom Source Templates feature allowing users to create, export, and import personalized citation templates beyond the standard options (book, webpage, journal article, etc.).
 
-## Getting Started
+## 🚀 Getting Started
 
 To get up and running with CiteEase, follow the instructions in our [GETTING_STARTED.md](.github/GETTING_STARTED.md) file.
 
-## Contributing
+## 🤝 Contributing
 
 We actively welcome contributions from the community! To get started, please see our [CONTRIBUTING.md](.github/CONTRIBUTING.md) file and use the provided [Pull Request Template](.github/PULL_REQUEST_TEMPLATE.md) when submitting changes.
 
-## Reporting Issues
+## 🐛 Reporting Issues
 
 If you encounter any issues or have suggestions for new features, you can use the following templates:
 
@@ -69,19 +69,19 @@ If you encounter any issues or have suggestions for new features, you can use th
 
 Alternatively, you can visit our [Discussions page](https://github.com/discontinuedlabs/citeease/discussions) for questions, ideas, or general support.
 
-## Testing
+## 🧪 Testing
 
 Rigorous testing is essential for ensuring the quality and stability of any application. We acknowledge its importance and plan to incorporate a comprehensive testing suite in the future. Currently, however, automated testing is not actively implemented in this project.
 
-## License
+## 📜 License
 
 CiteEase is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## Contact
+## 📧 Contact
 
 For inquiries or more information, you can reach out to us at [discontinuedlabs@gmail.com](mailto:discontinuedlabs@gmail.com).
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
 CiteEase utilizes CSL style files from [Citation Style Language Styles](https://github.com/citation-style-language/styles) and XML locales files from [Citation Style Language Locales](https://github.com/citation-style-language/locales), both of which are licensed under the [Creative Commons Attribution-ShareAlike 3.0 Unported License](https://creativecommons.org/licenses/by-sa/3.0/). We extend our gratitude to these projects for providing essential resources that enhance the functionality and versatility of CiteEase.
 
