@@ -178,7 +178,7 @@ export default function DialogProvider({ children }: DialogProviderProps) {
 
     function showDialog(newDialog: Dialog): void {
         const existingId = document.getElementById(newDialog?.id);
-        if (existingId) return;
+        if (existingId) existingId.remove();
 
         setDialogs((prevDialogs) => [...prevDialogs, { ...newDialog, id: newDialog?.id || uid() }]);
         setTimeout(removeHiddenDialogs, 150);
