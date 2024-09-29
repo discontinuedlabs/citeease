@@ -64,8 +64,8 @@ We actively welcome contributions from the community! To get started, please see
 
 If you encounter any issues or have suggestions for new features, you can use the following templates:
 
-- For **bug reports**, please [open a bug issue](https://github.com/discontinuedlabs/citeease/issues/new?template=bug.yml) and provide as much detail as possible.
-- For **feature requests**, please [open a feature request](https://github.com/discontinuedlabs/citeease/issues/new?template=feature.yml) and describe your idea and its use case.
+-   For **bug reports**, please [open a bug issue](https://github.com/discontinuedlabs/citeease/issues/new?template=bug.yml) and provide as much detail as possible.
+-   For **feature requests**, please [open a feature request](https://github.com/discontinuedlabs/citeease/issues/new?template=feature.yml) and describe your idea and its use case.
 
 Alternatively, you can visit our [Discussions page](https://github.com/discontinuedlabs/citeease/discussions) for questions, ideas, or general support.
 

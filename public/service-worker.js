@@ -1,5 +1,6 @@
-// Import Workbox library from CDN
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/6.5.3/workbox-sw.js");
+
+workbox.setConfig({ debug: false });
 
 const { core, routing, strategies, cacheableResponse, expiration } = workbox;
 

@@ -2,8 +2,8 @@
 
 Please include a summary of the changes and the related issue. Also, describe any changes made to the codebase or dependencies.
 
-- **Issue Reference:** [#IssueNumber](link-to-issue)
-- **Description of Changes:**
+-   **Issue Reference:** [#IssueNumber](link-to-issue)
+-   **Description of Changes:**
 
 ## How to Test
 
