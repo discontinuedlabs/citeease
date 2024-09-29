@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars, @typescript-eslint/no-namespace */
 
-import React, { createContext, useContext, useEffect, useMemo, useState, ReactNode } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState, ReactNode, forwardRef } from "react";
 import { FilledButton, Icon, TextButton } from "../components/ui/MaterialComponents";
 import { uid } from "../utils/utils.ts";
 import { useTimeout } from "../hooks/hooks.tsx";
@@ -11,6 +11,7 @@ declare global {
             "md-dialog": React.DetailedHTMLProps<React.HTMLAttributes<HTMLDialogElement>, HTMLDialogElement> & {
                 open?: boolean;
                 class?: string;
+                ref?: unknown;
             };
         }
     }
@@ -21,7 +22,7 @@ type ActionOptions = {
     closeOnClick?: boolean;
 };
 
-type DialogProps = {
+type Dialog = {
     id: string;
     headline?: ReactNode;
     icon?: string;
@@ -30,12 +31,16 @@ type DialogProps = {
     close: (id: string) => void;
 };
 
-type DialogContextType = {
-    show: (newDialog: Omit<DialogProps, "id" | "close">) => void;
+type DialogContextValue = {
+    show: (newDialog: Dialog) => void;
     close: (id: string) => void;
 };
 
-const DialogContext = createContext<DialogContextType | undefined>(undefined);
+type DialogProviderProps = {
+    children: ReactNode;
+};
+
+const DialogContext = createContext<DialogContextValue | undefined>(undefined);
 
 /**
  * Allows components to interact with the dialog system, showing and closing dialogs.
@@ -62,7 +67,7 @@ const DialogContext = createContext<DialogContextType | undefined>(undefined);
  *     );
  * }
  */
-export function useDialog(): DialogContextType {
+export function useDialog(): DialogContextValue {
     const context = useContext(DialogContext);
     if (!context) {
         throw new Error("useDialog must be used within a DialogProvider");
@@ -70,7 +75,9 @@ export function useDialog(): DialogContextType {
     return context;
 }
 
-function Dialog({ id, headline, icon, content, actions, close }: DialogProps) {
+// eslint-disable-next-line
+const Dialog = forwardRef(function Dialog(props: Dialog, ref: any) {
+    const { id, headline, icon, content, actions, close } = props;
     const setTimeout = useTimeout();
 
     function handleClose(dId) {
@@ -78,7 +85,7 @@ function Dialog({ id, headline, icon, content, actions, close }: DialogProps) {
         dialog?.close();
         setTimeout(() => {
             close(dId);
-        }, 1000); // PATCH: Duct tape fix to show the closign animation before removing it from the dialogs array.
+        }, 150); // PATCH: Duct tape fix to show the closign animation before removing it from the dialogs array.
     }
 
     useEffect(() => {
@@ -94,7 +101,7 @@ function Dialog({ id, headline, icon, content, actions, close }: DialogProps) {
     }, [close, id]);
 
     return (
-        <md-dialog open id={id}>
+        <md-dialog ref={ref} open id={id}>
             {headline && (
                 <div className="p-5" slot="headline">
                     {headline}
@@ -136,11 +143,7 @@ function Dialog({ id, headline, icon, content, actions, close }: DialogProps) {
             </div>
         </md-dialog>
     );
-}
-
-type DialogProviderProps = {
-    children: ReactNode;
-};
+});
 
 /**
  * Context provider for managing dialog states.
@@ -154,7 +157,7 @@ type DialogProviderProps = {
  * </DialogProvider>
  */
 export default function DialogProvider({ children }: DialogProviderProps) {
-    const [dialogs, setDialogs] = useState<DialogProps[]>([]);
+    const [dialogs, setDialogs] = useState<Dialog[]>([]);
     const setTimeout = useTimeout();
 
     function removeHiddenDialogs(): void {
@@ -170,12 +173,15 @@ export default function DialogProvider({ children }: DialogProviderProps) {
     function closeDialog(id: string): void {
         const targetDialog = document.getElementById(id) as HTMLDialogElement;
         targetDialog?.close();
-        setTimeout(removeHiddenDialogs, 1000);
+        setTimeout(removeHiddenDialogs, 150);
     }
 
-    function showDialog(newDialog: Omit<DialogProps, "id" | "close">): void {
-        setDialogs((prevDialogs) => [...prevDialogs, { id: uid(), close: closeDialog, ...newDialog }]);
-        setTimeout(removeHiddenDialogs, 1000);
+    function showDialog(newDialog: Dialog): void {
+        const existingId = document.getElementById(newDialog?.id);
+        if (existingId) return;
+
+        setDialogs((prevDialogs) => [...prevDialogs, { ...newDialog, id: newDialog?.id || uid() }]);
+        setTimeout(removeHiddenDialogs, 150);
     }
 
     const contextValue = useMemo(
