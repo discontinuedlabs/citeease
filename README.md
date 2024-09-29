@@ -73,7 +73,7 @@ Alternatively, you can visit our [Discussions page](https://github.com/discontin
 
 Rigorous testing is essential for ensuring the quality and stability of any application. We acknowledge its importance and plan to incorporate a comprehensive testing suite in the future. Currently, however, automated testing is not actively implemented in this project.
 
-## 📜 License
+## ⚖️ License
 
 CiteEase is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
