@@ -43,7 +43,7 @@ CiteEase is a powerful and user-friendly open-source citation management app des
     -   Open collaboration on bibliographies using a unique identifier and password.
     -   Collaborate with others in real-time, allowing everyone to add, modify, or delete citations within a shared bibliography.
 
-## 🔜 Upcoming Features (to-do)
+## 📅 Upcoming Features (to-do)
 
 -   [ ] Integration with popular reference managers (Zotero, Mendeley, EndNote).
 -   [ ] Version control to track changes and revert to previous versions (local for privacy).
