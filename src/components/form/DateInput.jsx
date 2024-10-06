@@ -1,61 +1,112 @@
-import { forwardRef } from "react";
-import { TextField } from "../ui/MaterialComponents";
+import { forwardRef, useImperativeHandle, useRef, useState, useEffect } from "react";
+import { IconButton, Select, TextField } from "../ui/MaterialComponents";
+import * as citationUtils from "../../utils/citationUtils.ts";
 
-// TODO: Make the month a select component that also includes seasons
-const DateInput = forwardRef(function DateInput(props, ref) {
-    const { value = [], onChange, name, className, ...rest } = props;
+// FIXME: Why does "value" become undefined before it changes to another value?
+const DateInput = forwardRef(function DateInput(props, parentRef) {
+    const { value: passedValue, name, label, onChange, className, ...rest } = props;
+    const [value, setValue] = useState(passedValue);
+    const [year, month, day] = value?.["date-parts"][0] || [];
+    const [maxDaysInMonth, setMaxDaysInMonth] = useState(31);
+    const selectRef = useRef();
+    const localRef = useRef();
 
-    function handleChange(type) {
-        return (event) => {
-            console.log(type);
-            const newValue = [...value];
-            const newVal = event.target.value ? parseInt(event.target.value, 10) : "";
+    const monthOptions = [
+        { headline: "", value: "" },
+        { headline: "January", value: 1 },
+        { headline: "February", value: 2 },
+        { headline: "March", value: 3 },
+        { headline: "April", value: 4 },
+        { headline: "May", value: 5 },
+        { headline: "June", value: 6 },
+        { headline: "July", value: 7 },
+        { headline: "August", value: 8 },
+        { headline: "September", value: 9 },
+        { headline: "October", value: 10 },
+        { headline: "November", value: 11 },
+        { headline: "December", value: 12 },
+        { headline: "Spring", value: "season-01" },
+        { headline: "Summer", value: "season-02" },
+        { headline: "Autumn", value: "season-03" },
+        { headline: "Winter", value: "season-04" },
+    ];
 
-            if (type === "year") {
-                newValue[0] = newVal;
-            } else if (type === "month") {
-                newValue[1] = newVal;
-            } else if (type === "day") {
-                newValue[2] = newVal;
-            }
+    useImperativeHandle(parentRef, () => localRef?.current, []);
 
-            onChange(newValue);
+    useEffect(() => {
+        const syntheticEvent = {
+            target: { ...localRef.current, value, name },
         };
+
+        onChange(syntheticEvent);
+    }, [value]);
+
+    useEffect(() => {
+        if (year && month) {
+            setMaxDaysInMonth(new Date(year, month, 0).getDate());
+        }
+    }, [year, month]);
+
+    function handleChange(event) {
+        const match = event.target.name.match(/(year|month|day)$/);
+        const type = match ? match[0] : "";
+        let newValue;
+
+        const targetValue = event.target.value;
+
+        if (type === "year") {
+            newValue = citationUtils.createDateObject(targetValue, month, day);
+        } else if (type === "month") {
+            newValue = citationUtils.createDateObject(year, targetValue, day);
+        } else if (type === "day") {
+            newValue = citationUtils.createDateObject(year, month, targetValue);
+        }
+
+        setValue(newValue);
+    }
+
+    function setToToday() {
+        const today = citationUtils.createDateObject(new Date());
+        setValue(today);
     }
 
     /* eslint-disable react/jsx-props-no-spreading */
     return (
-        <div ref={ref} name={name} {...rest} className={`flex gap-1 ${className}`}>
-            <TextField
-                type="number"
-                value={value?.[0] || ""}
-                min="1"
-                max={new Date().getFullYear()}
-                name={`${name}-year`}
-                label="Year"
-                placeholder="YYYY"
-                onChange={() => handleChange("year")}
-            />
-            <TextField
-                type="number"
-                value={value?.[1] || ""}
-                min="1"
-                max="12"
-                name={`${name}-month`}
-                label="Month"
-                placeholder="MM"
-                onChange={() => handleChange("month")}
-            />
-            <TextField
-                type="number"
-                value={value?.[2] || ""}
-                min="1"
-                max="31"
-                label="Day"
-                name={`${name}-day`}
-                placeholder="DD"
-                onChange={() => handleChange("day")}
-            />
+        <div ref={localRef} name={name} className={className} {...rest}>
+            <p>{label}</p>
+            <div className="flex gap-1">
+                <TextField
+                    type="number"
+                    value={year || ""}
+                    min={-200000}
+                    max={200000}
+                    name={`${name}-year`}
+                    label="Year"
+                    placeholder="YYYY"
+                    onChange={handleChange}
+                />
+                <Select
+                    ref={selectRef}
+                    options={monthOptions}
+                    name={`${name}-month`}
+                    value={month || ""}
+                    label="Month"
+                    onChange={handleChange}
+                    disabled={!year}
+                />
+                <TextField
+                    type="number"
+                    value={day || ""}
+                    min={1}
+                    max={maxDaysInMonth || 31}
+                    label="Day"
+                    name={`${name}-day`}
+                    placeholder="DD"
+                    onChange={handleChange}
+                    disabled={!year || !month}
+                />
+                <IconButton name="today" onClick={setToToday} />
+            </div>
         </div>
     );
 });

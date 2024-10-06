@@ -28,7 +28,6 @@
         "@citation-js/plugin-csl": "^0.7.11",
         "@material/web": "^1.5.1",
         "@reduxjs/toolkit": "^2.2.5",
-        "citation-js": "^0.7.11",
         "citeproc": "^2.4.63",
         "dexie": "^4.0.4",
         "firebase": "^10.12.2",

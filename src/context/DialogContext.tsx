@@ -1,9 +1,18 @@
 /* eslint-disable no-unused-vars, @typescript-eslint/no-namespace */
 
-import React, { createContext, useContext, useEffect, useMemo, useState, ReactNode, forwardRef } from "react";
+import React, {
+    createContext,
+    useContext,
+    useEffect,
+    useMemo,
+    useState,
+    ReactNode,
+    forwardRef,
+    useRef,
+    useImperativeHandle,
+} from "react";
 import { FilledButton, Icon, TextButton } from "../components/ui/MaterialComponents";
 import { uid } from "../utils/utils.ts";
-import { useTimeout } from "../hooks/hooks.tsx";
 
 declare global {
     namespace JSX {
@@ -11,7 +20,7 @@ declare global {
             "md-dialog": React.DetailedHTMLProps<React.HTMLAttributes<HTMLDialogElement>, HTMLDialogElement> & {
                 open?: boolean;
                 class?: string;
-                ref?: unknown;
+                ref?: React.Ref<HTMLDialogElement>;
             };
         }
     }
@@ -22,7 +31,7 @@ type ActionOptions = {
     closeOnClick?: boolean;
 };
 
-type Dialog = {
+type DialogProps = {
     id: string;
     headline?: ReactNode;
     icon?: string;
@@ -32,7 +41,7 @@ type Dialog = {
 };
 
 type DialogContextValue = {
-    show: (newDialog: Dialog) => void;
+    show: (newDialog: DialogProps) => void;
     close: (id: string) => void;
 };
 
@@ -75,33 +84,28 @@ export function useDialog(): DialogContextValue {
     return context;
 }
 
-// eslint-disable-next-line
-const Dialog = forwardRef(function Dialog(props: Dialog, ref: any) {
+const Dialog = forwardRef<HTMLDialogElement, DialogProps>(function Dialog(props: DialogProps, parentRef) {
     const { id, headline, icon, content, actions, close } = props;
-    const setTimeout = useTimeout();
+    const localRef = useRef<HTMLDialogElement>(null);
 
-    function handleClose(dId) {
-        const dialog = document.getElementById(dId) as HTMLDialogElement;
-        dialog?.close();
-        setTimeout(() => {
-            close(dId);
-        }, 150); // PATCH: Duct tape fix to show the closign animation before removing it from the dialogs array.
-    }
+    useImperativeHandle(parentRef, () => localRef.current!, []);
 
     useEffect(() => {
         function handleKeyDown(event: KeyboardEvent) {
             if (event.key === "Escape") {
-                handleClose(id);
+                close(id);
             }
         }
+
         document.addEventListener("keydown", handleKeyDown);
+
         return () => {
             document.removeEventListener("keydown", handleKeyDown);
         };
     }, [close, id]);
 
     return (
-        <md-dialog ref={ref} open id={id}>
+        <md-dialog ref={localRef} open id={id}>
             {headline && (
                 <div className="p-5" slot="headline">
                     {headline}
@@ -121,7 +125,7 @@ const Dialog = forwardRef(function Dialog(props: Dialog, ref: any) {
                                     key={uid()}
                                     onClick={() => {
                                         action[1]();
-                                        if (options?.closeOnClick !== false) handleClose(id);
+                                        if (options?.closeOnClick !== false) close(id);
                                     }}
                                 >
                                     {action[0]}
@@ -133,7 +137,7 @@ const Dialog = forwardRef(function Dialog(props: Dialog, ref: any) {
                                 key={uid()}
                                 onClick={() => {
                                     action[1]();
-                                    if (options?.closeOnClick !== false) handleClose(id);
+                                    if (options?.closeOnClick !== false) close(id);
                                 }}
                             >
                                 {action[0]}
@@ -157,31 +161,39 @@ const Dialog = forwardRef(function Dialog(props: Dialog, ref: any) {
  * </DialogProvider>
  */
 export default function DialogProvider({ children }: DialogProviderProps) {
-    const [dialogs, setDialogs] = useState<Dialog[]>([]);
-    const setTimeout = useTimeout();
+    const [dialogs, setDialogs] = useState<DialogProps[]>([]);
+    const dialogRefs = useRef<{ [key: string]: HTMLDialogElement | null }>({});
 
-    function removeHiddenDialogs(): void {
-        setDialogs((prevDialogs) => {
-            return prevDialogs.filter((dialog) => {
-                const dialogElement = document.getElementById(dialog.id) as HTMLDialogElement;
-                // Keep the dialog if it's still open, otherwise remove it
-                return dialogElement?.open;
-            });
+    useEffect(() => {
+        dialogs.forEach((dialog) => {
+            function handleClose() {
+                setDialogs((prevDialogs) => prevDialogs.filter((d) => d.id !== dialog.id));
+            }
+
+            const dialogElement = dialogRefs.current[dialog.id];
+
+            if (dialogElement) {
+                dialogElement.addEventListener("closed", handleClose);
+
+                return () => {
+                    dialogElement.removeEventListener("closed", handleClose);
+                };
+            }
+
+            return undefined;
         });
-    }
+    }, [dialogs]);
 
     function closeDialog(id: string): void {
         const targetDialog = document.getElementById(id) as HTMLDialogElement;
         targetDialog?.close();
-        setTimeout(removeHiddenDialogs, 150);
     }
 
-    function showDialog(newDialog: Dialog): void {
+    function showDialog(newDialog: DialogProps): void {
         const existingId = document.getElementById(newDialog?.id);
         if (existingId) existingId.remove();
 
         setDialogs((prevDialogs) => [...prevDialogs, { ...newDialog, id: newDialog?.id || uid() }]);
-        setTimeout(removeHiddenDialogs, 150);
     }
 
     const contextValue = useMemo(
@@ -198,6 +210,7 @@ export default function DialogProvider({ children }: DialogProviderProps) {
             {dialogs &&
                 dialogs.map((dialog) => (
                     <Dialog
+                        ref={(el) => (dialogRefs.current[dialog.id] = el)} // eslint-disable-line no-return-assign
                         key={dialog.id}
                         id={dialog.id}
                         headline={dialog.headline}

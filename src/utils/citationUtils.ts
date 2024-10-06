@@ -8,15 +8,18 @@ const CORS_PROXY: string = "https://corsproxy.io/?";
  * includes `raw`, `date_time`, and `timestamp` properties.
  *
  * @param {Date | number} yearOrDate - A `Date` object or a year as a number.
- * @param {number} [month] - The month (1-12), optional if `yearOrDate` is a `number`.
+ * @param {number | string} [month] - The month (1-12), optional if `yearOrDate` is a `number`.
  * @param {number} [day] - The day of the month, optional if `yearOrDate` is a `number`.
  * @returns {DateObject | undefined} An object containing `date-parts` or `undefined`. If a full date (year, month, day) is provided,
  * it also includes `raw`, `date_time`, and `timestamp` properties.
  */
-export function createDateObject(yearOrDate: Date | number, month?: number, day?: number): DateObject | undefined {
-    if (!yearOrDate) return undefined;
+export function createDateObject(
+    yearOrDate: Date | number,
+    month?: number | string | undefined,
+    day?: number | undefined
+): DateObject {
     let year: number;
-    let adjustedMonth: number | undefined;
+    let adjustedMonth: number | string | undefined;
     let adjustedDay: number | undefined;
 
     if (yearOrDate instanceof Date) {
@@ -29,12 +32,12 @@ export function createDateObject(yearOrDate: Date | number, month?: number, day?
         adjustedDay = day ?? undefined;
     }
 
-    const dateParts: number[] = [year];
+    const dateParts: [number, (number | string)?, number?] = [year];
 
     if (adjustedMonth) {
         dateParts.push(adjustedMonth);
 
-        if (adjustedDay) {
+        if (typeof adjustedMonth === "number" && adjustedDay) {
             dateParts.push(adjustedDay);
         }
     }
@@ -43,9 +46,9 @@ export function createDateObject(yearOrDate: Date | number, month?: number, day?
         "date-parts": [dateParts],
     };
 
-    // Only add "raw", "date_time", and "timestamp" if year, month, and day are all defined
-    if (adjustedMonth && adjustedDay) {
-        const newDate = new Date(year, adjustedMonth - 1, adjustedDay);
+    // Only add "raw", "date_time", and "timestamp" if year, month, and day are all defined, and month is not a string (as season)
+    if (adjustedMonth && typeof adjustedMonth === "number" && adjustedDay) {
+        const newDate = new Date(year, (adjustedMonth as number) - 1, adjustedDay);
         [dateObject.raw] = newDate.toISOString().split("T");
         dateObject.date_time = newDate.toISOString();
         dateObject.timestamp = newDate.getTime();
@@ -415,8 +418,10 @@ export async function retrieveContentFromPMID(pmid: string): Promise<CslJson | n
 export function getContentFromForm(form: HTMLFormElement): CslJson {
     const data = new FormData(form);
     const dataObject = Object.fromEntries(data.entries()) as Record<string, string | undefined>;
+    const checkboxes = form.querySelectorAll<HTMLInputElement>("md-checkbox");
 
-    const { URL, DOI, ISSN, PMCID, PMID, ISBN, issue, online, page, title, volume, publisher } = dataObject;
+    const { URL, DOI, ISSN, PMCID, PMID, ISBN, issue, page, title, volume, publisher } = dataObject;
+    const online = Array.from(checkboxes).find((checkbox) => checkbox.name === "online");
 
     const content = {
         title,
@@ -430,19 +435,19 @@ export function getContentFromForm(form: HTMLFormElement): CslJson {
         PMID,
         ISBN,
         publisher,
+        online: online?.getAttribute("checked") === "true",
         issued: createDateObject(
-            Number(dataObject["issued-year"]),
-            Number(dataObject["issued-month"]),
-            Number(dataObject["issued-day"])
+            parseInt(dataObject["issued-year"]!, 10),
+            parseInt(dataObject["issued-month"]!, 10) || dataObject["issued-month"],
+            parseInt(dataObject["issued-day"]!, 10)
         ),
         accessed: createDateObject(
-            Number(dataObject["accessed-year"]),
-            Number(dataObject["accessed-month"]),
-            Number(dataObject["accessed-day"])
+            parseInt(dataObject["accessed-year"]!, 10),
+            parseInt(dataObject["accessed-month"]!, 10) || dataObject["accessed-month"],
+            parseInt(dataObject["accessed-day"]!, 10)
         ),
         author: createAuthorsArray(dataObject),
         "container-title": (dataObject["container-title"] as string) || undefined,
-        online: online === "on",
     };
 
     return content;

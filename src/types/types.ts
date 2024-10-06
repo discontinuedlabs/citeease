@@ -37,7 +37,7 @@ export type CslJson = {
     "publisher-place"?: string;
     source?: string;
     volume?: string | number;
-    online?: boolean;
+    online?: boolean | string;
     "number-of-pages"?: number;
 };
 
