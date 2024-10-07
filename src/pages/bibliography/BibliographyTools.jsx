@@ -13,16 +13,16 @@ import {
     toggleEntryCheckbox,
     updateCitation,
 } from "../../data/store/slices/bibsSlice";
-import BibliographyCard from "../../components/ui/BibliographyCard";
 import * as citationUtils from "../../utils/citationUtils.ts";
 import { useEnhancedDispatch, useFindBib, useOnlineStatus } from "../../hooks/hooks.tsx";
 import Tag from "../../components/ui/Tag";
 import citationStyles from "../../assets/json/styles.json";
 import mostPopularStyles from "../../assets/json/mostPopularStyles.json";
-import { uid } from "../../utils/utils.ts";
+import { citationCount, timeAgo, uid } from "../../utils/utils.ts";
 import { parseHtmlToJsx } from "../../utils/conversionUtils.tsx";
 import {
     Checkbox,
+    ChipSet,
     CircularProgress,
     Divider,
     EmptyPage,
@@ -961,20 +961,30 @@ export function MoveDialog(props) {
             <button type="button" onClick={() => setIsVisible(false)}>
                 X
             </button>
-            {bibliographies.map((bib) => {
-                if (bib.id !== bibliography.id) {
-                    /* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
-                    return (
-                        <div onClick={() => handleSelect(bib.id)}>
-                            <BibliographyCard
-                                bibliography={bib}
-                                style={{ backgroundColor: bib.id in selectedBibliographyIds ? "red" : "unset" }}
-                            />
-                        </div>
-                    );
-                }
-                return null;
-            })}
+            <List
+                items={bibliographies.map((bib) => {
+                    if (bib.id !== bibliography.id) {
+                        return {
+                            start: <Icon name={bib?.icon} />,
+                            title: bib.title,
+                            description: `${bib.style.name.short || bib.style.name.long.replace(/\((.*?)\)/g, "")} • ${citationCount(bib.citations)} • ${timeAgo(bib.dateModified)}`,
+                            content: (
+                                <ChipSet
+                                    chips={bib.tags.map(({ label, color }) => ({ label, color }))}
+                                    style={{ marginTop: bib.tags.length === 0 ? "0" : "0.5rem" }}
+                                />
+                            ),
+                            onClick: () => handleSelect(bib.id),
+                            style: {
+                                backgroundColor: selectedBibliographyIds.includes(bib.id)
+                                    ? "var(--md-sys-color-secondary-container)"
+                                    : "",
+                            },
+                        };
+                    }
+                    return null;
+                })}
+            />
             <button
                 type="button"
                 disabled={selectedBibliographyIds.length !== 1}

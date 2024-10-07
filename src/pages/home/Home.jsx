@@ -8,7 +8,7 @@ import { useAuth } from "../../context/AuthContext";
 import { CoBibsSearchDialog } from "./HomeTools";
 import { useEnhancedDispatch } from "../../hooks/hooks.tsx";
 import { ChipSet, EmptyPage, Fab, Icon, List, TopBar } from "../../components/ui/MaterialComponents";
-import { parseQueryString, timeAgo, uid } from "../../utils/utils.ts";
+import { citationCount, parseQueryString, timeAgo, uid } from "../../utils/utils.ts";
 import { useDialog } from "../../context/DialogContext.tsx";
 import { prioritizeAvailableStyles } from "../../utils/citationUtils.ts";
 
@@ -126,20 +126,10 @@ export default function Home() {
             {sortedBibliographies.length > 0 ? (
                 <List
                     items={sortedBibliographies.map((bib) => {
-                        function renderCitationCount(citations) {
-                            if (citations.length === 0) {
-                                return "No sources added";
-                            }
-                            if (citations.length === 1) {
-                                return "1 source";
-                            }
-                            return `${citations.length} sources`;
-                        }
-
                         return {
                             start: <Icon name={bib?.icon} />,
                             title: bib.title,
-                            description: `${bib.style.name.short || bib.style.name.long.replace(/\((.*?)\)/g, "")} • ${renderCitationCount(bib.citations)} • ${timeAgo(bib.dateModified)}`,
+                            description: `${bib.style.name.short || bib.style.name.long.replace(/\((.*?)\)/g, "")} • ${citationCount(bib.citations)} • ${timeAgo(bib.dateModified)}`,
                             content: (
                                 <ChipSet
                                     chips={bib.tags.map(({ label, color }) => ({ label, color }))}

@@ -427,6 +427,8 @@ const bibsSlice = createSlice({
                 dateCreated: new Date().toString(),
                 dateModified: new Date().toString(),
                 id: uid(10),
+                icon: "book_2",
+                tags: [],
                 citations: [...action.payload.checkedCitations],
             };
             const newBibs = [...state.data, newBib];
