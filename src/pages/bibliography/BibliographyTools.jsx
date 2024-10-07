@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useId, useRef, useState } from "react";
+import React, { forwardRef, Suspense, useEffect, useId, useRef, useState } from "react";
 import { FixedSizeList } from "react-window";
 import { useDispatch, useSelector } from "react-redux";
 import DOMPurify from "../../utils/purify";
@@ -11,6 +11,7 @@ import {
     handleMasterEntriesCheckbox,
     moveSelectedCitations,
     toggleEntryCheckbox,
+    updateCitation,
 } from "../../data/store/slices/bibsSlice";
 import BibliographyCard from "../../components/ui/BibliographyCard";
 import * as citationUtils from "../../utils/citationUtils.ts";
@@ -22,6 +23,7 @@ import { uid } from "../../utils/utils.ts";
 import { parseHtmlToJsx } from "../../utils/conversionUtils.tsx";
 import {
     Checkbox,
+    CircularProgress,
     Divider,
     EmptyPage,
     FilledButton,
@@ -29,43 +31,183 @@ import {
     IconButton,
     LinearProgress,
     List,
+    OutlinedButton,
     Select,
+    Switch,
     TextButton,
     TextField,
 } from "../../components/ui/MaterialComponents";
 import { useToast } from "../../context/ToastContext.tsx";
 import { useDialog } from "../../context/DialogContext.tsx";
 
-// Source types
-import ArticleJournal from "../../components/sourceTypes/ArticleJournal";
-import Webpage from "../../components/sourceTypes/Webpage";
-import Book from "../../components/sourceTypes/Book";
-
-const MASTER_CHECKBOX_STATES = {
-    CHECKED: "checked", // All reference entries are checked
-    UNCHECKED: "unchecked", // All reference entries are unchecked
-    INDETERMINATE: "indeterminate", // Some reference entries are checked
-};
-
-const DEFAULT_LOCATOR = locatorTypes.page;
+const DateInput = React.lazy(() => import("../../components/form/DateInput"));
+const AuthorsInput = React.lazy(() => import("../../components/form/AuthorsInput"));
 
 export const CitationForm = forwardRef(function CitationForm(props, ref) {
-    const { content } = props;
+    const { content: passedContant } = props;
+    const [content, setContent] = useState(passedContant);
+    const sourceType = sourceTypes[content.type];
+    const autoFillRef = useRef(null);
+    const dialog = useDialog();
 
-    const citationControlProps = {
-        content,
-        ref: ref, // eslint-disable-line object-shorthand
-    };
+    async function retrieveContent(source) {
+        try {
+            const retreivedContent = await citationUtils.retrieveContentFromDOI(source);
+            setContent((prevContent) => ({
+                ...prevContent,
+                ...retreivedContent,
+            }));
+        } catch (error) {
+            if (!error.response && error.message === "Network Error") {
+                dialog.show({
+                    headline: "Network Error",
+                    content:
+                        "Unable to retrieve the journal article data due to network issues. Please check your internet connection and try again.",
+                    actions: [["Ok", () => dialog.close()]],
+                });
+            } else {
+                dialog.show({
+                    headline: "No results found",
+                    content:
+                        "Failed to retrieve information from DOI. Please check your internet connection and ensure the provided DOI is correct.",
+                    actions: [["Ok", () => dialog.close()]],
+                });
+            }
+            console.error(error);
+        }
+    }
 
-    /* eslint-disable react/jsx-props-no-spreading */
-    const CITATION_COMPONENTS = {
-        [sourceTypes.articleJournal.code]: <ArticleJournal {...citationControlProps} />,
-        [sourceTypes.book.code]: <Book {...citationControlProps} />,
-        [sourceTypes.webpage.code]: <Webpage {...citationControlProps} />,
-    };
-    /* eslint-enable react/jsx-props-no-spreading */
+    function updateContentField(event) {
+        const { name } = event.target;
+        let { value } = event.target;
+        if (event.target.tagName === "MD-CHECKBOX" || event.target.nodeName === "MD-CHECKBOX") {
+            value = event.target.checked;
+        }
+        if (event.target.tagName === "MD-SWITCH" || event.target.nodeName === "MD-SWITCH") {
+            value = event.target.selected;
+        }
+        setContent((prevContent) => ({
+            ...prevContent,
+            [name]: value,
+        }));
+    }
 
-    return CITATION_COMPONENTS[content.type];
+    /* eslint-disable indent, react/no-array-index-key, react/jsx-props-no-spreading */
+    function renderFormElements(elements) {
+        return elements.map((element, index) => {
+            switch (element.component) {
+                case "autoFillDoi":
+                    return (
+                        <div key={index}>
+                            <TextField
+                                className="mb-2 w-full"
+                                label={element.label}
+                                type="text"
+                                name="auto-fill-doi"
+                                placeholder={element.placeholder}
+                                ref={autoFillRef}
+                            />
+                            <FilledButton
+                                className="w-full"
+                                type="button"
+                                onClick={() => retrieveContent(autoFillRef.current.value)}
+                            >
+                                Fill in
+                            </FilledButton>
+                        </div>
+                    );
+                case "divider":
+                    return <Divider key={index} className="my-4" label={element.label} />;
+
+                case "label":
+                    return <p key={index}>{element.label}</p>;
+                case "authors":
+                    return (
+                        <Suspense key={index} fallback={<CircularProgress />}>
+                            <AuthorsInput key={index} name="author" content={content} setContent={setContent} />
+                        </Suspense>
+                    );
+                case "text":
+                    return (
+                        <TextField
+                            className="w-full"
+                            key={index}
+                            label={element.label}
+                            type="text"
+                            name={element.value}
+                            value={content[element.value] || ""}
+                            placeholder={element.placeholder}
+                            onChange={updateContentField}
+                            {...props}
+                        />
+                    );
+                case "textarea":
+                    return (
+                        <TextField
+                            className="w-full"
+                            key={index}
+                            label={element.label}
+                            type="textarea"
+                            rows={3}
+                            name={element.value}
+                            value={content[element.value] || ""}
+                            placeholder={element.placeholder}
+                            onChange={updateContentField}
+                            {...props}
+                        />
+                    );
+                case "number":
+                    return (
+                        <TextField
+                            className="w-full"
+                            key={index}
+                            label={element.label}
+                            type="number"
+                            name={element.value}
+                            value={content[element.value] || ""}
+                            placeholder={element.placeholder}
+                            onChange={updateContentField}
+                            {...props}
+                        />
+                    );
+                case "date":
+                    return (
+                        <Suspense key={index} fallback={<CircularProgress />}>
+                            <DateInput
+                                key={index}
+                                label={element.label}
+                                name={element.value}
+                                value={content?.[element.value]}
+                                onChange={updateContentField}
+                            />
+                        </Suspense>
+                    );
+                case "checkbox":
+                    return (
+                        <div key={index} className="grid gap-2">
+                            <Switch
+                                label={element.label}
+                                name={element.value}
+                                selected={content[element.value]}
+                                onChange={updateContentField}
+                            />
+                            {content[element.value] === true && renderFormElements(element.on)}
+                        </div>
+                    );
+                case "annotation":
+                    return <TextField className="w-full" label="Annotation" type="textarea" rows="3" />;
+                default:
+                    return null;
+            }
+        });
+    }
+    /* eslint-enable indent, react/no-array-index-key, react/jsx-props-no-spreading */
+
+    return (
+        <form onSubmit={(event) => event.preventDefault()} ref={ref} className="grid gap-2 p-4">
+            {renderFormElements(sourceType.form)}
+        </form>
+    );
 });
 
 export function IntextCitationDialog() {
@@ -73,6 +215,9 @@ export function IntextCitationDialog() {
     const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
     const [intextCitation, setIntextCitation] = useState("");
     const [citationsForIntext, setCitationsForIntext] = useState(checkedCitations.map((cit) => cit.content));
+    const [copied, setCopied] = useState(false);
+    const intextRef = useRef();
+    const DEFAULT_LOCATOR = locatorTypes.page;
 
     useEffect(() => {
         async function formatIntextCitation() {
@@ -83,6 +228,7 @@ export function IntextCitationDialog() {
                 bibliography?.locale
             );
             setIntextCitation(DOMPurify.sanitize(formattedIntextCitation));
+            setCopied(false);
         }
         formatIntextCitation();
     }, [citationsForIntext, bibliography?.style]);
@@ -101,10 +247,25 @@ export function IntextCitationDialog() {
         );
     }
 
+    function handleCopy() {
+        try {
+            const copiedText = intextRef.current.innerText;
+            navigator.clipboard.writeText(copiedText);
+            setCopied(true);
+        } catch (err) {
+            console.error("Failed to copy text: ", err);
+        }
+    }
+
     return (
         <div className="px-4">
-            <h3>Example</h3>
-            <p className="font-cambo">{parseHtmlToJsx(intextCitation)}</p>
+            <div className="flex justify-between">
+                <h3 className="mb-0">Example</h3>
+                <IconButton onClick={handleCopy} name={copied ? "check" : "content_copy"} />
+            </div>
+            <p className="font-cambo" ref={intextRef}>
+                {parseHtmlToJsx(intextCitation)}
+            </p>
 
             <Divider />
 
@@ -124,6 +285,7 @@ export function IntextCitationDialog() {
                     <div className="flex w-full">
                         <Select
                             value={cit?.label || DEFAULT_LOCATOR.code}
+                            name="intext-label"
                             options={Object.values(locatorTypes).map((option) => ({
                                 headline: option.name,
                                 value: option.code,
@@ -144,6 +306,27 @@ export function IntextCitationDialog() {
                         />
                     </div>
 
+                    <div className="flex w-full">
+                        <TextField
+                            label="Prefix"
+                            name="intext-prefix"
+                            type="text"
+                            placeholder="See "
+                            value={cit?.prefix}
+                            onChange={(event) => updateContentField(cit.id, "prefix", event.target.value)}
+                            className="flex-1"
+                        />
+                        <TextField
+                            label="Suffix"
+                            name="intext-suffix"
+                            type="text"
+                            placeholder=" (arguing that X is Y"
+                            value={cit?.suffix}
+                            onChange={(event) => updateContentField(cit.id, "suffix", event.target.value)}
+                            className="flex-1"
+                        />
+                    </div>
+
                     <small>{locatorTypes[cit.label]?.def || DEFAULT_LOCATOR.def}</small>
                 </div>
             ))}
@@ -156,6 +339,11 @@ export function ReferenceEntries(props) {
     const bibliography = useFindBib();
     const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
     const [references, setReferences] = useState([]);
+    const MASTER_CHECKBOX_STATES = {
+        CHECKED: "checked", // All reference entries are checked
+        UNCHECKED: "unchecked", // All reference entries are unchecked
+        INDETERMINATE: "indeterminate", // Some reference entries are checked
+    };
     const [masterCheckboxState, setMasterCheckboxState] = useState(MASTER_CHECKBOX_STATES.UNCHECKED);
     const dispatch = useEnhancedDispatch();
     const formattedSelectedCitationsRef = useRef([]);
@@ -255,6 +443,29 @@ export function ReferenceEntries(props) {
         }
     }
 
+    function editCitation(citation) {
+        openCitationForm(
+            citation,
+            (newContent) =>
+                dispatch(
+                    updateCitation({
+                        bibId: bibliography.id,
+                        citation: {
+                            ...citation,
+                            content: {
+                                ...citation.content,
+                                ...newContent,
+                            },
+                        },
+                    })
+                ),
+            {
+                formTitle: "Edit reference",
+                applyLabel: "Apply changes",
+            }
+        );
+    }
+
     return (
         <div>
             <div className="flex items-center justify-between gap-4 p-4">
@@ -263,16 +474,14 @@ export function ReferenceEntries(props) {
                         <Checkbox
                             indeterminate={masterCheckboxState === MASTER_CHECKBOX_STATES.INDETERMINATE}
                             checked={masterCheckboxState === MASTER_CHECKBOX_STATES.CHECKED}
-                            onChange={handleMasterCheck}
-                            onInput={handleMasterCheck}
-                            className="me-2"
+                            className="pointer-events-none me-2"
                         />
                         {masterCheckboxState !== MASTER_CHECKBOX_STATES.CHECKED ? "Select all" : " Deselect all"}
                     </TextButton>
                 )}
 
                 {checkedCitations?.length !== 0 && (
-                    <TextButton onClick={openIntextCitationDialog}>In-text citation</TextButton>
+                    <OutlinedButton onClick={openIntextCitationDialog}>In-text citation</OutlinedButton>
                 )}
             </div>
 
@@ -295,11 +504,16 @@ export function ReferenceEntries(props) {
                             return dirElement.getAttribute("dir");
                         }
 
-                        const hangingIndentationStyle = {
-                            paddingInlineStart: getDirValue() === "ltr" ? "1.5rem" : "",
-                            paddingInlineEnd: getDirValue() === "rtl" ? "1.5rem" : "",
-                            textIndent: "-1.5rem",
-                        };
+                        function applyHangingIndentationStyle() {
+                            if (/^(apa|modern-language-association|chicago)/.test(bibliography?.style.code)) {
+                                return {
+                                    paddingInlineStart: getDirValue() === "ltr" ? "1.5rem" : "",
+                                    paddingInlineEnd: getDirValue() === "rtl" ? "1.5rem" : "",
+                                    textIndent: "-1.5rem",
+                                };
+                            }
+                            return {};
+                        }
 
                         return {
                             start: (
@@ -312,12 +526,8 @@ export function ReferenceEntries(props) {
                                 // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
                                 <div
                                     className="break-words font-cambo"
-                                    onClick={() => openCitationForm(citation.content.id)}
-                                    style={
-                                        /^(apa|modern-language-association|chicago)/.test(bibliography?.style.code)
-                                            ? hangingIndentationStyle
-                                            : {}
-                                    }
+                                    onClick={() => editCitation(citation)}
+                                    style={{ ...applyHangingIndentationStyle() }}
                                 >
                                     {parseHtmlToJsx(sanitizedReference)}
                                 </div>
@@ -346,7 +556,7 @@ export function ReferenceEntries(props) {
  * - [ ] Checkboxes shouldn't be present until it processing identifiers.
  * - [ ] Add quick options directly in the `SmartGenerator` component such as `Copy` and `Move`.
  */
-export function SmartGenerator({ input, setAcceptedCitations }) {
+export function SmartGenerator({ input, setAcceptedCitations, openCitationForm }) {
     const bibliography = useFindBib();
     const [references, setReferences] = useState([]);
     const [inputArray, setInputArray] = useState(
@@ -354,8 +564,6 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
     );
     const [newCitations, setNewCitations] = useState([]);
     const totalIdentifiers = input.split(/\n+/).length;
-    const dialog = useDialog();
-    const citationFormRef = useRef();
 
     useEffect(() => {
         async function generateCitation() {
@@ -503,12 +711,10 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
                         textIndent: "-1.5rem",
                     };
 
-                    function updateContent(id) {
+                    function updateContent(id, newContent) {
                         setNewCitations((prevNewCitations) => {
                             return prevNewCitations.map((nCit) => {
-                                if (nCit.id === id && citationFormRef?.current) {
-                                    const newContent = citationUtils.getContentFromForm(citationFormRef.current);
-
+                                if (nCit.id === id) {
                                     return {
                                         ...nCit,
                                         content: {
@@ -532,16 +738,12 @@ export function SmartGenerator({ input, setAcceptedCitations }) {
                                         ? hangingIndentationStyle
                                         : {}
                                 }
-                                onClick={() => {
-                                    dialog.show({
-                                        headline: "Edit citation",
-                                        content: <CitationForm ref={citationFormRef} content={cit.content} />,
-                                        actions: [
-                                            ["Cancel", () => dialog.close()],
-                                            ["Apply", () => updateContent(cit.id)],
-                                        ],
-                                    });
-                                }}
+                                onClick={() =>
+                                    openCitationForm(cit, (newContent) => updateContent(cit.content.id, newContent), {
+                                        formTitle: "Edit reference",
+                                        applyLabel: "Apply changes",
+                                    })
+                                }
                             >
                                 {parseHtmlToJsx(sanitizedReference)}
                             </div>
@@ -600,6 +802,7 @@ export function AddCitationMenu({ openCitationForm, close }) {
                     setAcceptedCitations={(citations) => {
                         acceptedCitationsRef.current = citations;
                     }}
+                    openCitationForm={openCitationForm}
                 />
             ),
             actions: [
@@ -633,11 +836,26 @@ export function AddCitationMenu({ openCitationForm, close }) {
             headline: "Choose the type of your source",
             content: (
                 <List
-                    items={Object.values(sourceTypes).map((entry) => ({
-                        title: entry.label,
+                    items={Object.keys(sourceTypes).map((key) => ({
+                        title: sourceTypes[key].label,
                         onClick: () => {
                             dialog.close(id);
-                            openCitationForm(undefined, entry.code);
+                            const newId = uid();
+                            const newCitation = { id: newId, content: { id: newId, type: key }, isChecked: false };
+                            openCitationForm(newCitation, (newContent) =>
+                                dispatch(
+                                    updateCitation({
+                                        bibId: newId,
+                                        citation: {
+                                            ...newCitation,
+                                            content: {
+                                                ...newCitation.content,
+                                                ...newContent,
+                                            },
+                                        },
+                                    })
+                                )
+                            );
                         },
                     }))}
                 />

@@ -29,7 +29,7 @@ import {
 import { useEnhancedDispatch, useFindBib, useKeyboardShortcuts, useOnlineStatus } from "../../hooks/hooks.tsx";
 import { useAuth } from "../../context/AuthContext";
 import firestoreDB from "../../data/db/firebase/firebase";
-import { ChipSet, Fab, Icon, List, TopBar } from "../../components/ui/MaterialComponents";
+import { ChipSet, EmptyPage, Fab, Icon, List, TopBar } from "../../components/ui/MaterialComponents";
 import { useToast } from "../../context/ToastContext.tsx";
 import {
     exportToBibJson,
@@ -68,13 +68,8 @@ export default function Bibliography() {
     const [iconsMenuVisible, setIconsMenuVisible] = useState(false);
 
     useEffect(() => {
-        if (!bibsLoaded) return;
-        if (!bibliography) {
-            navigate("/");
-            toast.show({ message: "No such bibliography", color: "red", icon: "error" });
-        } else {
-            dispatch(uncheckAllCitations({ bibId: bibliography.id }));
-        }
+        if (!bibsLoaded || !bibliography) return;
+        dispatch(uncheckAllCitations({ bibId: bibliography.id }));
     }, [bibsLoaded]);
 
     useEffect(() => {
@@ -87,54 +82,25 @@ export default function Bibliography() {
         }
     }, [bibId, bibliography?.collab?.open, location.pathname]);
 
-    // FIXME: This passes the new content in the dispatch but it doesnt update the bibliographies state
-    function updateContent(id) {
-        const targetCitation = bibliography.citations.find((cit) => cit.content.id === id);
-        let newContent = {};
-
-        if (targetCitation && citationFormRef?.current) {
-            newContent = citationUtils.getContentFromForm(citationFormRef.current);
-        }
-
-        dispatch(
-            updateCitation({
-                bibId: bibliography.id,
-                citation: {
-                    ...targetCitation,
-                    content: {
-                        ...targetCitation.content,
-                        ...newContent,
-                    },
-                },
-            })
-        );
-    }
-
-    function openCitationForm(id = undefined, sourceType = "webpage") {
+    function openCitationForm(
+        targetCitation,
+        onApply,
+        options = { formTitle: "Reference data", applyLabel: "Add reference" }
+    ) {
         if (!isOnline && bibliography?.collab?.open) {
             toast.show({ message: "You are offline", icon: "error", color: "red" });
             return;
         }
 
-        let targetCitation;
-
-        const checkedCitationsIds = bibliography?.citations.filter((cit) => cit.isChecked).map((cit) => cit.id);
-
-        if (id) {
-            targetCitation = bibliography.citations.find((cit) => cit.content.id === id);
-        } else if (checkedCitationsIds.length === 1) {
-            targetCitation = bibliography.citations.find((cit) => cit.content.id === checkedCitationsIds[0]);
-        } else {
-            const newId = uid();
-            targetCitation = { id: newId, content: { id: newId, type: sourceType }, isChecked: false };
-        }
+        const { formTitle, applyLabel } = options;
 
         dialog.show({
-            title: "Citation form",
+            id: "citation-form",
+            headline: formTitle,
             content: <CitationForm content={targetCitation.content} ref={citationFormRef} />,
             actions: [
                 ["Cancel", () => dialog.close()],
-                ["Add reference", () => updateContent(targetCitation.content.id)],
+                [applyLabel, () => onApply(citationUtils.getContentFromForm(citationFormRef.current))],
             ],
         });
     }
@@ -189,8 +155,8 @@ export default function Bibliography() {
 
             try {
                 navigator.clipboard.writeText(formattedCitations);
-            } catch (err) {
-                console.error("Failed to copy text: ", err);
+            } catch (error) {
+                console.error("Failed to copy text: ", error);
             }
         }
     }
@@ -490,7 +456,31 @@ export default function Bibliography() {
 
     function getConditionalOptionsWhenCitationsSelected() {
         if (checkedCitations?.length === 1) {
-            const options = [{ headline: "Edit", onClick: () => openCitationForm(checkedCitations[0].content.id) }];
+            const options = [
+                {
+                    headline: "Edit",
+                    onClick: (newContent) => {
+                        const targetCitation = checkedCitations[0];
+                        openCitationForm(
+                            targetCitation,
+                            () =>
+                                dispatch(
+                                    updateCitation({
+                                        bibId: bibliography.id,
+                                        citation: {
+                                            ...targetCitation,
+                                            content: {
+                                                ...targetCitation.content,
+                                                ...newContent,
+                                            },
+                                        },
+                                    })
+                                ),
+                            { formTitle: "Edit reference", applyLabel: "Apply changes" }
+                        );
+                    },
+                },
+            ];
 
             if (checkedCitations[0].content.URL) {
                 options.push({
@@ -630,6 +620,23 @@ export default function Bibliography() {
         // "ctrl+s": changeStyle,
         // "ctrl+n": addCitation,
     });
+
+    if (!bibliography) {
+        return (
+            <EmptyPage
+                icon="error"
+                title="Bibliography Not Found"
+                message="We're sorry, but the bibliography you're trying to access could not be found. Please verify the URL or check if you have the correct bibliography ID. If you need further assistance, feel free to contact us."
+                actions={[
+                    ["Home", () => navigate("/")],
+                    [
+                        "Contact support",
+                        () => (window.location.href = "mailto:discontinuedlabs@gmail.com?subject=Support Request"), // eslint-disable-line no-return-assign
+                    ],
+                ]}
+            />
+        );
+    }
 
     return (
         <div className="mx-auto max-w-[50rem]">

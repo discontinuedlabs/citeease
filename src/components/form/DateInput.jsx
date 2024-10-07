@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useRef, useState, useEffect } from "react";
-import { IconButton, Select, TextField } from "../ui/MaterialComponents";
+import { OutlinedIconButton, Select, TextField } from "../ui/MaterialComponents";
 import * as citationUtils from "../../utils/citationUtils.ts";
 
 // FIXME: Why does "value" become undefined before it changes to another value?
@@ -73,9 +73,10 @@ const DateInput = forwardRef(function DateInput(props, parentRef) {
     /* eslint-disable react/jsx-props-no-spreading */
     return (
         <div ref={localRef} name={name} className={className} {...rest}>
-            <p>{label}</p>
-            <div className="flex gap-1">
+            <h4 className="m-2">{label}</h4>
+            <div className="flex items-center gap-2">
                 <TextField
+                    className="flex-1"
                     type="number"
                     value={year || ""}
                     min={-200000}
@@ -86,6 +87,7 @@ const DateInput = forwardRef(function DateInput(props, parentRef) {
                     onChange={handleChange}
                 />
                 <Select
+                    className="flex-1"
                     ref={selectRef}
                     options={monthOptions}
                     name={`${name}-month`}
@@ -95,6 +97,7 @@ const DateInput = forwardRef(function DateInput(props, parentRef) {
                     disabled={!year}
                 />
                 <TextField
+                    className="flex-1"
                     type="number"
                     value={day || ""}
                     min={1}
@@ -105,7 +108,7 @@ const DateInput = forwardRef(function DateInput(props, parentRef) {
                     onChange={handleChange}
                     disabled={!year || !month}
                 />
-                <IconButton name="today" onClick={setToToday} />
+                <OutlinedIconButton name="today" onClick={setToToday} />
             </div>
         </div>
     );

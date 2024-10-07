@@ -9,10 +9,10 @@ import { useMetaThemeColor } from "../../hooks/hooks.tsx";
 export function Divider({ className = "", label, ...rest }) {
     if (label)
         return (
-            <div className={`flex items-center justify-between ${className}`}>
+            <div className={`flex items-center ${className}`}>
                 <md-divider />
                 <p
-                    className="mx-1 my-0"
+                    className="mx-1 my-0 whitespace-nowrap"
                     style={{
                         color: "var(--md-sys-color-outline)",
                     }}
@@ -136,6 +136,42 @@ export const Checkbox = forwardRef(function Checkbox(props, parentRef) {
     return <md-checkbox ref={localRef} class={nClass} touch-target="wrapper" {...rest} />;
 });
 
+export const Switch = forwardRef(function Switch(props, parentRef) {
+    const { className = "", label = "", id = undefined, onChange = () => undefined, selected = false, ...rest } = props;
+    const localRef = useRef();
+    const uuid = uid();
+    const nClass = `flex justify-between items-center ${className}`;
+
+    useImperativeHandle(parentRef, () => localRef?.current, []);
+
+    useEffect(() => {
+        const currentRef = localRef?.current;
+        if (currentRef) {
+            currentRef.addEventListener("input", onChange);
+        }
+
+        return () => {
+            if (currentRef) {
+                currentRef.removeEventListener("input", onChange);
+            }
+        };
+    }, []);
+
+    if (selected)
+        return (
+            <label className={nClass} htmlFor={id || uuid}>
+                {label}
+                <md-switch ref={localRef} aria-label={label} id={id || uuid} selected {...rest} />
+            </label>
+        );
+    return (
+        <label className={nClass} htmlFor={id || uuid}>
+            {label}
+            <md-switch ref={localRef} aria-label={label} id={id || uuid} {...rest} />
+        </label>
+    );
+});
+
 export function Icon({ name, className = "", ...rest }) {
     return (
         <md-icon slot="icon" {...rest} class={`align-middle ${className}`}>
@@ -185,11 +221,35 @@ export function TextButton({ className = "", onClick, type = "button", children,
     );
 }
 
+export function OutlinedButton({ className = "", onClick, type = "button", children, ...rest }) {
+    return (
+        <md-outlined-button type={type} class={`px-6 py-2 font-sans ${className}`} onClick={onClick} {...rest}>
+            {children}
+        </md-outlined-button>
+    );
+}
+
 export function IconButton({ className = "", onClick, type = "button", name, ...rest }) {
     return (
         <md-icon-button type={type} class={className} onClick={onClick} {...rest}>
             <md-icon>{name}</md-icon>
         </md-icon-button>
+    );
+}
+
+// export function FilledIconButton({ className = "", onClick, type = "button", name, ...rest }) {
+//     return (
+//         <md-filled-icon-button type={type} class={className} onClick={onClick} {...rest}>
+//             <md-icon>{name}</md-icon>
+//         </md-filled-icon-button>
+//     );
+// }
+
+export function OutlinedIconButton({ className = "", onClick, type = "button", name, ...rest }) {
+    return (
+        <md-outlined-icon-button type={type} class={className} onClick={onClick} {...rest}>
+            <md-icon>{name}</md-icon>
+        </md-outlined-icon-button>
     );
 }
 

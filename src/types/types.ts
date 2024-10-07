@@ -6,9 +6,12 @@ export type DateObject = {
 };
 
 export type Author = {
+    literal?: string;
+    "non-dropping-particle"?: string;
     family?: string;
+    "dropping-particle"?: string;
     given?: string;
-    id?: string;
+    suffix?: string;
 };
 
 export type CslJson = {

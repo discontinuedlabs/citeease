@@ -93,15 +93,28 @@ export function createAuthorsArray(authors: string[] | Record<string, string | u
             const names = author.split(/\s+/);
             const given = names.shift() || "";
             const family = names.join(" ");
-            result.push({ given, family, id: uid() });
+            result.push({ given, family });
         });
     } else {
-        // Handle authors as an object with "given-name-x" and "family-name-x"
+        // Handle authors as an object with more detailed fields
         let index = 0;
-        while (`given-name-${index}` in authors && `family-name-${index}` in authors) {
-            const given = authors[`given-name-${index}`] || "";
-            const family = authors[`family-name-${index}`] || "";
-            result.push({ given, family, id: uid() });
+        while (`given-${index}` in authors && `family-${index}` in authors) {
+            const authorObj: Author = {
+                given: authors[`given-${index}`] || "",
+                family: authors[`family-${index}`] || "",
+                "dropping-particle": authors[`dropping-particle-${index}`] || "",
+                "non-dropping-particle": authors[`non-dropping-particle-${index}`] || "",
+                suffix: authors[`suffix-${index}`] || "",
+                literal: authors[`literal-${index}`] || "",
+            };
+
+            Object.keys(authorObj).forEach((key) => {
+                if (authorObj[key] === "" || authorObj[key] === undefined) {
+                    delete authorObj[key];
+                }
+            });
+
+            result.push(authorObj);
             index += 1;
         }
     }
@@ -418,10 +431,13 @@ export async function retrieveContentFromPMID(pmid: string): Promise<CslJson | n
 export function getContentFromForm(form: HTMLFormElement): CslJson {
     const data = new FormData(form);
     const dataObject = Object.fromEntries(data.entries()) as Record<string, string | undefined>;
-    const checkboxes = form.querySelectorAll<HTMLInputElement>("md-checkbox");
+    // const checkboxes = form.querySelectorAll<HTMLInputElement>("md-checkbox");
+    const switches = form.querySelectorAll<HTMLInputElement>("md-switch");
 
     const { URL, DOI, ISSN, PMCID, PMID, ISBN, issue, page, title, volume, publisher } = dataObject;
-    const online = Array.from(checkboxes).find((checkbox) => checkbox.name === "online");
+    const online = Array.from(switches).find((checkbox) => checkbox.name === "online");
+
+    console.log(dataObject);
 
     const content = {
         title,
@@ -435,7 +451,7 @@ export function getContentFromForm(form: HTMLFormElement): CslJson {
         PMID,
         ISBN,
         publisher,
-        online: online?.getAttribute("checked") === "true",
+        online: online?.getAttribute("selected") === "true",
         issued: createDateObject(
             parseInt(dataObject["issued-year"]!, 10),
             parseInt(dataObject["issued-month"]!, 10) || dataObject["issued-month"],
