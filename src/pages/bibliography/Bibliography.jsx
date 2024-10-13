@@ -7,7 +7,6 @@ import {
     ReferenceEntries,
     MoveDialog,
     CitationForm,
-    RenameDialog,
     AddCitationMenu,
     CitationStylesMenu,
     TagsDialog,
@@ -29,7 +28,7 @@ import {
 import { useEnhancedDispatch, useFindBib, useKeyboardShortcuts, useOnlineStatus } from "../../hooks/hooks.tsx";
 import { useAuth } from "../../context/AuthContext";
 import firestoreDB from "../../data/db/firebase/firebase";
-import { ChipSet, EmptyPage, Fab, Icon, List, TopBar } from "../../components/ui/MaterialComponents";
+import { ChipSet, EmptyPage, Fab, Icon, List, TextField, TopBar } from "../../components/ui/MaterialComponents";
 import { useToast } from "../../context/ToastContext.tsx";
 import {
     exportToBibJson,
@@ -59,11 +58,11 @@ export default function Bibliography() {
     const toast = useToast();
     const citationFormRef = useRef();
     const receiverBibsRef = useRef([]);
+    const renameInputRef = useRef();
 
     const [collaborationOpened, setCollaborationOpened] = useState(bibliography?.collab?.open);
     const [idAndPasswordDialogVisible, setIdAndPasswordDialogVisible] = useState(false);
     const [moveWindowVisible, setMoveWindowVisible] = useState(false);
-    const [renameWindowVisible, setRenameWindowVisible] = useState(false);
     const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
     const [tagsDialogVisible, setTagsDialogVisible] = useState(false);
     const [iconsMenuVisible, setIconsMenuVisible] = useState(false);
@@ -74,7 +73,7 @@ export default function Bibliography() {
     }, [bibsLoaded]);
 
     useEffect(() => {
-        // Prioritizes showing collab.id in the URL instead of the regular id
+        // Prioritizes showing collab.id in the URL instead of the regular id if bibliography is collaborative
         if (!bibliography) return;
         if (bibliography?.collab?.open && bibId !== bibliography?.collab?.id) {
             navigate(`/bib/collab/${bibliography.collab.id}`, { replace: true });
@@ -279,21 +278,44 @@ export default function Bibliography() {
         }
     }
 
-    function handleRename(value) {
-        if (!isOnline && bibliography?.collab?.open) {
-            toast.show({ message: "You are offline", icon: "error", color: "red" });
-            return;
+    function showRenameDialog() {
+        function rename() {
+            const newTitle = renameInputRef.current.value;
+
+            if (!isOnline && bibliography?.collab?.open) {
+                toast.show({ message: "You are offline", icon: "error", color: "red" });
+                return;
+            }
+
+            if (/^\s*$/.test(newTitle)) {
+                dialog.show({
+                    headline: "Title is empty",
+                    content: "You cant't set the title to an emdpty value.",
+                    actions: [["Ok", () => dialog.close()]],
+                });
+            } else {
+                dispatch(updateBibField({ key: "title", value: newTitle }));
+            }
         }
 
-        if (/^\s*$/.test(value)) {
-            dialog.show({
-                headline: "Title is empty",
-                content: "You cant't set the title to an emdpty value.",
-                actions: [["Ok", () => dialog.close()]],
-            });
-        } else {
-            dispatch(updateBibField({ bibliographyId: bibliography.id, key: "title", value }));
-        }
+        dialog.show({
+            headline: "Rename bibliography",
+            content: (
+                <div className="px-5">
+                    <TextField
+                        className="w-full"
+                        placeholder="Untitled Bibliography"
+                        value={bibliography.title || ""}
+                        type="text"
+                        ref={renameInputRef}
+                    />
+                </div>
+            ),
+            actions: [
+                ["Cancel", () => dialog.close()],
+                ["Rename", rename],
+            ],
+        });
     }
 
     async function openCollaboration(data) {
@@ -631,7 +653,7 @@ export default function Bibliography() {
         if (collaborationOpened && bibliography?.collab?.adminId === currentUser?.uid) {
             return [
                 { headline: "Tags", onClick: () => setTagsDialogVisible(true) },
-                { headline: "Rename bibliography", onClick: () => setRenameWindowVisible(true) },
+                { headline: "Rename bibliography", onClick: showRenameDialog },
                 { headline: "Change icon", onClick: () => setIconsMenuVisible(true) },
                 { headline: "Change style", onClick: () => setCitationStyleMenuVisible(true) },
                 { headline: "Change locale", onClick: handleChangeLocale },
@@ -652,7 +674,7 @@ export default function Bibliography() {
         if (!collaborationOpened) {
             return [
                 { headline: "Tags", onClick: () => setTagsDialogVisible(true) },
-                { headline: "Rename bibliography", onClick: () => setRenameWindowVisible(true) },
+                { headline: "Rename bibliography", onClick: showRenameDialog },
                 { headline: "Change icon", onClick: () => setIconsMenuVisible(true) },
                 { headline: "Change style", onClick: () => setCitationStyleMenuVisible(true) },
                 { headline: "Change locale", onClick: handleChangeLocale },
@@ -741,10 +763,6 @@ export default function Bibliography() {
             )}
 
             {moveWindowVisible && <MoveDialog {...{ setMoveWindowVisible }} />}
-
-            {renameWindowVisible && (
-                <RenameDialog {...{ title: bibliography?.title, setRenameWindowVisible, handleRename }} />
-            )}
 
             {tagsDialogVisible && (
                 <TagsDialog {...{ setTagsDialogVisible, onTagAdded: addTagToBib, onTagRemoved: removeTagFromBib }} />

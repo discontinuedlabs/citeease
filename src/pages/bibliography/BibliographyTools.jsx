@@ -974,35 +974,6 @@ export function MoveDialog({ setReceiverBibs }) {
     );
 }
 
-export function RenameDialog(props) {
-    const { title: pTitle } = props;
-    const { handleRename, setRenameWindowVisible: setIsVisible } = props;
-    const [title, setTitle] = useState(pTitle);
-
-    function handleSubmit() {
-        setIsVisible(false);
-        handleRename(title);
-    }
-
-    return (
-        <div className="rename-window">
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    onChange={(event) => setTitle(event.target.value)}
-                    placeholder="Untitled Bibliography"
-                    value={title}
-                    name="title-input"
-                />
-                <button type="submit">Rename</button>
-                <button type="button" onClick={() => setIsVisible(false)}>
-                    Cancel
-                </button>
-            </form>
-        </div>
-    );
-}
-
 // TODO: Include the most used styles in the styles.json, and the rest should be downloaded when needed only.
 //       Then the package "react-window" can be safely removed because this is the only component that uses it.
 export function CitationStylesMenu(props) {
