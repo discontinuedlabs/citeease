@@ -10,8 +10,9 @@ import React, {
     forwardRef,
     useRef,
     useImperativeHandle,
+    useId,
 } from "react";
-import { FilledButton, Icon, TextButton } from "../components/ui/MaterialComponents";
+import { Checkbox, FilledButton, Icon, OutlinedButton, TextButton } from "../components/ui/MaterialComponents";
 import { uid } from "../utils/utils.ts";
 
 declare global {
@@ -27,7 +28,7 @@ declare global {
 }
 
 type ActionOptions = {
-    type?: "text" | "filled";
+    type?: "text" | "filled" | "outlined";
     closeOnClick?: boolean;
 };
 
@@ -37,6 +38,7 @@ type DialogProps = {
     icon?: string;
     content: ReactNode;
     actions?: [string, () => void, ActionOptions][];
+    checkboxes?: [string, boolean, (checked: boolean) => void][];
     close: (id: string) => void;
 };
 
@@ -68,6 +70,7 @@ const DialogContext = createContext<DialogContextValue | undefined>(undefined);
  *                     headline: "Title",
  *                     content: "Message",
  *                     actions: [["Ok", () => dialog.close()]],
+ *                     checkboxes: ["Don't show again", false, (checked) => setDontShowAgain(checked)],
  *                 })
  *             }
  *         >
@@ -85,8 +88,9 @@ export function useDialog(): DialogContextValue {
 }
 
 const Dialog = forwardRef<HTMLDialogElement, DialogProps>(function Dialog(props: DialogProps, parentRef) {
-    const { id, headline, icon, content, actions, close } = props;
+    const { id, headline, icon, content, actions = [], checkboxes = [], close } = props;
     const localRef = useRef<HTMLDialogElement>(null);
+    const checkoxId = useId();
 
     useImperativeHandle(parentRef, () => localRef.current!, []);
 
@@ -104,6 +108,7 @@ const Dialog = forwardRef<HTMLDialogElement, DialogProps>(function Dialog(props:
         };
     }, [close, id]);
 
+    /* eslint-disable react/jsx-props-no-spreading, indent */
     return (
         <md-dialog ref={localRef} open id={id}>
             {headline && (
@@ -111,42 +116,67 @@ const Dialog = forwardRef<HTMLDialogElement, DialogProps>(function Dialog(props:
                     {headline}
                 </div>
             )}
+
             {icon && <Icon name={icon} />}
+
             <div slot="content">
                 {(typeof content === "string" && <div className="px-5">{content}</div>) || content}
-            </div>
-            <div className="p-5" slot="actions">
-                {actions &&
-                    actions.map((action) => {
-                        const options = action[2];
-                        if (options?.type === "filled") {
-                            return (
-                                <FilledButton
-                                    key={uid()}
-                                    onClick={() => {
-                                        action[1]();
-                                        if (options?.closeOnClick !== false) close(id);
-                                    }}
-                                >
-                                    {action[0]}
-                                </FilledButton>
-                            );
-                        }
+                {checkboxes.length !== 0 &&
+                    checkboxes.map((checkbox) => {
+                        const [label, checked, onChange] = checkbox;
                         return (
-                            <TextButton
-                                key={uid()}
-                                onClick={() => {
-                                    action[1]();
-                                    if (options?.closeOnClick !== false) close(id);
-                                }}
-                            >
-                                {action[0]}
-                            </TextButton>
+                            <div className="flex gap-2 px-5 py-2">
+                                <Checkbox
+                                    id={checkoxId}
+                                    checked={checked || false}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                                        onChange((event.target as HTMLInputElement).checked);
+                                    }}
+                                    {...({} as React.InputHTMLAttributes<HTMLInputElement>)}
+                                />
+                                <label htmlFor={checkoxId}>{label}</label>
+                            </div>
                         );
+                    })}
+            </div>
+
+            <div className="grid p-5 sm:flex sm:flex-wrap sm:justify-end" slot="actions">
+                {actions.length !== 0 &&
+                    actions.map((action, index) => {
+                        const [label, callback, options] = action;
+                        const buttonProps = {
+                            className: `${index === 0 && actions.length === 3 ? "mr-auto" : ""}`,
+                            onClick: () => {
+                                callback();
+                                if (options?.closeOnClick !== false) close(id);
+                            },
+                        };
+
+                        switch (options?.type) {
+                            case "filled":
+                                return (
+                                    <FilledButton key={uid()} {...buttonProps}>
+                                        {label}
+                                    </FilledButton>
+                                );
+                            case "outlined":
+                                return (
+                                    <OutlinedButton key={uid()} {...buttonProps}>
+                                        {label}
+                                    </OutlinedButton>
+                                );
+                            default:
+                                return (
+                                    <TextButton key={uid()} {...buttonProps}>
+                                        {label}
+                                    </TextButton>
+                                );
+                        }
                     })}
             </div>
         </md-dialog>
     );
+    /* eslint-enable react/jsx-props-no-spreading, indent */
 });
 
 /**
@@ -217,6 +247,7 @@ export default function DialogProvider({ children }: DialogProviderProps) {
                         icon={dialog.icon}
                         content={dialog.content}
                         actions={dialog.actions}
+                        checkboxes={dialog.checkboxes}
                         close={closeDialog}
                     />
                 ))}
