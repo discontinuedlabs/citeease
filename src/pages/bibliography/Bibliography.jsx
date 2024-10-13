@@ -58,6 +58,7 @@ export default function Bibliography() {
     const isOnline = useOnlineStatus();
     const toast = useToast();
     const citationFormRef = useRef();
+    const receiverBibsRef = useRef([]);
 
     const [collaborationOpened, setCollaborationOpened] = useState(bibliography?.collab?.open);
     const [idAndPasswordDialogVisible, setIdAndPasswordDialogVisible] = useState(false);
@@ -76,7 +77,7 @@ export default function Bibliography() {
         // Prioritizes showing collab.id in the URL instead of the regular id
         if (!bibliography) return;
         if (bibliography?.collab?.open && bibId !== bibliography?.collab?.id) {
-            navigate(`/collab/${bibliography.collab.id}`, { replace: true });
+            navigate(`/bib/collab/${bibliography.collab.id}`, { replace: true });
         } else if (!bibliography?.collab?.open && bibId !== bibliography.id) {
             navigate(`/bib/${bibliography.id}`, { replace: true });
         }
@@ -162,6 +163,49 @@ export default function Bibliography() {
     }
 
     function handleMove() {
+        function moveCitations(moveMode = true) {
+            if (
+                !isOnline &&
+                bibliographies
+                    .filter((bib) => !receiverBibsRef.current.includes(bib.id))
+                    .some((sBib) => sBib?.collab?.open)
+            ) {
+                toast.show({
+                    message: "You can't move to a collaborative bibliography in offline mode",
+                    icon: "error",
+                    color: "red",
+                });
+                return;
+            }
+
+            const movedCitations = checkedCitations.map((cit) => {
+                const newId = uid();
+                return { ...cit, id: newId, content: { ...cit.content, id: newId } };
+            });
+
+            receiverBibsRef.current.forEach((receiverId) => {
+                const receiverBib = bibliographies.find((bib) => bib.id === receiverId);
+                dispatch(
+                    updateBibField({
+                        bibId: receiverId,
+                        key: "citations",
+                        value: [...receiverBib.citations, ...movedCitations],
+                    })
+                );
+            });
+
+            if (moveMode) {
+                dispatch(
+                    updateBibField({
+                        key: "citations",
+                        value: bibliography.citations.filter(
+                            (cit) => !checkedCitations.some((checked) => checked.id === cit.id)
+                        ),
+                    })
+                );
+            }
+        }
+
         function addNewBib() {
             dispatch(
                 addNewBibAndMoveSelectedCitations({
@@ -170,8 +214,24 @@ export default function Bibliography() {
                 })
             );
         }
-        if (bibliographies.length > 1) setMoveWindowVisible(true);
-        else {
+
+        if (bibliographies.length > 1) {
+            dialog.show({
+                headline: "Move",
+                content: (
+                    <MoveDialog
+                        setReceiverBibs={(ids) => {
+                            receiverBibsRef.current = ids;
+                        }}
+                    />
+                ),
+                actions: [
+                    ["Cancel", () => dialog.close()],
+                    ["Move", moveCitations],
+                    ["Copy", () => moveCitations(false)],
+                ],
+            });
+        } else {
             dialog.show({
                 headline: "No bibliographies to move",
                 content:
@@ -639,7 +699,8 @@ export default function Bibliography() {
     }
 
     return (
-        <div className="mx-auto max-w-[50rem]">
+        // mb-20 needed in pages with a Fab component
+        <div className="mx-auto mb-20 max-w-[50rem]">
             <TopBar
                 icon={bibliography?.icon}
                 headline={bibliography?.title}

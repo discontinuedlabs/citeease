@@ -140,7 +140,10 @@ const Dialog = forwardRef<HTMLDialogElement, DialogProps>(function Dialog(props:
                     })}
             </div>
 
-            <div className="grid p-5 sm:flex sm:flex-wrap sm:justify-end" slot="actions">
+            <div
+                className={`${actions.length > 2 ? "grid" : ""} p-5 sm:flex sm:flex-wrap sm:justify-end`}
+                slot="actions"
+            >
                 {actions.length !== 0 &&
                     actions.map((action, index) => {
                         const [label, callback, options] = action;

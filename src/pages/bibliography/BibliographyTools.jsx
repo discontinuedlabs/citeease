@@ -1,16 +1,14 @@
 import React, { forwardRef, Suspense, useEffect, useId, useRef, useState } from "react";
 import { FixedSizeList } from "react-window";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import DOMPurify from "../../utils/purify";
 import locatorTypes from "../../assets/json/locatorOptions.json";
 import * as citationEngine from "../../utils/citationEngine";
 import sourceTypes from "../../assets/json/sourceTypes.json";
 import {
-    addCitationsToBib,
-    copySelectedCitations,
     handleMasterEntriesCheckbox,
-    moveSelectedCitations,
     toggleEntryCheckbox,
+    updateBibField,
     updateCitation,
 } from "../../data/store/slices/bibsSlice";
 import * as citationUtils from "../../utils/citationUtils.ts";
@@ -204,9 +202,23 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
     /* eslint-enable indent, react/no-array-index-key, react/jsx-props-no-spreading */
 
     return (
-        <form onSubmit={(event) => event.preventDefault()} ref={ref} className="grid gap-2 p-4">
-            {renderFormElements(sourceType.form)}
-        </form>
+        <div className="grid gap-2 p-4">
+            <Select
+                className="w-full"
+                label="Source type"
+                name="type"
+                value={content.type || ""}
+                options={Object.keys(sourceTypes).map((key) => ({
+                    headline: sourceTypes[key].label,
+                    value: key,
+                }))}
+                onChange={updateContentField}
+            />
+            <Divider className="my-4" />
+            <form onSubmit={(event) => event.preventDefault()} ref={ref} className="grid gap-2">
+                {renderFormElements(sourceType.form)}
+            </form>
+        </div>
     );
 });
 
@@ -774,7 +786,12 @@ export function AddCitationMenu({ openCitationForm, close }) {
     const [errorMessage, setErrorMessage] = useState();
 
     function handleAcceptCitations() {
-        dispatch(addCitationsToBib({ bibId: bibliography.id, citations: acceptedCitationsRef.current }));
+        dispatch(
+            updateBibField({
+                key: "citations",
+                value: [...bibliography.citations, ...acceptedCitationsRef.current],
+            })
+        );
     }
 
     function startSmartGenerator(input) {
@@ -841,7 +858,11 @@ export function AddCitationMenu({ openCitationForm, close }) {
                         onClick: () => {
                             dialog.close(id);
                             const newId = uid();
-                            const newCitation = { id: newId, content: { id: newId, type: key }, isChecked: false };
+                            const newCitation = {
+                                id: newId,
+                                content: { id: newId, type: key, author: [{ given: "", family: "" }] },
+                                isChecked: false,
+                            };
                             openCitationForm(newCitation, (newContent) =>
                                 dispatch(
                                     updateCitation({
@@ -907,95 +928,49 @@ export function AddCitationMenu({ openCitationForm, close }) {
     );
 }
 
-export function MoveDialog(props) {
-    const { setMoveWindowVisible: setIsVisible } = props;
+export function MoveDialog({ setReceiverBibs }) {
     const bibliographies = useSelector((state) => state.bibliographies.data);
     const bibliography = useFindBib();
-    const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
-    const [selectedBibliographyIds, setSelectedBibliographyIds] = useState([]);
-    const dispatch = useDispatch();
-    const isOnline = useOnlineStatus();
-    const toast = useToast();
+    const [selectedBibIds, setSelectedBibIds] = useState([]);
+
+    useEffect(() => {
+        setReceiverBibs(selectedBibIds);
+    }, [selectedBibIds]);
 
     function handleSelect(bibId) {
-        const index = selectedBibliographyIds.indexOf(bibId);
+        const index = selectedBibIds.indexOf(bibId);
         if (index !== -1) {
-            setSelectedBibliographyIds((prevSelectedBibliographyIds) =>
-                prevSelectedBibliographyIds.filter((id) => id !== bibId)
-            );
+            setSelectedBibIds((prevSelectedBibIds) => prevSelectedBibIds.filter((id) => id !== bibId));
         } else {
-            setSelectedBibliographyIds((prevSelectedBibliographyIds) => [...prevSelectedBibliographyIds, bibId]);
+            setSelectedBibIds((prevSelectedBibIds) => [...prevSelectedBibIds, bibId]);
         }
-    }
-
-    function handleMove(toId) {
-        if (!isOnline && bibliographies.find((bib) => bib.id === toId)?.collab?.open) {
-            toast.show({ message: "You are offline", icon: "error", color: "red" });
-            return;
-        }
-
-        dispatch(
-            moveSelectedCitations({
-                fromId: bibliography.id,
-                toId,
-                checkedCitations,
-            })
-        );
-        setIsVisible(false);
-        setSelectedBibliographyIds([]);
-    }
-
-    function handleCopy() {
-        dispatch(
-            copySelectedCitations({
-                toIds: selectedBibliographyIds,
-                checkedCitations,
-            })
-        );
-        setIsVisible(false);
-        setSelectedBibliographyIds([]);
     }
 
     return (
-        <div className="move-window">
-            <button type="button" onClick={() => setIsVisible(false)}>
-                X
-            </button>
-            <List
-                items={bibliographies.map((bib) => {
-                    if (bib.id !== bibliography.id) {
-                        return {
-                            start: <Icon name={bib?.icon} />,
-                            title: bib.title,
-                            description: `${bib.style.name.short || bib.style.name.long.replace(/\((.*?)\)/g, "")} • ${citationCount(bib.citations)} • ${timeAgo(bib.dateModified)}`,
-                            content: (
-                                <ChipSet
-                                    chips={bib.tags.map(({ label, color }) => ({ label, color }))}
-                                    style={{ marginTop: bib.tags.length === 0 ? "0" : "0.5rem" }}
-                                />
-                            ),
-                            onClick: () => handleSelect(bib.id),
-                            style: {
-                                backgroundColor: selectedBibliographyIds.includes(bib.id)
-                                    ? "var(--md-sys-color-secondary-container)"
-                                    : "",
-                            },
-                        };
-                    }
-                    return null;
-                })}
-            />
-            <button
-                type="button"
-                disabled={selectedBibliographyIds.length !== 1}
-                onClick={() => handleMove(selectedBibliographyIds[0])}
-            >
-                Move
-            </button>
-            <button type="button" disabled={selectedBibliographyIds.length === 0} onClick={handleCopy}>
-                Copy
-            </button>
-        </div>
+        <List
+            items={bibliographies.map((bib) => {
+                if (bib.id !== bibliography.id) {
+                    return {
+                        start: <Icon name={selectedBibIds.includes(bib.id) ? "check" : bib?.icon} />,
+                        title: bib.title,
+                        description: `${bib.style.name.short || bib.style.name.long.replace(/\((.*?)\)/g, "")} • ${citationCount(bib.citations)} • ${timeAgo(bib.dateModified)}`,
+                        content: (
+                            <ChipSet
+                                chips={bib.tags.map(({ label, color }) => ({ label, color }))}
+                                style={{ marginTop: bib.tags.length === 0 ? "0" : "0.5rem" }}
+                            />
+                        ),
+                        onClick: () => handleSelect(bib.id),
+                        style: {
+                            backgroundColor: selectedBibIds.includes(bib.id)
+                                ? "var(--md-sys-color-secondary-container)"
+                                : "",
+                        },
+                    };
+                }
+                return null;
+            })}
+        />
     );
 }
 
