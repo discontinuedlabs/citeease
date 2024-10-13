@@ -5,6 +5,7 @@ import { Icon, OutlinedButton, OutlinedIconButton, Select, TextField } from "../
 export default function AuthorsInput(props) {
     const { content, setContent } = props;
     const { data: settings } = useSelector((state) => state.settings);
+    console.log(content);
 
     function handleUpdateAuthor(event) {
         const { name, value } = event.target;

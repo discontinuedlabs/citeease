@@ -109,7 +109,14 @@ export const TextField = forwardRef(function TextField(props, parentRef) {
 });
 
 export const Checkbox = forwardRef(function Checkbox(props, parentRef) {
-    const { className = "", onChange = () => undefined, checked = false, indeterminate = false, ...rest } = props;
+    const {
+        className = "",
+        id = "",
+        onChange = () => undefined,
+        checked = false,
+        indeterminate = false,
+        ...rest
+    } = props;
     const localRef = useRef();
 
     useImperativeHandle(parentRef, () => localRef?.current, []);
@@ -130,10 +137,10 @@ export const Checkbox = forwardRef(function Checkbox(props, parentRef) {
     }, []);
 
     const nClass = `m-0 align-middle ${className}`;
-    if (checked) return <md-checkbox ref={localRef} class={nClass} touch-target="wrapper" checked {...rest} />;
+    if (checked) return <md-checkbox id={id} ref={localRef} class={nClass} touch-target="wrapper" checked {...rest} />;
     if (indeterminate)
-        return <md-checkbox ref={localRef} class={nClass} touch-target="wrapper" indeterminate {...rest} />;
-    return <md-checkbox ref={localRef} class={nClass} touch-target="wrapper" {...rest} />;
+        return <md-checkbox id={id} ref={localRef} class={nClass} touch-target="wrapper" indeterminate {...rest} />;
+    return <md-checkbox id={id} ref={localRef} class={nClass} touch-target="wrapper" {...rest} />;
 });
 
 export const Switch = forwardRef(function Switch(props, parentRef) {
@@ -181,25 +188,8 @@ export function Icon({ name, className = "", ...rest }) {
 }
 
 export function Fab({ label, icon, className = "", onClick, ...rest }) {
-    const [isScrolled, setIsScrolled] = useState(false);
-
-    const handleScroll = () => {
-        const show = window.scrollY > 60;
-        setIsScrolled(show);
-    };
-
-    useEffect(() => {
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
-
     return (
-        <md-fab
-            label={isScrolled ? "" : label}
-            class={`font-sans transition duration-150 ease-in-out ${className}`}
-            onClick={onClick}
-            {...rest}
-        >
+        <md-fab label={label} class={`font-sans ${className}`} onClick={onClick} {...rest}>
             <md-icon slot="icon">{icon}</md-icon>
         </md-fab>
     );
@@ -260,6 +250,7 @@ export function List({ items = [], className = "", ...rest }) {
                 if (typeof item === "string" && /divider/i.test(item)) {
                     return <Divider key={uid()} />;
                 }
+                if (!item) return null;
                 return (
                     <md-list-item class="" {...item} type="button" onClick={item?.onClick} key={uid()}>
                         {item?.start && <div slot="start">{item.start}</div>}
@@ -275,7 +266,7 @@ export function List({ items = [], className = "", ...rest }) {
 }
 
 export const Select = forwardRef(function Select(props, parentRef) {
-    const { options, onChange, disabled = false, ...rest } = props;
+    const { className = "", options, onChange, disabled = false, ...rest } = props;
     const localRef = useRef();
 
     useImperativeHandle(parentRef, () => localRef?.current, []);
@@ -283,13 +274,11 @@ export const Select = forwardRef(function Select(props, parentRef) {
     useEffect(() => {
         const currentRef = localRef?.current;
         if (currentRef) {
-            currentRef.addEventListener("change", onChange);
             currentRef.addEventListener("input", onChange);
         }
 
         return () => {
             if (currentRef) {
-                currentRef.removeEventListener("change", onChange);
                 currentRef.removeEventListener("input", onChange);
             }
         };
@@ -297,17 +286,17 @@ export const Select = forwardRef(function Select(props, parentRef) {
 
     if (disabled) {
         return (
-            <md-filled-select disabled ref={localRef} {...rest}>
+            <md-filled-select class={className} disabled ref={localRef} {...rest}>
                 {options.map((option) => {
                     if (localRef?.current?.value === option.value) {
                         return (
-                            <md-select-option key={option.value} selected value={option.value}>
+                            <md-select-option key={uid()} selected value={option.value}>
                                 <div slot="headline">{option.headline}</div>
                             </md-select-option>
                         );
                     }
                     return (
-                        <md-select-option key={option.value} value={option.value}>
+                        <md-select-option key={uid()} value={option.value}>
                             <div slot="headline">{option.headline}</div>
                         </md-select-option>
                     );
@@ -317,17 +306,17 @@ export const Select = forwardRef(function Select(props, parentRef) {
     }
 
     return (
-        <md-filled-select ref={localRef} {...rest}>
+        <md-filled-select class={className} ref={localRef} {...rest}>
             {options.map((option) => {
                 if (localRef?.current?.value === option.value) {
                     return (
-                        <md-select-option key={option.value} selected value={option.value}>
+                        <md-select-option key={uid()} selected value={option.value}>
                             <div slot="headline">{option.headline}</div>
                         </md-select-option>
                     );
                 }
                 return (
-                    <md-select-option key={option.value} value={option.value}>
+                    <md-select-option key={uid()} value={option.value}>
                         <div slot="headline">{option.headline}</div>
                     </md-select-option>
                 );

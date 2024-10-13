@@ -111,7 +111,8 @@ export default function Home() {
     }
 
     return (
-        <div className="mx-auto min-h-screen max-w-[50rem]">
+        // mb-20 needed in pages with a Fab component
+        <div className="mx-auto mb-20 min-h-screen max-w-[50rem]">
             <TopBar
                 headline="Home"
                 showBackButton={false}

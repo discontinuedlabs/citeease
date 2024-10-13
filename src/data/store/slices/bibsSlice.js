@@ -156,14 +156,17 @@ const bibsSlice = createSlice({
             return newState;
         },
         updateBibField: (state, action) => {
+            const { bibId, key, value, currentUser } = action.payload;
+
             const newBibs = state.data?.map((bib) => {
-                if (bib.id === action.payload.bibliographyId) {
-                    return { ...bib, [action.payload.key]: action.payload.value, dateModified: new Date().toString() };
+                if (bib.id === bibId) {
+                    return { ...bib, [key]: value, dateModified: new Date().toString() };
                 }
                 return bib;
             });
+
             const newState = { ...state, data: newBibs };
-            save(newState, action.payload.currentUser);
+            save(newState, currentUser);
             return newState;
         },
         uncheckAllCitations: (state, action) => {
@@ -181,22 +184,6 @@ const bibsSlice = createSlice({
             });
             const newState = { ...state, data: newBibs };
             save(newState);
-            return newState;
-        },
-        addCitationsToBib: (state, action) => {
-            const newBibs = state.data.map((bib) => {
-                if (bib.id === action.payload.bibId) {
-                    return {
-                        ...bib,
-                        citations: [...bib.citations, ...action.payload.citations],
-                        dateModified: new Date().toString(),
-                    };
-                }
-                return bib;
-            });
-
-            const newState = { ...state, data: newBibs };
-            save(newState, action.payload.currentUser);
             return newState;
         },
         addNewCitation: (state, action) => {
@@ -329,54 +316,6 @@ const bibsSlice = createSlice({
             const newState = { ...state, data: newBibs };
             return newState;
         },
-        moveSelectedCitations: (state, action) => {
-            const newBibs = state.data?.map((bib) => {
-                if (bib.id === action.payload.toId) {
-                    return {
-                        ...bib,
-                        citations: [...bib.citations, ...action.payload.checkedCitations],
-                        dateModified: new Date().toString(),
-                    };
-                }
-                if (bib.id === action.payload.fromId) {
-                    const idsForDelete = action.payload.checkedCitations.map((cit) => cit.id);
-                    return {
-                        ...bib,
-                        citations: bib.citations.filter((cit) => !idsForDelete.includes(cit.id)),
-                        dateModified: new Date().toString(),
-                    };
-                }
-                return bib;
-            });
-            const newState = { ...state, data: newBibs };
-            save(newState, action.payload.currentUser);
-            return newState;
-        },
-        copySelectedCitations: (state, action) => {
-            const newBibs = state.data?.map((bib) => {
-                const filteredCitations = bib.citations.filter(
-                    (cit) => !action.payload.checkedCitations.some((checkedCit) => checkedCit.id === cit.id)
-                );
-                const updatedCitations = filteredCitations.map((cit) => ({ ...cit, isChecked: false }));
-                const copiedCitations = action.payload.checkedCitations.map((cit) => {
-                    const newId = uid();
-                    return {
-                        ...cit,
-                        id: newId,
-                        content: { ...cit.content, id: newId },
-                        isChecked: false,
-                    };
-                });
-                return {
-                    ...bib,
-                    citations: [...updatedCitations, ...copiedCitations],
-                    dateModified: new Date().toString(),
-                };
-            });
-            const newState = { ...state, data: newBibs };
-            save(newState, action.payload.currentUser);
-            return newState;
-        },
         duplicateSelectedCitations: (state, action) => {
             const newBibs = state.data?.map((bib) => {
                 if (bib.id === action.payload.bibliographyId) {
@@ -460,13 +399,10 @@ export const {
     deleteBib,
     updateBibField,
     uncheckAllCitations,
-    addCitationsToBib,
     addNewCitation,
     updateCitation,
     toggleEntryCheckbox,
     handleMasterEntriesCheckbox,
-    moveSelectedCitations,
-    copySelectedCitations,
     duplicateSelectedCitations,
     deleteSelectedCitations,
     addNewBibAndMoveSelectedCitations,

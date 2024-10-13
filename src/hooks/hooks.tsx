@@ -1,11 +1,66 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { User } from "firebase/auth";
 import { Location, useLocation, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { doc, onSnapshot } from "firebase/firestore";
 import { Bibliography } from "../types/types.ts";
 import { RootState } from "../data/store/store.ts";
 import { useAuth } from "../context/AuthContext";
+import { retrieveUserData } from "../utils/dataUtils.ts";
+import { deleteBib, mergeWithCurrentBibs, replaceAllBibs } from "../data/store/slices/bibsSlice";
+import { replaceAllSettings } from "../data/store/slices/settingsSlice";
+import db from "../data/db/firebase/firebase";
 
-/* eslint-disable no-unused-vars */
+export function useUserDataSync(currentUser: User, bibsLoaded: boolean) {
+    const dispatch = useDispatch();
+
+    const getCollaborativeBibIds = useCallback((bibs: Bibliography[]) => {
+        return bibs.filter((bib) => bib?.collab?.open).map((bib) => bib.collab!.id);
+    }, []);
+
+    useEffect(() => {
+        async function syncUserData() {
+            try {
+                const userData = await retrieveUserData(currentUser);
+
+                if (userData?.bibliographies) {
+                    dispatch(replaceAllBibs({ bibs: userData.bibliographies }));
+                }
+                if (userData?.settings) {
+                    dispatch(replaceAllSettings({ settings: userData.settings }));
+                }
+
+                const coBibsIds = getCollaborativeBibIds(userData!.bibliographies || []);
+
+                const unsubscribeList = coBibsIds.map((id) => {
+                    return onSnapshot(doc(db, "coBibs", id), (sDoc) => {
+                        if (sDoc.exists()) {
+                            const parsedCoBib = JSON.parse(sDoc.data().bibliography);
+                            const isCollaborator = parsedCoBib?.collab?.collaborators?.some(
+                                (co) => co.id === currentUser.uid
+                            );
+
+                            if (!isCollaborator) {
+                                // Remove the bib if the user was removed as a collaborator
+                                dispatch(deleteBib({ bibliographyId: parsedCoBib.id }));
+                            } else {
+                                // Merge updated bibliography data
+                                dispatch(mergeWithCurrentBibs({ bibs: [parsedCoBib] }));
+                            }
+                        }
+                    });
+                });
+
+                return () => unsubscribeList.forEach((unsubscribe) => unsubscribe());
+            } catch (error) {
+                console.error("Error retreiving user data or setting up snapshots: ", error);
+                return undefined;
+            }
+        }
+
+        syncUserData();
+    }, [currentUser, bibsLoaded, dispatch]);
+}
 
 /**
  * Adds an event listener to the specified element, document, or window object.
@@ -16,10 +71,10 @@ import { useAuth } from "../context/AuthContext";
  */
 export function useEventListener(
     eventType: string,
-    callback: (event: Event) => void,
+    callback: (event: Event) => void, // eslint-disable-line no-unused-vars
     element: Element | Document | Window = window
 ): void {
-    const callbackRef = useRef<(event: Event) => void>(() => {});
+    const callbackRef = useRef<(event: Event) => void>(() => {}); // eslint-disable-line no-unused-vars
 
     useEffect(() => {
         callbackRef.current = callback;
@@ -28,7 +83,7 @@ export function useEventListener(
     useEffect(() => {
         if (!element) return;
 
-        const handler = (e: Event) => callbackRef.current(e);
+        const handler = (event: Event) => callbackRef.current(event);
         element.addEventListener(eventType, handler, false);
     }, [eventType, element, callbackRef.current]);
 }
@@ -57,24 +112,15 @@ export function useFindBib(): Bibliography | null {
     return bibliography ? bibliography : null; // eslint-disable-line no-unneeded-ternary
 }
 
-type EnhancedDispatchConfig = {
-    includeCurrentUser?: boolean;
-};
-
 /**
  * Enhances the Redux dispatch function by automatically including the current user
- * information in dispatched actions, unless overridden by a custom configuration.
- *
- * @param {Object} [config={}] Configuration options for the enhanced dispatch function.
- * @param {boolean} [config.includeCurrentUser=true] Whether to include the current user in dispatched actions.
- * @returns {Function} An enhanced version of the Redux dispatch function.
+ * information and bibliography ID in dispatched actions.
  */
 // FIXME: Fix this hook because it doesnt accept Promises (loadBibs, and loadSettings in this case).
-export function useEnhancedDispatch(config: EnhancedDispatchConfig) {
+export function useEnhancedDispatch() {
     const dispatch = useDispatch();
     const { currentUser } = useAuth();
-
-    const shouldIncludeCurrentUser = config?.includeCurrentUser ?? true;
+    const { bibId } = useParams();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function enhancedDispatch(action: any) {
@@ -83,9 +129,7 @@ export function useEnhancedDispatch(config: EnhancedDispatchConfig) {
         }
         const enhancedAction = {
             ...action,
-            ...(shouldIncludeCurrentUser && {
-                payload: { ...action.payload, currentUser: JSON.stringify(currentUser) },
-            }),
+            payload: { bibId, currentUser: JSON.stringify(currentUser), ...action.payload },
         };
         return dispatch(enhancedAction);
     }
@@ -168,6 +212,7 @@ export function useDeviceTheme(onChangeCallback: CallableFunction = () => undefi
  *                                it attempts to read the background color of the document root element.
  * @returns {(newColor: string) => void} - A function that accepts a new color string and updates the theme color.
  */
+// eslint-disable-next-line no-unused-vars
 export function useMetaThemeColor(initialColor: string): (newColor: string) => void {
     const [color, setColor] = useState<string>(
         initialColor || window.getComputedStyle(document.documentElement).getPropertyValue("background-color")
@@ -239,7 +284,7 @@ export function useTimeout() {
     return setTimeoutCallback;
 }
 
-type ShortcutAction = (event: KeyboardEvent) => void;
+type ShortcutAction = (event: KeyboardEvent) => void; // eslint-disable-line no-unused-vars
 type OptionalConfig = Pick<KeyboardEvent, "altKey" | "ctrlKey" | "shiftKey">;
 interface ShortcutConfig extends Partial<OptionalConfig> {
     code: KeyboardEvent["code"];
