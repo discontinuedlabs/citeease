@@ -736,7 +736,17 @@ export default function Bibliography() {
                     <div className="grid gap-2">
                         {bibliography?.collab?.open ? <Icon name="group" className="text-xl" /> : ""}
                         {`${bibliography?.collab?.open ? ` ${bibliography?.collab?.id} • ` : ""}${bibliography?.style.name.long}`}
-                        <ChipSet chips={settings?.tags.filter((tag) => bibliography.tags.includes(tag.id))} />
+                        <ChipSet
+                            chips={settings?.tags
+                                .filter((tag) => bibliography.tags.includes(tag.id))
+                                .map((tag) => {
+                                    return {
+                                        ...tag,
+                                        selected: true,
+                                        onClick: showTagsDialog,
+                                    };
+                                })}
+                        />
                     </div>
                 }
             />

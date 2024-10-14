@@ -2,9 +2,11 @@
 
 import React, { forwardRef, useEffect, useId, useImperativeHandle, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { uid } from "../../utils/utils.ts";
-import { TAG_COLOR_VALUES } from "../../data/store/slices/settingsSlice";
 import { useMetaThemeColor } from "../../hooks/hooks.tsx";
+import colorValues from "../../assets/json/colors.json";
+import { rgbToRgba } from "../../utils/conversionUtils.tsx";
 
 export function Divider({ className = "", label, ...rest }) {
     if (label)
@@ -66,7 +68,7 @@ export const TextField = forwardRef(function TextField(props, parentRef) {
         };
     }, [onChange, localRef]);
 
-    if (error)
+    if (errorText && errorText.length !== 0)
         return (
             <md-filled-text-field
                 ref={localRef}
@@ -215,6 +217,14 @@ export function OutlinedButton({ className = "", onClick, type = "button", child
     );
 }
 
+export function TonalButton({ className = "", onClick, type = "button", children, ...rest }) {
+    return (
+        <md-filled-tonal-button type={type} class={`px-6 py-2 font-sans ${className}`} onClick={onClick} {...rest}>
+            {children}
+        </md-filled-tonal-button>
+    );
+}
+
 export function IconButton({ className = "", onClick, type = "button", name, ...rest }) {
     return (
         <md-icon-button type={type} class={className} onClick={onClick} {...rest}>
@@ -222,14 +232,6 @@ export function IconButton({ className = "", onClick, type = "button", name, ...
         </md-icon-button>
     );
 }
-
-// export function FilledIconButton({ className = "", onClick, type = "button", name, ...rest }) {
-//     return (
-//         <md-filled-icon-button type={type} class={className} onClick={onClick} {...rest}>
-//             <md-icon>{name}</md-icon>
-//         </md-filled-icon-button>
-//     );
-// }
 
 export function OutlinedIconButton({ className = "", onClick, type = "button", name, ...rest }) {
     return (
@@ -445,26 +447,49 @@ export function TopBar({ headline, description, showBackButton = true, options }
 
 export function ChipSet(props) {
     const { chips = [], className = "", ...rest } = props;
+    const { data: settings } = useSelector((state) => state.settings);
 
     return (
-        <md-chip-set class={className} {...rest}>
+        <div className={`flex flex-wrap gap-1 ${className}`} {...rest}>
             {chips.map((chip) => {
+                if (!chip || !colorValues[settings.theme]) return undefined;
+
+                const targetColor = colorValues[settings.theme][chip.color];
+
                 const style = {
-                    "--md-assist-chip-outline-color": TAG_COLOR_VALUES[chip?.color],
-                    "--md-assist-chip-label-text-color": TAG_COLOR_VALUES[chip?.color],
-                    "--md-input-chip-outline-color": TAG_COLOR_VALUES[chip?.color],
-                    "--md-input-chip-label-text-color": TAG_COLOR_VALUES[chip?.color],
+                    "--md-filled-tonal-button-container-color": rgbToRgba(targetColor, 0.4),
+                    "--md-filled-tonal-button-container-shape": "10px",
+
+                    "--md-outlined-button-outline-color": targetColor,
+                    "--md-outlined-button-container-shape": "10px",
+                    "--md-outlined-button-label-text-color": targetColor,
                 };
 
-                if (!chip) return undefined;
+                const chipProps = {
+                    className: "px-0 py-0 ",
+                    style,
+                    ...chip,
+                };
+
+                if (chip.selected) {
+                    return (
+                        <TonalButton key={uid()} {...chipProps}>
+                            {chip?.start}
+                            {chip?.label}
+                            {chip?.end}
+                        </TonalButton>
+                    );
+                }
 
                 return (
-                    <md-assist-chip key={uid()} style={style} {...chip}>
-                        {chip?.icon && <md-icon slot="icon">{chip.icon}</md-icon>}
-                    </md-assist-chip>
+                    <OutlinedButton key={uid()} {...chipProps}>
+                        {chip?.start}
+                        {chip?.label}
+                        {chip?.end}
+                    </OutlinedButton>
                 );
             })}
-        </md-chip-set>
+        </div>
     );
 }
 

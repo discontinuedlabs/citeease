@@ -1132,7 +1132,8 @@ export function TagsDialog({ setSelectedTags: setParentTags }) {
                         const targetTag = settings.tags?.find((tag) => tag.id === tagId);
                         return {
                             ...targetTag,
-                            icon: "close",
+                            end: "close",
+                            selected: true,
                             onClick: () => {
                                 setSelectedTags((prevTags) => prevTags.filter((tag) => tag !== tagId));
                             },
@@ -1148,6 +1149,7 @@ export function TagsDialog({ setSelectedTags: setParentTags }) {
                         if (!selectedTags.includes(tag.id)) {
                             return {
                                 ...tag,
+                                selected: true,
                                 onClick: () => setSelectedTags((prevTags) => [...prevTags, tag.id]),
                             };
                         }

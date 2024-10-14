@@ -1,80 +1,114 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useId, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-    TAG_COLORS,
-    TAG_COLOR_VALUES,
-    addIcon,
-    addTag,
-    deleteIcon,
-    deleteTag,
-    resetAllSettings,
-} from "../../data/store/slices/settingsSlice";
-import Tag from "../../components/ui/Tag";
+import { addIcon, updateSettingsField, deleteIcon, resetAllSettings } from "../../data/store/slices/settingsSlice";
 import { useAuth } from "../../context/AuthContext";
 import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
 import { uid } from "../../utils/utils.ts";
-import { getGradient, getTagBgColors } from "../../utils/uiUtils.ts";
-import { Button } from "../../components/ui/StyledButtons";
-import { IconButton } from "../../components/ui/MaterialComponents";
+import {
+    ChipSet,
+    Divider,
+    FilledButton,
+    IconButton,
+    OutlinedButton,
+    TextField,
+} from "../../components/ui/MaterialComponents";
 import { useToast } from "../../context/ToastContext.tsx";
+import colorValues from "../../assets/json/colors.json";
+import builtinTags from "../../assets/json/tags.json";
 
 export function TagsManager() {
-    const settings = useSelector((state) => state.settings);
+    const { data: settings } = useSelector((state) => state.settings);
     const [tagLabel, setTagLabel] = useState("");
-    const [tagColor, setTagColor] = useState(TAG_COLORS.YELLOW);
+    const [tagColor, setTagColor] = useState("yellow");
+    const [errorMessage, setErrorMessage] = useState("");
     const dispatch = useDispatch();
-    const [lightColor, darkColor] = getGradient(getTagBgColors(tagColor)[0]);
 
-    function addTagToBib(event) {
+    function addTag(event) {
         event.preventDefault();
-        if (!/^\s*$/.test(tagLabel)) {
-            dispatch(addTag({ tag: { label: tagLabel, color: tagColor, id: uid() } }));
-            setTagLabel("");
+        if (/^\s*$/.test(tagLabel)) {
+            setErrorMessage("You can't add an empty tag.");
+            return;
         }
+
+        dispatch(
+            updateSettingsField({
+                key: "tags",
+                value: [...settings.tags, { label: tagLabel, color: tagColor, id: uid() }],
+            })
+        );
+        setTagLabel("");
+        setErrorMessage("");
+    }
+
+    function deleteTag(id) {
+        dispatch(
+            updateSettingsField({
+                key: "tags",
+                value: settings.tags.filter((tag) => tag.id !== id),
+            })
+        );
+    }
+
+    function restoreDefaultTags() {
+        dispatch(
+            updateSettingsField({
+                key: "tags",
+                value: [
+                    ...settings.tags,
+                    ...builtinTags.filter((tag) => !settings.tags.some((sTag) => sTag.id === tag.id)),
+                ],
+            })
+        );
     }
 
     return (
-        <div className="grid gap-2">
-            <div className="flex flex-wrap gap-1">
-                {settings.tags?.map((tag) => (
-                    <Tag key={uid()} tagProps={tag} showX onClick={() => dispatch(deleteTag({ tagId: tag.id }))} />
-                ))}
-            </div>
-            <form onSubmit={addTagToBib} className="grid gap-1 rounded-md bg-overlay-100 p-4">
-                <div className="flex grid-cols-2 gap-2">
-                    <div className="rounded-md bg-white">
-                        <input
-                            className="w-full grid-flow-row-dense rounded-md p-2 font-sans font-bold"
-                            style={{
-                                border: `solid 0.1rem ${TAG_COLOR_VALUES[tagColor]}`,
-                                background: `linear-gradient(to bottom, ${lightColor}, ${darkColor}`,
-                                color: TAG_COLOR_VALUES[tagColor],
-                            }}
-                            type="text"
-                            placeholder="Tag label"
-                            value={tagLabel}
-                            onChange={(event) => setTagLabel(event.target.value)}
-                        />
-                    </div>
+        <div className="grid gap-2 px-5">
+            <ChipSet
+                chips={settings.tags.map((tag) => {
+                    return {
+                        ...tag,
+                        icon: "close",
+                        selected: true,
+                        onClick: () => deleteTag(tag.id),
+                    };
+                })}
+            />
 
-                    <Button className="text-nowrap" type="submit">
+            <Divider className="my-2" />
+
+            <form className="grid gap-2" onSubmit={addTag}>
+                <div className="flex justify-between gap-2">
+                    <TextField
+                        className="w-full"
+                        errorText={errorMessage}
+                        style={{
+                            "--md-filled-text-field-focus-active-indicator-color":
+                                colorValues[settings.theme][tagColor],
+                        }}
+                        type="text"
+                        label="Tag label"
+                        placeholder="eg., Favorite"
+                        value={tagLabel}
+                        onChange={(event) => setTagLabel(event.target.value)}
+                    />
+                    <FilledButton type="submit" onClick={addTag}>
                         Add tag
-                    </Button>
+                    </FilledButton>
                 </div>
 
-                <div className="flex flex-wrap gap-1">
-                    {Object.values(TAG_COLORS)?.map((color) => {
-                        return (
-                            <Tag
-                                className="h-8 w-8 rounded-full"
-                                key={uid()}
-                                tagProps={{ color, id: color, label: "" }}
-                                onClick={() => setTagColor(color)}
-                            />
-                        );
+                <ChipSet
+                    chips={Object.keys(colorValues[settings.theme]).map((color) => {
+                        return {
+                            label: color.charAt(0).toUpperCase() + color.slice(1).toLowerCase(),
+                            color,
+                            selected: tagColor === color,
+                            onClick: () => setTagColor(color),
+                        };
                     })}
-                </div>
+                />
+
+                <OutlinedButton onClick={restoreDefaultTags}>Restore default tags</OutlinedButton>
             </form>
         </div>
     );
@@ -90,15 +124,15 @@ export function IconsManager() {
 
     function addIconToCollection(event) {
         event.preventDefault();
-        if (!/^\s*$/.test(iconName)) {
-            if (icons.includes(iconName)) {
-                toast.show({
-                    message: `You already have \`${iconName}\` icon`,
-                });
-            } else {
-                dispatch(addIcon({ icon: iconName }));
-                setIconName("");
-            }
+        if (/^\s*$/.test(iconName)) return;
+
+        if (icons.includes(iconName.toLowerCase())) {
+            toast.show({
+                message: `You already have \`${iconName}\` icon`,
+            });
+        } else {
+            dispatch(addIcon({ icon: iconName }));
+            setIconName("");
         }
     }
 
@@ -129,9 +163,7 @@ export function IconsManager() {
                         />
                     </div>
 
-                    <Button className="text-nowrap" type="submit">
-                        Add icon
-                    </Button>
+                    <FilledButton type="submit">Add icon</FilledButton>
                 </div>
             </form>
         </div>

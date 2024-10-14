@@ -4,6 +4,23 @@ import { uid } from "./utils.ts";
 import { createDateObject } from "./citationUtils.ts";
 
 /**
+ * Converts an RGB string to an RGBA string with a specified alpha value.
+ *
+ * @param {string} rgbString - The RGB string in the format "rgb(r, g, b)".
+ * @param {number} alpha - The alpha value for the RGBA string (between 0 and 1).
+ * @returns {string | undefined} The corresponding RGBA string in the format "rgba(r, g, b, a)", or `undefined` if the input RGB string is invalid.
+ */
+export function rgbToRgba(rgbString: string, alpha: number): string | undefined {
+    const rgbValues = rgbString?.match(/\d+/g);
+
+    if (rgbValues && rgbValues.length === 3) {
+        const [r, g, b] = rgbValues.map(Number);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+    return undefined;
+}
+
+/**
  * Converts an HTML string to a Markdown-formatted string.
  *
  * Note: This is a basic function designed to meet the specific needs of

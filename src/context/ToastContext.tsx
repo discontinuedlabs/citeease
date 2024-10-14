@@ -2,9 +2,7 @@
 
 import React, { createContext, useContext, useMemo, useState } from "react";
 import { uid } from "../utils/utils.ts";
-import { Icon } from "../components/ui/MaterialComponents";
-import { getGradient } from "../utils/uiUtils.ts";
-import { SoftButton } from "../components/ui/StyledButtons";
+import { Icon, TextButton } from "../components/ui/MaterialComponents";
 import { useTimeout } from "../hooks/hooks.tsx";
 
 type ToastProps = {
@@ -31,7 +29,7 @@ export function useToast(): ToastContextType {
 }
 
 function Toast({ id, message, icon, color = "#ffd60a", close }: ToastProps) {
-    const [lightColor, mainColor, darkColor] = getGradient(color);
+    const [lightColor, mainColor, darkColor] = [color, color, color];
     const setTimeout = useTimeout();
 
     setTimeout(() => close(id), 10000);
@@ -49,10 +47,10 @@ function Toast({ id, message, icon, color = "#ffd60a", close }: ToastProps) {
                 <p className="m-0 align-middle">{message}</p>
             </div>
 
-            <SoftButton className="px-0 py-0" onClick={() => close(id)}>
+            <TextButton className="px-0 py-0" onClick={() => close(id)}>
                 {/* eslint-disable-next-line react/no-children-prop */}
                 <Icon name="close" className="" children={undefined} />
-            </SoftButton>
+            </TextButton>
         </div>
     );
 }

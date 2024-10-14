@@ -3,9 +3,9 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useAuth } from "../../context/AuthContext";
 import { ChangePasswordDialog, DeleteAccountDialog, UpdateEmailDialog } from "../settings/SettingTools";
-import { SettingsButton, SettingsNavigate } from "../settings/SettingsComponents";
 import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
 import { resetAllSettings } from "../../data/store/slices/settingsSlice";
+import { FilledButton, List, TopBar } from "../../components/ui/MaterialComponents";
 
 export default function Account() {
     const navigate = useNavigate();
@@ -65,7 +65,7 @@ export default function Account() {
 
     return (
         <>
-            <h1>Account</h1>
+            <TopBar headline="Account" />
             <div>
                 <p>{currentUser?.displayName}</p>
                 <p>
@@ -73,21 +73,29 @@ export default function Account() {
                     <span>{currentUser?.emailVerified ? "Verified" : "Not verified"}</span>
                 </p>
             </div>
+
             {!currentUser?.emailVerified && (
-                <SettingsButton
+                <FilledButton
                     disabled={isEmailVerificationDisabled || verifyLoading}
                     onClick={() => handleVerifyEmail()}
                 >
                     Verify email
-                </SettingsButton>
+                </FilledButton>
             )}
-            <SettingsNavigate onClick={() => setUpdateEmailDialogVisible(true)}>Update email</SettingsNavigate>
-            <SettingsNavigate onClick={() => setChangePasswordDialogVisible(true)}>Change password</SettingsNavigate>
-            <SettingsNavigate onClick={() => navigate("/login")}>Switch account</SettingsNavigate>
-            <SettingsNavigate onClick={() => handleLogout()} disabled={logoutLoading}>
-                Log out
-            </SettingsNavigate>
-            <SettingsNavigate onClick={() => setDeleteAccountDialogVisible(true)}>Delete account</SettingsNavigate>
+
+            <List
+                items={[
+                    { title: "Update email", onClick: () => setUpdateEmailDialogVisible(true) },
+                    { title: "Change password", onClick: () => setChangePasswordDialogVisible(true) },
+                    { title: "Switch account", onClick: () => navigate("/login") },
+                    { title: "Log out", onClick: () => handleLogout() },
+                    {
+                        title: "Delete account",
+                        onClick: () => setDeleteAccountDialogVisible(true),
+                        disabled: logoutLoading, // TODO..
+                    },
+                ]}
+            />
 
             {updateEmailDialogVisible && <UpdateEmailDialog setIsVisible={setUpdateEmailDialogVisible} />}
             {changePasswordDialogVisible && <ChangePasswordDialog setIsVisible={setChangePasswordDialogVisible} />}

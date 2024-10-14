@@ -1,6 +1,4 @@
-/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
-
-import { configureStore, combineReducers, Middleware } from "@reduxjs/toolkit";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import bibsReducer from "./slices/bibsSlice";
 import settingsReducer from "./slices/settingsSlice";
 

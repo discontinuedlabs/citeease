@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { IconsManager, TagsManager } from "./SettingTools";
-import { restoreDefaultIcons, restoreDefaultTags } from "../../data/store/slices/settingsSlice";
+import { restoreDefaultIcons } from "../../data/store/slices/settingsSlice";
 import { List, TopBar } from "../../components/ui/MaterialComponents";
 import { useDialog } from "../../context/DialogContext.tsx";
 
@@ -13,12 +13,9 @@ export default function Settings() {
 
     function openTagsManager() {
         tagsManagerDialog.show({
-            title: "Tags Manager",
+            headline: "Manage tags",
             content: <TagsManager />,
-            actions: [
-                ["Restore default tags", () => dispatch(restoreDefaultTags())],
-                ["Cancel", () => tagsManagerDialog.close()],
-            ],
+            actions: [["Cancel", () => tagsManagerDialog.close()]],
             id: "tags-manager",
         });
     }

@@ -133,7 +133,16 @@ export default function Home() {
                             start: <Icon name={bib?.icon} />,
                             title: bib.title,
                             description: `${bib.style.name.short || bib.style.name.long.replace(/\((.*?)\)/g, "")} • ${citationCount(bib.citations)} • ${timeAgo(bib.dateModified)}`,
-                            content: <ChipSet chips={bibTags} />,
+                            content: (
+                                <ChipSet
+                                    chips={bibTags.map((tag) => {
+                                        return {
+                                            ...tag,
+                                            selected: true,
+                                        };
+                                    })}
+                                />
+                            ),
                             onClick: () => navigate(bib?.collab?.open ? `/collab/${bib.collab.id}` : `/bib/${bib.id}`),
                         };
                     })}
