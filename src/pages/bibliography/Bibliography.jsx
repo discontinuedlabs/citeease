@@ -45,7 +45,8 @@ import * as citationUtils from "../../utils/citationUtils.ts";
 
 // TODO: The user cannot do any actions in collaborative bibliographies when they are offline
 export default function Bibliography() {
-    const { data: bibliographies, loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies);
+    const { data: bibliographies, loadedLocally: bibsLoaded } = useSelector((state) => state.bibliographies);
+    const { data: settings } = useSelector((state) => state.settings);
     const bibliography = useFindBib();
     const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
     const { currentUser } = useAuth();
@@ -59,12 +60,11 @@ export default function Bibliography() {
     const citationFormRef = useRef();
     const receiverBibsRef = useRef([]);
     const renameInputRef = useRef();
+    const selectedTagsRef = useRef([]);
 
     const [collaborationOpened, setCollaborationOpened] = useState(bibliography?.collab?.open);
     const [idAndPasswordDialogVisible, setIdAndPasswordDialogVisible] = useState(false);
-    const [moveWindowVisible, setMoveWindowVisible] = useState(false);
     const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
-    const [tagsDialogVisible, setTagsDialogVisible] = useState(false);
     const [iconsMenuVisible, setIconsMenuVisible] = useState(false);
 
     useEffect(() => {
@@ -115,34 +115,32 @@ export default function Bibliography() {
         });
     }
 
-    function addTagToBib(tag) {
+    function showTagsDialog() {
         if (!isOnline && bibliography?.collab?.open) {
             toast.show({ message: "You are offline", icon: "error", color: "red" });
             return;
         }
 
-        dispatch(
-            updateBibField({
-                bibliographyId: bibliography.id,
-                key: "tags",
-                value: [...bibliography.tags, tag],
-            })
-        );
-    }
-
-    function removeTagFromBib(tag) {
-        if (!isOnline && bibliography?.collab?.open) {
-            toast.show({ message: "You are offline", icon: "error", color: "red" });
-            return;
+        function updateTags() {
+            const selectedTags = selectedTagsRef.current;
+            dispatch(updateBibField({ key: "tags", value: selectedTags }));
         }
 
-        dispatch(
-            updateBibField({
-                bibliographyId: bibliography.id,
-                key: "tags",
-                value: bibliography.tags.filter((prevTag) => prevTag.id !== tag.id),
-            })
-        );
+        dialog.show({
+            headline: "Change tags",
+            content: (
+                <TagsDialog
+                    setSelectedTags={(tags) => {
+                        selectedTagsRef.current = tags;
+                    }}
+                />
+            ),
+            actions: [
+                ["Cancel", () => dialog.close()],
+                ["Manage tags", () => navigate("/settings")], // TODO: Use query to open TagsManager
+                ["Update tags", updateTags],
+            ],
+        });
     }
 
     async function handleCopy() {
@@ -279,6 +277,11 @@ export default function Bibliography() {
     }
 
     function showRenameDialog() {
+        if (!isOnline && bibliography?.collab?.open) {
+            toast.show({ message: "You are offline", icon: "error", color: "red" });
+            return;
+        }
+
         function rename() {
             const newTitle = renameInputRef.current.value;
 
@@ -652,7 +655,7 @@ export default function Bibliography() {
         // Options for admin of collaborative bibliographies
         if (collaborationOpened && bibliography?.collab?.adminId === currentUser?.uid) {
             return [
-                { headline: "Tags", onClick: () => setTagsDialogVisible(true) },
+                { headline: "Tags", onClick: showTagsDialog },
                 { headline: "Rename bibliography", onClick: showRenameDialog },
                 { headline: "Change icon", onClick: () => setIconsMenuVisible(true) },
                 { headline: "Change style", onClick: () => setCitationStyleMenuVisible(true) },
@@ -673,7 +676,7 @@ export default function Bibliography() {
         // Options if bibliography not open for collaboration
         if (!collaborationOpened) {
             return [
-                { headline: "Tags", onClick: () => setTagsDialogVisible(true) },
+                { headline: "Tags", onClick: showTagsDialog },
                 { headline: "Rename bibliography", onClick: showRenameDialog },
                 { headline: "Change icon", onClick: () => setIconsMenuVisible(true) },
                 { headline: "Change style", onClick: () => setCitationStyleMenuVisible(true) },
@@ -730,17 +733,11 @@ export default function Bibliography() {
                     ...(checkedCitations?.length !== 0 ? optionsWhenCitationsSelected : optionsWhenNothingSelected),
                 ]}
                 description={
-                    <>
-                        <>
-                            {bibliography?.collab?.open ? <Icon name="group" className="text-xl" /> : ""}
-                            {`${bibliography?.collab?.open ? ` ${bibliography?.collab?.id} • ` : ""}${bibliography?.style.name.long}`}
-                        </>
-
-                        <ChipSet
-                            chips={bibliography?.tags?.map(({ label, color }) => ({ label, color }))}
-                            style={{ marginTop: bibliography?.tags?.length === 0 ? "0" : "0.5rem" }}
-                        />
-                    </>
+                    <div className="grid gap-2">
+                        {bibliography?.collab?.open ? <Icon name="group" className="text-xl" /> : ""}
+                        {`${bibliography?.collab?.open ? ` ${bibliography?.collab?.id} • ` : ""}${bibliography?.style.name.long}`}
+                        <ChipSet chips={settings?.tags.filter((tag) => bibliography.tags.includes(tag.id))} />
+                    </div>
                 }
             />
 
@@ -760,12 +757,6 @@ export default function Bibliography() {
                             ),
                     }}
                 />
-            )}
-
-            {moveWindowVisible && <MoveDialog {...{ setMoveWindowVisible }} />}
-
-            {tagsDialogVisible && (
-                <TagsDialog {...{ setTagsDialogVisible, onTagAdded: addTagToBib, onTagRemoved: removeTagFromBib }} />
             )}
 
             {idAndPasswordDialogVisible && (

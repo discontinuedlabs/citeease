@@ -14,6 +14,7 @@ import { prioritizeAvailableStyles } from "../../utils/citationUtils.ts";
 
 export default function Home() {
     const { data: bibliographies, loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies);
+    const { data: settings } = useSelector((state) => state.settings);
     const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
     const [coBibsSearchDialogVisible, setCoBibsSearchDialogVisible] = useState(false);
     const [tryingToJoinBib, setTryingToJoinBib] = useState(undefined);
@@ -127,16 +128,12 @@ export default function Home() {
             {sortedBibliographies.length > 0 ? (
                 <List
                     items={sortedBibliographies.map((bib) => {
+                        const bibTags = settings?.tags.filter((tag) => bib.tags.includes(tag.id));
                         return {
                             start: <Icon name={bib?.icon} />,
                             title: bib.title,
                             description: `${bib.style.name.short || bib.style.name.long.replace(/\((.*?)\)/g, "")} • ${citationCount(bib.citations)} • ${timeAgo(bib.dateModified)}`,
-                            content: (
-                                <ChipSet
-                                    chips={bib.tags.map(({ label, color }) => ({ label, color }))}
-                                    style={{ marginTop: bib.tags.length === 0 ? "0" : "0.5rem" }}
-                                />
-                            ),
+                            content: <ChipSet chips={bibTags} />,
                             onClick: () => navigate(bib?.collab?.open ? `/collab/${bib.collab.id}` : `/bib/${bib.id}`),
                         };
                     })}

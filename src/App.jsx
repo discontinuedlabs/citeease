@@ -23,7 +23,7 @@ import { useAuth } from "./context/AuthContext";
 import { useDocumentTitle, useMetaThemeColor, useUserDataSync } from "./hooks/hooks.tsx";
 
 export default function App() {
-    const { loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies);
+    const { loadedLocally: bibsLoaded } = useSelector((state) => state.bibliographies);
     const { currentUser } = useAuth();
     const dispatch = useDispatch();
 

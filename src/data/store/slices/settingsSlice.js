@@ -44,9 +44,9 @@ const BUILTIN_TAGS = [
     { label: "Discontinued", color: TAG_COLORS.GRAY, id: "builtin-discontinued" },
 ];
 
-const initialState = { tags: BUILTIN_TAGS, icons: builtinIcons };
+const initialState = { data: { tags: BUILTIN_TAGS, icons: builtinIcons }, loadedLocally: false };
 
-async function saveToIndexedDB(newState) {
+async function save(newState) {
     const serializedState = JSON.stringify(newState);
     await db.items.put({ id: "settings", value: serializedState });
 }
@@ -64,7 +64,7 @@ const settingsSlice = createSlice({
         replaceAllSettings: (settings, action) => {
             if (!action.payload.settings) return settings;
             const newState = action.payload.settings;
-            saveToIndexedDB(newState);
+            save(newState);
             return newState;
         },
         restoreDefaultTags: (settings) => {
@@ -76,17 +76,17 @@ const settingsSlice = createSlice({
                     ...BUILTIN_TAGS.filter((pTag) => !sTagIds.includes(pTag.id)),
                 ],
             };
-            saveToIndexedDB(newState);
+            save(newState);
             return newState;
         },
         addTag: (settings, action) => {
             const newState = { ...settings, tags: [...(settings.tags ? settings.tags : []), action.payload.tag] };
-            saveToIndexedDB(newState);
+            save(newState);
             return newState;
         },
         deleteTag: (settings, action) => {
             const newState = { ...settings, tags: settings.tags?.filter((tag) => tag.id !== action.payload.tagId) };
-            saveToIndexedDB(newState);
+            save(newState);
             return newState;
         },
         restoreDefaultIcons: (settings) => {
@@ -94,18 +94,18 @@ const settingsSlice = createSlice({
                 ...settings,
                 icons: [...settings.icons, ...builtinIcons.filter((icon) => !settings.icons.includes(icon))],
             };
-            saveToIndexedDB(newState);
+            save(newState);
             return newState;
         },
         addIcon: (settings, action) => {
             const newState = { ...settings, icons: [...settings.icons, action.payload.icon] };
-            saveToIndexedDB(newState);
+            save(newState);
             return newState;
         },
         deleteIcon: (settings, action) => {
             console.log(action);
             const newState = { ...settings, icons: settings.icons?.filter((icon) => icon !== action.payload.icon) };
-            saveToIndexedDB(newState);
+            save(newState);
             return newState;
         },
         setTryingToJoinBib: (settings, action) => {
@@ -113,13 +113,13 @@ const settingsSlice = createSlice({
             return newState;
         },
         resetAllSettings: () => {
-            saveToIndexedDB(initialState);
+            save(initialState);
             return initialState;
         },
     },
     extraReducers: (builder) => {
         builder.addCase(loadFromIndexedDB.fulfilled, (state, action) => {
-            return { ...state, ...action?.payload };
+            return { ...state, data: action?.payload, loadedLocally: true };
         });
     },
 });

@@ -56,13 +56,11 @@ export const TextField = forwardRef(function TextField(props, parentRef) {
     useEffect(() => {
         const currentRef = localRef?.current;
         if (currentRef) {
-            currentRef.addEventListener("change", onChange);
             currentRef.addEventListener("input", onChange);
         }
 
         return () => {
             if (currentRef) {
-                currentRef.removeEventListener("change", onChange);
                 currentRef.removeEventListener("input", onChange);
             }
         };
@@ -124,13 +122,11 @@ export const Checkbox = forwardRef(function Checkbox(props, parentRef) {
     useEffect(() => {
         const currentRef = localRef?.current;
         if (currentRef) {
-            currentRef.addEventListener("change", onChange);
             currentRef.addEventListener("input", onChange);
         }
 
         return () => {
             if (currentRef) {
-                currentRef.removeEventListener("change", onChange);
                 currentRef.removeEventListener("input", onChange);
             }
         };
@@ -255,8 +251,12 @@ export function List({ items = [], className = "", ...rest }) {
                     <md-list-item class="" {...item} type="button" onClick={item?.onClick} key={uid()}>
                         {item?.start && <div slot="start">{item.start}</div>}
                         {item?.title && <div slot="headline">{item.title}</div>}
-                        {item?.description && <div slot="supporting-text">{item.description}</div>}
-                        {item?.content && <div slot="supporting-text">{item.content}</div>}
+                        {item?.description && (
+                            <div className="grid gap-2" slot="supporting-text">
+                                {item.description}
+                                {item.content}
+                            </div>
+                        )}
                         {item?.end && <div slot="end">{item.end}</div>}
                     </md-list-item>
                 );
@@ -443,22 +443,26 @@ export function TopBar({ headline, description, showBackButton = true, options }
     );
 }
 
-export function ChipSet({ chips = [], removable = false, className = "", ...rest }) {
+export function ChipSet(props) {
+    const { chips = [], className = "", ...rest } = props;
+
     return (
         <md-chip-set class={className} {...rest}>
             {chips.map((chip) => {
-                const chipStyle = {
-                    "--md-assist-chip-outline-color": TAG_COLOR_VALUES[chip.color],
-                    "--md-assist-chip-label-text-color": TAG_COLOR_VALUES[chip.color],
+                const style = {
+                    "--md-assist-chip-outline-color": TAG_COLOR_VALUES[chip?.color],
+                    "--md-assist-chip-label-text-color": TAG_COLOR_VALUES[chip?.color],
+                    "--md-input-chip-outline-color": TAG_COLOR_VALUES[chip?.color],
+                    "--md-input-chip-label-text-color": TAG_COLOR_VALUES[chip?.color],
                 };
-                if (removable) {
-                    return (
-                        <md-input-chip style={chipStyle} key={uid()} label={chip.label}>
-                            <md-icon slot-icon>close</md-icon>
-                        </md-input-chip>
-                    );
-                }
-                return <md-assist-chip style={chipStyle} key={uid()} label={chip.label} />;
+
+                if (!chip) return undefined;
+
+                return (
+                    <md-assist-chip key={uid()} style={style} {...chip}>
+                        {chip?.icon && <md-icon slot="icon">{chip.icon}</md-icon>}
+                    </md-assist-chip>
+                );
             })}
         </md-chip-set>
     );

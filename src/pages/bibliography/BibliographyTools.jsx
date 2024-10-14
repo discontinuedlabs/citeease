@@ -13,7 +13,6 @@ import {
 } from "../../data/store/slices/bibsSlice";
 import * as citationUtils from "../../utils/citationUtils.ts";
 import { useEnhancedDispatch, useFindBib, useOnlineStatus } from "../../hooks/hooks.tsx";
-import Tag from "../../components/ui/Tag";
 import citationStyles from "../../assets/json/styles.json";
 import mostPopularStyles from "../../assets/json/mostPopularStyles.json";
 import { citationCount, timeAgo, uid } from "../../utils/utils.ts";
@@ -1115,30 +1114,46 @@ export function IconsMenu({ onSubmit, setIsVisible }) {
     );
 }
 
-export function TagsDialog(props) {
-    const { setTagsDialogVisible: setIsVisible, onTagAdded, onTagRemoved } = props;
+export function TagsDialog({ setSelectedTags: setParentTags }) {
     const bibliography = useFindBib();
-    const settings = useSelector((state) => state.settings);
-    // TODO: The bibliography.tags array should only store tag IDs
+    const { data: settings } = useSelector((state) => state.settings);
+    const [selectedTags, setSelectedTags] = useState(bibliography.tags);
+
+    useEffect(() => {
+        setParentTags(selectedTags);
+    }, [selectedTags]);
 
     return (
-        <div>
-            <button type="button" onClick={() => setIsVisible(false)}>
-                X
-            </button>
-            <h3>Tags</h3>
-            <div className="flex flex-wrap gap-1">
-                {bibliography?.tags?.map((tag) => (
-                    <Tag key={uid()} tagProps={tag} onClick={onTagRemoved} showX />
-                ))}
+        <div className="grid gap-5 px-5">
+            <div>
+                <h4 className="mt-0">Selected tags</h4>
+                <ChipSet
+                    chips={selectedTags.map((tagId) => {
+                        const targetTag = settings.tags?.find((tag) => tag.id === tagId);
+                        return {
+                            ...targetTag,
+                            icon: "close",
+                            onClick: () => {
+                                setSelectedTags((prevTags) => prevTags.filter((tag) => tag !== tagId));
+                            },
+                        };
+                    })}
+                />
             </div>
 
-            <div className="flex flex-wrap gap-1">
-                {settings.tags
-                    ?.filter((tag) => !bibliography?.tags?.some((bibTag) => bibTag.id === tag.id))
-                    .map((tag) => (
-                        <Tag key={uid()} tagProps={tag} onClick={onTagAdded} />
-                    ))}
+            <div>
+                <h4 className="mt-0">Available tags</h4>
+                <ChipSet
+                    chips={settings.tags?.map((tag) => {
+                        if (!selectedTags.includes(tag.id)) {
+                            return {
+                                ...tag,
+                                onClick: () => setSelectedTags((prevTags) => [...prevTags, tag.id]),
+                            };
+                        }
+                        return undefined;
+                    })}
+                />
             </div>
         </div>
     );

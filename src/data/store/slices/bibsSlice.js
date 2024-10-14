@@ -4,7 +4,7 @@ import firestoreDB from "../../db/firebase/firebase";
 import dexieDB from "../../db/dexie/dexie";
 import { uid } from "../../../utils/utils.ts";
 
-const initialState = { data: [], loadedFromIndexedDB: false };
+const initialState = { data: [], loadedLocally: false };
 
 function save(newState, currentUser = undefined) {
     const serializedBibs = JSON.stringify(newState.data);
@@ -383,7 +383,7 @@ const bibsSlice = createSlice({
 
     extraReducers: (builder) => {
         builder.addCase(loadFromIndexedDB.fulfilled, (state, action) => {
-            return { ...state, data: action?.payload, loadedFromIndexedDB: true };
+            return { ...state, data: action?.payload, loadedLocally: true };
         });
     },
 });

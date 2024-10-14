@@ -32,12 +32,14 @@ type ActionOptions = {
     closeOnClick?: boolean;
 };
 
+type DialogAction = [string, () => void, ActionOptions];
+
 type DialogProps = {
     id: string;
     headline?: ReactNode;
     icon?: string;
     content: ReactNode;
-    actions?: [string, () => void, ActionOptions][];
+    actions?: DialogAction[];
     checkboxes?: [string, boolean, (checked: boolean) => void][];
     close: (id: string) => void;
 };
@@ -91,6 +93,11 @@ const Dialog = forwardRef<HTMLDialogElement, DialogProps>(function Dialog(props:
     const { id, headline, icon, content, actions = [], checkboxes = [], close } = props;
     const localRef = useRef<HTMLDialogElement>(null);
     const checkoxId = useId();
+    // let otherOptions: [DialogAction[], DialogAction, DialogAction];
+
+    // if (actions.length > 3) {
+    //     otherOptions = [actions.slice(0, -2), actions.at(-2) as DialogAction, actions.at(-1) as DialogAction];
+    // }
 
     useImperativeHandle(parentRef, () => localRef.current!, []);
 
@@ -141,14 +148,14 @@ const Dialog = forwardRef<HTMLDialogElement, DialogProps>(function Dialog(props:
             </div>
 
             <div
-                className={`${actions.length > 2 ? "grid" : ""} p-5 sm:flex sm:flex-wrap sm:justify-end`}
+                className={`${actions.length > 2 ? "grid *:ml-auto *:mr-0" : ""} p-5 sm:flex sm:flex-wrap sm:justify-end sm:*:ml-0`}
                 slot="actions"
             >
                 {actions.length !== 0 &&
                     actions.map((action, index) => {
                         const [label, callback, options] = action;
                         const buttonProps = {
-                            className: `${index === 0 && actions.length === 3 ? "mr-auto" : ""}`,
+                            className: `${index === 0 && actions.length === 3 ? "sm:mr-auto" : "sm:mr-0"}`,
                             onClick: () => {
                                 callback();
                                 if (options?.closeOnClick !== false) close(id);
