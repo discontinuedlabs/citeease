@@ -4,18 +4,18 @@ import { uid } from "./utils.ts";
 import { createDateObject } from "./citationUtils.ts";
 
 /**
- * Converts an RGB string to an RGBA string with a specified alpha value.
+ * Converts an HSL string to an HSLA string with a specified alpha value.
  *
- * @param {string} rgbString - The RGB string in the format "rgb(r, g, b)".
- * @param {number} alpha - The alpha value for the RGBA string (between 0 and 1).
- * @returns {string | undefined} The corresponding RGBA string in the format "rgba(r, g, b, a)", or `undefined` if the input RGB string is invalid.
+ * @param {string} hslString - The HSL string in the format "hsl(h, s%, l%)".
+ * @param {number} alpha - The alpha value for the HSLA string (between 0 and 1).
+ * @returns {string | undefined} The corresponding HSLA string in the format "hsla(h, s%, l%, a)", or `undefined` if the input HSL string is invalid.
  */
-export function rgbToRgba(rgbString: string, alpha: number): string | undefined {
-    const rgbValues = rgbString?.match(/\d+/g);
+export function hslToHsla(hslString: string, alpha: number): string | undefined {
+    const hslValues = hslString?.match(/\d+(\.\d+)?/g);
 
-    if (rgbValues && rgbValues.length === 3) {
-        const [r, g, b] = rgbValues.map(Number);
-        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    if (hslValues && hslValues.length === 3) {
+        const [h, s, l] = hslValues;
+        return `hsla(${h}, ${s}%, ${l}%, ${alpha})`;
     }
     return undefined;
 }

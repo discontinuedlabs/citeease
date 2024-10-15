@@ -3,14 +3,16 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { CitationStylesMenu } from "../bibliography/BibliographyTools";
 import * as citationEngine from "../../utils/citationEngine";
-import { addNewBib, createBibFromJson } from "../../data/store/slices/bibsSlice";
+import { addNewBib, createBibFromJson, updateBibField } from "../../data/store/slices/bibsSlice";
 import { useAuth } from "../../context/AuthContext";
 import { CoBibsSearchDialog } from "./HomeTools";
-import { useEnhancedDispatch } from "../../hooks/hooks.tsx";
+import { useEnhancedDispatch, useTheme } from "../../hooks/hooks.tsx";
 import { ChipSet, EmptyPage, Fab, Icon, List, TopBar } from "../../components/ui/MaterialComponents";
 import { citationCount, parseQueryString, timeAgo, uid } from "../../utils/utils.ts";
 import { useDialog } from "../../context/DialogContext.tsx";
 import { prioritizeAvailableStyles } from "../../utils/citationUtils.ts";
+import { hslToHsla } from "../../utils/conversionUtils.tsx";
+import colorValues from "../../assets/json/colors.json";
 
 export default function Home() {
     const { data: bibliographies, loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies);
@@ -24,6 +26,7 @@ export default function Home() {
     const dispatch = useEnhancedDispatch();
     const AddBibDialog = useDialog();
     const importDialog = useDialog();
+    const [theme] = useTheme();
 
     useEffect(() => {
         if (!bibsLoaded) return;
@@ -47,6 +50,11 @@ export default function Home() {
         setCitationStyleMenuVisible(false);
         dispatch(addNewBib({ bibliographyStyle: style }));
         citationEngine.updateCslFiles(style);
+    }
+
+    function addBibToFavorite(id) {
+        const targetBib = bibliographies.find((bib) => bib.id === id);
+        dispatch(updateBibField({ bibId: id, key: "favorite", value: !targetBib?.favorite }));
     }
 
     function openCoBibsSearchDialog() {
@@ -130,10 +138,34 @@ export default function Home() {
                     items={sortedBibliographies.map((bib) => {
                         const bibTags = settings?.tags.filter((tag) => bib.tags.includes(tag.id));
                         return {
-                            start: <Icon name={bib?.icon} />,
-                            title: bib.title,
-                            description: `${bib.style.name.short || bib.style.name.long.replace(/\((.*?)\)/g, "")} • ${citationCount(bib.citations)} • ${timeAgo(bib.dateModified)}`,
-                            content: (
+                            start: (
+                                <Icon
+                                    style={{
+                                        background: bib?.icon?.color || hslToHsla(colorValues[theme].gray, 0.25),
+                                        color: theme === "dark" ? "white" : "",
+                                    }}
+                                    className="rounded-full p-5"
+                                    name={bib?.icon}
+                                />
+                            ),
+                            title: (
+                                <div className="flex justify-between">
+                                    <div className="font-semibold">{bib.title}</div>
+                                    <small>{timeAgo(bib.dateModified)}</small>
+                                </div>
+                            ),
+                            description: (
+                                <div className="flex justify-between">
+                                    <div>{`${bib.style.name.short || bib.style.name.long.replace(/\((.*?)\)/g, "")} • ${citationCount(bib.citations)}`}</div>
+                                    <Icon
+                                        className="z-10"
+                                        style={{ background: bib?.favorite ? "yellow" : "" }}
+                                        onClick={() => addBibToFavorite(bib.id)}
+                                        name="star"
+                                    />
+                                </div>
+                            ),
+                            content: bibTags.length !== 0 && (
                                 <ChipSet
                                     chips={bibTags.map((tag) => {
                                         return {

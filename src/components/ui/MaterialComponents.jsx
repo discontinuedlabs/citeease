@@ -1,12 +1,11 @@
-/* eslint-disable react/jsx-props-no-spreading, prettier/prettier */
+/* eslint-disable react/jsx-props-no-spreading */
 
 import React, { forwardRef, useEffect, useId, useImperativeHandle, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
 import { uid } from "../../utils/utils.ts";
-import { useMetaThemeColor } from "../../hooks/hooks.tsx";
+import { useMetaThemeColor, useTheme } from "../../hooks/hooks.tsx";
 import colorValues from "../../assets/json/colors.json";
-import { rgbToRgba } from "../../utils/conversionUtils.tsx";
+import { hslToHsla } from "../../utils/conversionUtils.tsx";
 
 export function Divider({ className = "", label, ...rest }) {
     if (label)
@@ -179,7 +178,7 @@ export const Switch = forwardRef(function Switch(props, parentRef) {
 
 export function Icon({ name, className = "", ...rest }) {
     return (
-        <md-icon slot="icon" {...rest} class={`align-middle ${className}`}>
+        <md-icon slot="icon" class={`align-middle ${className}`} {...rest}>
             {name}
         </md-icon>
     );
@@ -214,14 +213,6 @@ export function OutlinedButton({ className = "", onClick, type = "button", child
         <md-outlined-button type={type} class={`px-6 py-2 font-sans ${className}`} onClick={onClick} {...rest}>
             {children}
         </md-outlined-button>
-    );
-}
-
-export function TonalButton({ className = "", onClick, type = "button", children, ...rest }) {
-    return (
-        <md-filled-tonal-button type={type} class={`px-6 py-2 font-sans ${className}`} onClick={onClick} {...rest}>
-            {children}
-        </md-filled-tonal-button>
     );
 }
 
@@ -445,49 +436,56 @@ export function TopBar({ headline, description, showBackButton = true, options }
     );
 }
 
+function Chip(props) {
+    const { className, onClick, start, label, end, selected, color, ...rest } = props;
+    const [theme] = useTheme();
+    const id = uid();
+
+    const targetColor = colorValues[theme][color];
+
+    function getTextColor() {
+        if (selected) {
+            if (theme === "dark") return "white";
+            return "";
+        }
+        return targetColor;
+    }
+
+    const style = {
+        color: getTextColor(),
+        background: selected ? hslToHsla(targetColor, 0.25) : "transparent",
+        border: `1px solid ${selected ? "transparent" : targetColor}`,
+    };
+
+    return (
+        <div id={id} className={`relative *:rounded-[8px] ${className}`} {...rest}>
+            <md-focus-ring part="focus-ring" htmlFor={id} aria-hidden />
+            <md-ripple part="ripple" htmlFor={id} aria-hidden />
+            <button
+                className="flex items-center justify-between gap-1 p-[0.4rem] font-sans font-semibold"
+                style={style}
+                onClick={onClick}
+                type="button"
+                id={id}
+            >
+                {start}
+                {label}
+                {end}
+            </button>
+        </div>
+    );
+}
+
 export function ChipSet(props) {
     const { chips = [], className = "", ...rest } = props;
-    const { data: settings } = useSelector((state) => state.settings);
+    const [theme] = useTheme();
 
     return (
         <div className={`flex flex-wrap gap-1 ${className}`} {...rest}>
             {chips.map((chip) => {
-                if (!chip || !colorValues[settings.theme]) return undefined;
+                if (!chip || !colorValues[theme]) return undefined;
 
-                const targetColor = colorValues[settings.theme][chip.color];
-
-                const style = {
-                    "--md-filled-tonal-button-container-color": rgbToRgba(targetColor, 0.4),
-                    "--md-filled-tonal-button-container-shape": "10px",
-
-                    "--md-outlined-button-outline-color": targetColor,
-                    "--md-outlined-button-container-shape": "10px",
-                    "--md-outlined-button-label-text-color": targetColor,
-                };
-
-                const chipProps = {
-                    className: "px-0 py-0 ",
-                    style,
-                    ...chip,
-                };
-
-                if (chip.selected) {
-                    return (
-                        <TonalButton key={uid()} {...chipProps}>
-                            {chip?.start}
-                            {chip?.label}
-                            {chip?.end}
-                        </TonalButton>
-                    );
-                }
-
-                return (
-                    <OutlinedButton key={uid()} {...chipProps}>
-                        {chip?.start}
-                        {chip?.label}
-                        {chip?.end}
-                    </OutlinedButton>
-                );
+                return <Chip key={uid()} {...chip} />;
             })}
         </div>
     );

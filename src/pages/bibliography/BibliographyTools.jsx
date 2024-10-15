@@ -1132,7 +1132,7 @@ export function TagsDialog({ setSelectedTags: setParentTags }) {
                         const targetTag = settings.tags?.find((tag) => tag.id === tagId);
                         return {
                             ...targetTag,
-                            end: "close",
+                            end: <Icon className="max-h-min max-w-min text-sm" name="close" />,
                             selected: true,
                             onClick: () => {
                                 setSelectedTags((prevTags) => prevTags.filter((tag) => tag !== tagId));

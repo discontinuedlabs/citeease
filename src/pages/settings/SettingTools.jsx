@@ -9,6 +9,7 @@ import {
     ChipSet,
     Divider,
     FilledButton,
+    Icon,
     IconButton,
     OutlinedButton,
     TextField,
@@ -16,6 +17,7 @@ import {
 import { useToast } from "../../context/ToastContext.tsx";
 import colorValues from "../../assets/json/colors.json";
 import builtinTags from "../../assets/json/tags.json";
+import { useTheme } from "../../hooks/hooks.tsx";
 
 export function TagsManager() {
     const { data: settings } = useSelector((state) => state.settings);
@@ -23,6 +25,7 @@ export function TagsManager() {
     const [tagColor, setTagColor] = useState("yellow");
     const [errorMessage, setErrorMessage] = useState("");
     const dispatch = useDispatch();
+    const [theme] = useTheme();
 
     function addTag(event) {
         event.preventDefault();
@@ -68,7 +71,7 @@ export function TagsManager() {
                 chips={settings.tags.map((tag) => {
                     return {
                         ...tag,
-                        icon: "close",
+                        end: <Icon className="max-h-min max-w-min text-sm" name="close" />,
                         selected: true,
                         onClick: () => deleteTag(tag.id),
                     };
@@ -78,27 +81,21 @@ export function TagsManager() {
             <Divider className="my-2" />
 
             <form className="grid gap-2" onSubmit={addTag}>
-                <div className="flex justify-between gap-2">
-                    <TextField
-                        className="w-full"
-                        errorText={errorMessage}
-                        style={{
-                            "--md-filled-text-field-focus-active-indicator-color":
-                                colorValues[settings.theme][tagColor],
-                        }}
-                        type="text"
-                        label="Tag label"
-                        placeholder="eg., Favorite"
-                        value={tagLabel}
-                        onChange={(event) => setTagLabel(event.target.value)}
-                    />
-                    <FilledButton type="submit" onClick={addTag}>
-                        Add tag
-                    </FilledButton>
-                </div>
+                <TextField
+                    className="w-full"
+                    errorText={errorMessage}
+                    style={{
+                        "--md-filled-text-field-focus-active-indicator-color": colorValues[theme][tagColor],
+                    }}
+                    type="text"
+                    label="Tag label"
+                    placeholder="eg., Favorite"
+                    value={tagLabel}
+                    onChange={(event) => setTagLabel(event.target.value)}
+                />
 
                 <ChipSet
-                    chips={Object.keys(colorValues[settings.theme]).map((color) => {
+                    chips={Object.keys(colorValues[theme]).map((color) => {
                         return {
                             label: color.charAt(0).toUpperCase() + color.slice(1).toLowerCase(),
                             color,
@@ -108,6 +105,10 @@ export function TagsManager() {
                     })}
                 />
 
+                <FilledButton type="submit" onClick={addTag}>
+                    Add tag
+                </FilledButton>
+
                 <OutlinedButton onClick={restoreDefaultTags}>Restore default tags</OutlinedButton>
             </form>
         </div>
@@ -116,7 +117,6 @@ export function TagsManager() {
 
 export function IconsManager() {
     const settings = useSelector((state) => state.settings);
-    console.log(settings);
     const { icons } = settings;
     const dispatch = useDispatch();
     const toast = useToast();

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 import { User } from "firebase/auth";
 import { Location, useLocation, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -167,40 +167,56 @@ export function useDocumentTitle(
     return title;
 }
 
+type ThemeType = "auto" | "light" | "dark";
+
 /**
- * Returns the current device theme ("dark" or "light") based on the system preferences.
+ * A custom hook to manage theme mode (light or dark) and respond to system preferences.
  *
- * @param {CallableFunction} [onChangeCallback] - Optional callback function to be executed when the theme changes.
- * @returns {"dark" | "light"} The current device theme.
+ * @param {CallableFunction} [onChangeCallback=() => undefined] - A callback function that will be triggered when the theme changes.
  *
- * @example
- * // Usage
- * const theme = useDeviceTheme((isDarkMode) => {
- *     console.log(isDarkMode ? "Dark mode is enabled" : "Light mode is enabled");
- * });
- * console.log("Current theme:", theme);
+ * @returns {["light" | "dark", Dispatch<SetStateAction<ThemeType>>]} - Returns an array where the first element is the current theme ("light" or "dark") and the second element is a function to set the theme.
  */
-export function useDeviceTheme(onChangeCallback: CallableFunction = () => undefined): "dark" | "light" {
+export function useTheme(
+    onChangeCallback: CallableFunction = () => undefined
+): ["light" | "dark", Dispatch<SetStateAction<ThemeType>>] {
+    const [theme, setTheme] = useState<ThemeType>(() => {
+        const currentClass = document.documentElement.className;
+        const modeMatch = currentClass.match(/^(light|dark|auto)-mode/);
+
+        if (modeMatch) return modeMatch[1] as ThemeType;
+        return "auto";
+    });
     const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
     useEffect(() => {
-        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+        document.documentElement.classList.remove("light-mode", "dark-mode", "auto-mode");
+        document.documentElement.classList.add(`${theme}-mode`);
+    }, [theme]);
 
-        const handleChange = () => {
-            setIsDarkMode(mediaQuery.matches);
-            onChangeCallback(mediaQuery.matches);
-        };
+    useEffect(() => {
+        if (theme !== "auto") {
+            setIsDarkMode(theme === "dark");
+            onChangeCallback(theme === "dark");
+        } else {
+            const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
-        handleChange();
+            const handleChange = () => {
+                setIsDarkMode(mediaQuery.matches);
+                onChangeCallback(mediaQuery.matches);
+            };
 
-        mediaQuery.addEventListener("change", handleChange);
+            handleChange();
 
-        return () => {
-            mediaQuery.removeEventListener("change", handleChange);
-        };
-    }, [onChangeCallback]);
+            mediaQuery.addEventListener("change", handleChange);
 
-    return isDarkMode ? "dark" : "light";
+            return () => {
+                mediaQuery.removeEventListener("change", handleChange);
+            };
+        }
+        return undefined;
+    }, [onChangeCallback, theme]);
+
+    return [isDarkMode ? "dark" : "light", setTheme];
 }
 
 /**
@@ -217,14 +233,14 @@ export function useMetaThemeColor(initialColor: string): (newColor: string) => v
     const [color, setColor] = useState<string>(
         initialColor || window.getComputedStyle(document.documentElement).getPropertyValue("background-color")
     );
-    const currentDeviceTheme = useDeviceTheme();
+    const [currentTheme] = useTheme();
 
     useEffect(() => {
         const metaThemeColor = document.querySelector('meta[name="theme-color"]'); // eslint-disable-line quotes
         if (metaThemeColor) {
             metaThemeColor.setAttribute("content", color);
         }
-    }, [color, currentDeviceTheme]);
+    }, [color, currentTheme]);
 
     return (newColor) => setColor(newColor);
 }
@@ -249,7 +265,7 @@ export function useOnlineStatus(): boolean {
  *
  * The returned function allows you to execute a callback function after a specified delay.
  *
- * @returns {function(callback: () => void, ms?: number): function}
+ * @returns {(callback: () => void, ms: number) => () => void}
  *   A function that takes a callback to execute after a delay and an optional delay time in milliseconds.
  *   The returned function can be called to set the timeout.
  *
@@ -266,8 +282,9 @@ export function useOnlineStatus(): boolean {
  *     <button onClick={handleClick}>Click me</button>
  * );
  */
-export function useTimeout() {
-    const savedCallback = useRef<() => void>();
+// eslint-disable-next-line no-unused-vars
+export function useTimeout(): (callback: () => void, ms: number) => () => void {
+    const savedCallback = useRef<(() => void) | undefined>(undefined);
 
     const setTimeoutCallback = (callback: () => void, ms: number = 3000) => {
         savedCallback.current = callback;
@@ -346,23 +363,23 @@ export function useKeyboardShortcuts(keymap: Record<string, ShortcutAction>) {
     useEffect(registerShortcuts, [registerShortcuts]);
 }
 
-const keyMap = {
-    enter: "Enter",
-    ctrl: "Control",
-    meta: "Meta",
-    shift: "Shift",
-    alt: "Alt",
-    tab: "Tab",
-    escape: "Escape",
-};
-
-function parseKeyCombination(keyCombination) {
-    const keys = keyCombination.split("+").map((key) => keyMap[key.toLowerCase()] || key);
-    return new Set(keys);
-}
-
 /* eslint-disable no-restricted-syntax */
 export function useKeyDown() {
+    const keyMap = {
+        enter: "Enter",
+        ctrl: "Control",
+        meta: "Meta",
+        shift: "Shift",
+        alt: "Alt",
+        tab: "Tab",
+        escape: "Escape",
+    };
+
+    function parseKeyCombination(keyCombination) {
+        const keys = keyCombination.split("+").map((key) => keyMap[key.toLowerCase()] || key);
+        return new Set(keys);
+    }
+
     return useCallback(
         (keyActions) => (event) => {
             for (const [keyCombination, callback] of keyActions) {

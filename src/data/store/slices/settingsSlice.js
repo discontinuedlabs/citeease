@@ -3,7 +3,7 @@ import db from "../../db/dexie/dexie";
 import builtinIcons from "../../../assets/json/icons.json";
 import builtinTags from "../../../assets/json/tags.json";
 
-const initialState = { data: { theme: "light", tags: builtinTags, icons: builtinIcons }, loadedLocally: false };
+const initialState = { data: { theme: "auto", tags: builtinTags, icons: builtinIcons }, loadedLocally: false };
 
 // FIXME..
 async function save(newState) {
