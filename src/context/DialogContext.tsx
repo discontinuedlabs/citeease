@@ -12,6 +12,7 @@ import React, {
     useImperativeHandle,
     useId,
 } from "react";
+import { useLocation } from "react-router-dom";
 import { Checkbox, FilledButton, Icon, OutlinedButton, TextButton } from "../components/ui/MaterialComponents";
 import { uid } from "../utils/utils.ts";
 
@@ -203,6 +204,7 @@ const Dialog = forwardRef<HTMLDialogElement, DialogProps>(function Dialog(props:
 export default function DialogProvider({ children }: DialogProviderProps) {
     const [dialogs, setDialogs] = useState<DialogProps[]>([]);
     const dialogRefs = useRef<{ [key: string]: HTMLDialogElement | null }>({});
+    const location = useLocation();
 
     useEffect(() => {
         dialogs.forEach((dialog) => {
@@ -235,6 +237,12 @@ export default function DialogProvider({ children }: DialogProviderProps) {
 
         setDialogs((prevDialogs) => [...prevDialogs, { ...newDialog, id: newDialog?.id || uid() }]);
     }
+
+    useEffect(() => {
+        if (dialogs.length > 0) {
+            dialogs.forEach((dialog) => closeDialog(dialog.id));
+        }
+    }, [location]);
 
     const contextValue = useMemo(
         () => ({
