@@ -50,6 +50,21 @@ We use ESLint to enforce code quality and consistency. The configuration include
 }
 ```
 
+## Prettier Configuration
+
+We use Prettier to automatically format the code to maintain consistency across the project. The Prettier configuration is as follows:
+
+```json
+{
+    "trailingComma": "es5",
+    "printWidth": 120,
+    "tabWidth": 4,
+    "semi": true,
+    "singleQuote": false,
+    "plugins": ["prettier-plugin-tailwindcss"]
+}
+```
+
 ## Scripts
 
 Use the following npm scripts to manage code quality and formatting:
