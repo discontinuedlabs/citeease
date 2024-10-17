@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useId, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { addIcon, updateSettingsField, deleteIcon, resetAllSettings } from "../../data/store/slices/settingsSlice";
+import { updateSettingsField, resetAllSettings } from "../../data/store/slices/settingsSlice";
 import { useAuth } from "../../context/AuthContext";
 import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
 import { uid } from "../../utils/utils.ts";
@@ -14,10 +14,12 @@ import {
     OutlinedButton,
     TextField,
 } from "../../components/ui/MaterialComponents";
-import { useToast } from "../../context/ToastContext.tsx";
 import colorValues from "../../assets/json/colors.json";
 import builtinTags from "../../assets/json/tags.json";
-import { useTheme } from "../../hooks/hooks.tsx";
+import builtinIcons from "../../assets/json/icons.json";
+import { useEnhancedDispatch, useTheme } from "../../hooks/hooks.tsx";
+import { useDialog } from "../../context/DialogContext.tsx";
+import { markdownToHtml, parseHtmlToJsx } from "../../utils/conversionUtils.tsx";
 
 export function TagsManager() {
     const { data: settings } = useSelector((state) => state.settings);
@@ -91,7 +93,10 @@ export function TagsManager() {
                     label="Tag label"
                     placeholder="eg., Favorite"
                     value={tagLabel}
-                    onChange={(event) => setTagLabel(event.target.value)}
+                    onChange={(event) => {
+                        setErrorMessage("");
+                        setTagLabel(event.target.value);
+                    }}
                 />
 
                 <ChipSet
@@ -116,55 +121,120 @@ export function TagsManager() {
 }
 
 export function IconsManager() {
-    const settings = useSelector((state) => state.settings);
+    const { data: settings } = useSelector((state) => state.settings);
     const { icons } = settings;
-    const dispatch = useDispatch();
-    const toast = useToast();
+    const dispatch = useEnhancedDispatch();
     const [iconName, setIconName] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+    const dialog = useDialog();
 
-    function addIconToCollection(event) {
+    function addIcon(event) {
         event.preventDefault();
-        if (/^\s*$/.test(iconName)) return;
+        if (/^\s*$/.test(iconName)) {
+            setErrorMessage("You can't add an empty icon.");
+            return;
+        }
 
         if (icons.includes(iconName.toLowerCase())) {
-            toast.show({
-                message: `You already have \`${iconName}\` icon`,
-            });
+            setErrorMessage(`You already have \`${iconName}\` icon.`);
         } else {
-            dispatch(addIcon({ icon: iconName }));
+            dispatch(
+                updateSettingsField({
+                    key: "icons",
+                    value: [...settings.icons, iconName],
+                })
+            );
             setIconName("");
+            setErrorMessage("");
         }
     }
 
+    function deleteIcon(name) {
+        dispatch(
+            updateSettingsField({
+                key: "icons",
+                value: settings.icons.filter((icon) => icon !== name),
+            })
+        );
+    }
+
+    function restoreDefaultTags() {
+        dispatch(
+            updateSettingsField({
+                key: "icons",
+                value: [
+                    ...settings.icons,
+                    ...builtinIcons.filter((icon) => !settings.icons.some((sIcon) => sIcon === icon)),
+                ],
+            })
+        );
+    }
+
+    function showHelpDialog() {
+        dialog.show({
+            headline: "How to add icons?",
+            content: (
+                <div className="px-5 [&_img]:h-auto [&_img]:w-full [&_ol]:ps-5">
+                    {parseHtmlToJsx(
+                        markdownToHtml(`
+                            ![How to add icons](${import.meta.env.VITE_PUBLIC_URL}/images/how-to-add-icons.png)
+                            1. Visit [Material Icons](https://fonts.google.com/icons).
+                            2. Select your preferred icon.
+                            3. Copy the \`Icon name\` from the right panel.
+                            4. Paste the name into the Icon Manager's text input to add the icon.
+                        `)
+                    )}
+                </div>
+            ),
+            actions: [["Ok", () => dialog.close()]],
+        });
+    }
+
     return (
-        <div className="grid gap-2">
-            <div className="flex flex-wrap gap-1">
+        <div className="grid gap-2 px-5">
+            <div className="flex flex-wrap justify-stretch gap-1">
                 {icons?.map((icon) => {
+                    const style = {
+                        background: "var(--md-sys-color-error)",
+                    };
+                    const iconStyle = {
+                        color: "var(--md-sys-color-on-error)",
+                    };
                     return (
                         <IconButton
+                            className="rounded-full transition-colors"
+                            style={errorMessage && errorMessage.length !== 0 && iconName === icon ? style : {}}
                             key={uid()}
                             name={icon}
-                            onClick={() => {
-                                dispatch(deleteIcon({ icon }));
-                            }}
+                            onClick={() => deleteIcon(icon)}
+                            iconStyle={errorMessage && errorMessage.length !== 0 && iconName === icon ? iconStyle : {}}
                         />
                     );
                 })}
             </div>
 
-            <form onSubmit={addIconToCollection}>
-                <div className="flex grid-cols-2 gap-2">
-                    <div className="rounded-md bg-white">
-                        <input
-                            type="text"
-                            placeholder="Icon name"
-                            value={iconName}
-                            onChange={(event) => setIconName(event.target.value)}
-                        />
-                    </div>
+            <form className="grid gap-2" onSubmit={addIcon}>
+                <TextField
+                    className="w-full"
+                    errorText={errorMessage}
+                    type="text"
+                    label="Icon name"
+                    placeholder="eg., star"
+                    value={iconName}
+                    onChange={(event) => {
+                        setErrorMessage("");
+                        setIconName(event.target.value.trim());
+                    }}
+                />
 
-                    <FilledButton type="submit">Add icon</FilledButton>
+                <div className="flex justify-between gap-2">
+                    <FilledButton className="flex-1" type="submit" onClick={addIcon}>
+                        Add icon
+                    </FilledButton>
+                    <IconButton onClick={showHelpDialog} name="help" />
                 </div>
+
+                <OutlinedButton onClick={restoreDefaultTags}>Restore default icons</OutlinedButton>
             </form>
         </div>
     );

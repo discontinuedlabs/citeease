@@ -1,0 +1,12 @@
+{
+    "bibliography": {
+        "name": "Untitled Bibliography",
+        "icon": {
+            "name": "book_2",
+            "color": "gray"
+        }
+    },
+    "settings": {
+        "theme": "auto"
+    }
+}

@@ -11,7 +11,7 @@ import {
     CitationStylesMenu,
     TagsDialog,
     IdAndPasswordDialogVisible,
-    IconsMenu,
+    IconsDialog,
 } from "./BibliographyTools";
 import {
     addNewBibAndMoveSelectedCitations,
@@ -61,11 +61,11 @@ export default function Bibliography() {
     const receiverBibsRef = useRef([]);
     const renameInputRef = useRef();
     const selectedTagsRef = useRef([]);
+    const newIconObjectRef = useRef({});
 
     const [collaborationOpened, setCollaborationOpened] = useState(bibliography?.collab?.open);
     const [idAndPasswordDialogVisible, setIdAndPasswordDialogVisible] = useState(false);
     const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
-    const [iconsMenuVisible, setIconsMenuVisible] = useState(false);
 
     useEffect(() => {
         if (!bibsLoaded || !bibliography) return;
@@ -277,11 +277,6 @@ export default function Bibliography() {
     }
 
     function showRenameDialog() {
-        if (!isOnline && bibliography?.collab?.open) {
-            toast.show({ message: "You are offline", icon: "error", color: "red" });
-            return;
-        }
-
         function rename() {
             const newTitle = renameInputRef.current.value;
 
@@ -317,6 +312,32 @@ export default function Bibliography() {
             actions: [
                 ["Cancel", () => dialog.close()],
                 ["Rename", rename],
+            ],
+        });
+    }
+
+    function showIconsDialog() {
+        function updateIcon() {
+            if (!isOnline && bibliography?.collab?.open) {
+                toast.show({ message: "You are offline", icon: "error", color: "red" });
+                return;
+            }
+
+            dispatch(updateBibField({ key: "icon", value: newIconObjectRef.current }));
+        }
+
+        dialog.show({
+            headline: "Change icon",
+            content: (
+                <IconsDialog
+                    setIconObject={(iconObject) => {
+                        newIconObjectRef.current = iconObject;
+                    }}
+                />
+            ),
+            actions: [
+                ["Cancel", () => dialog.close()],
+                ["Update icon", updateIcon],
             ],
         });
     }
@@ -657,7 +678,7 @@ export default function Bibliography() {
             return [
                 { headline: "Tags", onClick: showTagsDialog },
                 { headline: "Rename bibliography", onClick: showRenameDialog },
-                { headline: "Change icon", onClick: () => setIconsMenuVisible(true) },
+                { headline: "Change icon", onClick: showIconsDialog },
                 { headline: "Change style", onClick: () => setCitationStyleMenuVisible(true) },
                 { headline: "Change locale", onClick: handleChangeLocale },
                 { headline: "Bibliography settings", onClick: () => navigate(`/bib/${bibliography.id}/settings`) },
@@ -678,7 +699,7 @@ export default function Bibliography() {
             return [
                 { headline: "Tags", onClick: showTagsDialog },
                 { headline: "Rename bibliography", onClick: showRenameDialog },
-                { headline: "Change icon", onClick: () => setIconsMenuVisible(true) },
+                { headline: "Change icon", onClick: showIconsDialog },
                 { headline: "Change style", onClick: () => setCitationStyleMenuVisible(true) },
                 { headline: "Change locale", onClick: handleChangeLocale },
                 { headline: "Bibliography settings", onClick: () => navigate(`/bib/${bibliography.id}/settings`) },
@@ -771,15 +792,6 @@ export default function Bibliography() {
 
             {idAndPasswordDialogVisible && (
                 <IdAndPasswordDialogVisible setIsVisible={setIdAndPasswordDialogVisible} onSubmit={openCollaboration} />
-            )}
-
-            {iconsMenuVisible && (
-                <IconsMenu
-                    setIsVisible={setIconsMenuVisible}
-                    onSubmit={(chosenIcon) =>
-                        dispatch(updateBibField({ bibliographyId: bibliography.id, key: "icon", value: chosenIcon }))
-                    }
-                />
             )}
 
             <Fab

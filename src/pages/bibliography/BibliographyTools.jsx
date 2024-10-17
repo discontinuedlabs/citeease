@@ -12,11 +12,11 @@ import {
     updateCitation,
 } from "../../data/store/slices/bibsSlice";
 import * as citationUtils from "../../utils/citationUtils.ts";
-import { useEnhancedDispatch, useFindBib, useOnlineStatus } from "../../hooks/hooks.tsx";
+import { useEnhancedDispatch, useFindBib, useOnlineStatus, useTheme } from "../../hooks/hooks.tsx";
 import citationStyles from "../../assets/json/styles.json";
 import mostPopularStyles from "../../assets/json/mostPopularStyles.json";
 import { citationCount, timeAgo, uid } from "../../utils/utils.ts";
-import { parseHtmlToJsx } from "../../utils/conversionUtils.tsx";
+import { hslToHsla, parseHtmlToJsx } from "../../utils/conversionUtils.tsx";
 import {
     Checkbox,
     ChipSet,
@@ -36,6 +36,8 @@ import {
 } from "../../components/ui/MaterialComponents";
 import { useToast } from "../../context/ToastContext.tsx";
 import { useDialog } from "../../context/DialogContext.tsx";
+import colorValues from "../../assets/json/colors.json";
+import defaults from "../../assets/json/defaults.json";
 
 const DateInput = React.lazy(() => import("../../components/form/DateInput"));
 const AuthorsInput = React.lazy(() => import("../../components/form/AuthorsInput"));
@@ -1087,29 +1089,67 @@ export function CitationStylesMenu(props) {
     );
 }
 
-export function IconsMenu({ onSubmit, setIsVisible }) {
-    const { icons } = useSelector((state) => state.settings);
+export function IconsDialog({ setIconObject }) {
+    const bibliography = useFindBib();
+    const { data: settings } = useSelector((state) => state.settings);
+    const { icons } = settings;
+    const defaultIcon = defaults.bibliography.icon;
+    const [selectedIcon, setSelectedIcon] = useState(bibliography?.icon?.name || defaultIcon.name);
+    const [selectedColor, setSelectedColor] = useState(bibliography?.icon?.color || defaultIcon.color);
+    const [theme] = useTheme();
+
+    useEffect(() => {
+        setIconObject({ name: selectedIcon, color: selectedColor });
+    }, [selectedColor, selectedIcon]);
 
     return (
-        <div>
-            <button type="button" onClick={() => setIsVisible(false)}>
-                X
-            </button>
-            <h3>Icons Menu</h3>
-            <div>
+        <div className="grid gap-2 px-5">
+            <div className="flex items-center justify-start gap-2">
+                <Icon
+                    style={{
+                        background: hslToHsla(colorValues[theme][selectedColor], 0.25),
+                        color: theme === "dark" ? "white" : "",
+                    }}
+                    className="rounded-full p-5"
+                    name={selectedIcon}
+                />
+                <h2>{bibliography.title}</h2>
+            </div>
+
+            <h4 className="mb-1">Icons</h4>
+            <div className="flex flex-wrap justify-stretch gap-1">
                 {icons.map((icon) => {
+                    const style = {
+                        background: "var(--md-sys-color-secondary)",
+                    };
+                    const iconStyle = {
+                        color: "var(--md-sys-color-on-secondary)",
+                    };
                     return (
                         <IconButton
+                            className="rounded-full transition-colors"
+                            style={selectedIcon === icon ? style : {}}
                             key={uid()}
                             name={icon}
-                            onClick={() => {
-                                onSubmit(icon);
-                                setIsVisible(false);
-                            }}
+                            onClick={() => setSelectedIcon(icon)}
+                            iconStyle={selectedIcon === icon ? iconStyle : {}}
                         />
                     );
                 })}
             </div>
+
+            <h4 className="mb-1">Colors</h4>
+            <ChipSet
+                className="pb-5"
+                chips={Object.keys(colorValues[theme]).map((color) => {
+                    return {
+                        label: color.charAt(0).toUpperCase() + color.slice(1).toLowerCase(),
+                        color,
+                        selected: selectedColor === color,
+                        onClick: () => setSelectedColor(color),
+                    };
+                })}
+            />
         </div>
     );
 }

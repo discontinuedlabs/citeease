@@ -185,6 +185,11 @@
 
     a {
         @apply no-underline;
+        color: var(--md-sys-color-primary);
+    }
+
+    a:hover {
+        @apply underline;
     }
 
     div {
@@ -193,9 +198,9 @@
 
     code,
     pre {
-        @apply break-words rounded-md px-2 py-1 text-sm;
-        color: var(--md-sys-color-on-secondary);
-        background-color: var(--md-sys-color-secondary);
+        @apply break-words rounded-md px-2 py-1 text-xs;
+        color: var(--md-sys-color-on-secondary-container);
+        background-color: var(--md-sys-color-secondary-container);
     }
 
     md-filled-text-field {

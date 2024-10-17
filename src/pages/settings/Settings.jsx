@@ -1,16 +1,16 @@
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { IconsManager, TagsManager } from "./SettingTools";
-import { restoreDefaultIcons, updateSettingsField } from "../../data/store/slices/settingsSlice";
+import { updateSettingsField } from "../../data/store/slices/settingsSlice";
 import { List, Select, TopBar } from "../../components/ui/MaterialComponents";
 import { useDialog } from "../../context/DialogContext.tsx";
-import { useTheme } from "../../hooks/hooks.tsx";
+import { useEnhancedDispatch, useTheme } from "../../hooks/hooks.tsx";
 
 export default function Settings() {
     const { data: settings } = useSelector((state) => state.settings);
     const tagsManagerDialog = useDialog();
     const iconsManagerDialog = useDialog();
-    const dispatch = useDispatch();
+    const dispatch = useEnhancedDispatch();
     const navigate = useNavigate();
     const setTheme = useTheme()[1];
 
@@ -19,22 +19,14 @@ export default function Settings() {
             headline: "Manage tags",
             content: <TagsManager />,
             actions: [["Cancel", () => tagsManagerDialog.close()]],
-            id: "tags-manager",
         });
     }
 
     function openIconsManager() {
         iconsManagerDialog.show({
-            title: "Icons Manager",
+            headline: "Manage icons",
             content: <IconsManager />,
-            actions: [
-                [
-                    "Restore default icons",
-                    () => dispatch(restoreDefaultIcons()),
-                    { closeOnClick: false, autoFocus: false },
-                ],
-                ["Cancel", () => iconsManagerDialog.close()],
-            ],
+            actions: [["Cancel", () => iconsManagerDialog.close()]],
         });
     }
 

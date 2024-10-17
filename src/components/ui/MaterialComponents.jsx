@@ -216,10 +216,10 @@ export function OutlinedButton({ className = "", onClick, type = "button", child
     );
 }
 
-export function IconButton({ className = "", onClick, type = "button", name, ...rest }) {
+export function IconButton({ className = "", onClick, type = "button", name, iconStyle, ...rest }) {
     return (
         <md-icon-button type={type} class={className} onClick={onClick} {...rest}>
-            <md-icon>{name}</md-icon>
+            <md-icon style={iconStyle}>{name}</md-icon>
         </md-icon-button>
     );
 }

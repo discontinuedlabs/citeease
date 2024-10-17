@@ -120,11 +120,11 @@ export function markdownToHtml(markdown: string): string {
     markdown = markdown.replace(/\*(.*?)\*/gim, "<i>$1</i>");
     markdown = markdown.replace(/_(.*?)_/gim, "<i>$1</i>");
 
-    // Replace Markdown links with HTML <a>
-    markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2">$1</a>');
-
     // Replace Markdown images with HTML <img>
     markdown = markdown.replace(/!\[(.*?)\]\((.*?)\)/gim, '<img src="$2" alt="$1" />');
+
+    // Replace Markdown links with HTML <a>
+    markdown = markdown.replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2">$1</a>');
 
     // Replace Markdown unordered lists with HTML <ul> and <li>
     markdown = markdown.replace(/(?:^\s*-\s+.*$\n?)+/gim, (match) => {

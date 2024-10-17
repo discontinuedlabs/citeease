@@ -13,6 +13,7 @@ import { useDialog } from "../../context/DialogContext.tsx";
 import { prioritizeAvailableStyles } from "../../utils/citationUtils.ts";
 import { hslToHsla } from "../../utils/conversionUtils.tsx";
 import colorValues from "../../assets/json/colors.json";
+import defaults from "../../assets/json/defaults.json";
 
 export default function Home() {
     const { data: bibliographies, loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies);
@@ -137,15 +138,19 @@ export default function Home() {
                 <List
                     items={sortedBibliographies.map((bib) => {
                         const bibTags = settings?.tags.filter((tag) => bib.tags.includes(tag.id));
+                        const defaultIcon = defaults.bibliography.icon;
                         return {
                             start: (
                                 <Icon
                                     style={{
-                                        background: bib?.icon?.color || hslToHsla(colorValues[theme].gray, 0.25),
+                                        background: hslToHsla(
+                                            colorValues[theme][bib?.icon?.color || defaultIcon.color],
+                                            0.25
+                                        ),
                                         color: theme === "dark" ? "white" : "",
                                     }}
                                     className="rounded-full p-5"
-                                    name={bib?.icon}
+                                    name={bib?.icon?.name || defaultIcon.name}
                                 />
                             ),
                             title: (

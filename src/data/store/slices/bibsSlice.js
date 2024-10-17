@@ -3,6 +3,7 @@ import { doc, setDoc } from "firebase/firestore";
 import firestoreDB from "../../db/firebase/firebase";
 import dexieDB from "../../db/dexie/dexie";
 import { uid } from "../../../utils/utils.ts";
+import defaults from "../../../assets/json/defaults.json";
 
 const initialState = { data: [], loadedLocally: false };
 
@@ -115,13 +116,13 @@ const bibsSlice = createSlice({
             return newState;
         },
         addNewBib: (state, action) => {
+            const defaultBib = defaults.bibliography;
             const newBib = {
-                title: "Untitled Bibliography",
+                ...defaultBib,
                 style: action.payload.bibliographyStyle,
                 dateCreated: new Date().toString(),
                 dateModified: new Date().toString(),
                 id: uid(10),
-                icon: "book_2",
                 citations: [],
                 tags: [],
             };
