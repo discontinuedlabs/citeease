@@ -11,6 +11,7 @@ function save(newState, currentUser = undefined) {
     dexieDB.items.put({ id: "bibliographies", value: serializedBibs });
 
     if (!currentUser) return;
+
     const parsedCurrentUser = JSON.parse(currentUser);
     if (parsedCurrentUser) {
         const userRef = doc(firestoreDB, "users", parsedCurrentUser?.uid);

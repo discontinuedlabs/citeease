@@ -1,18 +1,27 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import db from "../../db/dexie/dexie";
+import { doc, setDoc } from "firebase/firestore";
+import dexieDB from "../../db/dexie/dexie";
 import builtinIcons from "../../../assets/json/icons.json";
 import builtinTags from "../../../assets/json/tags.json";
+import firestoreDB from "../../db/firebase/firebase";
 
 const initialState = { data: { theme: "auto", tags: builtinTags, icons: builtinIcons }, loadedLocally: false };
 
-// FIXME..
-async function save(newState) {
-    const serializedState = JSON.stringify(newState);
-    await db.items.put({ id: "settings", value: serializedState });
+function save(newState, currentUser = undefined) {
+    const serializedSettings = JSON.stringify(newState.data);
+    dexieDB.items.put({ id: "settings", value: serializedSettings });
+
+    if (!currentUser) return;
+
+    const parsedCurrentUser = JSON.parse(currentUser);
+    if (parsedCurrentUser) {
+        const userRef = doc(firestoreDB, "users", parsedCurrentUser?.uid);
+        setDoc(userRef, { settings: JSON.stringify(newState.data) });
+    }
 }
 
 export const loadFromIndexedDB = createAsyncThunk("settings/loadFromIndexedDB", async () => {
-    const loadedSettings = await db.items.get("settings");
+    const loadedSettings = await dexieDB.items.get("settings");
     const parsedSettings = await JSON.parse(loadedSettings.value);
     return parsedSettings;
 });

@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
+import React, { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 import { User } from "firebase/auth";
 import { Location, useLocation, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,14 +11,21 @@ import { deleteBib, mergeWithCurrentBibs, replaceAllBibs } from "../data/store/s
 import { replaceAllSettings } from "../data/store/slices/settingsSlice";
 import db from "../data/db/firebase/firebase";
 
-export function useUserDataSync(currentUser: User, bibsLoaded: boolean) {
+/**
+ * Custom hook to synchronize user data including bibliographies and settings.
+ *
+ * @param {User} currentUser - The current authenticated user.
+ * @param {boolean} bibsLoaded - A flag indicating whether bibliographies have been loaded.
+ */
+export function useUserDataSync(currentUser: User, bibsLoaded: boolean): void {
     const dispatch = useDispatch();
 
-    const getCollaborativeBibIds = useCallback((bibs: Bibliography[]) => {
+    const getCollaborativeBibIds = useCallback((bibs: Bibliography[]): string[] => {
         return bibs.filter((bib) => bib?.collab?.open).map((bib) => bib.collab!.id);
     }, []);
 
     useEffect(() => {
+        // Synchronizes user data (bibliographies and settings) and sets up real-time updates for collaborative bibliographies.
         async function syncUserData() {
             try {
                 const userData = await retrieveUserData(currentUser);
@@ -53,13 +60,84 @@ export function useUserDataSync(currentUser: User, bibsLoaded: boolean) {
 
                 return () => unsubscribeList.forEach((unsubscribe) => unsubscribe());
             } catch (error) {
-                console.error("Error retreiving user data or setting up snapshots: ", error);
+                console.error("Error retrieving user data or setting up snapshots: ", error);
                 return undefined;
             }
         }
 
-        syncUserData();
-    }, [currentUser, bibsLoaded, dispatch]);
+        if (bibsLoaded) {
+            syncUserData();
+        }
+    }, [currentUser, bibsLoaded, dispatch, getCollaborativeBibIds]);
+}
+
+/**
+ * Custom hook for managing storage (localStorage or sessionStorage).
+ *
+ * @template T
+ * @param {string} key - The key under which the value is stored.
+ * @param {T | (() => T)} defaultValue - The default value or a function to return the default value if nothing is in storage.
+ * @param {Storage} storageObject - The storage object (localStorage or sessionStorage).
+ * @returns {[T, React.Dispatch<React.SetStateAction<T>>, () => void]} A tuple containing the stored value, a setter for the value, and a function to remove the item from storage.
+ */
+function useStorage<T>(
+    key: string,
+    defaultValue: T | (() => T),
+    storageObject: Storage
+): [T, React.Dispatch<React.SetStateAction<T>>, () => void] {
+    const [value, setValue] = useState<T>(() => {
+        const jsonValue = storageObject.getItem(key);
+        if (jsonValue != null) return JSON.parse(jsonValue) as T;
+
+        if (typeof defaultValue === "function") {
+            return (defaultValue as () => T)();
+        }
+        return defaultValue;
+    });
+
+    useEffect(() => {
+        if (value === undefined) {
+            storageObject.removeItem(key);
+        } else {
+            storageObject.setItem(key, JSON.stringify(value));
+        }
+    }, [key, value, storageObject]);
+
+    const remove = useCallback(() => {
+        setValue(undefined as unknown as T);
+    }, []);
+
+    return [value, setValue, remove];
+}
+
+/**
+ * Custom hook for using localStorage in a React component.
+ *
+ * @template T
+ * @param {string} key - The key under which the value is stored in localStorage.
+ * @param {T | (() => T)} defaultValue - The default value or a function to return the default value if nothing is in localStorage.
+ * @returns {[T, React.Dispatch<React.SetStateAction<T>>, () => void]} A tuple containing the stored value, a setter for the value, and a function to remove the item from localStorage.
+ */
+export function useLocalStorage<T>(
+    key: string,
+    defaultValue: T | (() => T)
+): [T, React.Dispatch<React.SetStateAction<T>>, () => void] {
+    return useStorage(key, defaultValue, window.localStorage);
+}
+
+/**
+ * Custom hook for using sessionStorage in a React component.
+ *
+ * @template T
+ * @param {string} key - The key under which the value is stored in sessionStorage.
+ * @param {T | (() => T)} defaultValue - The default value or a function to return the default value if nothing is in sessionStorage.
+ * @returns {[T, React.Dispatch<React.SetStateAction<T>>, () => void]} A tuple containing the stored value, a setter for the value, and a function to remove the item from sessionStorage.
+ */
+export function useSessionStorage<T>(
+    key: string,
+    defaultValue: T | (() => T)
+): [T, React.Dispatch<React.SetStateAction<T>>, () => void] {
+    return useStorage(key, defaultValue, window.sessionStorage);
 }
 
 /**
@@ -179,7 +257,7 @@ type ThemeType = "auto" | "light" | "dark";
 export function useTheme(
     onChangeCallback: CallableFunction = () => undefined
 ): ["light" | "dark", Dispatch<SetStateAction<ThemeType>>] {
-    const [theme, setTheme] = useState<ThemeType>(() => {
+    const [theme, setTheme] = useLocalStorage<ThemeType>("theme", () => {
         const currentClass = document.documentElement.className;
         const modeMatch = currentClass.match(/^(light|dark|auto)-mode/);
 
