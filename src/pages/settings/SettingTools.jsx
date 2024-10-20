@@ -50,7 +50,7 @@ export function TagsManager() {
         dispatch(
             updateSettingsField({
                 key: "tags",
-                value: settings.tags.filter((tag) => tag.id !== id),
+                value: settings?.tags.filter((tag) => tag.id !== id),
             })
         );
     }
@@ -61,7 +61,7 @@ export function TagsManager() {
                 key: "tags",
                 value: [
                     ...settings.tags,
-                    ...builtinTags.filter((tag) => !settings.tags.some((sTag) => sTag.id === tag.id)),
+                    ...builtinTags.filter((tag) => !settings?.tags.some((sTag) => sTag.id === tag.id)),
                 ],
             })
         );
@@ -70,7 +70,7 @@ export function TagsManager() {
     return (
         <div className="grid gap-2 px-5">
             <ChipSet
-                chips={settings.tags.map((tag) => {
+                chips={settings?.tags.map((tag) => {
                     return {
                         ...tag,
                         end: <Icon className="max-h-min max-w-min text-sm" name="close" />,
@@ -135,7 +135,7 @@ export function IconsManager() {
             return;
         }
 
-        if (icons.includes(iconName.toLowerCase())) {
+        if (icons?.includes(iconName.toLowerCase())) {
             setErrorMessage(`You already have \`${iconName}\` icon.`);
         } else {
             dispatch(
@@ -153,7 +153,7 @@ export function IconsManager() {
         dispatch(
             updateSettingsField({
                 key: "icons",
-                value: settings.icons.filter((icon) => icon !== name),
+                value: settings?.icons.filter((icon) => icon !== name),
             })
         );
     }
@@ -162,10 +162,9 @@ export function IconsManager() {
         dispatch(
             updateSettingsField({
                 key: "icons",
-                value: [
-                    ...settings.icons,
-                    ...builtinIcons.filter((icon) => !settings.icons.some((sIcon) => sIcon === icon)),
-                ],
+                value: Array.isArray(icons)
+                    ? [...icons, ...builtinIcons.filter((icon) => !settings?.icons.some((sIcon) => sIcon === icon))]
+                    : builtinIcons,
             })
         );
     }

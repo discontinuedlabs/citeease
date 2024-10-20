@@ -5,6 +5,7 @@ import { updateSettingsField } from "../../data/store/slices/settingsSlice";
 import { List, Select, TopBar } from "../../components/ui/MaterialComponents";
 import { useDialog } from "../../context/DialogContext.tsx";
 import { useEnhancedDispatch, useTheme } from "../../hooks/hooks.tsx";
+import defaults from "../../assets/json/defaults.json";
 
 export default function Settings() {
     const { data: settings } = useSelector((state) => state.settings);
@@ -31,7 +32,7 @@ export default function Settings() {
     }
 
     return (
-        <div className="mx-auto max-w-[50rem]">
+        <div className={defaults.classes.page}>
             <TopBar headline="Settings" />
 
             <List
@@ -40,7 +41,7 @@ export default function Settings() {
                         title: "Theme",
                         end: (
                             <Select
-                                value={settings.theme}
+                                value={settings?.theme}
                                 options={[
                                     { headline: "Auto", value: "auto" },
                                     { headline: "Light", value: "light" },

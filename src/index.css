@@ -183,6 +183,10 @@
         @apply font-medium;
     }
 
+    small {
+        @apply text-xs;
+    }
+
     a {
         @apply no-underline;
         color: var(--md-sys-color-primary);
@@ -196,11 +200,21 @@
         @apply p-0;
     }
 
+    button {
+        color: var(--md-sys-color-on-surface);
+    }
+
     code,
     pre {
-        @apply break-words rounded-md px-2 py-1 text-xs;
+        @apply text-wrap break-words rounded-md px-2 py-1 text-xs;
         color: var(--md-sys-color-on-secondary-container);
         background-color: var(--md-sys-color-secondary-container);
+    }
+
+    code.error,
+    pre.error {
+        color: var(--md-sys-color-on-error);
+        background-color: var(--md-sys-color-error);
     }
 
     md-filled-text-field {

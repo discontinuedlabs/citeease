@@ -36,8 +36,9 @@ const settingsSlice = createSlice({
     initialState,
     reducers: {
         replaceAllSettings: (state, action) => {
-            if (!action.payload.settings) return state;
-            const newState = action.payload.settings;
+            const { settings } = action.payload;
+
+            const newState = { ...state, data: { ...state.data, ...settings } };
             save(newState);
             return newState;
         },

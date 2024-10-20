@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 // Pages
 import Bibliography from "./pages/bibliography/Bibliography";
@@ -19,27 +19,20 @@ import { loadFromIndexedDB as loadBibs } from "./data/store/slices/bibsSlice";
 import { loadFromIndexedDB as loadSettings } from "./data/store/slices/settingsSlice";
 
 // Context and Hooks
-import { useAuth } from "./context/AuthContext";
 import { useDocumentTitle, useMetaThemeColor, useUserDataSync } from "./hooks/hooks.tsx";
 
 export default function App() {
-    const { loadedLocally: bibsLoaded } = useSelector((state) => state.bibliographies);
-    const { currentUser } = useAuth();
     const dispatch = useDispatch();
 
     useDocumentTitle();
     useMetaThemeColor();
+    useUserDataSync();
 
     // Load data from IndexedDB on initial render
     useEffect(() => {
         dispatch(loadBibs());
         dispatch(loadSettings());
     }, [dispatch]);
-
-    // Sync bibliographies and settings when currentUser and bibs are loaded
-    if (currentUser && bibsLoaded) {
-        useUserDataSync(currentUser, bibsLoaded);
-    }
 
     return (
         <main className="relative min-h-screen font-sans">

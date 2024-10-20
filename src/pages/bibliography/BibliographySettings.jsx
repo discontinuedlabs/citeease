@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useFindBib } from "../../hooks/hooks.tsx";
 import { List, TopBar } from "../../components/ui/MaterialComponents";
 import { CollaboratorsManager } from "./BibliographySettingsTools";
+import defaults from "../../assets/json/defaults.json";
 
 export default function BibliographySettings() {
     const { bibId } = useParams();
@@ -23,7 +24,7 @@ export default function BibliographySettings() {
     }, [bibId, bibliography?.collab?.open, location.pathname]);
 
     return (
-        <div>
+        <div className={defaults.classes.page}>
             <TopBar headline="Bibliography settings" />
             <List items={[{ title: "Manage collaborators", onClick: () => setCollaboratorsManagerVisible(true) }]} />
 

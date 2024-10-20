@@ -42,6 +42,7 @@ import { useDialog } from "../../context/DialogContext.tsx";
 import locales from "../../assets/json/locales.json";
 import { uid } from "../../utils/utils.ts";
 import * as citationUtils from "../../utils/citationUtils.ts";
+import defaults from "../../assets/json/defaults.json";
 
 // TODO: The user cannot do any actions in collaborative bibliographies when they are offline
 export default function Bibliography() {
@@ -745,8 +746,7 @@ export default function Bibliography() {
     }
 
     return (
-        // mb-20 needed in pages with a Fab component
-        <div className="mx-auto mb-20 max-w-[50rem]">
+        <div className={defaults.classes.pageWithFab}>
             <TopBar
                 icon={bibliography?.icon}
                 headline={bibliography?.title}

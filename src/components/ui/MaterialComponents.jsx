@@ -184,7 +184,14 @@ export function Icon({ name, className = "", ...rest }) {
     );
 }
 
-export function Fab({ label, icon, className = "", onClick, ...rest }) {
+export function Fab({ label, icon, className = "", disabled = false, onClick, ...rest }) {
+    if (disabled) {
+        return (
+            <md-fab disabled label={label} class={`font-sans ${className}`} onClick={onClick} {...rest}>
+                <md-icon slot="icon">{icon}</md-icon>
+            </md-fab>
+        );
+    }
     return (
         <md-fab label={label} class={`font-sans ${className}`} onClick={onClick} {...rest}>
             <md-icon slot="icon">{icon}</md-icon>
@@ -192,7 +199,20 @@ export function Fab({ label, icon, className = "", onClick, ...rest }) {
     );
 }
 
-export function FilledButton({ className = "", onClick, type = "button", children, ...rest }) {
+export function FilledButton({ className = "", onClick, type = "button", disabled = false, children, ...rest }) {
+    if (disabled) {
+        return (
+            <md-filled-button
+                disabled
+                type={type}
+                class={`px-6 py-2 font-sans ${className}`}
+                onClick={onClick}
+                {...rest}
+            >
+                {children}
+            </md-filled-button>
+        );
+    }
     return (
         <md-filled-button type={type} class={`px-6 py-2 font-sans ${className}`} onClick={onClick} {...rest}>
             {children}
@@ -200,7 +220,14 @@ export function FilledButton({ className = "", onClick, type = "button", childre
     );
 }
 
-export function TextButton({ className = "", onClick, type = "button", children, ...rest }) {
+export function TextButton({ className = "", onClick, disabled = false, type = "button", children, ...rest }) {
+    if (disabled) {
+        return (
+            <md-text-button disabled type={type} class={`px-6 py-2 font-sans ${className}`} onClick={onClick} {...rest}>
+                {children}
+            </md-text-button>
+        );
+    }
     return (
         <md-text-button type={type} class={`px-6 py-2 font-sans ${className}`} onClick={onClick} {...rest}>
             {children}
@@ -208,7 +235,20 @@ export function TextButton({ className = "", onClick, type = "button", children,
     );
 }
 
-export function OutlinedButton({ className = "", onClick, type = "button", children, ...rest }) {
+export function OutlinedButton({ className = "", onClick, disabled = false, type = "button", children, ...rest }) {
+    if (disabled) {
+        return (
+            <md-outlined-button
+                disabled
+                type={type}
+                class={`px-6 py-2 font-sans ${className}`}
+                onClick={onClick}
+                {...rest}
+            >
+                {children}
+            </md-outlined-button>
+        );
+    }
     return (
         <md-outlined-button type={type} class={`px-6 py-2 font-sans ${className}`} onClick={onClick} {...rest}>
             {children}
@@ -216,7 +256,14 @@ export function OutlinedButton({ className = "", onClick, type = "button", child
     );
 }
 
-export function IconButton({ className = "", onClick, type = "button", name, iconStyle, ...rest }) {
+export function IconButton({ className = "", onClick, disabled = false, type = "button", name, iconStyle, ...rest }) {
+    if (disabled) {
+        return (
+            <md-icon-button disabled type={type} class={className} onClick={onClick} {...rest}>
+                <md-icon style={iconStyle}>{name}</md-icon>
+            </md-icon-button>
+        );
+    }
     return (
         <md-icon-button type={type} class={className} onClick={onClick} {...rest}>
             <md-icon style={iconStyle}>{name}</md-icon>
@@ -239,7 +286,24 @@ export function List({ items = [], className = "", ...rest }) {
                 if (typeof item === "string" && /divider/i.test(item)) {
                     return <Divider key={uid()} />;
                 }
+                console.log(item);
                 if (!item) return null;
+                if (item?.disabled) {
+                    return (
+                        <md-list-item disabled class="" {...item} type="button" onClick={item?.onClick} key={uid()}>
+                            {item?.start && <div slot="start">{item.start}</div>}
+                            {item?.title && <div slot="headline">{item.title}</div>}
+                            {item?.description && (
+                                <div className="grid gap-2" slot="supporting-text">
+                                    {item.description}
+                                    {item.content}
+                                </div>
+                            )}
+                            {item?.end && <div slot="end">{item.end}</div>}
+                        </md-list-item>
+                    );
+                }
+                delete item?.disabled; // eslint-disable-line no-param-reassign
                 return (
                     <md-list-item class="" {...item} type="button" onClick={item?.onClick} key={uid()}>
                         {item?.start && <div slot="start">{item.start}</div>}
@@ -443,16 +507,7 @@ function Chip(props) {
 
     const targetColor = colorValues[theme][color];
 
-    function getTextColor() {
-        if (selected) {
-            if (theme === "dark") return "white";
-            return "";
-        }
-        return targetColor;
-    }
-
     const style = {
-        color: getTextColor(),
         background: selected ? hslToHsla(targetColor, 0.25) : "transparent",
         border: `1px solid ${selected ? "transparent" : targetColor}`,
     };

@@ -15,7 +15,7 @@ import * as citationUtils from "../../utils/citationUtils.ts";
 import { useEnhancedDispatch, useFindBib, useOnlineStatus, useTheme } from "../../hooks/hooks.tsx";
 import citationStyles from "../../assets/json/styles.json";
 import mostPopularStyles from "../../assets/json/mostPopularStyles.json";
-import { citationCount, timeAgo, uid } from "../../utils/utils.ts";
+import { timeAgo, uid } from "../../utils/utils.ts";
 import { hslToHsla, parseHtmlToJsx } from "../../utils/conversionUtils.tsx";
 import {
     Checkbox,
@@ -38,6 +38,7 @@ import { useToast } from "../../context/ToastContext.tsx";
 import { useDialog } from "../../context/DialogContext.tsx";
 import colorValues from "../../assets/json/colors.json";
 import defaults from "../../assets/json/defaults.json";
+import { EmptyStar, FilledStar } from "../../components/ui/Star";
 
 const DateInput = React.lazy(() => import("../../components/form/DateInput"));
 const AuthorsInput = React.lazy(() => import("../../components/form/AuthorsInput"));
@@ -931,6 +932,7 @@ export function AddCitationMenu({ openCitationForm, close }) {
 
 export function MoveDialog({ setReceiverBibs }) {
     const bibliographies = useSelector((state) => state.bibliographies.data);
+    const { theme, tags } = useSelector((state) => state.settings.data);
     const bibliography = useFindBib();
     const [selectedBibIds, setSelectedBibIds] = useState([]);
 
@@ -951,14 +953,46 @@ export function MoveDialog({ setReceiverBibs }) {
         <List
             items={bibliographies.map((bib) => {
                 if (bib.id !== bibliography.id) {
+                    const bibTags = tags.filter((tag) => bib.tags.includes(tag.id));
+                    const defaultIcon = defaults.bibliography.icon;
                     return {
-                        start: <Icon name={selectedBibIds.includes(bib.id) ? "check" : bib?.icon} />,
-                        title: bib.title,
-                        description: `${bib.style.name.short || bib.style.name.long.replace(/\((.*?)\)/g, "")} • ${citationCount(bib.citations)} • ${timeAgo(bib.dateModified)}`,
-                        content: (
+                        start: (
+                            <Icon
+                                style={{
+                                    background: hslToHsla(
+                                        colorValues[theme][bib?.icon?.color || defaultIcon.color],
+                                        0.25
+                                    ),
+                                }}
+                                className="rounded-full p-5"
+                                name={bib?.icon?.name || defaultIcon.name}
+                            />
+                        ),
+                        title: (
+                            <div className="flex items-baseline justify-between">
+                                <div className="flex items-baseline gap-1 font-semibold">
+                                    {bib.title}
+                                    <small className="font-normal">{bib.citations.length}</small>
+                                </div>
+                                <small>{timeAgo(bib.dateModified)}</small>
+                            </div>
+                        ),
+                        description: (
+                            <div className="flex items-center justify-between">
+                                <div>{bib.style.name.short || bib.style.name.long.replace(/\((.*?)\)/g, "")}</div>
+                                <button type="button" className="h-6 w-6 cursor-pointer border-none bg-transparent p-0">
+                                    {bib?.favorite ? <FilledStar /> : <EmptyStar />}
+                                </button>
+                            </div>
+                        ),
+                        content: bibTags && bibTags.length !== 0 && (
                             <ChipSet
-                                chips={bib.tags.map(({ label, color }) => ({ label, color }))}
-                                style={{ marginTop: bib.tags.length === 0 ? "0" : "0.5rem" }}
+                                chips={bibTags.map((tag) => {
+                                    return {
+                                        ...tag,
+                                        selected: true,
+                                    };
+                                })}
                             />
                         ),
                         onClick: () => handleSelect(bib.id),
@@ -1108,7 +1142,6 @@ export function IconsDialog({ setIconObject }) {
                 <Icon
                     style={{
                         background: hslToHsla(colorValues[theme][selectedColor], 0.25),
-                        color: theme === "dark" ? "white" : "",
                     }}
                     className="rounded-full p-5"
                     name={selectedIcon}
@@ -1120,10 +1153,10 @@ export function IconsDialog({ setIconObject }) {
             <div className="flex flex-wrap justify-stretch gap-1">
                 {icons.map((icon) => {
                     const style = {
-                        background: "var(--md-sys-color-secondary)",
+                        background: "var(--md-sys-color-on-surface)",
                     };
                     const iconStyle = {
-                        color: "var(--md-sys-color-on-secondary)",
+                        color: "var(--md-sys-color-surface)",
                     };
                     return (
                         <IconButton

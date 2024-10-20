@@ -7,8 +7,6 @@ export const rootReducer = combineReducers({
     settings: settingsReducer,
 });
 
-export type RootState = ReturnType<typeof rootReducer>;
-
 // const debugMiddleware: Middleware<object, RootState> = (storeApi) => (next) => (action) => {
 //     const before = storeApi.getState();
 //     const result = next(action);
@@ -22,4 +20,5 @@ const store = configureStore({
     // middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(debugMiddleware),
 });
 
+export type RootState = ReturnType<typeof rootReducer>;
 export default store;

@@ -6,6 +6,7 @@ import { useAuth } from "../../context/AuthContext";
 import db from "../../data/db/firebase/firebase";
 import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
 import { useDialog } from "../../context/DialogContext.tsx";
+import defaults from "../../assets/json/defaults.json";
 
 export default function Signup() {
     const [isLoading, setIsLoading] = useState(false);
@@ -68,7 +69,7 @@ export default function Signup() {
 
     return (
         <>
-            <div>
+            <div className={defaults.classes.page}>
                 <h1>Sign Up</h1>
                 <pre>{error}</pre>
                 <form onSubmit={handleSubmit}>

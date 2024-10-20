@@ -87,16 +87,6 @@ export function timeAgo(dateString: string, style: Intl.RelativeTimeFormatStyle 
     return "now";
 }
 
-export function citationCount(citations) {
-    if (citations.length === 0) {
-        return "No sources added";
-    }
-    if (citations.length === 1) {
-        return "1 source";
-    }
-    return `${citations.length} sources`;
-}
-
 /**
  * Parses a URL query string into an object where keys are the names of the query parameters and values are their corresponding values.
  *

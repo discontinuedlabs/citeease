@@ -1,6 +1,6 @@
 {
     "bibliography": {
-        "name": "Untitled Bibliography",
+        "title": "Untitled Bibliography",
         "icon": {
             "name": "book_2",
             "color": "gray"
@@ -8,5 +8,10 @@
     },
     "settings": {
         "theme": "auto"
+    },
+    "classes": {
+        "page": "mx-auto min-h-screen max-w-[50rem]",
+        "pageWithFab": "mx-auto mb-20 min-h-screen max-w-[50rem]",
+        "wideButton": "max-w-[30rem] w-full mx-auto"
     }
 }

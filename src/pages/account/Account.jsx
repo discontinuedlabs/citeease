@@ -6,6 +6,7 @@ import { ChangePasswordDialog, DeleteAccountDialog, UpdateEmailDialog } from "..
 import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
 import { resetAllSettings } from "../../data/store/slices/settingsSlice";
 import { FilledButton, List, TopBar } from "../../components/ui/MaterialComponents";
+import defaults from "../../assets/json/defaults.json";
 
 export default function Account() {
     const navigate = useNavigate();
@@ -64,24 +65,36 @@ export default function Account() {
     }
 
     return (
-        <>
+        <div className={defaults.classes.page}>
             <TopBar headline="Account" />
-            <div>
-                <p>{currentUser?.displayName}</p>
-                <p>
+            <div style={{ background: "var(--md-sys-color-secondary-container)" }} className="rounded-3xl p-5">
+                <h2 className="mt-0">{currentUser?.displayName}</h2>
+                <p className="mb-0 flex items-baseline gap-2">
                     {currentUser?.email}
-                    <span>{currentUser?.emailVerified ? "Verified" : "Not verified"}</span>
+                    <small
+                        style={{
+                            background: currentUser?.emailVerified
+                                ? "var(--md-sys-color-tertiary)"
+                                : "var(--md-sys-color-error)",
+                            color: currentUser?.emailVerified
+                                ? "var(--md-sys-color-on-tertiary)"
+                                : "var(--md-sys-color-on-error)",
+                        }}
+                        className="rounded-lg px-2 py-1"
+                    >
+                        {currentUser?.emailVerified ? "Verified" : "Not verified"}
+                    </small>
                 </p>
+                {!currentUser?.emailVerified && (
+                    <FilledButton
+                        className="mt-4"
+                        disabled={isEmailVerificationDisabled || verifyLoading}
+                        onClick={() => handleVerifyEmail()}
+                    >
+                        Verify email
+                    </FilledButton>
+                )}
             </div>
-
-            {!currentUser?.emailVerified && (
-                <FilledButton
-                    disabled={isEmailVerificationDisabled || verifyLoading}
-                    onClick={() => handleVerifyEmail()}
-                >
-                    Verify email
-                </FilledButton>
-            )}
 
             <List
                 items={[
@@ -100,6 +113,6 @@ export default function Account() {
             {updateEmailDialogVisible && <UpdateEmailDialog setIsVisible={setUpdateEmailDialogVisible} />}
             {changePasswordDialogVisible && <ChangePasswordDialog setIsVisible={setChangePasswordDialogVisible} />}
             {deleteAccountDialogVisible && <DeleteAccountDialog setIsVisible={setDeleteAccountDialogVisible} />}
-        </>
+        </div>
     );
 }

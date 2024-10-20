@@ -81,6 +81,11 @@ export type Bibliography = {
     };
 };
 
+export type BibliographiesState = {
+    loadedLocally: boolean;
+    data: Bibliography[];
+};
+
 export type BibJson = {
     title?: string;
     subtitle?: string;
@@ -105,3 +110,13 @@ export type BibJson = {
     abstract?: string;
     language?: string;
 };
+
+export type Tag = { label: string; color: string; id: string };
+
+export type Settings = {
+    theme?: string;
+    tags?: Tag[];
+    icons?: string[];
+};
+
+export type SettingsState = { loadedLocally: boolean; data: Settings };

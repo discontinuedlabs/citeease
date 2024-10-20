@@ -13,11 +13,10 @@ import db from "../data/db/firebase/firebase";
 
 /**
  * Custom hook to synchronize user data including bibliographies and settings.
- *
- * @param {User} currentUser - The current authenticated user.
- * @param {boolean} bibsLoaded - A flag indicating whether bibliographies have been loaded.
  */
-export function useUserDataSync(currentUser: User, bibsLoaded: boolean): void {
+export function useUserDataSync(): void {
+    const { loadedLocally: bibsLoaded } = useSelector((state: RootState) => state.bibliographies);
+    const { currentUser }: { currentUser: User } = useAuth();
     const dispatch = useDispatch();
 
     const getCollaborativeBibIds = useCallback((bibs: Bibliography[]): string[] => {
@@ -25,6 +24,8 @@ export function useUserDataSync(currentUser: User, bibsLoaded: boolean): void {
     }, []);
 
     useEffect(() => {
+        if (!currentUser || !bibsLoaded) return;
+
         // Synchronizes user data (bibliographies and settings) and sets up real-time updates for collaborative bibliographies.
         async function syncUserData() {
             try {
@@ -254,6 +255,7 @@ type ThemeType = "auto" | "light" | "dark";
  *
  * @returns {["light" | "dark", Dispatch<SetStateAction<ThemeType>>]} - Returns an array where the first element is the current theme ("light" or "dark") and the second element is a function to set the theme.
  */
+// WATCH: How does this hook changes the theme color even if it's not used in App component?
 export function useTheme(
     onChangeCallback: CallableFunction = () => undefined
 ): ["light" | "dark", Dispatch<SetStateAction<ThemeType>>] {
@@ -306,6 +308,7 @@ export function useTheme(
  *                                it attempts to read the background color of the document root element.
  * @returns {(newColor: string) => void} - A function that accepts a new color string and updates the theme color.
  */
+// FIXME: It doesn't update the color when the theme changes.
 // eslint-disable-next-line no-unused-vars
 export function useMetaThemeColor(initialColor: string): (newColor: string) => void {
     const [color, setColor] = useState<string>(

@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { doc, getDoc } from "firebase/firestore";
@@ -7,11 +7,12 @@ import db from "../../data/db/firebase/firebase";
 import { replaceAllSettings } from "../../data/store/slices/settingsSlice";
 import { mergeWithCurrentBibs, replaceAllBibs } from "../../data/store/slices/bibsSlice";
 import { useToast } from "../../context/ToastContext.tsx";
+import { FilledButton, TextField, TopBar } from "../../components/ui/MaterialComponents";
+import defaults from "../../assets/json/defaults.json";
 
 export default function Login() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-    const id = useId();
     const emailRef = useRef(null);
     const passwordRef = useRef(null);
     const { login } = useAuth();
@@ -84,28 +85,23 @@ export default function Login() {
     }
 
     return (
-        <>
-            <div>
-                <h1>Log in</h1>
-                <pre>{error}</pre>
-                <form onSubmit={handleSubmit}>
-                    <label htmlFor={`${id}-email`}>
-                        Email
-                        <input id={`${id}-email`} type="email" ref={emailRef} required />
-                    </label>
-                    <label htmlFor={`${id}-password`}>
-                        Password
-                        <input id={`${id}-password`} type="password" ref={passwordRef} required />
-                    </label>
-                    <Link to="/forgot-password">Forgot password?</Link>
-                    <button type="submit" disabled={isLoading}>
-                        Log in
-                    </button>
-                </form>
-            </div>
-            <p>
-                Don&apos;t have an account? <Link to="/signup">Sign up</Link>.
-            </p>
-        </>
+        <div className={defaults.classes.page}>
+            <TopBar headline="Log in" />
+
+            <form className="grid gap-2 px-5" onSubmit={handleSubmit}>
+                {error.length !== 0 && <pre className="error">Error signing in!</pre>}
+                <TextField label="Email" type="email" ref={emailRef} required />
+                <TextField label="Password" type="password" ref={passwordRef} required />
+
+                <Link to="/forgot-password">Forgot password?</Link>
+                <FilledButton className={defaults.classes.wideButton} type="submit" disabled={isLoading}>
+                    Log in
+                </FilledButton>
+
+                <p>
+                    Don&apos;t have an account? <Link to="/signup">Sign up</Link>.
+                </p>
+            </form>
+        </div>
     );
 }
