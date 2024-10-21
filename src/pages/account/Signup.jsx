@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { doc, setDoc } from "firebase/firestore";
 import { useDispatch, useSelector } from "react-redux";
@@ -7,11 +7,11 @@ import db from "../../data/db/firebase/firebase";
 import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
 import { useDialog } from "../../context/DialogContext.tsx";
 import defaults from "../../assets/json/defaults.json";
+import { FilledButton, TextField, TopBar } from "../../components/ui/MaterialComponents";
 
 export default function Signup() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-    const id = useId();
     const emailRef = useRef();
     const passwordRef = useRef();
     const passwordConfirmRef = useRef();
@@ -28,6 +28,7 @@ export default function Signup() {
             bibliographies: JSON.stringify(bibliographies),
             settings: JSON.stringify(settings),
         });
+        navigate("/");
     }
 
     async function handleSubmit(event) {
@@ -45,19 +46,24 @@ export default function Signup() {
                     nameRef.current.value
                 );
 
-                if (bibliographies.length > 0) {
+                if (bibliographies.length !== 0) {
                     dialog.show({
                         headline: "Associate current data with this email?",
                         content:
-                            "Do you want to associate your current data with this email? Choosing 'No' will delete your current data permanently.",
+                            "Do you want to associate your current data with this email? Choosing `No` will delete your current data permanently.",
                         actions: [
                             ["Yes", () => moveLocalDataToFirestore(credintials), { autoFocus: true }],
-                            ["No", () => dispatch(deleteAllBibs())],
+                            [
+                                "No",
+                                () => {
+                                    dispatch(deleteAllBibs());
+                                    navigate("/");
+                                },
+                            ],
                         ],
                     });
                 }
 
-                navigate("/");
                 // TODO: Show success toast message
             } catch (tError) {
                 setError(`Failed to create an account: ${tError}`);
@@ -68,35 +74,28 @@ export default function Signup() {
     }
 
     return (
-        <>
-            <div className={defaults.classes.page}>
-                <h1>Sign Up</h1>
-                <pre>{error}</pre>
-                <form onSubmit={handleSubmit}>
-                    <label htmlFor={`${id}-name`}>
-                        Name
-                        <input id={`${id}-name`} type="text" ref={nameRef} required />
-                    </label>
-                    <label htmlFor={`${id}-email`}>
-                        Email
-                        <input id={`${id}-email`} type="email" ref={emailRef} required />
-                    </label>
-                    <label htmlFor={`${id}-password`}>
-                        Password
-                        <input id={`${id}-password`} type="password" ref={passwordRef} required />
-                    </label>
-                    <label htmlFor={`${id}-password-confirm`}>
-                        Password confirmation
-                        <input id={`${id}-password-confirm`} type="password" ref={passwordConfirmRef} required />
-                    </label>
-                    <button type="submit" disabled={isLoading}>
-                        Sign up
-                    </button>
-                </form>
-            </div>
-            <p>
-                Already have an account? <Link to="/login">Log in</Link>.
-            </p>
-        </>
+        <div className={defaults.classes.page}>
+            <TopBar headline="Sign up" />
+
+            <form className="grid gap-2 px-5" onSubmit={handleSubmit}>
+                {error.length !== 0 && <pre className="error">Error signing in!</pre>}
+                <TextField label="Name" type="text" ref={nameRef} required />
+                <TextField label="Email" type="email" ref={emailRef} required />
+                <TextField label="Password" type="password" ref={passwordRef} required />
+                <TextField label="Password confirmation" type="password" ref={passwordConfirmRef} required />
+
+                <FilledButton className={defaults.classes.wideButton} type="submit" disabled={isLoading}>
+                    Sign up
+                </FilledButton>
+
+                <p className="text-center">
+                    Already have an account?{" "}
+                    <Link to="/login" replace>
+                        Log in
+                    </Link>
+                    .
+                </p>
+            </form>
+        </div>
     );
 }

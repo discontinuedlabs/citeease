@@ -1,19 +1,20 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useAuth } from "../../context/AuthContext";
-import { ChangePasswordDialog, DeleteAccountDialog, UpdateEmailDialog } from "../settings/SettingTools";
+import { ChangePasswordDialog, DeleteAccountDialog } from "../settings/SettingTools";
 import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
 import { resetAllSettings } from "../../data/store/slices/settingsSlice";
-import { FilledButton, List, TopBar } from "../../components/ui/MaterialComponents";
+import { FilledButton, List, TextField, TopBar } from "../../components/ui/MaterialComponents";
 import defaults from "../../assets/json/defaults.json";
+import { useDialog } from "../../context/DialogContext.tsx";
+import { useToast } from "../../context/ToastContext.tsx";
 
 export default function Account() {
     const navigate = useNavigate();
-    const { currentUser, logout, verifyEmail } = useAuth();
+    const { currentUser, logout, verifyEmail, updateEmail } = useAuth();
     const [verifyLoading, setVerifyLoading] = useState(false);
     const [logoutLoading, setLogoutLoading] = useState(false);
-    const [updateEmailDialogVisible, setUpdateEmailDialogVisible] = useState(false);
     const [changePasswordDialogVisible, setChangePasswordDialogVisible] = useState(false);
     const [deleteAccountDialogVisible, setDeleteAccountDialogVisible] = useState(false);
     const [isEmailVerificationDisabled, setEmailVerificationDisabled] = useState(() => {
@@ -22,32 +23,72 @@ export default function Account() {
         return false;
     });
     const dispatch = useDispatch();
-    // const [loggedOut, setLoggedOut] = useState(!currentUser);
+    const dialog = useDialog();
+    const newEmailRef = useRef();
+    const toast = useToast();
 
-    // useEffect(() => {
-    //     // WATCH: This effect should execute only when there's a change in the 'currentUser' state.
-    //     // If the 'loggedOut' state is true (which depends on the 'currentUser' state being falsy),
-    //     // then it proceeds with its task. This is because the 'useAuth().signOut()' function
-    //     // doesn't immediately set the 'currentUser' state to null upon resolving its promise;
-    //     // it retains the 'currentUser' for a brief period, necessitating this useEffect.
-    //     if (loggedOut) {
-    //         navigate("/");
-    //         dispatch(deleteAllBibs());
-    //         dispatch(resetAllSettings());
-    //         // TODO: show success taost message
-    //     }
-    // }, [currentUser]);
-
-    // TODO: Show confirm dialog first
-    async function handleLogout() {
-        setLogoutLoading(true);
-        const credentials = await logout();
-        if (!credentials) {
-            navigate("/");
-            dispatch(deleteAllBibs());
-            dispatch(resetAllSettings());
+    function showUpdateEmailDialog() {
+        async function update() {
+            try {
+                await updateEmail(newEmailRef.current.value);
+                toast.show({
+                    message: "You successfuly updated your email",
+                    color: "green",
+                    icon: "check",
+                });
+            } catch (error) {
+                console.error("Failed to update email: ", error);
+                toast.show({
+                    message: "Failed to update email",
+                    color: "red",
+                    icon: "error",
+                });
+            }
         }
-        setLogoutLoading(false);
+
+        dialog.show({
+            headline: "Update email",
+            content: (
+                <div className="p-5">
+                    <TextField
+                        className="w-full"
+                        label="New email"
+                        placeholder="Type your new email"
+                        type="email"
+                        ref={newEmailRef}
+                        required
+                    />
+                </div>
+            ),
+            actions: [
+                ["Cancel", () => dialog.close()],
+                ["Update", update],
+            ],
+        });
+    }
+
+    async function handleLogout() {
+        dialog.show({
+            icon: "logout",
+            headline: "Log out?",
+            content: "Are you sure you want to log out?",
+            actions: [
+                [
+                    "Yes",
+                    async () => {
+                        setLogoutLoading(true);
+                        const credentials = await logout();
+                        if (!credentials) {
+                            navigate("/");
+                            dispatch(deleteAllBibs());
+                            dispatch(resetAllSettings());
+                        }
+                        setLogoutLoading(false);
+                    },
+                ],
+                ["No", () => dialog.close(), { type: "filled" }],
+            ],
+        });
     }
 
     async function handleVerifyEmail() {
@@ -59,6 +100,7 @@ export default function Account() {
             setEmailVerificationDisabled(disableUntil > Date.now());
             // TODO: show toast to notify user to check email
         } catch (error) {
+            console.error(error);
             // TODO: show toast message for error
         }
         setVerifyLoading(false);
@@ -98,19 +140,18 @@ export default function Account() {
 
             <List
                 items={[
-                    { title: "Update email", onClick: () => setUpdateEmailDialogVisible(true) },
+                    { title: "Update email", onClick: showUpdateEmailDialog },
                     { title: "Change password", onClick: () => setChangePasswordDialogVisible(true) },
                     { title: "Switch account", onClick: () => navigate("/login") },
                     { title: "Log out", onClick: () => handleLogout() },
                     {
                         title: "Delete account",
                         onClick: () => setDeleteAccountDialogVisible(true),
-                        disabled: logoutLoading, // TODO..
+                        disabled: logoutLoading,
                     },
                 ]}
             />
 
-            {updateEmailDialogVisible && <UpdateEmailDialog setIsVisible={setUpdateEmailDialogVisible} />}
             {changePasswordDialogVisible && <ChangePasswordDialog setIsVisible={setChangePasswordDialogVisible} />}
             {deleteAccountDialogVisible && <DeleteAccountDialog setIsVisible={setDeleteAccountDialogVisible} />}
         </div>

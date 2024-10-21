@@ -239,51 +239,6 @@ export function IconsManager() {
     );
 }
 
-export function UpdateEmailDialog(props) {
-    const { setIsVisible } = props;
-    const { updateEmail } = useAuth();
-    const id = useId();
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState("");
-    const newEmailRef = useRef();
-    const navigate = useNavigate();
-
-    async function handleSUbmit(event) {
-        event.preventDefault();
-
-        try {
-            setError("");
-            setIsLoading(true);
-            await updateEmail(newEmailRef.current.value);
-            navigate("/");
-            // TODO: Show success toast message
-        } catch (tError) {
-            setError(`Failed to update email: ${tError}`);
-        }
-
-        setIsLoading(false);
-    }
-
-    return (
-        <div>
-            <button type="button" onClick={() => setIsVisible(false)}>
-                X
-            </button>
-            <h3>Update email</h3>
-            <pre>{error}</pre>
-            <form onSubmit={handleSUbmit}>
-                <label htmlFor={`${id}-newEmail`}>
-                    Type your new email.
-                    <input id={`${id}-newEmail`} type="email" ref={newEmailRef} required />
-                </label>
-                <button type="submit" disabled={isLoading}>
-                    Update email
-                </button>
-            </form>
-        </div>
-    );
-}
-
 export function ChangePasswordDialog(props) {
     const { setIsVisible } = props;
     const { changePassword } = useAuth();

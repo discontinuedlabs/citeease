@@ -1,5 +1,7 @@
 /* eslint-disable no-unused-vars, @typescript-eslint/no-namespace */
 
+// USING: https://material-web.dev/components/dialog/
+
 import React, {
     createContext,
     useContext,
@@ -208,11 +210,11 @@ export default function DialogProvider({ children }: DialogProviderProps) {
 
     useEffect(() => {
         dialogs.forEach((dialog) => {
+            const dialogElement = dialogRefs.current[dialog.id];
+
             function handleClose() {
                 setDialogs((prevDialogs) => prevDialogs.filter((d) => d.id !== dialog.id));
             }
-
-            const dialogElement = dialogRefs.current[dialog.id];
 
             if (dialogElement) {
                 dialogElement.addEventListener("closed", handleClose);

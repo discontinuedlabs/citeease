@@ -98,8 +98,12 @@ export default function Login() {
                     Log in
                 </FilledButton>
 
-                <p>
-                    Don&apos;t have an account? <Link to="/signup">Sign up</Link>.
+                <p className="text-center">
+                    Don&apos;t have an account?{" "}
+                    <Link to="/signup" replace>
+                        Sign up
+                    </Link>
+                    .
                 </p>
             </form>
         </div>
