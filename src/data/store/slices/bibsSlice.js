@@ -7,16 +7,17 @@ import defaults from "../../../assets/json/defaults.json";
 
 const initialState = { data: [], loadedLocally: false };
 
-function save(newState, currentUser = undefined) {
+async function save(newState, currentUser = undefined) {
     const serializedBibs = JSON.stringify(newState.data);
-    dexieDB.items.put({ id: "bibliographies", value: serializedBibs });
+    await dexieDB.items.put({ id: "bibliographies", value: serializedBibs });
+    const settings = await dexieDB.items.get("settings");
 
     if (!currentUser) return;
 
     const parsedCurrentUser = JSON.parse(currentUser);
     if (parsedCurrentUser) {
         const userRef = doc(firestoreDB, "users", parsedCurrentUser?.uid);
-        setDoc(userRef, { bibliographies: JSON.stringify(newState.data) });
+        setDoc(userRef, { settings: settings.value, bibliographies: JSON.stringify(newState.data) });
 
         newState.data.forEach((bib) => {
             if (bib?.collab?.open) {
@@ -158,11 +159,17 @@ const bibsSlice = createSlice({
             return newState;
         },
         updateBibField: (state, action) => {
-            const { bibId, key, value, currentUser } = action.payload;
+            const { bibId, key, value, options = {}, currentUser } = action.payload;
+            const { updateDateModified } = options;
+            console.log(action.payload);
 
             const newBibs = state.data?.map((bib) => {
                 if (bib.id === bibId) {
-                    return { ...bib, [key]: value, dateModified: new Date().toString() };
+                    return {
+                        ...bib,
+                        [key]: value,
+                        dateModified: updateDateModified !== false ? new Date().toString() : bib.dateModified,
+                    };
                 }
                 return bib;
             });

@@ -286,7 +286,6 @@ export function List({ items = [], className = "", ...rest }) {
                 if (typeof item === "string" && /divider/i.test(item)) {
                     return <Divider key={uid()} />;
                 }
-                console.log(item);
                 if (!item) return null;
                 if (item?.disabled) {
                     return (

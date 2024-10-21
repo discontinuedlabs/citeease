@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useId, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { updateSettingsField, resetAllSettings } from "../../data/store/slices/settingsSlice";
@@ -26,7 +26,7 @@ export function TagsManager() {
     const [tagLabel, setTagLabel] = useState("");
     const [tagColor, setTagColor] = useState("yellow");
     const [errorMessage, setErrorMessage] = useState("");
-    const dispatch = useDispatch();
+    const dispatch = useEnhancedDispatch();
     const [theme] = useTheme();
 
     function addTag(event) {
@@ -351,7 +351,7 @@ export function DeleteAccountDialog(props) {
     const passwordRef = useRef();
     const checkboxRef = useRef();
     const navigate = useNavigate();
-    const dispatch = useDispatch();
+    const dispatch = useEnhancedDispatch();
 
     async function handleSUbmit(event) {
         event.preventDefault();

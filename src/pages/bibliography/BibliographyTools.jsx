@@ -790,6 +790,7 @@ export function AddCitationMenu({ openCitationForm, close }) {
     function handleAcceptCitations() {
         dispatch(
             updateBibField({
+                bibId: bibliography.id,
                 key: "citations",
                 value: [...bibliography.citations, ...acceptedCitationsRef.current],
             })

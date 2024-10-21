@@ -55,9 +55,17 @@ export default function Home() {
     }
 
     function addBibToFavorite(id) {
-        console.log("clicked");
         const targetBib = bibliographies.find((bib) => bib.id === id);
-        dispatch(updateBibField({ bibId: id, key: "favorite", value: !targetBib?.favorite }));
+        dispatch(
+            updateBibField({
+                bibId: id,
+                key: "favorite",
+                value: !targetBib?.favorite,
+                options: {
+                    updateDateModified: false,
+                },
+            })
+        );
     }
 
     function openCoBibsSearchDialog() {
@@ -122,6 +130,7 @@ export default function Home() {
         });
     }
 
+    // TODO: Combine the Hpme list with the one used in MoveDialog.
     return (
         // mb-20 needed in pages with a Fab component
         <div className={defaults.classes.pageWithFab}>

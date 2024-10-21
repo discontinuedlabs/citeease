@@ -6,7 +6,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { Bibliography } from "../types/types.ts";
 import { RootState } from "../data/store/store.ts";
 import { useAuth } from "../context/AuthContext";
-import { retrieveUserData } from "../utils/dataUtils.ts";
+import retrieveUserData from "../utils/dataUtils.ts";
 import { deleteBib, mergeWithCurrentBibs, replaceAllBibs } from "../data/store/slices/bibsSlice";
 import { replaceAllSettings } from "../data/store/slices/settingsSlice";
 import db from "../data/db/firebase/firebase";
@@ -29,16 +29,16 @@ export function useUserDataSync(): void {
         // Synchronizes user data (bibliographies and settings) and sets up real-time updates for collaborative bibliographies.
         async function syncUserData() {
             try {
-                const userData = await retrieveUserData(currentUser);
+                const { bibliographies, settings } = await retrieveUserData(currentUser);
 
-                if (userData?.bibliographies) {
-                    dispatch(replaceAllBibs({ bibs: userData.bibliographies }));
+                if (bibliographies) {
+                    dispatch(replaceAllBibs({ bibs: bibliographies }));
                 }
-                if (userData?.settings) {
-                    dispatch(replaceAllSettings({ settings: userData.settings }));
+                if (settings) {
+                    dispatch(replaceAllSettings({ settings }));
                 }
 
-                const coBibsIds = getCollaborativeBibIds(userData!.bibliographies || []);
+                const coBibsIds = getCollaborativeBibIds(bibliographies || []);
 
                 const unsubscribeList = coBibsIds.map((id) => {
                     return onSnapshot(doc(db, "coBibs", id), (sDoc) => {

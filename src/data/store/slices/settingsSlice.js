@@ -12,16 +12,17 @@ const initialState = {
     loadedLocally: false,
 };
 
-function save(newState, currentUser = undefined) {
+async function save(newState, currentUser = undefined) {
     const serializedSettings = JSON.stringify(newState.data);
-    dexieDB.items.put({ id: "settings", value: serializedSettings });
+    await dexieDB.items.put({ id: "settings", value: serializedSettings });
+    const bibs = await dexieDB.items.get("bibliographies");
 
     if (!currentUser) return;
 
     const parsedCurrentUser = JSON.parse(currentUser);
     if (parsedCurrentUser) {
         const userRef = doc(firestoreDB, "users", parsedCurrentUser?.uid);
-        setDoc(userRef, { settings: JSON.stringify(newState.data) });
+        setDoc(userRef, { bibliographies: bibs.value, settings: JSON.stringify(newState.data) });
     }
 }
 
@@ -36,23 +37,24 @@ const settingsSlice = createSlice({
     initialState,
     reducers: {
         replaceAllSettings: (state, action) => {
-            const { settings } = action.payload;
+            const { settings, currentUser } = action.payload;
 
             const newState = { ...state, data: { ...state.data, ...settings } };
-            save(newState);
+            save(newState, currentUser);
             return newState;
         },
         updateSettingsField: (state, action) => {
-            const { key, value } = action.payload;
+            const { key, value, currentUser } = action.payload;
 
             const newSettings = { ...state.data, [key]: value };
 
             const newState = { ...state, data: newSettings };
-            save(newState);
+            save(newState, currentUser);
             return newState;
         },
-        resetAllSettings: () => {
-            save(initialState);
+        resetAllSettings: (_, action) => {
+            const { currentUser } = action.payload;
+            save(initialState, currentUser);
             return initialState;
         },
     },
