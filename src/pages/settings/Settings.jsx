@@ -6,6 +6,7 @@ import { List, Select, TopBar } from "../../components/ui/MaterialComponents";
 import { useDialog } from "../../context/DialogContext.tsx";
 import { useEnhancedDispatch, useTheme } from "../../hooks/hooks.tsx";
 import defaults from "../../assets/json/defaults.json";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Settings() {
     const { data: settings } = useSelector((state) => state.settings);
@@ -14,6 +15,7 @@ export default function Settings() {
     const dispatch = useEnhancedDispatch();
     const navigate = useNavigate();
     const setTheme = useTheme()[1];
+    const { currentUser } = useAuth();
 
     function openTagsManager() {
         tagsManagerDialog.show({
@@ -37,6 +39,9 @@ export default function Settings() {
 
             <List
                 items={[
+                    ...(currentUser
+                        ? [{ title: "Manage account", onClick: () => navigate("/account") }, "DIVIDER"]
+                        : []),
                     {
                         title: "Theme",
                         end: (

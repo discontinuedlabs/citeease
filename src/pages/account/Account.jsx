@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useAuth } from "../../context/AuthContext";
 import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
@@ -29,6 +29,12 @@ export default function Account() {
     const newPasswordRef = useRef();
     const confirmNewPasswordRef = useRef();
     const checkboxRef = useRef();
+
+    useEffect(() => {
+        if (!currentUser) {
+            navigate("/", { replace: true });
+        }
+    }, []);
 
     // FIXME: This doesn't change the email.
     function showUpdateEmailDialog() {
