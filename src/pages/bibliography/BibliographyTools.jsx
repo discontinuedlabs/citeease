@@ -34,7 +34,6 @@ import {
     TextButton,
     TextField,
 } from "../../components/ui/MaterialComponents";
-import { useToast } from "../../context/ToastContext.tsx";
 import { useDialog } from "../../context/DialogContext.tsx";
 import colorValues from "../../assets/json/colors.json";
 import defaults from "../../assets/json/defaults.json";
@@ -781,7 +780,6 @@ export function AddCitationMenu({ openCitationForm, close }) {
     const bibliography = useFindBib();
     const identifiersInputRef = useRef();
     const isOnline = useOnlineStatus();
-    const toast = useToast();
     const dialog = useDialog();
     const dispatch = useEnhancedDispatch();
     const acceptedCitationsRef = useRef([]);
@@ -832,21 +830,21 @@ export function AddCitationMenu({ openCitationForm, close }) {
         });
     }
 
-    function handleImportCitation() {
-        if (!isOnline && bibliography?.collab?.open) {
-            toast.show({ message: "You are offline", icon: "error", color: "red" });
-            return undefined;
-        }
-        return undefined;
-    }
+    // function handleImportCitation() {
+    //     if (!isOnline && bibliography?.collab?.open) {
+    //         toast.show({ message: "You are offline", icon: "error", color: "red" });
+    //         return undefined;
+    //     }
+    //     return undefined;
+    // }
 
-    function handleSearchByTitle() {
-        if (!isOnline) {
-            toast.show({ message: "You are offline", icon: "error", color: "red" });
-            return undefined;
-        }
-        return undefined;
-    }
+    // function handleSearchByTitle() {
+    //     if (!isOnline) {
+    //         toast.show({ message: "You are offline", icon: "error", color: "red" });
+    //         return undefined;
+    //     }
+    //     return undefined;
+    // }
 
     function showSourceTypes() {
         close();
@@ -914,19 +912,19 @@ export function AddCitationMenu({ openCitationForm, close }) {
                 </FilledButton>
             </form>
 
-            <Divider className="my-4" />
+            <Divider label="or" className="my-4" />
 
-            <TextButton className="mb-1 w-full" onClick={handleImportCitation}>
+            {/* <OutlinedButton className="mb-1 w-full" onClick={handleImportCitation}>
                 Search by title
-            </TextButton>
+            </OutlinedButton> */}
 
-            <TextButton className="mb-1 w-full" onClick={showSourceTypes}>
+            <OutlinedButton className="mb-1 w-full" onClick={showSourceTypes}>
                 Create citation by source type
-            </TextButton>
+            </OutlinedButton>
 
-            <TextButton className="w-full" onClick={handleSearchByTitle}>
+            {/* <OutlinedButton className="w-full" onClick={handleSearchByTitle}>
                 Import from file
-            </TextButton>
+            </OutlinedButton> */}
         </div>
     );
 }

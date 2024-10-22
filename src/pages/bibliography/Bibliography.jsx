@@ -1,7 +1,7 @@
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { deleteDoc, doc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import * as citationEngine from "../../utils/citationEngine";
 import {
     ReferenceEntries,
@@ -10,7 +10,6 @@ import {
     AddCitationMenu,
     CitationStylesMenu,
     TagsDialog,
-    IdAndPasswordDialogVisible,
     IconsDialog,
 } from "./BibliographyTools";
 import {
@@ -19,9 +18,6 @@ import {
     deleteSelectedCitations,
     duplicateSelectedCitations,
     updateBibField,
-    enableCollabInBib,
-    reEnableCollabInBib,
-    disableCollabInBib,
     uncheckAllCitations,
     updateCitation,
 } from "../../data/store/slices/bibsSlice";
@@ -64,8 +60,8 @@ export default function Bibliography() {
     const selectedTagsRef = useRef([]);
     const newIconObjectRef = useRef({});
 
-    const [collaborationOpened, setCollaborationOpened] = useState(bibliography?.collab?.open);
-    const [idAndPasswordDialogVisible, setIdAndPasswordDialogVisible] = useState(false);
+    const [collaborationOpened] = useState(bibliography?.collab?.open);
+    // const [idAndPasswordDialogVisible, setIdAndPasswordDialogVisible] = useState(false);
     const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
 
     useEffect(() => {
@@ -343,131 +339,131 @@ export default function Bibliography() {
         });
     }
 
-    async function openCollaboration(data) {
-        if (!isOnline && bibliography?.collab?.open) {
-            toast.show({ message: "You are offline", icon: "error", color: "red" });
-            return;
-        }
+    // async function openCollaboration(data) {
+    //     if (!isOnline && bibliography?.collab?.open) {
+    //         toast.show({ message: "You are offline", icon: "error", color: "red" });
+    //         return;
+    //     }
 
-        const newCoBib = {
-            ...bibliography,
-            collab: {
-                open: true,
-                id: data.id,
-                adminId: currentUser.uid,
-                collaborators: [{ name: currentUser.adminName, id: currentUser.uid }],
-                preferences: {},
-                changelog: [],
-                password: data.password,
-            },
-        };
-        const coBibsRef = doc(firestoreDB, "coBibs", data.id);
-        await setDoc(coBibsRef, { bibliography: JSON.stringify(newCoBib) });
-
-        dispatch(
-            enableCollabInBib({
-                bibId: bibliography.id,
-                coId: data.id,
-                password: data.password,
-            })
-        );
-        setCollaborationOpened(true);
-    }
-
-    async function reopenCollaboration() {
-        if (!isOnline && bibliography?.collab?.open) {
-            toast.show({ message: "You are offline", icon: "error", color: "red" });
-            return;
-        }
-
-        const reopenedCoBib = {
-            ...bibliography,
-            collab: {
-                ...bibliography.collab,
-                open: true,
-            },
-        };
-        const coBibsRef = doc(firestoreDB, "coBibs", bibliography.collab.id);
-        await setDoc(coBibsRef, { bibliography: JSON.stringify(reopenedCoBib) });
-        dispatch(reEnableCollabInBib({ bibId: bibliography.id }));
-        setCollaborationOpened(true);
-    }
-
-    async function closeCollaboration() {
-        if (!isOnline && bibliography?.collab?.open) {
-            toast.show({ message: "You are offline", icon: "error", color: "red" });
-            return;
-        }
-
-        await deleteDoc(doc(firestoreDB, "coBibs", bibliography.collab.id));
-        dispatch(disableCollabInBib({ bibId: bibliography.id }));
-        setCollaborationOpened(false);
-    }
-
-    function handleOpenCollaboration() {
-        if (!currentUser) {
-            // If not logged in
-            dialog.show({
-                headline: "Login required",
-                content: "You need to log in first to use this feature.",
-                actions: [
-                    ["Cancel", () => dialog.close()],
-                    ["Log in", () => navigate("/login")],
-                ],
-            });
-        } else if (bibliography?.collab) {
-            // When attempting to open a bibliography that was previously set up for collaboration
-            dialog.show({
-                headline: "Open collaboration?",
-                content: "Are you sure you want to open this bibliography for collaboration?",
-                actions: [
-                    ["Cancel", () => dialog.close()],
-                    ["Open", reopenCollaboration],
-                ],
-            });
-        } else {
-            const firstTimeEver = bibliographies.some((bib) => bib?.collab);
-            if (firstTimeEver) {
-                // First time to open collaboration in any bibliography
-                dialog.show({
-                    headline: "Open collaboration?",
-                    content: "Are you sure you want to open this bibliography for collaboration?",
-                    actions: [
-                        ["Cancel", () => dialog.close()],
-                        ["Open", () => setIdAndPasswordDialogVisible(true)],
-                    ],
-                });
-            } else {
-                // First time to open collaboration for the current bibliography only
-                dialog.show({
-                    headline: "Open collaboration?",
-                    content: "Are you sure you want to open this bibliography for collaboration?",
-                    actions: [
-                        ["Cancel", () => dialog.close()],
-                        ["Open", () => setIdAndPasswordDialogVisible(true)],
-                    ],
-                });
-            }
-        }
-    }
-
-    function handleCloseCollaboration() {
-        if (!isOnline && bibliography?.collab?.open) {
-            toast.show({ message: "You are offline", icon: "error", color: "red" });
-            return;
-        }
-
-        dialog.show({
-            headline: "Close collaboration?",
-            icon: "group_off",
-            content:
-                "This will remove all collaborators, permanently delete the collaboration history, and revoke access foe all contributors. The bibliography will be removed from their list of accessible bibliographies. Are you sure you want to proceed? Collaboration can be opened anytime if needed.",
-            actions: [
-                ["Close collaboration", closeCollaboration],
-                ["Cancel", () => dialog.close(), { type: "filled" }],
-            ],
-        });
-    }
+    //     const newCoBib = {
+    //         ...bibliography,
+    //         collab: {
+    //             open: true,
+    //             id: data.id,
+    //             adminId: currentUser.uid,
+    //             collaborators: [{ name: currentUser.adminName, id: currentUser.uid }],
+    //             preferences: {},
+    //             changelog: [],
+    //             password: data.password,
+    //         },
+    //     };
+    //     const coBibsRef = doc(firestoreDB, "coBibs", data.id);
+    //     await setDoc(coBibsRef, { bibliography: JSON.stringify(newCoBib) });
+    //
+    //     dispatch(
+    //         enableCollabInBib({
+    //             bibId: bibliography.id,
+    //             coId: data.id,
+    //             password: data.password,
+    //         })
+    //     );
+    //     setCollaborationOpened(true);
+    // }
+    //
+    // async function reopenCollaboration() {
+    //     if (!isOnline && bibliography?.collab?.open) {
+    //         toast.show({ message: "You are offline", icon: "error", color: "red" });
+    //         return;
+    //     }
+    //
+    //     const reopenedCoBib = {
+    //         ...bibliography,
+    //         collab: {
+    //             ...bibliography.collab,
+    //             open: true,
+    //         },
+    //     };
+    //     const coBibsRef = doc(firestoreDB, "coBibs", bibliography.collab.id);
+    //     await setDoc(coBibsRef, { bibliography: JSON.stringify(reopenedCoBib) });
+    //     dispatch(reEnableCollabInBib({ bibId: bibliography.id }));
+    //     setCollaborationOpened(true);
+    // }
+    //
+    // async function closeCollaboration() {
+    //     if (!isOnline && bibliography?.collab?.open) {
+    //         toast.show({ message: "You are offline", icon: "error", color: "red" });
+    //         return;
+    //     }
+    //
+    //     await deleteDoc(doc(firestoreDB, "coBibs", bibliography.collab.id));
+    //     dispatch(disableCollabInBib({ bibId: bibliography.id }));
+    //     setCollaborationOpened(false);
+    // }
+    //
+    // function handleOpenCollaboration() {
+    //     if (!currentUser) {
+    //         // If not logged in
+    //         dialog.show({
+    //             headline: "Login required",
+    //             content: "You need to log in first to use this feature.",
+    //             actions: [
+    //                 ["Cancel", () => dialog.close()],
+    //                 ["Log in", () => navigate("/login")],
+    //             ],
+    //         });
+    //     } else if (bibliography?.collab) {
+    //         // When attempting to open a bibliography that was previously set up for collaboration
+    //         dialog.show({
+    //             headline: "Open collaboration?",
+    //             content: "Are you sure you want to open this bibliography for collaboration?",
+    //             actions: [
+    //                 ["Cancel", () => dialog.close()],
+    //                 ["Open", reopenCollaboration],
+    //             ],
+    //         });
+    //     } else {
+    //         const firstTimeEver = bibliographies.some((bib) => bib?.collab);
+    //         if (firstTimeEver) {
+    //             // First time to open collaboration in any bibliography
+    //             dialog.show({
+    //                 headline: "Open collaboration?",
+    //                 content: "Are you sure you want to open this bibliography for collaboration?",
+    //                 actions: [
+    //                     ["Cancel", () => dialog.close()],
+    //                     ["Open", () => setIdAndPasswordDialogVisible(true)],
+    //                 ],
+    //             });
+    //         } else {
+    //             // First time to open collaboration for the current bibliography only
+    //             dialog.show({
+    //                 headline: "Open collaboration?",
+    //                 content: "Are you sure you want to open this bibliography for collaboration?",
+    //                 actions: [
+    //                     ["Cancel", () => dialog.close()],
+    //                     ["Open", () => setIdAndPasswordDialogVisible(true)],
+    //                 ],
+    //             });
+    //         }
+    //     }
+    // }
+    //
+    // function handleCloseCollaboration() {
+    //     if (!isOnline && bibliography?.collab?.open) {
+    //         toast.show({ message: "You are offline", icon: "error", color: "red" });
+    //         return;
+    //     }
+    //
+    //     dialog.show({
+    //         headline: "Close collaboration?",
+    //         icon: "group_off",
+    //         content:
+    //             "This will remove all collaborators, permanently delete the collaboration history, and revoke access foe all contributors. The bibliography will be removed from their list of accessible bibliographies. Are you sure you want to proceed? Collaboration can be opened anytime if needed.",
+    //         actions: [
+    //             ["Close collaboration", closeCollaboration],
+    //             ["Cancel", () => dialog.close(), { type: "filled" }],
+    //         ],
+    //     });
+    // }
 
     async function handleLeaveCollaboration() {
         if (!isOnline && bibliography?.collab?.open) {
@@ -683,7 +679,7 @@ export default function Bibliography() {
                 { headline: "Change style", onClick: () => setCitationStyleMenuVisible(true) },
                 { headline: "Change locale", onClick: handleChangeLocale },
                 { headline: "Bibliography settings", onClick: () => navigate(`/bib/${bibliography.id}/settings`) },
-                { headline: "Close collaboration", onClick: handleCloseCollaboration },
+                // { headline: "Close collaboration", onClick: handleCloseCollaboration },
             ];
         }
 
@@ -704,7 +700,7 @@ export default function Bibliography() {
                 { headline: "Change style", onClick: () => setCitationStyleMenuVisible(true) },
                 { headline: "Change locale", onClick: handleChangeLocale },
                 { headline: "Bibliography settings", onClick: () => navigate(`/bib/${bibliography.id}/settings`) },
-                { headline: "Open collaboration", onClick: handleOpenCollaboration },
+                // { headline: "Open collaboration", onClick: handleOpenCollaboration },
                 { headline: "Delete bibliography", onClick: handleDeleteBibliography },
             ];
         }
@@ -790,9 +786,9 @@ export default function Bibliography() {
                 />
             )}
 
-            {idAndPasswordDialogVisible && (
+            {/* {idAndPasswordDialogVisible && (
                 <IdAndPasswordDialogVisible setIsVisible={setIdAndPasswordDialogVisible} onSubmit={openCollaboration} />
-            )}
+            )} */}
 
             <Fab
                 label="Add citation"

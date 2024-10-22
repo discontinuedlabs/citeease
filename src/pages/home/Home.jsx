@@ -68,9 +68,9 @@ export default function Home() {
         );
     }
 
-    function openCoBibsSearchDialog() {
-        setCoBibsSearchDialogVisible(true);
-    }
+    // function openCoBibsSearchDialog() {
+    //     setCoBibsSearchDialogVisible(true);
+    // }
 
     const sortedBibliographies = Array.from(bibliographies).sort((a, b) => {
         const dateA = new Date(a.dateModified);
@@ -222,13 +222,13 @@ export default function Home() {
                                             AddBibDialog.close(id);
                                         },
                                     },
-                                    {
-                                        title: "Join collaborative bibliography",
-                                        onClick: () => {
-                                            openCoBibsSearchDialog();
-                                            AddBibDialog.close(id);
-                                        },
-                                    },
+                                    // {
+                                    //     title: "Join collaborative bibliography",
+                                    //     onClick: () => {
+                                    //         openCoBibsSearchDialog();
+                                    //         AddBibDialog.close(id);
+                                    //     },
+                                    // },
                                     {
                                         title: "Import from file",
                                         onClick: () => {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useFindBib } from "../../hooks/hooks.tsx";
-import { List, TopBar } from "../../components/ui/MaterialComponents";
+import { TopBar } from "../../components/ui/MaterialComponents";
 import { CollaboratorsManager } from "./BibliographySettingsTools";
 import defaults from "../../assets/json/defaults.json";
 
@@ -26,7 +26,7 @@ export default function BibliographySettings() {
     return (
         <div className={defaults.classes.page}>
             <TopBar headline="Bibliography settings" />
-            <List items={[{ title: "Manage collaborators", onClick: () => setCollaboratorsManagerVisible(true) }]} />
+            {/* <List items={[{ title: "Manage collaborators", onClick: () => setCollaboratorsManagerVisible(true) }]} /> */}
 
             {collaboratorsManagerVisible && <CollaboratorsManager setIsVisible={setCollaboratorsManagerVisible} />}
         </div>
