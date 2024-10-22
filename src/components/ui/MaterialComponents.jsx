@@ -31,8 +31,18 @@ export function CircularProgress({ className = "", value, ...rest }) {
     return <md-circular-progress value={value} class={className} {...rest} />;
 }
 
-export function LinearProgress({ className = "", value, ...rest }) {
-    if (!value) return <md-linear-progress four-color indeterminate class={className} {...rest} />;
+export function LinearProgress({ className = "", value, indeterminateWithValue = false, ...rest }) {
+    if (!value) {
+        return <md-linear-progress four-color indeterminate class={className} {...rest} />;
+    }
+    if (indeterminateWithValue) {
+        return (
+            <div className={`relative h-1 ${className}`} {...rest}>
+                <md-linear-progress value={value} class="absolute start-0 top-0 w-full" />
+                <md-linear-progress four-color indeterminate class="absolute start-0 top-0 w-full opacity-30" />
+            </div>
+        );
+    }
     return <md-linear-progress value={value} class={className} {...rest} />;
 }
 

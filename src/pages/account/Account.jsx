@@ -32,7 +32,7 @@ export default function Account() {
 
     useEffect(() => {
         if (!currentUser) {
-            navigate("/", { replace: true });
+            navigate("/login", { replace: true });
         }
     }, []);
 

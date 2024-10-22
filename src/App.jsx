@@ -24,9 +24,9 @@ import { useDocumentTitle, useMetaThemeColor, useUserDataSync } from "./hooks/ho
 export default function App() {
     const dispatch = useDispatch();
 
-    useDocumentTitle();
-    useMetaThemeColor();
-    useUserDataSync();
+    useDocumentTitle(); // Dynamically change the page title based on an H1 element content
+    useMetaThemeColor(); // Update the theme color of the application dynamically (for mobile)
+    useUserDataSync(); // Synchronize user data
 
     // Load data from IndexedDB on initial render
     useEffect(() => {

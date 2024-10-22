@@ -6,6 +6,7 @@ import locatorTypes from "../../assets/json/locatorOptions.json";
 import * as citationEngine from "../../utils/citationEngine";
 import sourceTypes from "../../assets/json/sourceTypes.json";
 import {
+    addNewBibAndMoveSelectedCitations,
     handleMasterEntriesCheckbox,
     toggleEntryCheckbox,
     updateBibField,
@@ -38,6 +39,7 @@ import { useDialog } from "../../context/DialogContext.tsx";
 import colorValues from "../../assets/json/colors.json";
 import defaults from "../../assets/json/defaults.json";
 import { EmptyStar, FilledStar } from "../../components/ui/Star";
+import { useToast } from "../../context/ToastContext.tsx";
 
 const DateInput = React.lazy(() => import("../../components/form/DateInput"));
 const AuthorsInput = React.lazy(() => import("../../components/form/AuthorsInput"));
@@ -347,6 +349,86 @@ export function IntextCitationDialog() {
     );
 }
 
+export function MoveDialog({ setReceiverBibs }) {
+    const bibliographies = useSelector((state) => state.bibliographies.data);
+    const { tags } = useSelector((state) => state.settings.data);
+    const [theme] = useTheme();
+    const bibliography = useFindBib();
+    const [selectedBibIds, setSelectedBibIds] = useState([]);
+
+    useEffect(() => {
+        setReceiverBibs(selectedBibIds);
+    }, [selectedBibIds]);
+
+    function handleSelect(bibId) {
+        const index = selectedBibIds.indexOf(bibId);
+        if (index !== -1) {
+            setSelectedBibIds((prevSelectedBibIds) => prevSelectedBibIds.filter((id) => id !== bibId));
+        } else {
+            setSelectedBibIds((prevSelectedBibIds) => [...prevSelectedBibIds, bibId]);
+        }
+    }
+
+    return (
+        <List
+            items={bibliographies.map((bib) => {
+                if (bib.id !== bibliography.id) {
+                    const bibTags = tags.filter((tag) => bib.tags.includes(tag.id));
+                    const defaultIcon = defaults.bibliography.icon;
+                    return {
+                        start: (
+                            <Icon
+                                style={{
+                                    background: hslToHsla(
+                                        colorValues[theme][bib?.icon?.color || defaultIcon.color],
+                                        0.25
+                                    ),
+                                }}
+                                className="rounded-full p-5"
+                                name={bib?.icon?.name || defaultIcon.name}
+                            />
+                        ),
+                        title: (
+                            <div className="flex items-baseline justify-between">
+                                <div className="flex items-baseline gap-1 font-semibold">
+                                    {bib.title}
+                                    <small className="font-normal">{bib.citations.length}</small>
+                                </div>
+                                <small>{timeAgo(bib.dateModified)}</small>
+                            </div>
+                        ),
+                        description: (
+                            <div className="flex items-center justify-between">
+                                <div>{bib.style.name.short || bib.style.name.long.replace(/\((.*?)\)/g, "")}</div>
+                                <button type="button" className="h-6 w-6 cursor-pointer border-none bg-transparent p-0">
+                                    {bib?.favorite ? <FilledStar /> : <EmptyStar />}
+                                </button>
+                            </div>
+                        ),
+                        content: bibTags && bibTags.length !== 0 && (
+                            <ChipSet
+                                chips={bibTags.map((tag) => {
+                                    return {
+                                        ...tag,
+                                        selected: true,
+                                    };
+                                })}
+                            />
+                        ),
+                        onClick: () => handleSelect(bib.id),
+                        style: {
+                            backgroundColor: selectedBibIds.includes(bib.id)
+                                ? "var(--md-sys-color-secondary-container)"
+                                : "",
+                        },
+                    };
+                }
+                return null;
+            })}
+        />
+    );
+}
+
 export function ReferenceEntries(props) {
     const { openCitationForm } = props;
     const bibliography = useFindBib();
@@ -563,20 +645,26 @@ export function ReferenceEntries(props) {
     );
 }
 
-/**
- * **TODO**:
- * - [ ] `Accept` button should be `Stop` when it's still processing.
- * - [ ] Checkboxes shouldn't be present until it processing identifiers.
- * - [ ] Add quick options directly in the `SmartGenerator` component such as `Copy` and `Move`.
- */
+// FIXME: Component has many replicated elements and functions
 export function SmartGenerator({ input, setAcceptedCitations, openCitationForm }) {
+    const { data: bibliographies } = useSelector((state) => state.bibliographies);
     const bibliography = useFindBib();
     const [references, setReferences] = useState([]);
     const [inputArray, setInputArray] = useState(
         input.split(/\n+/).map((line) => [line.replace(/^(-|\*|\d+[.)-])?\s+/, "").trim(), uid()])
     );
     const [newCitations, setNewCitations] = useState([]);
+    const unbrokenCitations = newCitations.filter((cit) => cit.content);
     const totalIdentifiers = input.split(/\n+/).length;
+    const allChecked = unbrokenCitations.every((cit) => cit.isChecked);
+    const allUnchecked = unbrokenCitations.every((cit) => !cit.isChecked);
+    const [stopped, setStopped] = useState(false);
+    const [copied, setCopied] = useState(false);
+    const dialog = useDialog();
+    const receiverBibsRef = useRef();
+    const isOnline = useOnlineStatus();
+    const toast = useToast();
+    const dispatch = useEnhancedDispatch();
 
     useEffect(() => {
         async function generateCitation() {
@@ -623,7 +711,7 @@ export function SmartGenerator({ input, setAcceptedCitations, openCitationForm }
             return undefined;
         }
 
-        if (inputArray.length > 0) {
+        if (inputArray.length !== 0 && !stopped) {
             try {
                 generateCitation();
             } catch (error) {
@@ -658,28 +746,148 @@ export function SmartGenerator({ input, setAcceptedCitations, openCitationForm }
         );
     }
 
+    function handleMasterCheck() {
+        setNewCitations((prevNewCitations) => {
+            // If all citations are checked, uncheck all of them
+            if (allChecked) {
+                return prevNewCitations.map((cit) => ({ ...cit, isChecked: false }));
+            }
+            // If not all citations are checked, check all of them
+            return prevNewCitations.map((cit) => ({ ...cit, isChecked: true }));
+        });
+    }
+
+    // TODO: Only copy the selected ones.
+    function handleCopyContent() {
+        try {
+            const div = document.createElement("div");
+            references.forEach((cit) => {
+                const parser = new DOMParser();
+                const docFragment = parser.parseFromString(cit, "text/html");
+                const element = docFragment.body.firstChild;
+                div.appendChild(element);
+                div.appendChild(document.createElement("br"));
+            });
+
+            const sanitizedInnerText = DOMPurify.sanitize(div.innerText);
+            navigator.clipboard.writeText(sanitizedInnerText);
+            setCopied(true);
+        } catch (error) {
+            console.error("Failed to copy text: ", error);
+        }
+    }
+
+    // TODO: Only move the selected ones.
+    function showMoveDialog() {
+        function moveCitations() {
+            if (
+                !isOnline &&
+                bibliographies
+                    .filter((bib) => !receiverBibsRef.current.includes(bib.id))
+                    .some((sBib) => sBib?.collab?.open)
+            ) {
+                toast.show({
+                    message: "You can't move to a collaborative bibliography in offline mode",
+                    icon: "error",
+                    color: "red",
+                });
+                return;
+            }
+
+            const movedCitations = newCitations.map((cit) => {
+                const newId = uid();
+                return { ...cit, id: newId, content: { ...cit.content, id: newId } };
+            });
+
+            receiverBibsRef.current.forEach((receiverId) => {
+                const receiverBib = bibliographies.find((bib) => bib.id === receiverId);
+                dispatch(
+                    updateBibField({
+                        bibId: receiverId,
+                        key: "citations",
+                        value: [...receiverBib.citations, ...movedCitations],
+                    })
+                );
+            });
+        }
+
+        function addNewBib() {
+            dispatch(
+                addNewBibAndMoveSelectedCitations({
+                    checkedCitations: newCitations,
+                    bibliographyStyle: bibliography?.style,
+                })
+            );
+        }
+
+        if (bibliographies.length > 1) {
+            dialog.show({
+                headline: "Move",
+                content: (
+                    <MoveDialog
+                        setReceiverBibs={(ids) => {
+                            receiverBibsRef.current = ids;
+                        }}
+                    />
+                ),
+                actions: [
+                    ["Cancel", () => dialog.close()],
+                    ["Move", moveCitations],
+                ],
+            });
+        } else {
+            dialog.show({
+                headline: "No bibliographies to move",
+                content:
+                    "You have no other bibliography to move citations to. Would you like to create a new bibliography and move the selected citations to it?",
+                actions: [
+                    ["Cancel", () => dialog.close()],
+                    ["Create new bibliography", addNewBib],
+                ],
+            });
+        }
+    }
+
     return (
         <div className="relative">
-            <div className="mb-4 flex justify-between px-4">
-                <p className="m-0">Processing identifiers</p>
+            <div className="mb-2 flex justify-between px-4">
+                <h4 className="m-0">{inputArray.length !== 0 ? "Processing" : "Processed"} identifiers</h4>
                 <p className="m-0">{`${totalIdentifiers}/${totalIdentifiers - inputArray.length}`}</p>
             </div>
-            <LinearProgress value={(totalIdentifiers - inputArray.length) / totalIdentifiers} />
-            <div
-                className="sticky top-0 z-10"
-                style={{ backgroundColor: "var(--md-sys-color-surface-container-high)" }}
-            >
-                <div className="flex justify-start p-2">
-                    <div className="p-2">
-                        <Checkbox />
+            {inputArray.length !== 0 && !stopped ? (
+                <div className="grid gap-2">
+                    <LinearProgress
+                        indeterminateWithValue
+                        value={(totalIdentifiers - inputArray.length) / totalIdentifiers}
+                    />
+                    <div className="px-4">
+                        <FilledButton className="w-full" onClick={() => setStopped(true)}>
+                            Stop
+                        </FilledButton>
                     </div>
-                    <IconButton name="content_copy" />
-                    <IconButton name="open_with" /* move */ />
-                    <IconButton name="ios_share" /* export */ />
-                    <TextButton className="ml-auto">In-text citation</TextButton>
                 </div>
-                <Divider />
-            </div>
+            ) : (
+                <div
+                    className="sticky top-0 z-10"
+                    style={{ backgroundColor: "var(--md-sys-color-surface-container-high)" }}
+                >
+                    <div className="flex justify-start p-2">
+                        <div className="p-2">
+                            <Checkbox
+                                checked={allChecked}
+                                indeterminate={!allChecked && !allUnchecked}
+                                onChange={handleMasterCheck}
+                            />
+                        </div>
+                        <IconButton onClick={handleCopyContent} name={copied ? "check" : "content_copy"} />
+                        <IconButton onClick={showMoveDialog} name="open_with" />
+                        <IconButton name="ios_share" />
+                        <OutlinedButton className="ml-auto">In-text citation</OutlinedButton>
+                    </div>
+                    <Divider />
+                </div>
+            )}
+
             <List
                 items={newCitations.map((cit) => {
                     function getRefId(ref) {
@@ -751,18 +959,24 @@ export function SmartGenerator({ input, setAcceptedCitations, openCitationForm }
                                         ? hangingIndentationStyle
                                         : {}
                                 }
-                                onClick={() =>
-                                    openCitationForm(cit, (newContent) => updateContent(cit.content.id, newContent), {
-                                        formTitle: "Edit reference",
-                                        applyLabel: "Apply changes",
-                                    })
-                                }
+                                onClick={() => {
+                                    if (inputArray.length === 0 || stopped) {
+                                        openCitationForm(
+                                            cit,
+                                            (newContent) => updateContent(cit.content.id, newContent),
+                                            {
+                                                formTitle: "Edit reference",
+                                                applyLabel: "Apply changes",
+                                            }
+                                        );
+                                    }
+                                }}
                             >
                                 {parseHtmlToJsx(sanitizedReference)}
                             </div>
                         ),
                         start:
-                            inputArray.length === 0 ? (
+                            inputArray.length === 0 || stopped ? (
                                 <Checkbox checked={cit.isChecked} onChange={() => handleCheckboxOnChange(cit.id)} />
                             ) : (
                                 ""
@@ -926,85 +1140,6 @@ export function AddCitationMenu({ openCitationForm, close }) {
                 Import from file
             </OutlinedButton> */}
         </div>
-    );
-}
-
-export function MoveDialog({ setReceiverBibs }) {
-    const bibliographies = useSelector((state) => state.bibliographies.data);
-    const { theme, tags } = useSelector((state) => state.settings.data);
-    const bibliography = useFindBib();
-    const [selectedBibIds, setSelectedBibIds] = useState([]);
-
-    useEffect(() => {
-        setReceiverBibs(selectedBibIds);
-    }, [selectedBibIds]);
-
-    function handleSelect(bibId) {
-        const index = selectedBibIds.indexOf(bibId);
-        if (index !== -1) {
-            setSelectedBibIds((prevSelectedBibIds) => prevSelectedBibIds.filter((id) => id !== bibId));
-        } else {
-            setSelectedBibIds((prevSelectedBibIds) => [...prevSelectedBibIds, bibId]);
-        }
-    }
-
-    return (
-        <List
-            items={bibliographies.map((bib) => {
-                if (bib.id !== bibliography.id) {
-                    const bibTags = tags.filter((tag) => bib.tags.includes(tag.id));
-                    const defaultIcon = defaults.bibliography.icon;
-                    return {
-                        start: (
-                            <Icon
-                                style={{
-                                    background: hslToHsla(
-                                        colorValues[theme][bib?.icon?.color || defaultIcon.color],
-                                        0.25
-                                    ),
-                                }}
-                                className="rounded-full p-5"
-                                name={bib?.icon?.name || defaultIcon.name}
-                            />
-                        ),
-                        title: (
-                            <div className="flex items-baseline justify-between">
-                                <div className="flex items-baseline gap-1 font-semibold">
-                                    {bib.title}
-                                    <small className="font-normal">{bib.citations.length}</small>
-                                </div>
-                                <small>{timeAgo(bib.dateModified)}</small>
-                            </div>
-                        ),
-                        description: (
-                            <div className="flex items-center justify-between">
-                                <div>{bib.style.name.short || bib.style.name.long.replace(/\((.*?)\)/g, "")}</div>
-                                <button type="button" className="h-6 w-6 cursor-pointer border-none bg-transparent p-0">
-                                    {bib?.favorite ? <FilledStar /> : <EmptyStar />}
-                                </button>
-                            </div>
-                        ),
-                        content: bibTags && bibTags.length !== 0 && (
-                            <ChipSet
-                                chips={bibTags.map((tag) => {
-                                    return {
-                                        ...tag,
-                                        selected: true,
-                                    };
-                                })}
-                            />
-                        ),
-                        onClick: () => handleSelect(bib.id),
-                        style: {
-                            backgroundColor: selectedBibIds.includes(bib.id)
-                                ? "var(--md-sys-color-secondary-container)"
-                                : "",
-                        },
-                    };
-                }
-                return null;
-            })}
-        />
     );
 }
 

@@ -314,7 +314,6 @@ const bibsSlice = createSlice({
                         };
                     }
                     // If some citations are checked, check the rest
-
                     return {
                         ...bib,
                         citations: bib.citations.map((cit) => ({ ...cit, isChecked: true })),
