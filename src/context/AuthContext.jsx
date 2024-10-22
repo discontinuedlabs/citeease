@@ -61,8 +61,11 @@ export function AuthProvider({ children }) {
         return auth.currentUser;
     }
 
-    async function updateEmail(email) {
-        await verifyBeforeUpdateEmail(currentUser, email);
+    async function updateEmail(newEmail, password) {
+        const credential = EmailAuthProvider.credential(auth.currentUser.email, password);
+        await reauthenticateWithCredential(auth.currentUser, credential);
+        await verifyBeforeUpdateEmail(currentUser, newEmail);
+        console.log(await verifyBeforeUpdateEmail(currentUser, newEmail));
         return auth.currentUser;
     }
 

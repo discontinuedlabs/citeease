@@ -1,9 +1,6 @@
 import { useSelector } from "react-redux";
-import { useId, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { updateSettingsField, resetAllSettings } from "../../data/store/slices/settingsSlice";
-import { useAuth } from "../../context/AuthContext";
-import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
+import { useState } from "react";
+import { updateSettingsField } from "../../data/store/slices/settingsSlice";
 import { uid } from "../../utils/utils.ts";
 import {
     ChipSet,
@@ -234,121 +231,6 @@ export function IconsManager() {
                 </div>
 
                 <OutlinedButton onClick={restoreDefaultTags}>Restore default icons</OutlinedButton>
-            </form>
-        </div>
-    );
-}
-
-export function ChangePasswordDialog(props) {
-    const { setIsVisible } = props;
-    const { changePassword } = useAuth();
-    const id = useId();
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState("");
-    const prevPasswordRef = useRef();
-    const newPasswordRef = useRef();
-    const confirmPasswordRef = useRef();
-
-    async function handleSUbmit(event) {
-        event.preventDefault();
-
-        if (newPasswordRef.current.value !== confirmPasswordRef.current.value) {
-            setError("Passwords do not match.");
-        } else {
-            try {
-                setError("");
-                setIsLoading(true);
-                await changePassword(prevPasswordRef.current.value, newPasswordRef.current.value);
-                setIsVisible(false);
-                // TODO: Show success toast message
-            } catch (tError) {
-                setError(`Failed to update password: ${tError}`);
-            }
-
-            setIsLoading(false);
-        }
-    }
-
-    return (
-        <div>
-            <button type="button" onClick={() => setIsVisible(false)}>
-                X
-            </button>
-            <h3>Change password</h3>
-            <pre>{error}</pre>
-            <form onSubmit={handleSUbmit}>
-                <label htmlFor={`${id}-prevPassword`}>
-                    Previous password
-                    <input type="password" id={`${id}-prevPassword`} ref={prevPasswordRef} required />
-                </label>
-                <label htmlFor={`${id}-newPassword`}>
-                    New password
-                    <input type="password" id={`${id}-newPassword`} ref={newPasswordRef} required />
-                </label>
-                <label htmlFor={`${id}-confirmPassword`}>
-                    Confirm password
-                    <input type="password" id={`${id}-confirmPassword`} ref={confirmPasswordRef} required />
-                </label>
-                <button type="submit" disabled={isLoading}>
-                    Update password
-                </button>
-            </form>
-        </div>
-    );
-}
-
-export function DeleteAccountDialog(props) {
-    const { setIsVisible } = props;
-    const { deleteAccount } = useAuth();
-    const id = useId();
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState("");
-    const passwordRef = useRef();
-    const checkboxRef = useRef();
-    const navigate = useNavigate();
-    const dispatch = useEnhancedDispatch();
-
-    async function handleSUbmit(event) {
-        event.preventDefault();
-
-        try {
-            setError("");
-            setIsLoading(true);
-            await deleteAccount(passwordRef.current.value);
-            if (!checkboxRef.current.checked) {
-                dispatch(deleteAllBibs());
-                dispatch(resetAllSettings());
-            }
-            navigate("/");
-            // TODO: Show success toast message
-        } catch (tError) {
-            setError(`Failed to delete account: ${tError}`);
-        }
-
-        setIsLoading(false);
-    }
-
-    return (
-        <div>
-            <button type="button" onClick={() => setIsVisible(false)}>
-                X
-            </button>
-            <h3>Delete account?</h3>
-            <pre>{error}</pre>
-            <form onSubmit={handleSUbmit}>
-                <label htmlFor={`${id}-password`}>
-                    Type your password to delete your account.
-                    <input id={`${id}-password`} type="password" ref={passwordRef} required />
-                </label>
-
-                <label htmlFor={`${id}-checkbox`}>
-                    <input id={`${id}-checkbox`} type="checkbox" ref={checkboxRef} />
-                    Keep a copy of the associated data locally
-                </label>
-                <strong>Warning: This action can&apos;t be undone</strong>
-                <button type="submit" disabled={isLoading}>
-                    Delete account
-                </button>
             </form>
         </div>
     );
