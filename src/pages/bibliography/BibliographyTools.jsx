@@ -225,9 +225,9 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
     );
 });
 
-export function IntextCitationDialog() {
+export function IntextCitationDialog({ selectedCitations }) {
     const bibliography = useFindBib();
-    const checkedCitations = bibliography?.citations.filter((cit) => cit.isChecked);
+    const checkedCitations = selectedCitations || bibliography?.citations.filter((cit) => cit.isChecked);
     const [intextCitation, setIntextCitation] = useState("");
     const [citationsForIntext, setCitationsForIntext] = useState(checkedCitations.map((cit) => cit.content));
     const [copied, setCopied] = useState(false);
@@ -272,6 +272,16 @@ export function IntextCitationDialog() {
         }
     }
 
+    function getTitleToShow(citation) {
+        if (citation.title) {
+            return citation.title;
+        }
+        if (citation?.author.length !== 0 && citation?.issued) {
+            return `${citation?.author[0]?.family} (${citation?.issued["date-parts"][0][0]})`;
+        }
+        return citation?.DOI || citation?.URL || citation?.ISBN || citation?.ISSN;
+    }
+
     return (
         <div className="px-4">
             <div className="flex justify-between">
@@ -291,11 +301,7 @@ export function IntextCitationDialog() {
             </p>
             {citationsForIntext.map((cit) => (
                 <div key={cit.id}>
-                    <h4 className="mb-1 overflow-hidden text-ellipsis whitespace-nowrap">
-                        {cit?.title || (cit?.author.length !== 0 && cit?.issued)
-                            ? `${cit?.author[0]?.family} (${cit?.issued["date-parts"][0][0]})`
-                            : cit?.DOI || cit?.URL || cit?.ISBN || cit?.ISSN}
-                    </h4>
+                    <h4 className="mb-1 overflow-hidden text-ellipsis whitespace-nowrap">{getTitleToShow(cit)}</h4>
 
                     <div className="flex w-full">
                         <Select
@@ -321,27 +327,6 @@ export function IntextCitationDialog() {
                         />
                     </div>
 
-                    <div className="flex w-full">
-                        <TextField
-                            label="Prefix"
-                            name="intext-prefix"
-                            type="text"
-                            placeholder="See "
-                            value={cit?.prefix}
-                            onChange={(event) => updateContentField(cit.id, "prefix", event.target.value)}
-                            className="flex-1"
-                        />
-                        <TextField
-                            label="Suffix"
-                            name="intext-suffix"
-                            type="text"
-                            placeholder=" (arguing that X is Y"
-                            value={cit?.suffix}
-                            onChange={(event) => updateContentField(cit.id, "suffix", event.target.value)}
-                            className="flex-1"
-                        />
-                    </div>
-
                     <small>{locatorTypes[cit.label]?.def || DEFAULT_LOCATOR.def}</small>
                 </div>
             ))}
@@ -349,6 +334,7 @@ export function IntextCitationDialog() {
     );
 }
 
+// FIXME: Component has replicated elements
 export function MoveDialog({ setReceiverBibs }) {
     const bibliographies = useSelector((state) => state.bibliographies.data);
     const { tags } = useSelector((state) => state.settings.data);
@@ -645,7 +631,6 @@ export function ReferenceEntries(props) {
     );
 }
 
-// FIXME: Component has many replicated elements and functions
 export function SmartGenerator({ input, setAcceptedCitations, openCitationForm }) {
     const { data: bibliographies } = useSelector((state) => state.bibliographies);
     const bibliography = useFindBib();
@@ -733,6 +718,7 @@ export function SmartGenerator({ input, setAcceptedCitations, openCitationForm }
 
         formatBibliography();
         setAcceptedCitations(newCitations.filter((cit) => cit?.isChecked));
+        setCopied(false);
     }, [newCitations]);
 
     function handleCheckboxOnChange(id) {
@@ -757,11 +743,18 @@ export function SmartGenerator({ input, setAcceptedCitations, openCitationForm }
         });
     }
 
-    // TODO: Only copy the selected ones.
-    function handleCopyContent() {
+    async function handleCopyContent() {
         try {
+            const formattedCitations = await citationEngine.formatBibliography(
+                newCitations.filter((cit) => cit.content !== undefined && cit.isChecked),
+                bibliography.style,
+                "html",
+                bibliography?.locale
+            );
+
             const div = document.createElement("div");
-            references.forEach((cit) => {
+
+            formattedCitations.forEach((cit) => {
                 const parser = new DOMParser();
                 const docFragment = parser.parseFromString(cit, "text/html");
                 const element = docFragment.body.firstChild;
@@ -777,7 +770,6 @@ export function SmartGenerator({ input, setAcceptedCitations, openCitationForm }
         }
     }
 
-    // TODO: Only move the selected ones.
     function showMoveDialog() {
         function moveCitations() {
             if (
@@ -794,10 +786,12 @@ export function SmartGenerator({ input, setAcceptedCitations, openCitationForm }
                 return;
             }
 
-            const movedCitations = newCitations.map((cit) => {
-                const newId = uid();
-                return { ...cit, id: newId, content: { ...cit.content, id: newId } };
-            });
+            const movedCitations = newCitations
+                .filter((cit) => cit.content !== undefined && cit.isChecked)
+                .map((cit) => {
+                    const newId = uid();
+                    return { ...cit, id: newId, content: { ...cit.content, id: newId } };
+                });
 
             receiverBibsRef.current.forEach((receiverId) => {
                 const receiverBib = bibliographies.find((bib) => bib.id === receiverId);
@@ -814,7 +808,7 @@ export function SmartGenerator({ input, setAcceptedCitations, openCitationForm }
         function addNewBib() {
             dispatch(
                 addNewBibAndMoveSelectedCitations({
-                    checkedCitations: newCitations,
+                    checkedCitations: newCitations.filter((cit) => cit.content !== undefined && cit.isChecked),
                     bibliographyStyle: bibliography?.style,
                 })
             );
@@ -846,6 +840,18 @@ export function SmartGenerator({ input, setAcceptedCitations, openCitationForm }
                 ],
             });
         }
+    }
+
+    function showIntextCitationDialog() {
+        dialog.show({
+            headline: "In-text citation",
+            content: (
+                <IntextCitationDialog
+                    selectedCitations={newCitations.filter((cit) => cit.content !== undefined && cit.isChecked)}
+                />
+            ),
+            actions: [["Cancel", () => dialog.close()]],
+        });
     }
 
     return (
@@ -881,8 +887,10 @@ export function SmartGenerator({ input, setAcceptedCitations, openCitationForm }
                         </div>
                         <IconButton onClick={handleCopyContent} name={copied ? "check" : "content_copy"} />
                         <IconButton onClick={showMoveDialog} name="open_with" />
-                        <IconButton name="ios_share" />
-                        <OutlinedButton className="ml-auto">In-text citation</OutlinedButton>
+                        {/* <IconButton name="ios_share" /> */}
+                        <OutlinedButton onClick={showIntextCitationDialog} className="ml-auto">
+                            In-text citation
+                        </OutlinedButton>
                     </div>
                     <Divider />
                 </div>
