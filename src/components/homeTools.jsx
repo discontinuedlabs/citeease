@@ -2,12 +2,18 @@ import { useNavigate } from "react-router-dom";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useEffect, useId, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import db from "../../data/db/firebase/firebase";
-import { useAuth } from "../../context/AuthContext";
-import { mergeWithCurrentBibs } from "../../data/store/slices/bibsSlice";
-import { useToast } from "../../context/ToastContext.tsx";
-import { useEnhancedDispatch } from "../../hooks/hooks.tsx";
-import { useDialog } from "../../context/DialogContext.tsx";
+import db from "../data/db/firebase/firebase";
+import { useAuth } from "../context/AuthContext";
+import { mergeWithCurrentBibs, updateBibField } from "../data/store/slices/bibsSlice";
+import { useToast } from "../context/ToastContext.tsx";
+import { useEnhancedDispatch, useFindBib, useTheme } from "../hooks/hooks.tsx";
+import { useDialog } from "../context/DialogContext.tsx";
+import { ChipSet, Icon, List } from "./ui/MaterialComponents";
+import defaults from "../assets/json/defaults.json";
+import { hslToHsla } from "../utils/conversionUtils.tsx";
+import colorValues from "../assets/json/colors.json";
+import { timeAgo } from "../utils/utils.ts";
+import { EmptyStar, FilledStar } from "./ui/Star";
 
 export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib = undefined }) {
     const { data: bibliographies, loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies);
@@ -162,6 +168,93 @@ export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib = undefined }
     );
 }
 
-export function Temp() {
-    return <div />;
+export function BibsList({ hideCurrentBib = false, disableStar = false, highlightedBibs = [], onBibClick }) {
+    const { data: bibliographies } = useSelector((state) => state.bibliographies);
+    const { data: settings } = useSelector((state) => state.settings);
+    const currentBib = useFindBib();
+    const [theme] = useTheme();
+    const dispatch = useEnhancedDispatch();
+
+    const sortedBibliographies = Array.from(bibliographies).sort((a, b) => {
+        const dateA = new Date(a.dateModified);
+        const dateB = new Date(b.dateModified);
+        return dateB - dateA;
+    });
+
+    function addBibToFavorite(id) {
+        const targetBib = bibliographies.find((bib) => bib.id === id);
+        dispatch(
+            updateBibField({
+                bibId: id,
+                key: "favorite",
+                value: !targetBib?.favorite,
+                options: {
+                    updateDateModified: false,
+                },
+            })
+        );
+    }
+
+    return (
+        <List
+            items={sortedBibliographies.map((bib) => {
+                if (hideCurrentBib && bib.id === currentBib.id) return null;
+
+                const bibTags = settings?.tags.filter((tag) => bib.tags.includes(tag.id));
+                const defaultIcon = defaults.bibliography.icon;
+                return {
+                    start: (
+                        <Icon
+                            style={{
+                                background: hslToHsla(colorValues[theme][bib?.icon?.color || defaultIcon.color], 0.25),
+                            }}
+                            className="rounded-full p-5"
+                            name={bib?.icon?.name || defaultIcon.name}
+                        />
+                    ),
+                    title: (
+                        <div className="flex items-baseline justify-between">
+                            <div className="flex items-baseline gap-1 font-semibold">
+                                {bib.title}
+                                <small className="font-normal">{bib.citations.length}</small>
+                            </div>
+                            <small>{timeAgo(bib.dateModified)}</small>
+                        </div>
+                    ),
+                    description: (
+                        <div className="flex items-center justify-between">
+                            <div>{bib.style.name.short || bib.style.name.long.replace(/\((.*?)\)/g, "")}</div>
+                            <button
+                                type="button"
+                                className="h-6 w-6 cursor-pointer border-none bg-transparent p-0"
+                                onClick={() => {
+                                    if (!disableStar) {
+                                        addBibToFavorite(bib.id);
+                                    }
+                                }}
+                            >
+                                {bib?.favorite ? <FilledStar /> : <EmptyStar />}
+                            </button>
+                        </div>
+                    ),
+                    content: bibTags && bibTags.length !== 0 && (
+                        <ChipSet
+                            chips={bibTags.map((tag) => {
+                                return {
+                                    ...tag,
+                                    selected: true,
+                                };
+                            })}
+                        />
+                    ),
+                    onClick: () => onBibClick(bib),
+                    style: {
+                        backgroundColor: highlightedBibs.includes(bib.id)
+                            ? "var(--md-sys-color-secondary-container)"
+                            : "",
+                    },
+                };
+            })}
+        />
+    );
 }

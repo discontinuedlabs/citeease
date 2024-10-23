@@ -1,24 +1,20 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { CitationStylesMenu } from "../bibliography/BibliographyTools";
+import { CitationStylesMenu } from "../../components/bibTools";
 import * as citationEngine from "../../utils/citationEngine";
-import { addNewBib, createBibFromJson, updateBibField } from "../../data/store/slices/bibsSlice";
+import { addNewBib, createBibFromJson } from "../../data/store/slices/bibsSlice";
 import { useAuth } from "../../context/AuthContext";
-import { CoBibsSearchDialog } from "./HomeTools";
-import { useEnhancedDispatch, useTheme } from "../../hooks/hooks.tsx";
-import { ChipSet, EmptyPage, Fab, Icon, List, TopBar } from "../../components/ui/MaterialComponents";
-import { parseQueryString, timeAgo, uid } from "../../utils/utils.ts";
+import { BibsList, CoBibsSearchDialog } from "../../components/homeTools";
+import { useEnhancedDispatch } from "../../hooks/hooks.tsx";
+import { EmptyPage, Fab, List, TopBar } from "../../components/ui/MaterialComponents";
+import { parseQueryString, uid } from "../../utils/utils.ts";
 import { useDialog } from "../../context/DialogContext.tsx";
 import { prioritizeAvailableStyles } from "../../utils/citationUtils.ts";
-import { hslToHsla } from "../../utils/conversionUtils.tsx";
-import colorValues from "../../assets/json/colors.json";
 import defaults from "../../assets/json/defaults.json";
-import { EmptyStar, FilledStar } from "../../components/ui/Star";
 
 export default function Home() {
     const { data: bibliographies, loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies);
-    const { data: settings } = useSelector((state) => state.settings);
     const [citationStyleMenuVisible, setCitationStyleMenuVisible] = useState(false);
     const [coBibsSearchDialogVisible, setCoBibsSearchDialogVisible] = useState(false);
     const [tryingToJoinBib, setTryingToJoinBib] = useState(undefined);
@@ -28,7 +24,6 @@ export default function Home() {
     const dispatch = useEnhancedDispatch();
     const AddBibDialog = useDialog();
     const importDialog = useDialog();
-    const [theme] = useTheme();
 
     useEffect(() => {
         if (!bibsLoaded) return;
@@ -54,29 +49,9 @@ export default function Home() {
         citationEngine.updateCslFiles(style);
     }
 
-    function addBibToFavorite(id) {
-        const targetBib = bibliographies.find((bib) => bib.id === id);
-        dispatch(
-            updateBibField({
-                bibId: id,
-                key: "favorite",
-                value: !targetBib?.favorite,
-                options: {
-                    updateDateModified: false,
-                },
-            })
-        );
-    }
-
     // function openCoBibsSearchDialog() {
     //     setCoBibsSearchDialogVisible(true);
     // }
-
-    const sortedBibliographies = Array.from(bibliographies).sort((a, b) => {
-        const dateA = new Date(a.dateModified);
-        const dateB = new Date(b.dateModified);
-        return dateB - dateA;
-    });
 
     // FIXME: Fix the json function
     function handleImport() {
@@ -145,58 +120,9 @@ export default function Home() {
                 ]}
             />
 
-            {sortedBibliographies.length > 0 ? (
-                <List
-                    items={sortedBibliographies.map((bib) => {
-                        const bibTags = settings?.tags.filter((tag) => bib.tags.includes(tag.id));
-                        const defaultIcon = defaults.bibliography.icon;
-                        return {
-                            start: (
-                                <Icon
-                                    style={{
-                                        background: hslToHsla(
-                                            colorValues[theme][bib?.icon?.color || defaultIcon.color],
-                                            0.25
-                                        ),
-                                    }}
-                                    className="rounded-full p-5"
-                                    name={bib?.icon?.name || defaultIcon.name}
-                                />
-                            ),
-                            title: (
-                                <div className="flex items-baseline justify-between">
-                                    <div className="flex items-baseline gap-1 font-semibold">
-                                        {bib.title}
-                                        <small className="font-normal">{bib.citations.length}</small>
-                                    </div>
-                                    <small>{timeAgo(bib.dateModified)}</small>
-                                </div>
-                            ),
-                            description: (
-                                <div className="flex items-center justify-between">
-                                    <div>{bib.style.name.short || bib.style.name.long.replace(/\((.*?)\)/g, "")}</div>
-                                    <button
-                                        type="button"
-                                        className="h-6 w-6 cursor-pointer border-none bg-transparent p-0"
-                                        onClick={() => addBibToFavorite(bib.id)}
-                                    >
-                                        {bib?.favorite ? <FilledStar /> : <EmptyStar />}
-                                    </button>
-                                </div>
-                            ),
-                            content: bibTags && bibTags.length !== 0 && (
-                                <ChipSet
-                                    chips={bibTags.map((tag) => {
-                                        return {
-                                            ...tag,
-                                            selected: true,
-                                        };
-                                    })}
-                                />
-                            ),
-                            onClick: () => navigate(bib?.collab?.open ? `/collab/${bib.collab.id}` : `/bib/${bib.id}`),
-                        };
-                    })}
+            {bibliographies.length > 0 ? (
+                <BibsList
+                    onBibClick={(bib) => navigate(bib?.collab?.open ? `/collab/${bib.collab.id}` : `/bib/${bib.id}`)}
                 />
             ) : (
                 <EmptyPage

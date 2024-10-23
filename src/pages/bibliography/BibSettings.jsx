@@ -1,10 +1,13 @@
-import { EmptyPage, List } from "../../components/ui/MaterialComponents";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useEnhancedDispatch, useFindBib } from "../../hooks/hooks.tsx";
+import { EmptyPage, List, TopBar } from "../../components/ui/MaterialComponents";
+import defaults from "../../assets/json/defaults.json";
 import { useAuth } from "../../context/AuthContext";
 import { useDialog } from "../../context/DialogContext.tsx";
 import { updateBibField } from "../../data/store/slices/bibsSlice";
-import { useEnhancedDispatch, useFindBib } from "../../hooks/hooks.tsx";
 
-export function CollaboratorsManager({ setIsVisible }) {
+function CollaboratorsManager({ setIsVisible }) {
     const bibliography = useFindBib();
     const { currentUser } = useAuth();
     const dialog = useDialog();
@@ -80,4 +83,30 @@ export function CollaboratorsManager({ setIsVisible }) {
     );
 }
 
-export function a() {}
+export default function BibliographySettings() {
+    const { bibId } = useParams();
+    const bibliography = useFindBib();
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    const [collaboratorsManagerVisible, setCollaboratorsManagerVisible] = useState(false);
+
+    useEffect(() => {
+        // Prioritizes showing collab.id in the URL instead of the regular id
+        if (!bibliography) return;
+        if (bibliography?.collab?.open && bibId !== bibliography?.collab?.id) {
+            navigate(`/collab/${bibliography.collab.id}/settings`, { replace: true });
+        } else if (!bibliography?.collab?.open && bibId !== bibliography.id) {
+            navigate(`/bib/${bibliography.id}/settings`, { replace: true });
+        }
+    }, [bibId, bibliography?.collab?.open, location.pathname]);
+
+    return (
+        <div className={defaults.classes.page}>
+            <TopBar headline="Bibliography settings" />
+            {/* <List items={[{ title: "Manage collaborators", onClick: () => setCollaboratorsManagerVisible(true) }]} /> */}
+
+            {collaboratorsManagerVisible && <CollaboratorsManager setIsVisible={setCollaboratorsManagerVisible} />}
+        </div>
+    );
+}

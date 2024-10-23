@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import Bibliography from "./pages/bibliography/Bibliography";
 import Home from "./pages/home/Home";
 import Settings from "./pages/settings/Settings";
-import BibliographySettings from "./pages/bibliography/BibliographySettings";
+import BibSettings from "./pages/bibliography/BibSettings";
 import MarkdownPage from "./pages/MarkdownPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import Signup from "./pages/account/Signup";
@@ -44,7 +44,7 @@ export default function App() {
                 <Route path="/account" element={<Account />} /> {/* Redirect to "/login" when !currentUser */}
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/bib/collab?/:bibId" element={<Bibliography />} />
-                <Route path="/bib/collab?/:bibId/settings" element={<BibliographySettings />} />
+                <Route path="/bib/collab?/:bibId/settings" element={<BibSettings />} />
                 <Route
                     path="/about"
                     element={<MarkdownPage title="About CiteEase" filePath="/citeease/markdown/about.md" />}

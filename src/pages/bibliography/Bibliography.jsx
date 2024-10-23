@@ -11,7 +11,7 @@ import {
     CitationStylesMenu,
     TagsDialog,
     IconsDialog,
-} from "./BibliographyTools";
+} from "../../components/bibTools";
 import {
     addNewBibAndMoveSelectedCitations,
     deleteBib,
