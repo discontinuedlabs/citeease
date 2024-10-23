@@ -1,10 +1,21 @@
 import { render, fireEvent, screen } from "@testing-library/react";
+import { Provider as ReduxeProvider } from "react-redux";
+import { BrowserRouter as Router } from "react-router-dom";
 import Settings from "./Settings";
+import store from "../../data/store/store.ts";
+import DialogProvider from "../../context/DialogContext.tsx";
 
-// TODO: Testing needs more configurations
 describe("Settings", () => {
     it("renders settings buttons", () => {
-        render(<Settings />);
+        render(
+            <Router basename="/citeease/">
+                <ReduxeProvider store={store}>
+                    <DialogProvider>
+                        <Settings />
+                    </DialogProvider>
+                </ReduxeProvider>
+            </Router>
+        );
 
         const aboutButton = screen.getByText(/About CiteEase/i);
         expect(aboutButton).toBeInTheDocument();
@@ -17,7 +28,15 @@ describe("Settings", () => {
     });
 
     test("navigates to correct screens on button click", () => {
-        render(<Settings />);
+        render(
+            <Router basename="/citeease/">
+                <ReduxeProvider store={store}>
+                    <DialogProvider>
+                        <Settings />
+                    </DialogProvider>
+                </ReduxeProvider>
+            </Router>
+        );
 
         fireEvent.click(screen.getByText(/About CiteEase/i));
         expect(window.location.pathname).toBe("/about");

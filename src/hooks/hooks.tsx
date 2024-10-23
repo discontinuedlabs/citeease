@@ -164,7 +164,7 @@ export function useEventListener(
 
         const handler = (event: Event) => callbackRef.current(event);
         element.addEventListener(eventType, handler, false);
-    }, [eventType, element, callbackRef.current]);
+    }, [eventType, element]);
 }
 
 type RouteParams = {
@@ -439,30 +439,30 @@ export function useKeyboardShortcuts(keymap: Record<string, ShortcutAction>) {
                 });
             });
         });
-    }, [keymap]);
+    }, [keymap, targetElements]);
 
     useEffect(registerShortcuts, [registerShortcuts]);
 }
 
 /* eslint-disable no-restricted-syntax */
 export function useKeyDown() {
-    const keyMap = {
-        enter: "Enter",
-        ctrl: "Control",
-        meta: "Meta",
-        shift: "Shift",
-        alt: "Alt",
-        tab: "Tab",
-        escape: "Escape",
-    };
-
-    function parseKeyCombination(keyCombination) {
-        const keys = keyCombination.split("+").map((key) => keyMap[key.toLowerCase()] || key);
-        return new Set(keys);
-    }
-
     return useCallback(
         (keyActions) => (event) => {
+            const keyMap = {
+                enter: "Enter",
+                ctrl: "Control",
+                meta: "Meta",
+                shift: "Shift",
+                alt: "Alt",
+                tab: "Tab",
+                escape: "Escape",
+            };
+
+            function parseKeyCombination(keyCombination) {
+                const keys = keyCombination.split("+").map((key) => keyMap[key.toLowerCase()] || key);
+                return new Set(keys);
+            }
+
             for (const [keyCombination, callback] of keyActions) {
                 const keySet = parseKeyCombination(keyCombination);
 

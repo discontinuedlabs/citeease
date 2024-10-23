@@ -244,7 +244,7 @@ export default function DialogProvider({ children }: DialogProviderProps) {
         if (dialogs.length > 0) {
             dialogs.forEach((dialog) => closeDialog(dialog.id));
         }
-    }, [location]);
+    }, [location, dialogs]);
 
     const contextValue = useMemo(
         () => ({

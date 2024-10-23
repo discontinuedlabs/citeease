@@ -1,22 +1,14 @@
 import { useSelector } from "react-redux";
 import { useState } from "react";
-import { updateSettingsField } from "../../data/store/slices/settingsSlice";
-import { uid } from "../../utils/utils.ts";
-import {
-    ChipSet,
-    Divider,
-    FilledButton,
-    Icon,
-    IconButton,
-    OutlinedButton,
-    TextField,
-} from "../../components/ui/MaterialComponents";
-import colorValues from "../../assets/json/colors.json";
-import builtinTags from "../../assets/json/tags.json";
-import builtinIcons from "../../assets/json/icons.json";
-import { useEnhancedDispatch, useTheme } from "../../hooks/hooks.tsx";
-import { useDialog } from "../../context/DialogContext.tsx";
-import { markdownToHtml, parseHtmlToJsx } from "../../utils/conversionUtils.tsx";
+import { updateSettingsField } from "../data/store/slices/settingsSlice";
+import { uid } from "../utils/utils.ts";
+import { ChipSet, Divider, FilledButton, Icon, IconButton, OutlinedButton, TextField } from "./ui/MaterialComponents";
+import colorValues from "../assets/json/colors.json";
+import builtinTags from "../assets/json/tags.json";
+import builtinIcons from "../assets/json/icons.json";
+import { useEnhancedDispatch, useTheme } from "../hooks/hooks.tsx";
+import { useDialog } from "../context/DialogContext.tsx";
+import { markdownToHtml, parseHtmlToJsx } from "../utils/conversionUtils.tsx";
 
 export function TagsManager() {
     const { data: settings } = useSelector((state) => state.settings);

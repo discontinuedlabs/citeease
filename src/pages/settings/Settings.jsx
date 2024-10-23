@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { IconsManager, TagsManager } from "./SettingTools";
+import { IconsManager, TagsManager } from "../../components/settingsTools";
 import { updateSettingsField } from "../../data/store/slices/settingsSlice";
 import { List, Select, TopBar } from "../../components/ui/MaterialComponents";
 import { useDialog } from "../../context/DialogContext.tsx";
