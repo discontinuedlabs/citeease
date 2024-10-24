@@ -228,7 +228,7 @@ export async function retrieveContentFromURL(url: string): Promise<CslJson | nul
             type: "webpage",
             title: extractContent(doc, "title", ""),
             author: extractAuthors(doc),
-            "container-title": extractContent(doc, 'meta[property="og:site_name"]', "content"),
+            "container-title": [extractContent(doc, 'meta[property="og:site_name"]', "content")],
             publisher: extractContent(doc, 'meta[property="article:publisher"]', "content"),
             accessed: createDateObject(new Date()),
             issued: createDateObject(
@@ -277,7 +277,7 @@ export async function retrieveContentFromDOI(doi: string): Promise<CslJson | nul
             ISSN: message.ISSN,
             PMID: message.PMID,
             PMCID: message.PMCI,
-            "container-title": message["container-title"][0],
+            "container-title": message["container-title"],
             issue: message.issue,
             issued: message.issued,
             page: message.page,
@@ -343,9 +343,11 @@ export async function retrieveContentFromISBN(isbn: string): Promise<CslJson | n
 export async function retrieveContentFromPMCID(pmcid: string): Promise<CslJson | null> {
     if (!pmcid) return null;
 
+    const pmcIdWithoutPrefix = pmcid.replace(/^PMC/, "");
+
     try {
         const response = await fetch(
-            `${CORS_PROXY}https://api.ncbi.nlm.nih.gov/lit/ctxp/v1/pmc/?format=csl&id=${pmcid}`
+            `${CORS_PROXY}https://api.ncbi.nlm.nih.gov/lit/ctxp/v1/pmc/?format=csl&id=${pmcIdWithoutPrefix}`
         );
 
         const data: Record<string, never> = await response.json();
@@ -356,7 +358,7 @@ export async function retrieveContentFromPMCID(pmcid: string): Promise<CslJson |
             ISSN: data?.ISSN,
             PMID: data?.PMID,
             PMCID: data?.PMCID,
-            "container-title": data?.["container-title"],
+            "container-title": [data?.["container-title"]],
             issue: data?.issue,
             issued: data?.issued,
             page: data?.page,
@@ -400,7 +402,7 @@ export async function retrieveContentFromPMID(pmid: string): Promise<CslJson | n
             ISSN: data?.ISSN,
             PMID: data?.PMID,
             PMCID: data?.PMCID,
-            "container-title": data?.["container-title"],
+            "container-title": [data?.["container-title"]],
             issue: data?.issue,
             issued: data?.issued,
             page: data?.page,
@@ -431,13 +433,10 @@ export async function retrieveContentFromPMID(pmid: string): Promise<CslJson | n
 export function getContentFromForm(form: HTMLFormElement): CslJson {
     const data = new FormData(form);
     const dataObject = Object.fromEntries(data.entries()) as Record<string, string | undefined>;
-    // const checkboxes = form.querySelectorAll<HTMLInputElement>("md-checkbox");
     const switches = form.querySelectorAll<HTMLInputElement>("md-switch");
 
     const { URL, DOI, ISSN, PMCID, PMID, ISBN, issue, page, title, volume, publisher } = dataObject;
     const online = Array.from(switches).find((checkbox) => checkbox.name === "online");
-
-    console.log(dataObject);
 
     const content = {
         title,
@@ -463,7 +462,7 @@ export function getContentFromForm(form: HTMLFormElement): CslJson {
             parseInt(dataObject["accessed-day"]!, 10)
         ),
         author: createAuthorsArray(dataObject),
-        "container-title": (dataObject["container-title"] as string) || undefined,
+        "container-title": [dataObject["container-title[0]"] as string],
     };
 
     return content;

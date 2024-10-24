@@ -74,7 +74,7 @@ export default function Signup() {
     }
 
     return (
-        <div className={defaults.classes.page}>
+        <div className="page">
             <TopBar headline="Sign up" />
 
             <form className="grid gap-2 px-5" onSubmit={handleSubmit}>

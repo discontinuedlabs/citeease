@@ -7,11 +7,94 @@
         }
     },
     "settings": {
-        "theme": "auto"
+        "theme": "auto",
+        "icons": [
+            "book_2",
+            "person",
+            "public",
+            "rocket_launch",
+            "psychology",
+            "emoji_objects",
+            "pets",
+            "vaccines",
+            "potted_plant",
+            "skull",
+            "dentistry",
+            "radiology",
+            "neurology",
+            "labs",
+            "nutrition",
+            "stethoscope",
+            "cardiology",
+            "microbiology",
+            "pulmonology",
+            "pediatrics",
+            "oncology",
+            "syringe",
+            "gynecology",
+            "hematology",
+            "endocrinology",
+            "gastroenterology",
+            "immunology",
+            "biotech",
+            "rheumatology",
+            "nephrology",
+            "ophthalmology",
+            "urology",
+            "science",
+            "genetics",
+            "calculate"
+        ],
+        "tags": [
+            { "label": "Completed", "color": "green", "id": "builtin-completed" },
+            { "label": "In progress", "color": "yellow", "id": "builtin-inProgress" },
+            { "label": "Pending Review", "color": "orange", "id": "builtin-pendingReview" },
+            { "label": "High priority", "color": "red", "id": "builtin-highPriority" },
+            { "label": "Low priority", "color": "blue", "id": "builtin-lowPriority" },
+            { "label": "Research topic", "color": "purple", "id": "builtin-researchTopic" },
+            { "label": "Course project", "color": "cyan", "id": "builtin-courseProject" },
+            { "label": "Personal project", "color": "pink", "id": "builtin-personalProject" },
+            { "label": "Archived", "color": "brown", "id": "builtin-archived" },
+            { "label": "Discontinued", "color": "gray", "id": "builtin-discontinued" }
+        ]
     },
-    "classes": {
-        "page": "mx-auto min-h-screen max-w-[50rem]",
-        "pageWithFab": "mx-auto mb-20 min-h-screen max-w-[50rem]",
-        "wideButton": "max-w-[30rem] w-full mx-auto"
+    "colors": {
+        "light": {
+            "yellow": "hsl(42, 100%, 40%)",
+            "orange": "hsl(22, 100%, 40%)",
+            "red": "hsl(0, 100%, 40%)",
+            "pink": "hsl(288, 100%, 40%)",
+            "purple": "hsl(255, 100%, 40%",
+            "blue": "hsl(210, 100%, 40%)",
+            "cyan": "hsl(190, 100%, 40%)",
+            "green": "hsl(150, 100%, 40%)",
+            "gray": "hsl(216, 40%, 40%)",
+            "brown": "hsl(21, 40%, 40%)"
+        },
+        "dark": {
+            "yellow": "hsl(42, 90%, 70%)",
+            "orange": "hsl(22, 90%, 70%)",
+            "red": "hsl(0, 90%, 70%)",
+            "pink": "hsl(288, 90%, 70%)",
+            "purple": "hsl(255, 90%, 70%",
+            "blue": "hsl(210, 90%, 70%)",
+            "cyan": "hsl(190, 90%, 70%)",
+            "green": "hsl(150, 90%, 70%)",
+            "gray": "hsl(216, 35%, 70%)",
+            "brown": "hsl(21, 35%, 70%)"
+        }
+    },
+    "placeholders": {
+        "doi": "http://dx.doi.org/10.1093/ajae/aaq063",
+        "url": "https://example.com",
+        "pmid": "27097605",
+        "pmcid": "PMC6323133",
+        "isbn": "978-3-16-148410-0"
+    },
+    "errors": {
+        "autoFill": {
+            "networkFail": "Unable to retrieve the ${sourceType} data due to network issues. Please check your internet connection and try again.",
+            "noResult": "Failed to retrieve information from ${identifierType}. Please check your internet connection and ensure the provided ${identifierType} is correct."
+        }
     }
 }

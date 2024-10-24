@@ -5,7 +5,6 @@ import { updateSettingsField } from "../../data/store/slices/settingsSlice";
 import { List, Select, TopBar } from "../../components/ui/MaterialComponents";
 import { useDialog } from "../../context/DialogContext.tsx";
 import { useEnhancedDispatch, useTheme } from "../../hooks/hooks.tsx";
-import defaults from "../../assets/json/defaults.json";
 import { useAuth } from "../../context/AuthContext";
 
 export default function Settings() {
@@ -34,7 +33,7 @@ export default function Settings() {
     }
 
     return (
-        <div className={defaults.classes.page}>
+        <div className="page">
             <TopBar headline="Settings" />
 
             <List

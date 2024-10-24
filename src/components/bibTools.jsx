@@ -36,7 +36,6 @@ import {
     TextField,
 } from "./ui/MaterialComponents";
 import { useDialog } from "../context/DialogContext.tsx";
-import colorValues from "../assets/json/colors.json";
 import defaults from "../assets/json/defaults.json";
 import { useToast } from "../context/ToastContext.tsx";
 import { BibsList } from "./homeTools";
@@ -48,29 +47,51 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
     const { content: passedContant } = props;
     const [content, setContent] = useState(passedContant);
     const sourceType = sourceTypes[content.type];
-    const autoFillRef = useRef(null);
+    const autoFillContentRef = useRef(null);
+    const autoFillSelectRef = useRef();
     const dialog = useDialog();
+    const [autoFillLoading, setAutoFillLoading] = useState(false);
 
     async function retrieveContent(source) {
+        setAutoFillLoading(true);
+
         try {
-            const retreivedContent = await citationUtils.retrieveContentFromDOI(source);
+            let retreivedContent;
+            const type = autoFillSelectRef.current.value;
+
+            if (type === "URL") {
+                retreivedContent = await citationUtils.retrieveContentFromURL(source);
+            } else if (type === "DOI") {
+                retreivedContent = await citationUtils.retrieveContentFromURL(source);
+            } else if (type === "PMCID") {
+                retreivedContent = await citationUtils.retrieveContentFromURL(source);
+            } else if (type === "PMID") {
+                retreivedContent = await citationUtils.retrieveContentFromURL(source);
+            } else if (type === "ISBN") {
+                retreivedContent = await citationUtils.retrieveContentFromURL(source);
+            }
+
             setContent((prevContent) => ({
                 ...prevContent,
                 ...retreivedContent,
             }));
+
+            setAutoFillLoading(false);
         } catch (error) {
+            setAutoFillLoading(false);
             if (!error.response && error.message === "Network Error") {
                 dialog.show({
                     headline: "Network Error",
-                    content:
-                        "Unable to retrieve the journal article data due to network issues. Please check your internet connection and try again.",
+                    content: defaults.errors.autoFill.networkFail.replace(/\${sourceType}/g, sourceType),
                     actions: [["Ok", () => dialog.close()]],
                 });
             } else {
                 dialog.show({
                     headline: "No results found",
-                    content:
-                        "Failed to retrieve information from DOI. Please check your internet connection and ensure the provided DOI is correct.",
+                    content: defaults.errors.autoFill.noResult.replace(
+                        /\${identifierType}/g,
+                        autoFillSelectRef.current.value.toUpperCase()
+                    ),
                     actions: [["Ok", () => dialog.close()]],
                 });
             }
@@ -79,39 +100,98 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
     }
 
     function updateContentField(event) {
+        console.warn(event.target.name, event.target.value);
         const { name } = event.target;
         let { value } = event.target;
+
+        // Handle specific tag names
         if (event.target.tagName === "MD-CHECKBOX" || event.target.nodeName === "MD-CHECKBOX") {
             value = event.target.checked;
         }
         if (event.target.tagName === "MD-SWITCH" || event.target.nodeName === "MD-SWITCH") {
             value = event.target.selected;
         }
-        setContent((prevContent) => ({
-            ...prevContent,
-            [name]: value,
-        }));
+
+        // Check if 'name' contains an array reference
+        const arrayMatch = name.match(/(.*)\[(\d+)\]/);
+
+        if (arrayMatch) {
+            const baseKey = arrayMatch[1]; // e.g., "container-title"
+            const index = parseInt(arrayMatch[2], 10); // e.g., 0 as a number
+
+            // Update the content state for the specific array element
+            setContent((prevContent) => {
+                const updatedArray = Array.isArray(prevContent[baseKey]) ? [...prevContent[baseKey]] : [];
+
+                // Set the value at the correct index in the array
+                updatedArray[index] = value;
+
+                console.error(baseKey, updatedArray, index);
+
+                return {
+                    ...prevContent,
+                    [baseKey]: updatedArray,
+                };
+            });
+        } else {
+            // If no array reference, update content directly
+            setContent((prevContent) => ({
+                ...prevContent,
+                [name]: value,
+            }));
+        }
+    }
+
+    function getFieldValue(valueKey) {
+        // Check if valueKey contains an array index, e.g., "container-title[0]"
+        const arrayMatch = valueKey.match(/(.*)\[(\d+)\]/);
+
+        if (arrayMatch) {
+            const baseKey = arrayMatch[1]; // e.g., "container-title"
+            const index = parseInt(arrayMatch[2], 10); // e.g., 0 (as a number)
+
+            // Check if content[baseKey] is an array and access the correct index
+            if (Array.isArray(content[baseKey])) {
+                return content[baseKey][index];
+            }
+        }
+
+        // If no array index is found, return the value directly
+        return content[valueKey];
     }
 
     /* eslint-disable indent, react/no-array-index-key, react/jsx-props-no-spreading */
     function renderFormElements(elements) {
+        console.log(content);
         return elements.map((element, index) => {
             switch (element.component) {
-                case "autoFillDoi":
+                case "autoFill":
                     return (
-                        <div key={index}>
-                            <TextField
-                                className="mb-2 w-full"
-                                label={element.label}
-                                type="text"
-                                name="auto-fill-doi"
-                                placeholder={element.placeholder}
-                                ref={autoFillRef}
-                            />
+                        <div className="grid gap-2" key={index}>
+                            <div className="flex justify-between gap-1">
+                                <Select
+                                    className="flex-shrink"
+                                    value={element.value[0].toLowerCase()}
+                                    ref={autoFillSelectRef}
+                                    options={element.value.map((value) => {
+                                        return { headline: value, value: value.toLowerCase() };
+                                    })}
+                                />
+                                <TextField
+                                    className="flex-1"
+                                    label={`Insert a ${autoFillSelectRef.current?.value.toUpperCase()} to fill the fields automatically`}
+                                    type="text"
+                                    name="auto-fill"
+                                    placeholder={defaults.placeholders[autoFillSelectRef.current?.value]}
+                                    ref={autoFillContentRef}
+                                />
+                            </div>
+
                             <FilledButton
                                 className="w-full"
                                 type="button"
-                                onClick={() => retrieveContent(autoFillRef.current.value)}
+                                onClick={() => retrieveContent(autoFillContentRef.current.value)}
+                                disabled={autoFillLoading}
                             >
                                 Fill in
                             </FilledButton>
@@ -136,7 +216,7 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                             label={element.label}
                             type="text"
                             name={element.value}
-                            value={content[element.value] || ""}
+                            value={getFieldValue(element.value) || ""}
                             placeholder={element.placeholder}
                             onChange={updateContentField}
                             {...props}
@@ -951,6 +1031,7 @@ export function AddCitationMenu({ openCitationForm, close }) {
     const dispatch = useEnhancedDispatch();
     const acceptedCitationsRef = useRef([]);
     const [errorMessage, setErrorMessage] = useState();
+    const toast = useToast();
 
     function handleAcceptCitations() {
         dispatch(
@@ -997,21 +1078,21 @@ export function AddCitationMenu({ openCitationForm, close }) {
         });
     }
 
-    // function handleImportCitation() {
-    //     if (!isOnline && bibliography?.collab?.open) {
-    //         toast.show({ message: "You are offline", icon: "error", color: "red" });
-    //         return undefined;
-    //     }
-    //     return undefined;
-    // }
+    function handleImportCitation() {
+        if (!isOnline && bibliography?.collab?.open) {
+            toast.show({ message: "You are offline", icon: "error", color: "red" });
+            return undefined;
+        }
+        return undefined;
+    }
 
-    // function handleSearchByTitle() {
-    //     if (!isOnline) {
-    //         toast.show({ message: "You are offline", icon: "error", color: "red" });
-    //         return undefined;
-    //     }
-    //     return undefined;
-    // }
+    function handleSearchByTitle() {
+        if (!isOnline) {
+            toast.show({ message: "You are offline", icon: "error", color: "red" });
+            return undefined;
+        }
+        return undefined;
+    }
 
     function showSourceTypes() {
         close();
@@ -1062,7 +1143,7 @@ export function AddCitationMenu({ openCitationForm, close }) {
                     className="mb-2 w-full"
                     onChange={() => setErrorMessage()}
                     label="Search by unique identifiers"
-                    placeholder={`https://example.com\nhttps://doi.org/xxxx\nPMID: 12345678`} // eslint-disable-line quotes
+                    placeholder={`${defaults.placeholders.url}\n${defaults.placeholders.doi}\nPMID: ${defaults.placeholders.pmid}`} // eslint-disable-line quotes
                     supportingText="You can list all the identifiers at the same time."
                     rows="3"
                     type="textarea"
@@ -1081,17 +1162,17 @@ export function AddCitationMenu({ openCitationForm, close }) {
 
             <Divider label="or" className="my-4" />
 
-            {/* <OutlinedButton className="mb-1 w-full" onClick={handleImportCitation}>
+            <OutlinedButton className="mb-1 w-full" onClick={handleImportCitation}>
                 Search by title
-            </OutlinedButton> */}
+            </OutlinedButton>
 
             <OutlinedButton className="mb-1 w-full" onClick={showSourceTypes}>
                 Create citation by source type
             </OutlinedButton>
 
-            {/* <OutlinedButton className="w-full" onClick={handleSearchByTitle}>
+            <OutlinedButton className="w-full" onClick={handleSearchByTitle}>
                 Import from file
-            </OutlinedButton> */}
+            </OutlinedButton>
         </div>
     );
 }
@@ -1168,16 +1249,14 @@ export function CitationStylesMenu(props) {
             </button>
 
             <search>
-                <form>
-                    <TextField
-                        label="Search for citation styles"
-                        type="search"
-                        name="citation-style-search-input"
-                        placeholder="Find style by name..."
-                        value={searchTerm}
-                        onChange={(event) => setSearchTerm(event.target.value)}
-                    />
-                </form>
+                <TextField
+                    label="Search for citation styles"
+                    type="search"
+                    name="citation-style-search-input"
+                    placeholder="Find style by name..."
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                />
             </search>
 
             <FixedSizeList height={500} itemCount={filteredStyles.length} itemSize={45} width={300}>
@@ -1218,6 +1297,7 @@ export function IconsDialog({ setIconObject }) {
     const [selectedIcon, setSelectedIcon] = useState(bibliography?.icon?.name || defaultIcon.name);
     const [selectedColor, setSelectedColor] = useState(bibliography?.icon?.color || defaultIcon.color);
     const [theme] = useTheme();
+    const { colors: colorValues } = defaults;
 
     useEffect(() => {
         setIconObject({ name: selectedIcon, color: selectedColor });

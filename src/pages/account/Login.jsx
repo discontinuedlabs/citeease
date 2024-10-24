@@ -85,7 +85,7 @@ export default function Login() {
     }
 
     return (
-        <div className={defaults.classes.page}>
+        <div className="page">
             <TopBar headline="Log in" />
 
             <form className="grid gap-2 px-5" onSubmit={handleSubmit}>

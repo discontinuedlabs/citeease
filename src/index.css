@@ -221,6 +221,18 @@
         @apply resize-none;
     }
 
+    .page {
+        @apply mx-auto min-h-screen max-w-[50rem];
+    }
+
+    .page-with-fab {
+        @apply mx-auto mb-20 min-h-screen max-w-[50rem];
+    }
+
+    .wide-button {
+        @apply mx-auto w-full max-w-[30rem];
+    }
+
     .csl-entry:has(.csl-left-margin) {
         @apply flex items-start gap-2;
     }

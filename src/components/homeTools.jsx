@@ -11,9 +11,10 @@ import { useDialog } from "../context/DialogContext.tsx";
 import { ChipSet, Icon, List } from "./ui/MaterialComponents";
 import defaults from "../assets/json/defaults.json";
 import { hslToHsla } from "../utils/conversionUtils.tsx";
-import colorValues from "../assets/json/colors.json";
 import { timeAgo } from "../utils/utils.ts";
 import { EmptyStar, FilledStar } from "./ui/Star";
+
+const { colors: colorValues } = defaults;
 
 export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib = undefined }) {
     const { data: bibliographies, loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies);

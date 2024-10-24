@@ -11,7 +11,6 @@ import { EmptyPage, Fab, List, TopBar } from "../../components/ui/MaterialCompon
 import { parseQueryString, uid } from "../../utils/utils.ts";
 import { useDialog } from "../../context/DialogContext.tsx";
 import { prioritizeAvailableStyles } from "../../utils/citationUtils.ts";
-import defaults from "../../assets/json/defaults.json";
 
 export default function Home() {
     const { data: bibliographies, loadedFromIndexedDB: bibsLoaded } = useSelector((state) => state.bibliographies);
@@ -108,7 +107,7 @@ export default function Home() {
     // TODO: Combine the Hpme list with the one used in MoveDialog.
     return (
         // mb-20 needed in pages with a Fab component
-        <div className={defaults.classes.pageWithFab}>
+        <div className="page-with-fab">
             <TopBar
                 headline="Home"
                 showBackButton={false}

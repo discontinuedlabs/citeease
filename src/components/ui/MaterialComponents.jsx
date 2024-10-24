@@ -4,8 +4,8 @@ import React, { forwardRef, useEffect, useId, useImperativeHandle, useRef, useSt
 import { useNavigate } from "react-router-dom";
 import { uid } from "../../utils/utils.ts";
 import { useMetaThemeColor, useTheme } from "../../hooks/hooks.tsx";
-import colorValues from "../../assets/json/colors.json";
 import { hslToHsla } from "../../utils/conversionUtils.tsx";
+import { colors as colorValues } from "../../assets/json/defaults.json";
 
 export function Divider({ className = "", label, ...rest }) {
     if (label)

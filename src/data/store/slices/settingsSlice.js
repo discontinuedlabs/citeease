@@ -1,14 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { doc, setDoc } from "firebase/firestore";
 import dexieDB from "../../db/dexie/dexie";
-import builtinIcons from "../../../assets/json/icons.json";
-import builtinTags from "../../../assets/json/tags.json";
 import firestoreDB from "../../db/firebase/firebase";
 import defaults from "../../../assets/json/defaults.json";
 
-const defaultSettings = defaults.settings;
 const initialState = {
-    data: { theme: defaultSettings.theme, tags: builtinTags, icons: builtinIcons },
+    data: defaults.settings,
     loadedLocally: false,
 };
 

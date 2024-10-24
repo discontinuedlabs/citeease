@@ -1,7 +1,6 @@
 import { useId, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import defaults from "../../assets/json/defaults.json";
 
 export default function ForgotPassword() {
     const id = useId();
@@ -28,7 +27,7 @@ export default function ForgotPassword() {
     }
 
     return (
-        <div className={defaults.classes.page}>
+        <div className="page">
             <h1>Forgot password</h1>
             <pre>{error}</pre>
             <form onSubmit={handleSUbmit}>

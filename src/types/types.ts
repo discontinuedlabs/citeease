@@ -25,7 +25,7 @@ export type CslJson = {
     keyword?: string[];
     abstract?: string;
     language?: string;
-    "container-title"?: string;
+    "container-title"?: string[];
     publisher?: string;
     accessed?: DateObject;
     issued?: DateObject;

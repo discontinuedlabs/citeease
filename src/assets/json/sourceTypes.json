@@ -3,9 +3,8 @@
         "label": "Journal article",
         "form": [
             {
-                "component": "autoFillDoi",
-                "label": "Insert a DOI to fill the fields automatically",
-                "placeholder": "https://doi.org/xxxx"
+                "component": "autoFill",
+                "value": ["DOI", "PMID", "PMCID"]
             },
             { "component": "divider", "label": "or enter the article details manually" },
             {
@@ -17,7 +16,7 @@
             {
                 "component": "text",
                 "label": "Journal name",
-                "value": "container-title",
+                "value": "container-title[0]",
                 "placeholder": "Journal name"
             },
             { "component": "divider" },
@@ -88,9 +87,7 @@
                 "value": "note",
                 "placeholder": "Add a summary, key insight, or analysis for this source."
             }
-        ],
-        "networkError": "Unable to retrieve the journal article data due to network issues. Please check your internet connection and try again.",
-        "noResultMessage": "Failed to retrieve information from DOI. Please check your internet connection and ensure the provided DOI is correct."
+        ]
     },
     "book": {
         "label": "Book",

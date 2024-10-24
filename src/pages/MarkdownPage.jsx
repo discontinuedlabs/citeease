@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { EmptyPage, CircularProgress, TopBar } from "../components/ui/MaterialComponents";
 import { markdownToHtml, parseHtmlToJsx } from "../utils/conversionUtils.tsx";
 import { useOnlineStatus } from "../hooks/hooks.tsx";
-import defaults from "../assets/json/defaults.json";
 
 export default function MarkdownPage({ title, filePath }) {
     const [content, setContent] = useState();
@@ -26,10 +25,10 @@ export default function MarkdownPage({ title, filePath }) {
                 console.error(error);
             }
         }
-    }, [filePath, online]);
+    }, [filePath, online, content]);
 
     return (
-        <div className={defaults.classes.page}>
+        <div className="page">
             <TopBar headline={title} />
             {(!online && !content && <EmptyPage title="You are offline!" />) ||
                 (loading && (

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEnhancedDispatch, useFindBib } from "../../hooks/hooks.tsx";
 import { EmptyPage, List, TopBar } from "../../components/ui/MaterialComponents";
-import defaults from "../../assets/json/defaults.json";
 import { useAuth } from "../../context/AuthContext";
 import { useDialog } from "../../context/DialogContext.tsx";
 import { updateBibField } from "../../data/store/slices/bibsSlice";
@@ -102,7 +101,7 @@ export default function BibliographySettings() {
     }, [bibId, bibliography?.collab?.open, location.pathname]);
 
     return (
-        <div className={defaults.classes.page}>
+        <div className="page">
             <TopBar headline="Bibliography settings" />
             {/* <List items={[{ title: "Manage collaborators", onClick: () => setCollaboratorsManagerVisible(true) }]} /> */}
 

@@ -5,7 +5,6 @@ import { useAuth } from "../../context/AuthContext";
 import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
 import { resetAllSettings } from "../../data/store/slices/settingsSlice";
 import { Checkbox, FilledButton, List, TextField, TopBar } from "../../components/ui/MaterialComponents";
-import defaults from "../../assets/json/defaults.json";
 import { useDialog } from "../../context/DialogContext.tsx";
 import { useToast } from "../../context/ToastContext.tsx";
 
@@ -239,7 +238,7 @@ export default function Account() {
     }
 
     return (
-        <div className={defaults.classes.page}>
+        <div className="page">
             <TopBar headline="Account" />
             <div style={{ background: "var(--md-sys-color-secondary-container)" }} className="rounded-3xl p-5">
                 <h2 className="mt-0">{currentUser?.displayName}</h2>
