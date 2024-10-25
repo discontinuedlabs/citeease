@@ -89,7 +89,8 @@
         "URL": "https://example.com",
         "PMID": "27097605",
         "PMCID": "PMC6323133",
-        "ISBN": "978-3-16-148410-0"
+        "ISBN": "978-3-16-148410-0",
+        "page": "123 or 456-789"
     },
     "errors": {
         "autoFill": {

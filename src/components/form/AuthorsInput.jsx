@@ -125,7 +125,6 @@ export default function AuthorsInput(props) {
                                             />
                                             <Select
                                                 label="Role"
-                                                value="author"
                                                 options={[
                                                     { headline: "Author", value: "author" },
                                                     { headline: "Editor", value: "editor" },

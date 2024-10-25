@@ -108,7 +108,7 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
             value = event.target.selected;
         }
 
-        // Check if 'name' contains an array reference
+        // Check if name contains an array reference, e.g., "container-title[0]"
         const arrayMatch = name.match(/(.*)\[(\d+)\]/);
 
         if (arrayMatch) {
@@ -121,8 +121,6 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
 
                 // Set the value at the correct index in the array
                 updatedArray[index] = value;
-
-                console.error(baseKey, updatedArray, index);
 
                 return {
                     ...prevContent,
@@ -146,14 +144,24 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
             const baseKey = arrayMatch[1]; // e.g., "container-title"
             const index = parseInt(arrayMatch[2], 10); // e.g., 0 (as a number)
 
-            // Check if content[baseKey] is an array and access the correct index
-            if (Array.isArray(content[baseKey])) {
-                return content[baseKey][index];
-            }
+            return content[baseKey][index];
         }
 
         // If no array index is found, return the value directly
         return content[valueKey];
+    }
+
+    function getPlaceholder(element) {
+        if (element.placeholder) {
+            return element.placeholder;
+        }
+
+        const availablePlaceholders = Object.keys(defaults.placeholders);
+        if (availablePlaceholders.includes(element.value)) {
+            return `e.g., ${defaults.placeholders[element.value]}`;
+        }
+
+        return element.label;
     }
 
     /* eslint-disable indent, react/no-array-index-key, react/jsx-props-no-spreading */
@@ -170,9 +178,8 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                                     options={element.value.map((value) => {
                                         return { headline: value, value };
                                     })}
-                                    value={autoFillSelect}
                                     onChange={(event) => {
-                                        console.log(event);
+                                        console.log(event.target.value);
                                         setAutoFillSelect(event.target.value);
                                     }}
                                 />
@@ -181,7 +188,7 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                                     label={`Insert a ${autoFillSelect} to fill the fields automatically`}
                                     type="text"
                                     name="auto-fill-content"
-                                    placeholder={defaults.placeholders[autoFillSelect]}
+                                    placeholder={`e.g., ${defaults.placeholders[autoFillSelect]}`}
                                     ref={autoFillContentRef}
                                 />
                             </div>
@@ -216,7 +223,7 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                             type="text"
                             name={element.value}
                             value={getFieldValue(element.value) || ""}
-                            placeholder={element.placeholder}
+                            placeholder={getPlaceholder(element)}
                             onChange={updateContentField}
                             {...props}
                         />
@@ -245,7 +252,7 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                             type="number"
                             name={element.value}
                             value={content[element.value] || ""}
-                            placeholder={element.placeholder}
+                            placeholder={element.placeholder || "Enter a number"}
                             onChange={updateContentField}
                             {...props}
                         />
@@ -289,7 +296,6 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                 className="w-full"
                 label="Source type"
                 name="type"
-                value={content.type || ""}
                 options={Object.keys(sourceTypes).map((key) => ({
                     headline: sourceTypes[key].label,
                     value: key,

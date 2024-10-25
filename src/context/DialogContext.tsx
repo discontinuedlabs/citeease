@@ -244,7 +244,7 @@ export default function DialogProvider({ children }: DialogProviderProps) {
         if (dialogs.length > 0) {
             dialogs.forEach((dialog) => closeDialog(dialog.id));
         }
-    }, [location]);
+    }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const contextValue = useMemo(
         () => ({

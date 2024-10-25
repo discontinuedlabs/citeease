@@ -2,7 +2,6 @@ import { forwardRef, useImperativeHandle, useRef, useState, useEffect } from "re
 import { OutlinedIconButton, Select, TextField } from "../ui/MaterialComponents";
 import * as citationUtils from "../../utils/citationUtils.ts";
 
-// FIXME: Why does "value" become undefined before it changes to another value?
 const DateInput = forwardRef(function DateInput(props, parentRef) {
     const { value: passedValue, name, label, onChange, className, ...rest } = props;
     const [value, setValue] = useState(passedValue);
@@ -50,19 +49,16 @@ const DateInput = forwardRef(function DateInput(props, parentRef) {
     function handleChange(event) {
         const match = event.target.name.match(/(year|month|day)$/);
         const type = match ? match[0] : "";
-        let newValue;
 
         const targetValue = event.target.value;
 
-        if (type === "year") {
-            newValue = citationUtils.createDateObject(targetValue, month, day);
-        } else if (type === "month") {
-            newValue = citationUtils.createDateObject(year, targetValue, day);
-        } else if (type === "day") {
-            newValue = citationUtils.createDateObject(year, month, targetValue);
-        }
+        const newValues = {
+            year: citationUtils.createDateObject(targetValue, month, day),
+            month: citationUtils.createDateObject(year, targetValue, day),
+            day: citationUtils.createDateObject(year, month, targetValue),
+        };
 
-        setValue(newValue);
+        setValue(newValues[type]);
     }
 
     function setToToday() {
@@ -91,7 +87,6 @@ const DateInput = forwardRef(function DateInput(props, parentRef) {
                     ref={selectRef}
                     options={monthOptions}
                     name={`${name}-month`}
-                    value={month || ""}
                     label="Month"
                     onChange={handleChange}
                     disabled={!year}

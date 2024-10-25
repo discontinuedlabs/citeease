@@ -12,15 +12,13 @@
             {
                 "component": "text",
                 "label": "Title",
-                "value": "title",
-                "placeholder": "Title"
+                "value": "title"
             },
 
             {
                 "component": "text",
                 "label": "Journal name",
-                "value": "container-title[0]",
-                "placeholder": "Journal name"
+                "value": "container-title[0]"
             },
 
             { "component": "divider" },
@@ -32,29 +30,25 @@
             {
                 "component": "number",
                 "label": "Volume",
-                "value": "volume",
-                "placeholder": "Enter a number"
+                "value": "volume"
             },
 
             {
                 "component": "number",
                 "label": "Issue",
-                "value": "issue",
-                "placeholder": "Enter a number"
+                "value": "issue"
             },
 
             {
                 "component": "text",
                 "label": "Pages",
-                "value": "page",
-                "placeholder": "e.g. 123 or 456-890"
+                "value": "page"
             },
 
             {
                 "component": "text",
                 "label": "ISSN",
-                "value": "ISSN",
-                "placeholder": "ISSN number"
+                "value": "ISSN"
             },
 
             { "component": "divider" },
@@ -75,8 +69,7 @@
                     {
                         "component": "text",
                         "label": "DOI",
-                        "value": "DOI",
-                        "placeholder": "e.g. https://doi.org/xxx"
+                        "value": "DOI"
                     },
 
                     {
@@ -110,8 +103,7 @@
             {
                 "component": "text",
                 "label": "Title",
-                "value": "title",
-                "placeholder": "Title"
+                "value": "title"
             },
 
             { "component": "divider" },
@@ -123,15 +115,19 @@
             {
                 "component": "number",
                 "label": "Edition",
-                "value": "edition",
-                "placeholder": "Enter a number"
+                "value": "edition"
             },
 
             {
                 "component": "number",
                 "label": "Volume",
-                "value": "volume",
-                "placeholder": "Enter a number"
+                "value": "volume"
+            },
+
+            {
+                "component": "text",
+                "label": "Pages",
+                "value": "page"
             },
 
             { "component": "divider" },
@@ -140,14 +136,13 @@
                 "component": "text",
                 "label": "Medium",
                 "value": "medium",
-                "placeholder": "e.g. “CD”, “DVD”, “Album”, etc."
+                "placeholder": "e.g., “CD”, “DVD”, “Album”, etc."
             },
 
             {
                 "component": "text",
                 "label": "Publisher",
-                "value": "publisher",
-                "placeholder": "Publisher"
+                "value": "publisher"
             },
 
             {
@@ -168,15 +163,13 @@
             {
                 "component": "text",
                 "label": "DOI",
-                "value": "DOI",
-                "placeholder": "DOI"
+                "value": "DOI"
             },
 
             {
                 "component": "text",
                 "label": "URL",
-                "value": "URL",
-                "placeholder": "URL"
+                "value": "URL"
             },
 
             { "component": "divider" },
@@ -202,15 +195,13 @@
             {
                 "component": "text",
                 "label": "Title",
-                "value": "title",
-                "placeholder": "Title"
+                "value": "title"
             },
 
             {
                 "component": "text",
                 "label": "Website name",
-                "value": "container-title[0]",
-                "placeholder": "Website name"
+                "value": "container-title[0]"
             },
 
             { "component": "divider" },
@@ -236,8 +227,7 @@
             {
                 "component": "text",
                 "label": "URL",
-                "value": "URL",
-                "placeholder": "URL"
+                "value": "URL"
             },
 
             { "component": "divider" },
