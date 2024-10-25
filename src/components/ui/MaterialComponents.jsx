@@ -331,6 +331,7 @@ export function List({ items = [], className = "", ...rest }) {
     );
 }
 
+// FIXME: It doesnt show the current selected option
 export const Select = forwardRef(function Select(props, parentRef) {
     const { className = "", options, onChange, disabled = false, ...rest } = props;
     const localRef = useRef();

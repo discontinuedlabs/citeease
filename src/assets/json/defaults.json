@@ -85,11 +85,11 @@
         }
     },
     "placeholders": {
-        "doi": "http://dx.doi.org/10.1093/ajae/aaq063",
-        "url": "https://example.com",
-        "pmid": "27097605",
-        "pmcid": "PMC6323133",
-        "isbn": "978-3-16-148410-0"
+        "DOI": "http://dx.doi.org/10.1093/ajae/aaq063",
+        "URL": "https://example.com",
+        "PMID": "27097605",
+        "PMCID": "PMC6323133",
+        "ISBN": "978-3-16-148410-0"
     },
     "errors": {
         "autoFill": {

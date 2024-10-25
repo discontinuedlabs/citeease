@@ -6,19 +6,23 @@
                 "component": "autoFill",
                 "value": ["DOI", "PMID", "PMCID"]
             },
-            { "component": "divider", "label": "or enter the article details manually" },
+
+            { "component": "divider", "label": "or enter the article's details manually" },
+
             {
                 "component": "text",
                 "label": "Title",
                 "value": "title",
                 "placeholder": "Title"
             },
+
             {
                 "component": "text",
                 "label": "Journal name",
                 "value": "container-title[0]",
                 "placeholder": "Journal name"
             },
+
             { "component": "divider" },
 
             { "component": "authors" },
@@ -31,18 +35,21 @@
                 "value": "volume",
                 "placeholder": "Enter a number"
             },
+
             {
                 "component": "number",
                 "label": "Issue",
                 "value": "issue",
                 "placeholder": "Enter a number"
             },
+
             {
                 "component": "text",
                 "label": "Pages",
                 "value": "page",
-                "placeholder": "e.g., 123 or 456-890"
+                "placeholder": "e.g. 123 or 456-890"
             },
+
             {
                 "component": "text",
                 "label": "ISSN",
@@ -69,8 +76,9 @@
                         "component": "text",
                         "label": "DOI",
                         "value": "DOI",
-                        "placeholder": "e.g., https://doi.org/xxx"
+                        "placeholder": "e.g. https://doi.org/xxx"
                     },
+
                     {
                         "component": "date",
                         "label": "Access date",
@@ -93,9 +101,91 @@
         "label": "Book",
         "form": [
             {
-                "component": "autoFillDoi",
-                "label": "Insert a DOI to fill the fields automatically",
-                "placeholder": "https://doi.org/xxxx"
+                "component": "autoFill",
+                "value": ["ISBN", "DOI", "URL"]
+            },
+
+            { "component": "divider", "label": "or enter the book's details manually" },
+
+            {
+                "component": "text",
+                "label": "Title",
+                "value": "title",
+                "placeholder": "Title"
+            },
+
+            { "component": "divider" },
+
+            { "component": "authors" },
+
+            { "component": "divider" },
+
+            {
+                "component": "number",
+                "label": "Edition",
+                "value": "edition",
+                "placeholder": "Enter a number"
+            },
+
+            {
+                "component": "number",
+                "label": "Volume",
+                "value": "volume",
+                "placeholder": "Enter a number"
+            },
+
+            { "component": "divider" },
+
+            {
+                "component": "text",
+                "label": "Medium",
+                "value": "medium",
+                "placeholder": "e.g. “CD”, “DVD”, “Album”, etc."
+            },
+
+            {
+                "component": "text",
+                "label": "Publisher",
+                "value": "publisher",
+                "placeholder": "Publisher"
+            },
+
+            {
+                "component": "text",
+                "label": "Publisher place",
+                "value": "publisher-place",
+                "placeholder": "Geographic location of the publisher"
+            },
+
+            {
+                "component": "date",
+                "label": "Publication date",
+                "value": "issued"
+            },
+
+            { "component": "divider" },
+
+            {
+                "component": "text",
+                "label": "DOI",
+                "value": "DOI",
+                "placeholder": "DOI"
+            },
+
+            {
+                "component": "text",
+                "label": "URL",
+                "value": "URL",
+                "placeholder": "URL"
+            },
+
+            { "component": "divider" },
+
+            {
+                "component": "textarea",
+                "label": "Annotation",
+                "value": "note",
+                "placeholder": "Add a summary, key insight, or analysis for this source."
             }
         ]
     },
@@ -103,9 +193,60 @@
         "label": "Webpage",
         "form": [
             {
-                "component": "autoFillDoi",
-                "label": "Insert a DOI to fill the fields automatically",
-                "placeholder": "https://doi.org/xxxx"
+                "component": "autoFill",
+                "value": ["URL"]
+            },
+
+            { "component": "divider", "label": "or enter the webpage's details manually" },
+
+            {
+                "component": "text",
+                "label": "Title",
+                "value": "title",
+                "placeholder": "Title"
+            },
+
+            {
+                "component": "text",
+                "label": "Website name",
+                "value": "container-title[0]",
+                "placeholder": "Website name"
+            },
+
+            { "component": "divider" },
+
+            { "component": "authors" },
+
+            { "component": "divider" },
+
+            {
+                "component": "date",
+                "label": "Publication date",
+                "value": "issued"
+            },
+
+            {
+                "component": "date",
+                "label": "Access date",
+                "value": "accessed"
+            },
+
+            { "component": "divider" },
+
+            {
+                "component": "text",
+                "label": "URL",
+                "value": "URL",
+                "placeholder": "URL"
+            },
+
+            { "component": "divider" },
+
+            {
+                "component": "textarea",
+                "label": "Annotation",
+                "value": "note",
+                "placeholder": "Add a summary, key insight, or analysis for this source."
             }
         ]
     }

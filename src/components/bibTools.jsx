@@ -48,7 +48,8 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
     const [content, setContent] = useState(passedContant);
     const sourceType = sourceTypes[content.type];
     const autoFillContentRef = useRef(null);
-    const autoFillSelectRef = useRef();
+    const autoFillComponent = sourceType.form.find((entry) => entry.component === "autoFill");
+    const [autoFillSelect, setAutoFillSelect] = useState(autoFillComponent.value[0]);
     const dialog = useDialog();
     const [autoFillLoading, setAutoFillLoading] = useState(false);
 
@@ -57,17 +58,16 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
 
         try {
             let retreivedContent;
-            const type = autoFillSelectRef.current.value;
 
-            if (type === "URL") {
+            if (autoFillSelect === "URL") {
                 retreivedContent = await citationUtils.retrieveContentFromURL(source);
-            } else if (type === "DOI") {
+            } else if (autoFillSelect === "DOI") {
                 retreivedContent = await citationUtils.retrieveContentFromURL(source);
-            } else if (type === "PMCID") {
+            } else if (autoFillSelect === "PMCID") {
                 retreivedContent = await citationUtils.retrieveContentFromURL(source);
-            } else if (type === "PMID") {
+            } else if (autoFillSelect === "PMID") {
                 retreivedContent = await citationUtils.retrieveContentFromURL(source);
-            } else if (type === "ISBN") {
+            } else if (autoFillSelect === "ISBN") {
                 retreivedContent = await citationUtils.retrieveContentFromURL(source);
             }
 
@@ -82,16 +82,13 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
             if (!error.response && error.message === "Network Error") {
                 dialog.show({
                     headline: "Network Error",
-                    content: defaults.errors.autoFill.networkFail.replace(/\${sourceType}/g, sourceType),
+                    content: defaults.errors.autoFill.networkFail.replace(/\${sourceType}/g, autoFillSelect),
                     actions: [["Ok", () => dialog.close()]],
                 });
             } else {
                 dialog.show({
                     headline: "No results found",
-                    content: defaults.errors.autoFill.noResult.replace(
-                        /\${identifierType}/g,
-                        autoFillSelectRef.current.value.toUpperCase()
-                    ),
+                    content: defaults.errors.autoFill.noResult.replace(/\${identifierType}/g, autoFillSelect),
                     actions: [["Ok", () => dialog.close()]],
                 });
             }
@@ -100,7 +97,6 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
     }
 
     function updateContentField(event) {
-        console.warn(event.target.name, event.target.value);
         const { name } = event.target;
         let { value } = event.target;
 
@@ -162,7 +158,6 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
 
     /* eslint-disable indent, react/no-array-index-key, react/jsx-props-no-spreading */
     function renderFormElements(elements) {
-        console.log(content);
         return elements.map((element, index) => {
             switch (element.component) {
                 case "autoFill":
@@ -171,18 +166,22 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                             <div className="flex justify-between gap-1">
                                 <Select
                                     className="flex-shrink"
-                                    value={element.value[0].toLowerCase()}
-                                    ref={autoFillSelectRef}
+                                    name="auto-fill-select"
                                     options={element.value.map((value) => {
-                                        return { headline: value, value: value.toLowerCase() };
+                                        return { headline: value, value };
                                     })}
+                                    value={autoFillSelect}
+                                    onChange={(event) => {
+                                        console.log(event);
+                                        setAutoFillSelect(event.target.value);
+                                    }}
                                 />
                                 <TextField
                                     className="flex-1"
-                                    label={`Insert a ${autoFillSelectRef.current?.value.toUpperCase()} to fill the fields automatically`}
+                                    label={`Insert a ${autoFillSelect} to fill the fields automatically`}
                                     type="text"
-                                    name="auto-fill"
-                                    placeholder={defaults.placeholders[autoFillSelectRef.current?.value]}
+                                    name="auto-fill-content"
+                                    placeholder={defaults.placeholders[autoFillSelect]}
                                     ref={autoFillContentRef}
                                 />
                             </div>
