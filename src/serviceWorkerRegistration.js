@@ -1,3 +1,4 @@
+// Redister the service worker
 export function register() {
     if ("serviceWorker" in navigator) {
         const publicUrl = import.meta.env.VITE_PUBLIC_URL;
@@ -13,6 +14,7 @@ export function register() {
     }
 }
 
+// Unregister the service worker
 export function unregister() {
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.ready
