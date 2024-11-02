@@ -331,12 +331,11 @@ export function List({ items = [], className = "", ...rest }) {
     );
 }
 
-// WATCH: Don't specify a `value` prop when using this component bevause `value` is only getter in this element.
+// WATCH: Don't specify a `value` prop when using this component because `value` is only getter in this element.
 // FIXME: When the `value` gets changed by code rather than user input, the current selected value doesn't show on the component.
 export const Select = forwardRef(function Select(props, parentRef) {
     const { className = "", options, onChange, disabled = false, ...rest } = props;
     const localRef = useRef();
-    const defaultValue = options[0].value;
 
     useImperativeHandle(parentRef, () => localRef?.current, []);
 
@@ -353,11 +352,21 @@ export const Select = forwardRef(function Select(props, parentRef) {
         };
     }, [onChange, localRef]);
 
+    function isSelected(option, index) {
+        return (
+            // localRef.current.value exists in options array and current option is equal to it
+            (options.some((sOption) => sOption.value === localRef?.current?.value) &&
+                localRef?.current?.value === option.value) ||
+            // localRef.current.value doesnt exist in options array and current option is the first one
+            (!options.some((sOption) => sOption.value === localRef?.current?.value) && index === 0)
+        );
+    }
+
     if (disabled) {
         return (
-            <md-filled-select class={className} value={defaultValue} disabled ref={localRef} clamp-menu-width {...rest}>
-                {options.map((option) => {
-                    if (localRef?.current?.value === option.value) {
+            <md-filled-select class={className} disabled ref={localRef} clamp-menu-width {...rest}>
+                {options.map((option, index) => {
+                    if (isSelected(option, index)) {
                         return (
                             <md-select-option key={uid()} selected value={option.value}>
                                 <div slot="headline">{option.headline}</div>
@@ -375,9 +384,9 @@ export const Select = forwardRef(function Select(props, parentRef) {
     }
 
     return (
-        <md-filled-select class={className} value={defaultValue} ref={localRef} clamp-menu-width {...rest}>
-            {options.map((option) => {
-                if (localRef?.current?.value === option.value) {
+        <md-filled-select class={className} ref={localRef} clamp-menu-width {...rest}>
+            {options.map((option, index) => {
+                if (isSelected(option, index)) {
                     return (
                         <md-select-option key={uid()} selected value={option.value}>
                             <div slot="headline">{option.headline}</div>

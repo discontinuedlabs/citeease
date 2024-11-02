@@ -1,4 +1,13 @@
+# See https://eslint.org/docs/latest/use/configure/ignore for more about ignoring files.
+
+# dependencies
 node_modules/
-build/
+
+# testing
 coverage/
+
+# production
+build/
+
+# development
 dev-dist/

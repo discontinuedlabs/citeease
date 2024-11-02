@@ -1,10 +1,10 @@
 # CiteEase: Open-Source Citation Management App
 
-![build status](https://img.shields.io/github/actions/workflow/status/discontinuedlabs/citeease/build.yml?label=build)
+![build status](https://img.shields.io/github/actions/workflow/status/ganymedelabs/citeease/build.yml?label=build)
 ![test status](https://img.shields.io/badge/test-pending-yellow)
-![lint status](https://img.shields.io/github/actions/workflow/status/discontinuedlabs/citeease/lint.yml?label=lint)
+![lint status](https://img.shields.io/github/actions/workflow/status/ganymedelabs/citeease/lint.yml?label=lint)
 ![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)
-![license](https://img.shields.io/github/license/discontinuedlabs/citeease?color=crimson)
+![license](https://img.shields.io/github/license/ganymedelabs/citeease?color=crimson)
 
 **Welcome to CiteEase, an open-source Progressive Web App (PWA) for managing citations and collaborating on bibliographies.**
 
@@ -64,10 +64,10 @@ We actively welcome contributions from the community! To get started, please see
 
 If you encounter any issues or have suggestions for new features, you can use the following templates:
 
--   For **bug reports**, please [open a bug issue](https://github.com/discontinuedlabs/citeease/issues/new?template=bug.yml) and provide as much detail as possible.
--   For **feature requests**, please [open a feature request](https://github.com/discontinuedlabs/citeease/issues/new?template=feature.yml) and describe your idea and its use case.
+-   For **bug reports**, please [open a bug issue](https://github.com/ganymedelabs/citeease/issues/new?template=bug.yml) and provide as much detail as possible.
+-   For **feature requests**, please [open a feature request](https://github.com/ganymedelabs/citeease/issues/new?template=feature.yml) and describe your idea and its use case.
 
-Alternatively, you can visit our [Discussions page](https://github.com/discontinuedlabs/citeease/discussions) for questions, ideas, or general support.
+Alternatively, you can visit our [Discussions page](https://github.com/ganymedelabs/citeease/discussions) for questions, ideas, or general support.
 
 ## 🧪 Testing
 
@@ -79,7 +79,7 @@ CiteEase is licensed under the MIT License. See the [LICENSE](LICENSE) file for 
 
 ## 📧 Contact
 
-For inquiries or more information, you can reach out to us at [discontinuedlabs@gmail.com](mailto:discontinuedlabs@gmail.com).
+For inquiries or more information, you can reach out to us at [ganymedelabs@gmail.com](mailto:ganymedelabs@gmail.com).
 
 ## 🙏 Acknowledgments
 

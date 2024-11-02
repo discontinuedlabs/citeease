@@ -435,7 +435,7 @@ export function getContentFromForm(form: HTMLFormElement): CslJson {
     const dataObject = Object.fromEntries(data.entries()) as Record<string, string | undefined>;
     const switches = form.querySelectorAll<HTMLInputElement>("md-switch");
 
-    const { URL, DOI, ISSN, PMCID, PMID, ISBN, issue, page, title, volume, publisher } = dataObject;
+    const { URL, DOI, ISSN, PMCID, PMID, ISBN, issue, page, title, volume, publisher, note } = dataObject;
     const online = Array.from(switches).find((checkbox) => checkbox.name === "online");
 
     const content = {
@@ -450,6 +450,7 @@ export function getContentFromForm(form: HTMLFormElement): CslJson {
         PMID,
         ISBN,
         publisher,
+        note,
         online: online?.getAttribute("selected") === "true",
         issued: createDateObject(
             parseInt(dataObject["issued-year"]!, 10),

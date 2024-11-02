@@ -1,14 +1,14 @@
 {
-    "homepage": "https://discontinuedlabs.github.io/citeease/",
+    "homepage": "https://ganymedelabs.github.io/citeease/",
     "name": "citeease",
-    "author": "discontinuedlabs",
+    "author": "ganymedelabs",
     "description": "CiteEase is a powerful and user-friendly open-source citation management app designed for students, researchers, and anyone who values efficiency and organization.",
     "license": "MIT",
     "version": "0.2.0",
     "private": true,
     "repository": {
         "type": "git",
-        "url": "https://github.com/discontinuedlabs/citeease.git"
+        "url": "https://github.com/ganymedelabs/citeease.git"
     },
     "keywords": [
         "PWA",
@@ -20,7 +20,7 @@
         "Reference Management Tool"
     ],
     "bugs": {
-        "url": "https://github.com/discontinuedlabs/citeease/issues"
+        "url": "https://github.com/ganymedelabs/citeease/issues"
     },
     "dependencies": {
         "@citation-js/core": "^0.7.11",

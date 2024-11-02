@@ -52,6 +52,7 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
     const [autoFillSelect, setAutoFillSelect] = useState(autoFillComponent.value[0]);
     const dialog = useDialog();
     const [autoFillLoading, setAutoFillLoading] = useState(false);
+    const uuid = useId();
 
     async function retrieveContent(source) {
         setAutoFillLoading(true);
@@ -170,14 +171,13 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
             switch (element.component) {
                 case "autoFill":
                     return (
-                        <div className="grid gap-2" key={index}>
+                        <div className="grid gap-2" key={uuid}>
                             <div className="flex justify-between gap-1">
                                 <Select
                                     className="flex-shrink"
+                                    label="Identifier type"
                                     name="auto-fill-select"
-                                    options={element.value.map((value) => {
-                                        return { headline: value, value };
-                                    })}
+                                    options={element.value.map((value) => ({ headline: value, value }))}
                                     onChange={(event) => {
                                         console.log(event.target.value);
                                         setAutoFillSelect(event.target.value);
@@ -204,13 +204,13 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                         </div>
                     );
                 case "divider":
-                    return <Divider key={index} className="my-4" label={element.label} />;
+                    return <Divider key={uuid} className="my-4" label={element.label} />;
 
                 case "label":
-                    return <p key={index}>{element.label}</p>;
+                    return <p key={uuid}>{element.label}</p>;
                 case "authors":
                     return (
-                        <Suspense key={index} fallback={<CircularProgress />}>
+                        <Suspense key={uuid} fallback={<CircularProgress />}>
                             <AuthorsInput key={index} name="author" content={content} setContent={setContent} />
                         </Suspense>
                     );
@@ -218,7 +218,7 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                     return (
                         <TextField
                             className="w-full"
-                            key={index}
+                            key={uuid}
                             label={element.label}
                             type="text"
                             name={element.value}
@@ -232,13 +232,13 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                     return (
                         <TextField
                             className="w-full"
-                            key={index}
+                            key={uuid}
                             label={element.label}
                             type="textarea"
                             rows={3}
                             name={element.value}
-                            value={content[element.value] || ""}
-                            placeholder={element.placeholder}
+                            value={getFieldValue(element.value) || ""}
+                            placeholder={getPlaceholder(element)}
                             onChange={updateContentField}
                             {...props}
                         />
@@ -247,11 +247,11 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                     return (
                         <TextField
                             className="w-full"
-                            key={index}
+                            key={uuid}
                             label={element.label}
                             type="number"
                             name={element.value}
-                            value={content[element.value] || ""}
+                            value={getFieldValue(element.value) || ""}
                             placeholder={element.placeholder || "Enter a number"}
                             onChange={updateContentField}
                             {...props}
@@ -259,9 +259,9 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                     );
                 case "date":
                     return (
-                        <Suspense key={index} fallback={<CircularProgress />}>
+                        <Suspense key={uuid} fallback={<CircularProgress />}>
                             <DateInput
-                                key={index}
+                                key={uuid}
                                 label={element.label}
                                 name={element.value}
                                 value={content?.[element.value]}
@@ -271,7 +271,7 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                     );
                 case "checkbox":
                     return (
-                        <div key={index} className="grid gap-2">
+                        <div key={uuid} className="grid gap-2">
                             <Switch
                                 label={element.label}
                                 name={element.value}
@@ -282,7 +282,20 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                         </div>
                     );
                 case "annotation":
-                    return <TextField className="w-full" label="Annotation" type="textarea" rows="3" />;
+                    return (
+                        <TextField
+                            className="w-full"
+                            key={uuid}
+                            label="Annotation"
+                            type="textarea"
+                            rows="3"
+                            name={element.value}
+                            value={getFieldValue(element.value) || ""}
+                            placeholder={getPlaceholder(element)}
+                            onChange={updateContentField}
+                            {...props}
+                        />
+                    );
                 default:
                     return null;
             }

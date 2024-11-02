@@ -14,7 +14,7 @@ export default function NotFoundPage() {
                 ["Home", () => navigate("/")],
                 [
                     "Contact support",
-                    () => (window.location.href = "mailto:discontinuedlabs@gmail.com?subject=Support Request"), // eslint-disable-line no-return-assign
+                    () => (window.location.href = "mailto:ganymedelabs@gmail.com?subject=Support Request"), // eslint-disable-line no-return-assign
                 ],
             ]}
         />

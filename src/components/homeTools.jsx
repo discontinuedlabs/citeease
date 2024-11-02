@@ -80,7 +80,7 @@ export function CoBibsSearchDialog({ setIsVisible, tryingToJoinBib = undefined }
                 searchForBib(tryingToJoinBib);
             }
         }
-    }, [tryingToJoinBib, bibsLoaded]);
+    }, [tryingToJoinBib, bibsLoaded]); // eslint-disable-line react-hooks/exhaustive-deps
 
     async function handleSearch(event) {
         event.preventDefault();
