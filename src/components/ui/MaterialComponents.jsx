@@ -7,23 +7,26 @@ import { useMetaThemeColor, useTheme } from "../../hooks/hooks.tsx";
 import { hslToHsla } from "../../utils/conversionUtils.tsx";
 import { colors as colorValues } from "../../assets/json/defaults.json";
 
-export function Divider({ className = "", label, ...rest }) {
-    if (label)
-        return (
-            <div className={`flex items-center ${className}`}>
-                <md-divider />
+export function Divider({ className = "", label = "", ...rest }) {
+    const dividerClass = "h-[1px] w-full";
+    const dividerStyle = { background: "var(--md-sys-color-outline-variant)" };
+
+    return (
+        <div className={`flex items-center ${className}`} {...rest}>
+            <div className={dividerClass} style={dividerStyle} />
+            {Boolean(label.length) && (
                 <p
-                    className="mx-1 my-0 whitespace-nowrap"
+                    className="mx-1 my-0 whitespace-nowrap text-sm"
                     style={{
                         color: "var(--md-sys-color-outline)",
                     }}
                 >
                     {label}
                 </p>
-                <md-divider />
-            </div>
-        );
-    return <md-divider class={className} {...rest} />;
+            )}
+            <div className={dividerClass} style={dividerStyle} />
+        </div>
+    );
 }
 
 export function CircularProgress({ className = "", value, ...rest }) {
@@ -46,6 +49,7 @@ export function LinearProgress({ className = "", value, indeterminateWithValue =
     return <md-linear-progress value={value} class={className} {...rest} />;
 }
 
+// TODO: Remake this component from scratch
 export const TextField = forwardRef(function TextField(props, parentRef) {
     const {
         className = "",
@@ -289,6 +293,7 @@ export function OutlinedIconButton({ className = "", onClick, type = "button", n
     );
 }
 
+// TODO: Remake this component from scratch
 export function List({ items = [], className = "", ...rest }) {
     return (
         <md-list class={className} {...rest}>
@@ -403,8 +408,6 @@ export const Select = forwardRef(function Select(props, parentRef) {
                 {label}
             </div>
 
-            {/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
-
             {/* Select Display */}
             <button
                 id={id}
@@ -445,8 +448,6 @@ export const Select = forwardRef(function Select(props, parentRef) {
                     ))}
                 </div>
             )}
-
-            {/* eslint-enable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
 
             <span
                 className={`absolute end-3 top-1/2 -translate-y-1/2 text-base ${isOpen ? "rotate-180" : "rotate-0"}`}
