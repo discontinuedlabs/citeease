@@ -10,7 +10,6 @@ import { useEnhancedDispatch, useFindBib, useTheme } from "../hooks/hooks.tsx";
 import { useDialog } from "../context/DialogContext.tsx";
 import { ChipSet, Icon, List } from "./ui/MaterialComponents";
 import defaults from "../assets/json/defaults.json";
-import { hslToHsla } from "../utils/conversionUtils.tsx";
 import { timeAgo } from "../utils/utils.ts";
 import { EmptyStar, FilledStar } from "./ui/Star";
 
@@ -207,7 +206,8 @@ export function BibsList({ hideCurrentBib = false, disableStar = false, highligh
                     start: (
                         <Icon
                             style={{
-                                background: hslToHsla(colorValues[theme][bib?.icon?.color || defaultIcon.color], 0.25),
+                                background: colorValues[theme][bib?.icon?.color || defaultIcon.color],
+                                color: "var(--md-sys-color-surface)",
                             }}
                             className="rounded-full p-5"
                             name={bib?.icon?.name || defaultIcon.name}

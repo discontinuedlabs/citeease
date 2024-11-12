@@ -331,75 +331,141 @@ export function List({ items = [], className = "", ...rest }) {
     );
 }
 
-// WATCH: Don't specify a `value` prop when using this component because `value` is only getter in this element.
-// FIXME: When the `value` gets changed by code rather than user input, the current selected value doesn't show on the component.
 export const Select = forwardRef(function Select(props, parentRef) {
-    const { className = "", options, onChange, disabled = false, ...rest } = props;
-    const localRef = useRef();
+    const {
+        className = "",
+        label = "",
+        options: passedOptions = [],
+        onChange = () => undefined,
+        disabled = false,
+        ...rest
+    } = props;
 
-    useImperativeHandle(parentRef, () => localRef?.current, []);
+    const options = passedOptions.map((option) => ({ ...option, id: uid() }));
+    const [selectedOption, setSelectedOption] = useState(options[0]);
+    const [isOpen, setIsOpen] = useState(false);
+    const [isFocused, setIsFocused] = useState(false);
+    const localRef = useRef(null);
+    const id = uid();
+
+    useImperativeHandle(parentRef, () => localRef, []);
 
     useEffect(() => {
-        const currentRef = localRef?.current;
-        if (currentRef) {
-            currentRef.addEventListener("input", onChange);
+        function handleClickOutside(event) {
+            if (localRef.current && !localRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        }
+        document.addEventListener("click", handleClickOutside);
+        return () => document.removeEventListener("click", handleClickOutside);
+    }, []);
+
+    useEffect(() => {
+        function checkFocus() {
+            setIsFocused(document.activeElement === localRef.current);
         }
 
-        return () => {
-            if (currentRef) {
-                currentRef.removeEventListener("input", onChange);
-            }
-        };
-    }, [onChange, localRef]);
+        checkFocus();
 
-    function isSelected(option, index) {
-        return (
-            // localRef.current.value exists in options array and current option is equal to it
-            (options.some((sOption) => sOption.value === localRef?.current?.value) &&
-                localRef?.current?.value === option.value) ||
-            // localRef.current.value doesnt exist in options array and current option is the first one
-            (!options.some((sOption) => sOption.value === localRef?.current?.value) && index === 0)
-        );
+        const inputEl = localRef.current;
+        inputEl.addEventListener("focus", checkFocus);
+        inputEl.addEventListener("blur", checkFocus);
+
+        return () => {
+            inputEl.removeEventListener("focus", checkFocus);
+            inputEl.removeEventListener("blur", checkFocus);
+        };
+    }, []);
+
+    function toggleDropdown() {
+        setIsOpen((prev) => !prev);
     }
 
-    if (disabled) {
-        return (
-            <md-filled-select class={className} disabled ref={localRef} clamp-menu-width {...rest}>
-                {options.map((option, index) => {
-                    if (isSelected(option, index)) {
-                        return (
-                            <md-select-option key={uid()} selected value={option.value}>
-                                <div slot="headline">{option.headline}</div>
-                            </md-select-option>
-                        );
-                    }
-                    return (
-                        <md-select-option key={uid()} value={option.value}>
-                            <div slot="headline">{option.headline}</div>
-                        </md-select-option>
-                    );
-                })}
-            </md-filled-select>
-        );
+    function handleOptionClick(option) {
+        setSelectedOption(option);
+        setIsOpen(false);
+
+        onChange(option.value);
     }
 
     return (
-        <md-filled-select class={className} ref={localRef} clamp-menu-width {...rest}>
-            {options.map((option, index) => {
-                if (isSelected(option, index)) {
-                    return (
-                        <md-select-option key={uid()} selected value={option.value}>
-                            <div slot="headline">{option.headline}</div>
-                        </md-select-option>
-                    );
-                }
-                return (
-                    <md-select-option key={uid()} value={option.value}>
-                        <div slot="headline">{option.headline}</div>
-                    </md-select-option>
-                );
-            })}
-        </md-filled-select>
+        <div className={`relative min-w-40 ${className}`} ref={localRef} {...rest}>
+            {!props.disabled && <md-ripple part="ripple" htmlFor={id} aria-hidden />}
+
+            {/* Label */}
+            <div
+                className={`absolute start-4 overflow-hidden text-ellipsis whitespace-nowrap transition-all duration-200 ease-in-out ${isFocused || selectedOption.headline ? "top-2 text-xs" : "top-1/2 -translate-y-1/2 text-base"}`}
+                style={{
+                    color:
+                        isFocused || isOpen ? "var(--md-sys-color-primary)" : "var(--md-sys-color-on-surface-variant)",
+                }}
+            >
+                {label}
+            </div>
+
+            {/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+
+            {/* Select Display */}
+            <button
+                id={id}
+                type="button"
+                className={`flex min-h-14 min-w-full cursor-pointer items-center justify-between overflow-hidden text-ellipsis whitespace-nowrap rounded-t-[4px] border-0 pe-6 ps-4 font-sans text-base ${
+                    label.length ? "pb-2 pt-6" : "py-4"
+                }`}
+                style={{ background: "var(--md-sys-color-inverse-surface)" }}
+                disabled={disabled}
+                onClick={toggleDropdown}
+            >
+                {selectedOption.headline}
+            </button>
+
+            {/* Options Dropdown */}
+            {isOpen && (
+                <div
+                    className="absolute z-50 w-full rounded-md py-2 text-base shadow-lg drop-shadow-md"
+                    style={{ background: "var(--md-sys-color-inverse-surface)" }}
+                >
+                    {options.map((option) => (
+                        <button
+                            type="button"
+                            key={option.id}
+                            value={option.value}
+                            className="relative block min-h-14 w-full border-none bg-transparent p-0 px-3 py-4 text-start font-sans text-base"
+                            onClick={() => handleOptionClick(option)}
+                            style={{
+                                background:
+                                    option.value === selectedOption.value
+                                        ? "var(--md-sys-color-primary-container)"
+                                        : "",
+                            }}
+                        >
+                            <md-ripple part="ripple" htmlFor={option.id} aria-hidden />
+                            {option.headline}
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {/* eslint-enable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+
+            <span
+                className={`absolute end-3 top-1/2 -translate-y-1/2 text-base ${isOpen ? "rotate-180" : "rotate-0"}`}
+                style={{
+                    color:
+                        isFocused || isOpen ? "var(--md-sys-color-primary)" : "var(--md-sys-color-on-surface-variant)",
+                }}
+            >
+                &#9662;
+            </span>
+
+            <div
+                className={`absolute bottom-0 w-full transition-all duration-200 ${isOpen || isFocused ? "h-[3px]" : "h-[1px]"}`}
+                style={{
+                    background:
+                        isOpen || isFocused ? "var(--md-sys-color-primary)" : "var(--md-sys-color-on-surface-variant)",
+                }}
+            />
+        </div>
     );
 });
 

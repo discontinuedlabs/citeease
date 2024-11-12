@@ -5,20 +5,10 @@
     "description": "CiteEase is a powerful and user-friendly open-source citation management app designed for students, researchers, and anyone who values efficiency and organization.",
     "license": "MIT",
     "version": "0.2.0",
-    "private": true,
     "repository": {
         "type": "git",
         "url": "https://github.com/ganymedelabs/citeease.git"
     },
-    "keywords": [
-        "PWA",
-        "Progressive Web App",
-        "Open Source",
-        "React",
-        "MIT",
-        "Citation",
-        "Reference Management Tool"
-    ],
     "bugs": {
         "url": "https://github.com/ganymedelabs/citeease/issues"
     },

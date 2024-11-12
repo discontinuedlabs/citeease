@@ -17,7 +17,7 @@ import { useEnhancedDispatch, useFindBib, useOnlineStatus, useTheme } from "../h
 import citationStyles from "../assets/json/styles.json";
 import mostPopularStyles from "../assets/json/mostPopularStyles.json";
 import { uid } from "../utils/utils.ts";
-import { hslToHsla, parseHtmlToJsx } from "../utils/conversionUtils.tsx";
+import { parseHtmlToJsx } from "../utils/conversionUtils.tsx";
 import {
     Checkbox,
     ChipSet,
@@ -177,6 +177,7 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                                     className="flex-shrink"
                                     label="Identifier type"
                                     name="auto-fill-select"
+                                    value={autoFillSelect}
                                     options={element.value.map((value) => ({ headline: value, value }))}
                                     onChange={(event) => {
                                         console.log(event.target.value);
@@ -1326,7 +1327,8 @@ export function IconsDialog({ setIconObject }) {
             <div className="flex items-center justify-start gap-2">
                 <Icon
                     style={{
-                        background: hslToHsla(colorValues[theme][selectedColor], 0.25),
+                        background: colorValues[theme][selectedColor],
+                        color: "var(--md-sys-color-surface)",
                     }}
                     className="rounded-full p-5"
                     name={selectedIcon}

@@ -104,9 +104,7 @@ export default function Home() {
         });
     }
 
-    // TODO: Combine the Hpme list with the one used in MoveDialog.
     return (
-        // mb-20 needed in pages with a Fab component
         <div className="page-with-fab">
             <TopBar
                 headline="Home"
