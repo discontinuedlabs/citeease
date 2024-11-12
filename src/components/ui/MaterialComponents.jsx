@@ -49,75 +49,126 @@ export function LinearProgress({ className = "", value, indeterminateWithValue =
     return <md-linear-progress value={value} class={className} {...rest} />;
 }
 
-// TODO: Remake this component from scratch
 export const TextField = forwardRef(function TextField(props, parentRef) {
     const {
-        className = "",
+        className,
+        type = "text",
         label,
-        onChange,
-        prefixText,
-        suffixText,
-        errorText,
-        supportingText,
+        value,
+        placeholder,
         error = false,
-        disabled = false,
+        supportingText,
+        disabled,
         ...rest
     } = props;
 
-    const localRef = useRef();
+    const [isFocused, setIsFocused] = useState(false);
+    const localRef = useRef(null);
+    const id = props?.id || uid();
+    const conatinerId = uid();
 
-    useImperativeHandle(parentRef, () => localRef?.current, []);
+    useImperativeHandle(parentRef, () => localRef, []);
 
     useEffect(() => {
-        const currentRef = localRef?.current;
-        if (currentRef) {
-            currentRef.addEventListener("input", onChange);
+        function checkFocus() {
+            setIsFocused(document.activeElement === localRef.current);
         }
 
-        return () => {
-            if (currentRef) {
-                currentRef.removeEventListener("input", onChange);
-            }
-        };
-    }, [onChange, localRef]);
+        checkFocus();
 
-    if (errorText && errorText.length !== 0)
-        return (
-            <md-filled-text-field
-                ref={localRef}
-                class={className}
-                label={label}
-                prefix-text={prefixText}
-                suffix-text={suffixText}
-                supporting-text={supportingText}
-                error={error}
-                error-text={errorText}
-                {...rest}
-            />
-        );
-    if (disabled)
-        return (
-            <md-filled-text-field
-                ref={localRef}
-                class={className}
-                label={label}
-                prefix-text={prefixText}
-                suffix-text={suffixText}
-                supporting-text={supportingText}
-                disabled
-                {...rest}
-            />
-        );
+        const element = localRef.current;
+        element.addEventListener("focus", checkFocus);
+        element.addEventListener("blur", checkFocus);
+
+        return () => {
+            element.removeEventListener("focus", checkFocus);
+            element.removeEventListener("blur", checkFocus);
+        };
+    }, []);
+
+    function handleFocus() {
+        if (!disabled) {
+            const element = localRef.current;
+            element.focus();
+        }
+    }
+
+    function getIndicatorsColor() {
+        if (error) return "var( --md-sys-color-error)";
+        if (isFocused) return "var(--md-sys-color-primary)";
+        return "var(--md-sys-color-on-surface-variant)";
+    }
+
+    const textFieldProps = {
+        ref: localRef,
+        type,
+        id,
+        value,
+        placeholder: isFocused ? placeholder : "",
+        disabled,
+        className: `resize-none w-full rounded-t-[4px] border-0 px-4 font-sans text-base ${
+            label && label.length ? "mb-2 mt-6" : "my-4"
+        } ${disabled ? "opacity-60" : ""}`,
+        style: {
+            background: "var(--md-sys-color-inverse-surface)",
+            caretColor: "var(--md-sys-color-primary)",
+        },
+        ...rest,
+    };
+
     return (
-        <md-filled-text-field
-            ref={localRef}
-            class={className}
-            label={label}
-            prefix-text={prefixText}
-            suffix-text={suffixText}
-            supporting-text={supportingText}
-            {...rest}
-        />
+        <div>
+            {/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+
+            <div
+                id={conatinerId}
+                className={`relative ${className}`}
+                onClick={handleFocus}
+                style={{
+                    background: "var(--md-sys-color-inverse-surface)",
+                }}
+            >
+                {!disabled && <md-ripple part="ripple" htmlFor={conatinerId} aria-hidden />}
+
+                {/* Label */}
+                <div className="absolute start-0 top-0 z-[1] h-14 w-full select-none bg-transparent text-transparent">
+                    ###
+                    <div
+                        className={`absolute start-4 w-10/12 overflow-hidden text-ellipsis whitespace-nowrap transition-all duration-200 ease-out ${
+                            isFocused || (value && value.length) || localRef.current?.value
+                                ? "top-2 text-xs"
+                                : "top-1/2 -translate-y-1/2 text-base"
+                        } ${disabled ? "opacity-60" : ""}`}
+                        style={{ color: getIndicatorsColor() }}
+                    >
+                        {label}
+                    </div>
+                </div>
+
+                {/* Text Field */}
+                {type === "textarea" ? <textarea {...textFieldProps} /> : <input {...textFieldProps} />}
+
+                {/* Focus Indicator */}
+                <div
+                    className={`absolute bottom-0 w-full transition-all duration-200 ease-out ${
+                        isFocused ? "h-[3px]" : "h-[1px]"
+                    } ${disabled ? "opacity-60" : ""}`}
+                    style={{ background: getIndicatorsColor() }}
+                />
+            </div>
+
+            {/* Supporting Text */}
+            {Boolean(supportingText && supportingText.length) && (
+                <small
+                    className="mx-4"
+                    style={{ color: error ? "var( --md-sys-color-error)" : "var(--md-sys-color-on-surface-variant)" }}
+                >
+                    {supportingText}
+                </small>
+            )}
+
+            {/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+        </div>
     );
 });
 
@@ -336,6 +387,7 @@ export function List({ items = [], className = "", ...rest }) {
     );
 }
 
+// FIXME: No focus
 export const Select = forwardRef(function Select(props, parentRef) {
     const {
         className = "",
@@ -372,13 +424,13 @@ export const Select = forwardRef(function Select(props, parentRef) {
 
         checkFocus();
 
-        const inputEl = localRef.current;
-        inputEl.addEventListener("focus", checkFocus);
-        inputEl.addEventListener("blur", checkFocus);
+        const element = localRef.current;
+        element.addEventListener("focus", checkFocus);
+        element.addEventListener("blur", checkFocus);
 
         return () => {
-            inputEl.removeEventListener("focus", checkFocus);
-            inputEl.removeEventListener("blur", checkFocus);
+            element.removeEventListener("focus", checkFocus);
+            element.removeEventListener("blur", checkFocus);
         };
     }, []);
 
@@ -399,7 +451,9 @@ export const Select = forwardRef(function Select(props, parentRef) {
 
             {/* Label */}
             <div
-                className={`absolute start-4 overflow-hidden text-ellipsis whitespace-nowrap transition-all duration-200 ease-in-out ${isFocused || selectedOption.headline ? "top-2 text-xs" : "top-1/2 -translate-y-1/2 text-base"}`}
+                className={`absolute start-4 overflow-hidden text-ellipsis whitespace-nowrap transition-all duration-200 ease-out ${
+                    isFocused || selectedOption.headline ? "top-2 text-xs" : "top-1/2 -translate-y-1/2 text-base"
+                } ${disabled ? "opacity-60" : ""}`}
                 style={{
                     color:
                         isFocused || isOpen ? "var(--md-sys-color-primary)" : "var(--md-sys-color-on-surface-variant)",
@@ -419,7 +473,7 @@ export const Select = forwardRef(function Select(props, parentRef) {
                 disabled={disabled}
                 onClick={toggleDropdown}
             >
-                {selectedOption.headline}
+                <span className={`${disabled ? "opacity-60" : ""}`}>{selectedOption.headline}</span>
             </button>
 
             {/* Options Dropdown */}
@@ -449,8 +503,11 @@ export const Select = forwardRef(function Select(props, parentRef) {
                 </div>
             )}
 
+            {/* Dropdown Arrow */}
             <span
-                className={`absolute end-3 top-1/2 -translate-y-1/2 text-base ${isOpen ? "rotate-180" : "rotate-0"}`}
+                className={`absolute end-3 top-1/2 -translate-y-1/2 text-base ${
+                    isOpen ? "rotate-180" : "rotate-0"
+                } ${disabled ? "opacity-60" : ""}`}
                 style={{
                     color:
                         isFocused || isOpen ? "var(--md-sys-color-primary)" : "var(--md-sys-color-on-surface-variant)",
@@ -459,8 +516,11 @@ export const Select = forwardRef(function Select(props, parentRef) {
                 &#9662;
             </span>
 
+            {/* Focus Indicator */}
             <div
-                className={`absolute bottom-0 w-full transition-all duration-200 ${isOpen || isFocused ? "h-[3px]" : "h-[1px]"}`}
+                className={`absolute bottom-0 w-full transition-all duration-200 ease-out ${
+                    isOpen || isFocused ? "h-[3px]" : "h-[1px]"
+                } ${disabled ? "opacity-60" : ""}`}
                 style={{
                     background:
                         isOpen || isFocused ? "var(--md-sys-color-primary)" : "var(--md-sys-color-on-surface-variant)",
@@ -563,7 +623,7 @@ export function TopBar({ headline, description, showBackButton = true, options }
                     )}
 
                     <h2
-                        className={`mx-2 overflow-hidden text-ellipsis whitespace-nowrap text-xl font-normal transition duration-150 ease-in-out ${isScrolled ? "translate-y-0" : "translate-y-4 opacity-0"}`}
+                        className={`mx-2 overflow-hidden text-ellipsis whitespace-nowrap text-xl font-normal transition duration-150 ease-out ${isScrolled ? "translate-y-0" : "translate-y-4 opacity-0"}`}
                     >
                         {headline}
                     </h2>

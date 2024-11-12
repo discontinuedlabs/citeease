@@ -217,8 +217,15 @@
         background-color: var(--md-sys-color-error);
     }
 
-    md-filled-text-field {
-        @apply resize-none;
+    input::placeholder,
+    textarea::placeholder {
+        color: var(--md-sys-color-on-surface-variant);
+        opacity: 1;
+    }
+
+    input:focus-visible,
+    textarea:focus-visible {
+        outline: solid transparent 0px;
     }
 
     .page {
