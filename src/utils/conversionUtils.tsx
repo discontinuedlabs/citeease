@@ -10,14 +10,57 @@ import { createDateObject } from "./citationUtils.ts";
  * @param {number} alpha - The alpha value for the HSLA string (between 0 and 1).
  * @returns {string | undefined} The corresponding HSLA string in the format "hsla(h, s%, l%, a)", or `undefined` if the input HSL string is invalid.
  */
-export function hslToHsla(hslString: string, alpha: number): string | undefined {
-    const hslValues = hslString?.match(/\d+(\.\d+)?/g);
+export function hslToHSLA(hsl: string, alpha: number): string | undefined {
+    console.log(hsl);
+    const hslValues = hsl?.match(/\d+(\.\d+)?/g);
 
     if (hslValues && hslValues.length === 3) {
         const [h, s, l] = hslValues;
         return `hsla(${h}, ${s}%, ${l}%, ${alpha})`;
     }
     return undefined;
+}
+
+/**
+ * Converts a hex color code to HSL (Hue, Saturation, Lightness) format.
+ *
+ * @param {string} hex - The hex color code (e.g., "#RRGGBB" or "RRGGBB").
+ * @param {boolean} [stringified=true] - If true, returns the HSL value as a formatted string. If false, returns an object with `h`, `s`, and `l` properties.
+ * @returns {string | { h: number, s: number, l: number }} - The HSL representation of the color. Returns a string in the format "hsl(h, s%, l%)" if `stringified` is true, otherwise an object with properties `h`, `s`, and `l`.
+ */
+export function hexToHSL(hex: string, stringified: boolean = true): string | { h: number; s: number; l: number } {
+    const cleanedHex = hex.replace(/^#/, "");
+
+    const r = parseInt(cleanedHex.substring(0, 2), 16) / 255;
+    const g = parseInt(cleanedHex.substring(2, 4), 16) / 255;
+    const b = parseInt(cleanedHex.substring(4, 6), 16) / 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+
+    let l = (max + min) / 2;
+
+    let s = 0;
+    if (max !== min) {
+        s = l > 0.5 ? (max - min) / (2 - max - min) : (max - min) / (max + min);
+    }
+
+    let h = 0;
+    if (max === r) {
+        h = (g - b) / (max - min);
+    } else if (max === g) {
+        h = 2 + (b - r) / (max - min);
+    } else if (max === b) {
+        h = 4 + (r - g) / (max - min);
+    }
+
+    h = Math.round(h * 60);
+    if (h < 0) h += 360;
+
+    s = Math.round(s * 100);
+    l = Math.round(l * 100);
+
+    return stringified ? `hsl(${h}, ${s}, ${l})` : { h, s, l };
 }
 
 /**
@@ -399,7 +442,7 @@ export function cslToBibJSON(cslJson: CslJson): BibJson {
     if (cslJson["publisher-place"]) bibJson.pubplace = cslJson["publisher-place"];
 
     // Journal title
-    if (cslJson["container-title"]) bibJson.journal = cslJson["container-title"];
+    if (cslJson["container-title"]) [bibJson.journal] = cslJson["container-title"];
 
     // Volume, issue, and page range
     if (cslJson.volume) bibJson.volume = cslJson.volume;
@@ -516,7 +559,7 @@ export function bibToCslJSON(bibJson: BibJson): CslJson {
     if (bibJson.pubplace) cslJson["publisher-place"] = bibJson.pubplace;
 
     // Journal title
-    if (bibJson.journal) cslJson["container-title"] = bibJson.journal;
+    if (bibJson.journal) cslJson["container-title"] = [bibJson.journal];
 
     // Volume, issue, and pages
     if (bibJson.volume) cslJson.volume = bibJson.volume;

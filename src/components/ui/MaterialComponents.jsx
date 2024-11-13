@@ -4,7 +4,7 @@ import React, { forwardRef, useEffect, useId, useImperativeHandle, useRef, useSt
 import { useNavigate } from "react-router-dom";
 import { uid } from "../../utils/utils.ts";
 import { useMetaThemeColor, useTheme } from "../../hooks/hooks.tsx";
-import { hslToHsla } from "../../utils/conversionUtils.tsx";
+import { hexToHSL, hslToHSLA } from "../../utils/conversionUtils.tsx";
 import { colors as colorValues } from "../../assets/json/defaults.json";
 
 export function Divider({ className = "", label = "", ...rest }) {
@@ -67,6 +67,10 @@ export const TextField = forwardRef(function TextField(props, parentRef) {
     const id = props?.id || uid();
     const conatinerId = uid();
 
+    const backgroundColor = window
+        .getComputedStyle(document.documentElement)
+        .getPropertyValue("--md-sys-color-on-primary-container");
+
     useImperativeHandle(parentRef, () => localRef, []);
 
     useEffect(() => {
@@ -106,11 +110,12 @@ export const TextField = forwardRef(function TextField(props, parentRef) {
         value,
         placeholder: isFocused ? placeholder : "",
         disabled,
-        className: `resize-none w-full rounded-t-[4px] border-0 px-4 font-sans text-base ${
+        className: `resize-none w-full border-0 px-4 font-sans text-base ${
             label && label.length ? "mb-2 mt-6" : "my-4"
         } ${disabled ? "opacity-60" : ""}`,
         style: {
-            background: "var(--md-sys-color-inverse-surface)",
+            background: "transparent",
+            color: "var(--md-sys-color-on-surface)",
             caretColor: "var(--md-sys-color-primary)",
         },
         ...rest,
@@ -122,13 +127,13 @@ export const TextField = forwardRef(function TextField(props, parentRef) {
 
             <div
                 id={conatinerId}
-                className={`relative ${className}`}
+                className={`relative rounded-t-[4px] ${className}`}
                 onClick={handleFocus}
                 style={{
-                    background: "var(--md-sys-color-inverse-surface)",
+                    background: hslToHSLA(hexToHSL(backgroundColor), 0.1),
                 }}
             >
-                {!disabled && <md-ripple part="ripple" htmlFor={conatinerId} aria-hidden />}
+                {!disabled && <md-ripple class="rounded-t-[4px]" part="ripple" htmlFor={conatinerId} aria-hidden />}
 
                 {/* Label */}
                 <div className="absolute start-0 top-0 z-[1] h-14 w-full select-none bg-transparent text-transparent">
@@ -405,6 +410,10 @@ export const Select = forwardRef(function Select(props, parentRef) {
     const localRef = useRef(null);
     const id = uid();
 
+    const backgroundColor = window
+        .getComputedStyle(document.documentElement)
+        .getPropertyValue("--md-sys-color-on-primary-container");
+
     useImperativeHandle(parentRef, () => localRef, []);
 
     useEffect(() => {
@@ -446,8 +455,15 @@ export const Select = forwardRef(function Select(props, parentRef) {
     }
 
     return (
-        <div className={`relative min-w-40 ${className}`} ref={localRef} {...rest}>
-            {!props.disabled && <md-ripple part="ripple" htmlFor={id} aria-hidden />}
+        <div
+            className={`relative min-w-40 ${className}`}
+            ref={localRef}
+            style={{
+                color: "var(--md-sys-color-on-surface)",
+            }}
+            {...rest}
+        >
+            {!props.disabled && <md-ripple class="rounded-t-[4px]" part="ripple" htmlFor={id} aria-hidden />}
 
             {/* Label */}
             <div
@@ -469,7 +485,9 @@ export const Select = forwardRef(function Select(props, parentRef) {
                 className={`flex min-h-14 min-w-full cursor-pointer items-center justify-between overflow-hidden text-ellipsis whitespace-nowrap rounded-t-[4px] border-0 pe-6 ps-4 font-sans text-base ${
                     label.length ? "pb-2 pt-6" : "py-4"
                 }`}
-                style={{ background: "var(--md-sys-color-inverse-surface)" }}
+                style={{
+                    background: hslToHSLA(hexToHSL(backgroundColor), 0.1),
+                }}
                 disabled={disabled}
                 onClick={toggleDropdown}
             >
@@ -656,7 +674,7 @@ function Chip(props) {
     const targetColor = colorValues[theme][color];
 
     const style = {
-        background: selected ? hslToHsla(targetColor, 0.25) : "transparent",
+        background: selected ? hslToHSLA(targetColor, 0.25) : "transparent",
         border: `1px solid ${selected ? "transparent" : targetColor}`,
     };
 

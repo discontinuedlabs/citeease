@@ -8,7 +8,6 @@ import { replaceAllSettings } from "../../data/store/slices/settingsSlice";
 import { mergeWithCurrentBibs, replaceAllBibs } from "../../data/store/slices/bibsSlice";
 import { useToast } from "../../context/ToastContext.tsx";
 import { FilledButton, TextField, TopBar } from "../../components/ui/MaterialComponents";
-import defaults from "../../assets/json/defaults.json";
 
 export default function Login() {
     const [isLoading, setIsLoading] = useState(false);
@@ -94,7 +93,7 @@ export default function Login() {
                 <TextField label="Password" type="password" ref={passwordRef} required />
 
                 <Link to="/forgot-password">Forgot password?</Link>
-                <FilledButton className={defaults.classes.wideButton} type="submit" disabled={isLoading}>
+                <FilledButton className="wide-button" type="submit" disabled={isLoading}>
                     Log in
                 </FilledButton>
 

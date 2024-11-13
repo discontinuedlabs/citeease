@@ -6,7 +6,6 @@ import { useAuth } from "../../context/AuthContext";
 import db from "../../data/db/firebase/firebase";
 import { deleteAllBibs } from "../../data/store/slices/bibsSlice";
 import { useDialog } from "../../context/DialogContext.tsx";
-import defaults from "../../assets/json/defaults.json";
 import { FilledButton, TextField, TopBar } from "../../components/ui/MaterialComponents";
 
 export default function Signup() {
@@ -84,7 +83,7 @@ export default function Signup() {
                 <TextField label="Password" type="password" ref={passwordRef} required />
                 <TextField label="Password confirmation" type="password" ref={passwordConfirmRef} required />
 
-                <FilledButton className={defaults.classes.wideButton} type="submit" disabled={isLoading}>
+                <FilledButton className="wide-button" type="submit" disabled={isLoading}>
                     Sign up
                 </FilledButton>
 

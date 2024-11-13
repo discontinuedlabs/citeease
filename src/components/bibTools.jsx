@@ -1162,7 +1162,7 @@ export function AddCitationMenu({ openCitationForm, close }) {
                     className="mb-2 w-full"
                     onChange={() => setErrorMessage()}
                     label="Search by unique identifiers"
-                    placeholder={`${defaults.placeholders.url}\n${defaults.placeholders.doi}\nPMID: ${defaults.placeholders.pmid}`} // eslint-disable-line quotes
+                    placeholder={`${defaults.placeholders.URL}\n${defaults.placeholders.DOI}\nPMID: ${defaults.placeholders.PMID}`} // eslint-disable-line quotes
                     supportingText="You can list all the identifiers at the same time."
                     rows="3"
                     type="textarea"
