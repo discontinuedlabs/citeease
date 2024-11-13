@@ -11,7 +11,6 @@ import { createDateObject } from "./citationUtils.ts";
  * @returns {string | undefined} The corresponding HSLA string in the format "hsla(h, s%, l%, a)", or `undefined` if the input HSL string is invalid.
  */
 export function hslToHSLA(hsl: string, alpha: number): string | undefined {
-    console.log(hsl);
     const hslValues = hsl?.match(/\d+(\.\d+)?/g);
 
     if (hslValues && hslValues.length === 3) {

@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading */
 
-import React, { forwardRef, useEffect, useId, useImperativeHandle, useRef, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useId, useImperativeHandle, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { uid } from "../../utils/utils.ts";
 import { useMetaThemeColor, useTheme } from "../../hooks/hooks.tsx";
@@ -392,22 +392,18 @@ export function List({ items = [], className = "", ...rest }) {
     );
 }
 
-// FIXME: No focus
 export const Select = forwardRef(function Select(props, parentRef) {
-    const {
-        className = "",
-        label = "",
-        options: passedOptions = [],
-        onChange = () => undefined,
-        disabled = false,
-        ...rest
-    } = props;
+    const { className, label, options: passedOptions = [], onChange, disabled, value, name, ...rest } = props;
 
-    const options = passedOptions.map((option) => ({ ...option, id: uid() }));
-    const [selectedOption, setSelectedOption] = useState(options[0]);
+    const options = passedOptions.map((option, index) => ({ ...option, id: index }));
+    const [selectedOption, setSelectedOption] = useState(
+        options.find((option) => value === option.value) || options[0]
+    );
     const [isOpen, setIsOpen] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
+    const [highlightedIndex, setHighlightedIndex] = useState(0);
     const localRef = useRef(null);
+    const optionRefs = useRef([]);
     const id = uid();
 
     const backgroundColor = window
@@ -443,16 +439,70 @@ export const Select = forwardRef(function Select(props, parentRef) {
         };
     }, []);
 
-    function toggleDropdown() {
-        setIsOpen((prev) => !prev);
-    }
+    useEffect(() => {
+        if (!options.some((option) => selectedOption.value === option.value)) {
+            setSelectedOption(options[0]);
+        }
+    }, [options, selectedOption.value]);
 
-    function handleOptionClick(option) {
-        setSelectedOption(option);
-        setIsOpen(false);
+    const handleOptionClick = useCallback(
+        (option, index) => {
+            setSelectedOption(option);
+            setHighlightedIndex(index);
+            setIsOpen(false);
+            onChange({ target: { name, value: option.value } });
+        },
+        [onChange, name]
+    );
 
-        onChange(option.value);
-    }
+    useEffect(() => {
+        function handleKeyDown(event) {
+            if (!isOpen) return;
+
+            /* eslint-disable indent */
+            switch (event.key) {
+                case "ArrowDown":
+                    event.preventDefault();
+                    setHighlightedIndex((prevIndex) => {
+                        const nextIndex = (prevIndex + 1) % options.length;
+                        optionRefs.current[nextIndex]?.focus();
+                        return nextIndex;
+                    });
+                    break;
+                case "ArrowUp":
+                    event.preventDefault();
+                    setHighlightedIndex((prevIndex) => {
+                        const nextIndex = (prevIndex - 1 + options.length) % options.length;
+                        optionRefs.current[nextIndex]?.focus();
+                        return nextIndex;
+                    });
+                    break;
+                case "Enter":
+                    event.preventDefault();
+                    if (isOpen) {
+                        handleOptionClick(options[highlightedIndex], highlightedIndex);
+                    }
+                    break;
+                case "Escape":
+                    event.preventDefault();
+                    setIsOpen(false);
+                    break;
+                default:
+                    break;
+            }
+            /* eslint-enable indent */
+        }
+
+        if (isOpen) {
+            document.addEventListener("keydown", handleKeyDown);
+        } else {
+            document.removeEventListener("keydown", handleKeyDown);
+        }
+
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [isOpen, highlightedIndex, options, onChange, handleOptionClick]);
 
     return (
         <div
@@ -483,13 +533,13 @@ export const Select = forwardRef(function Select(props, parentRef) {
                 id={id}
                 type="button"
                 className={`flex min-h-14 min-w-full cursor-pointer items-center justify-between overflow-hidden text-ellipsis whitespace-nowrap rounded-t-[4px] border-0 pe-6 ps-4 font-sans text-base ${
-                    label.length ? "pb-2 pt-6" : "py-4"
+                    label && label.length ? "pb-2 pt-6" : "py-4"
                 }`}
                 style={{
                     background: hslToHSLA(hexToHSL(backgroundColor), 0.1),
                 }}
                 disabled={disabled}
-                onClick={toggleDropdown}
+                onClick={() => setIsOpen((prevIsOpen) => !prevIsOpen)}
             >
                 <span className={`${disabled ? "opacity-60" : ""}`}>{selectedOption.headline}</span>
             </button>
@@ -500,13 +550,16 @@ export const Select = forwardRef(function Select(props, parentRef) {
                     className="absolute z-50 w-full rounded-md py-2 text-base shadow-lg drop-shadow-md"
                     style={{ background: "var(--md-sys-color-inverse-surface)" }}
                 >
-                    {options.map((option) => (
+                    {options.map((option, index) => (
                         <button
+                            ref={(element) => {
+                                optionRefs.current[index] = element;
+                            }}
                             type="button"
                             key={option.id}
                             value={option.value}
                             className="relative block min-h-14 w-full border-none bg-transparent p-0 px-3 py-4 text-start font-sans text-base"
-                            onClick={() => handleOptionClick(option)}
+                            onClick={() => handleOptionClick(option, index)}
                             style={{
                                 background:
                                     option.value === selectedOption.value

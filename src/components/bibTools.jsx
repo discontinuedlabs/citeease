@@ -52,7 +52,7 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
     const [autoFillSelect, setAutoFillSelect] = useState(autoFillComponent.value[0]);
     const dialog = useDialog();
     const [autoFillLoading, setAutoFillLoading] = useState(false);
-    const uuid = useId();
+    const uuid = uid();
 
     async function retrieveContent(source) {
         setAutoFillLoading(true);
@@ -171,7 +171,7 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
             switch (element.component) {
                 case "autoFill":
                     return (
-                        <div className="grid gap-2" key={uuid}>
+                        <div className="grid gap-2" key={uid()}>
                             <div className="flex justify-between gap-1">
                                 <Select
                                     className="flex-shrink"
@@ -179,10 +179,7 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                                     name="auto-fill-select"
                                     value={autoFillSelect}
                                     options={element.value.map((value) => ({ headline: value, value }))}
-                                    onChange={(event) => {
-                                        console.log(event.target.value);
-                                        setAutoFillSelect(event.target.value);
-                                    }}
+                                    onChange={(event) => setAutoFillSelect(event.target.value)}
                                 />
                                 <TextField
                                     className="flex-1"
@@ -310,6 +307,7 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                 className="w-full"
                 label="Source type"
                 name="type"
+                value={content.type}
                 options={Object.keys(sourceTypes).map((key) => ({
                     headline: sourceTypes[key].label,
                     value: key,
