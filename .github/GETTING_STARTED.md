@@ -46,4 +46,4 @@ Follow these steps to get CiteEase up and running:
 
 ## Troubleshooting
 
-If you encounter issues during setup, please [open an issue](https://github.com/discontinuedlabs/citeease/issues/new/choose) and include as much detail as possible to help us understand and address the problem or contact us at [discontinuedlabs@gmail.com](mailto:discontinuedlabs@gmail.com).
+If you encounter issues during setup, please [open an issue](https://github.com/ganymedelabs/citeease/issues/new/choose) and include as much detail as possible to help us understand and address the problem or contact us at [discontinuedlabs@gmail.com](mailto:ganemedelabs@gmail.com).
