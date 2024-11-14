@@ -79,7 +79,7 @@ CiteEase is licensed under the MIT License. See the [LICENSE](LICENSE) file for 
 
 ## 📧 Contact
 
-For inquiries or more information, you can reach out to us at [ganymedelabs@gmail.com](mailto:ganymedelabs@gmail.com).
+For inquiries or more information, you can reach out to us at [ganymedelabs@gmail.com](mailto:ganemedelabs@gmail.com).
 
 ## 🙏 Acknowledgments
 
