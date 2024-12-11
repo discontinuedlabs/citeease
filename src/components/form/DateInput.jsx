@@ -70,7 +70,7 @@ const DateInput = forwardRef(function DateInput(props, parentRef) {
     return (
         <div ref={localRef} name={name} className={className} {...rest}>
             <h4 className="m-2">{label}</h4>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between gap-1">
                 <TextField
                     className="flex-1"
                     type="number"
@@ -103,7 +103,7 @@ const DateInput = forwardRef(function DateInput(props, parentRef) {
                     onChange={handleChange}
                     disabled={!year || !month}
                 />
-                <OutlinedIconButton name="today" onClick={setToToday} />
+                <OutlinedIconButton className="flex-1" name="today" onClick={setToToday} />
             </div>
         </div>
     );

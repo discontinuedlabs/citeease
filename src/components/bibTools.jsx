@@ -52,7 +52,6 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
     const [autoFillSelect, setAutoFillSelect] = useState(autoFillComponent.value[0]);
     const dialog = useDialog();
     const [autoFillLoading, setAutoFillLoading] = useState(false);
-    const uuid = uid();
 
     async function retrieveContent(source) {
         setAutoFillLoading(true);
@@ -171,10 +170,9 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
             switch (element.component) {
                 case "autoFill":
                     return (
-                        <div className="grid gap-2" key={uid()}>
+                        <div className="grid gap-2" key={index}>
                             <div className="flex justify-between gap-1">
                                 <Select
-                                    className="flex-shrink"
                                     label="Identifier type"
                                     name="auto-fill-select"
                                     value={autoFillSelect}
@@ -182,7 +180,6 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                                     onChange={(event) => setAutoFillSelect(event.target.value)}
                                 />
                                 <TextField
-                                    className="flex-1"
                                     label={`Insert a ${autoFillSelect} to fill the fields automatically`}
                                     type="text"
                                     name="auto-fill-content"
@@ -202,13 +199,13 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                         </div>
                     );
                 case "divider":
-                    return <Divider key={uuid} className="my-4" label={element.label} />;
+                    return <Divider key={index} className="my-4" label={element.label} />;
 
                 case "label":
-                    return <p key={uuid}>{element.label}</p>;
+                    return <p key={index}>{element.label}</p>;
                 case "authors":
                     return (
-                        <Suspense key={uuid} fallback={<CircularProgress />}>
+                        <Suspense key={index} fallback={<CircularProgress />}>
                             <AuthorsInput key={index} name="author" content={content} setContent={setContent} />
                         </Suspense>
                     );
@@ -216,7 +213,7 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                     return (
                         <TextField
                             className="w-full"
-                            key={uuid}
+                            key={index}
                             label={element.label}
                             type="text"
                             name={element.value}
@@ -230,7 +227,7 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                     return (
                         <TextField
                             className="w-full"
-                            key={uuid}
+                            key={index}
                             label={element.label}
                             type="textarea"
                             rows={3}
@@ -245,7 +242,7 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                     return (
                         <TextField
                             className="w-full"
-                            key={uuid}
+                            key={index}
                             label={element.label}
                             type="number"
                             name={element.value}
@@ -257,9 +254,9 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                     );
                 case "date":
                     return (
-                        <Suspense key={uuid} fallback={<CircularProgress />}>
+                        <Suspense key={index} fallback={<CircularProgress />}>
                             <DateInput
-                                key={uuid}
+                                key={index}
                                 label={element.label}
                                 name={element.value}
                                 value={content?.[element.value]}
@@ -269,7 +266,7 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                     );
                 case "checkbox":
                     return (
-                        <div key={uuid} className="grid gap-2">
+                        <div key={index} className="grid gap-2">
                             <Switch
                                 label={element.label}
                                 name={element.value}
@@ -283,7 +280,7 @@ export const CitationForm = forwardRef(function CitationForm(props, ref) {
                     return (
                         <TextField
                             className="w-full"
-                            key={uuid}
+                            key={index}
                             label="Annotation"
                             type="textarea"
                             rows="3"

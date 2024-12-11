@@ -122,7 +122,7 @@ export const TextField = forwardRef(function TextField(props, parentRef) {
     };
 
     return (
-        <div>
+        <div className="w-full">
             {/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
 
             <div
@@ -517,7 +517,7 @@ export const Select = forwardRef(function Select(props, parentRef) {
 
             {/* Label */}
             <div
-                className={`absolute start-4 overflow-hidden text-ellipsis whitespace-nowrap transition-all duration-200 ease-out ${
+                className={`absolute start-4 w-10/12 overflow-hidden text-ellipsis whitespace-nowrap transition-all duration-200 ease-out ${
                     isFocused || selectedOption.headline ? "top-2 text-xs" : "top-1/2 -translate-y-1/2 text-base"
                 } ${disabled ? "opacity-60" : ""}`}
                 style={{
@@ -532,7 +532,7 @@ export const Select = forwardRef(function Select(props, parentRef) {
             <button
                 id={id}
                 type="button"
-                className={`flex min-h-14 min-w-full cursor-pointer items-center justify-between overflow-hidden text-ellipsis whitespace-nowrap rounded-t-[4px] border-0 pe-6 ps-4 font-sans text-base ${
+                className={`flex h-full min-h-14 min-w-full cursor-pointer items-center justify-between overflow-hidden text-ellipsis whitespace-nowrap rounded-t-[4px] border-0 pe-6 ps-4 font-sans text-base ${
                     label && label.length ? "pb-2 pt-6" : "py-4"
                 }`}
                 style={{
@@ -550,6 +550,7 @@ export const Select = forwardRef(function Select(props, parentRef) {
                     className="absolute z-50 w-full rounded-md py-2 text-base shadow-lg drop-shadow-md"
                     style={{ background: "var(--md-sys-color-inverse-surface)" }}
                 >
+                    <div className="absolute start-0 top-0 h-full w-full rounded-md bg-transparent shadow-sm drop-shadow-md" />
                     {options.map((option, index) => (
                         <button
                             ref={(element) => {
