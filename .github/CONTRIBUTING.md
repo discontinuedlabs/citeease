@@ -50,7 +50,7 @@ We’re excited that you’re interested in contributing to CiteEase! Whether yo
 
 ## Reporting Issues
 
-If you encounter any issues or have suggestions for improvements, [please open an issue](https://github.com/discontinuedlabs/citeease/issues/new/choose) and include as much detail as possible to help us understand and address the problem.
+If you encounter any issues or have suggestions for improvements, [please open an issue](https://github.com/ganymedelabs/citeease/issues/new/choose) and include as much detail as possible to help us understand and address the problem.
 
 ## Code of Conduct
 
@@ -58,6 +58,6 @@ We adhere to a [Code of Conduct](CODE_OF_CONDUCT.md) to ensure a welcoming and i
 
 ## Need Help?
 
-If you have questions or need help, feel free to reach out to us at [discontinuedlabs@gmail.com](mailto:discontinuedlabs@gmail.com).
+If you have questions or need help, feel free to reach out to us at [discontinuedlabs@gmail.com](mailto:ganemedelabs@gmail.com).
 
 Thank you for contributing to CiteEase!
